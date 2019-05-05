@@ -69,7 +69,7 @@ struct Profiler {
       
 private:
    /// @brief timer to time a particular execution
-   casa::Timer itsTimer;
+   casacore::Timer itsTimer;
    
    /// @brief unique name of the current method or block
    const std::string itsName;   

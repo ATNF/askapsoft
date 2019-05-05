@@ -42,12 +42,12 @@ namespace askap {
   /// It can be achieved by defining this sink as the global casa LogSink
   /// as follows:
   /// @code
-  ///   casa::LogSinkInterface* globalSink = new askap::Log4cxxLogSink;
-  ///   casa::LogSink::globalSink (globalSink);
+  ///   casacore::LogSinkInterface* globalSink = new askap::Log4cxxLogSink;
+  ///   casacore::LogSink::globalSink (globalSink);
   /// @endcode
   /// Note that the pointer is taken over by LogSink, so the newly
   /// created Log4cxxLogSink object should NOT be deleted.
-  class Log4cxxLogSink : public casa::LogSinkInterface
+  class Log4cxxLogSink : public casacore::LogSinkInterface
   {
   public:
     /// By default no filtering is done.
@@ -56,22 +56,22 @@ namespace askap {
     /// Create the sink with the given filter level.
     /// The default is that everything passes the filter.
     /// @{
-    explicit Log4cxxLogSink (casa::LogMessage::Priority filter);
-    explicit Log4cxxLogSink (const casa::LogFilterInterface& filter);
+    explicit Log4cxxLogSink (casacore::LogMessage::Priority filter);
+    explicit Log4cxxLogSink (const casacore::LogFilterInterface& filter);
     /// @}
 
     ~Log4cxxLogSink();
 
     /// If the message passes the filter, write it to the log4cxx sink.
-    virtual casa::Bool postLocally (const casa::LogMessage& message);
+    virtual casacore::Bool postLocally (const casacore::LogMessage& message);
 
     /// Clear the local sink (i.e. remove all messages from it).
     virtual void clearLocally();
 
     /// Returns the id for this class...
-    static casa::String localId();
+    static casacore::String localId();
     /// Returns the id of the LogSink in use...
-    casa::String id() const;
+    casacore::String id() const;
 
   private:
     /// Copying is forbidden.

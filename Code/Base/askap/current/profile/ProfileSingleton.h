@@ -144,7 +144,7 @@ private:
    /// @brief main thread global timer
    /// @detail We can add timers per thread later on, although the usefulness of it is not clear because we cannot
    /// detect when each child thread finishes.
-   casa::Timer itsMainTimer;   
+   casacore::Timer itsMainTimer;   
    
    /// @brief profile trees for child threads
    std::map<boost::thread::id, ProfileTree> itsThreadTrees;

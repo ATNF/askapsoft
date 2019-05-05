@@ -193,8 +193,8 @@ void Application::initLogging(const std::string& argv0)
     ASKAPLOG_PUTCONTEXT("mpirank", "-1");
 
     // Ensure that CASA log messages are captured
-    casa::LogSinkInterface* globalSink = new askap::Log4cxxLogSink();
-    casa::LogSink::globalSink(globalSink);
+    casacore::LogSinkInterface* globalSink = new askap::Log4cxxLogSink();
+    casacore::LogSink::globalSink(globalSink);
 }
 
 void Application::initConfig()

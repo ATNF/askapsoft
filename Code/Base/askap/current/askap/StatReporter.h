@@ -72,7 +72,7 @@ namespace askap {
             static std::string kbToMb(long val);
 
             // Casa timer to measure process execution times
-            casa::Timer itsTimer;
+            casacore::Timer itsTimer;
     };
 
 } // End namespace askap

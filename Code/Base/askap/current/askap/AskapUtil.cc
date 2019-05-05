@@ -53,29 +53,29 @@
 
 namespace askap {
 
-std::string printDirection(const casa::MVDirection &dir)
+std::string printDirection(const casacore::MVDirection &dir)
 {
     std::ostringstream os;
-    os << std::setprecision(8) << casa::MVAngle::Format(casa::MVAngle::TIME)
-        << casa::MVAngle(dir.getLong("deg"))
-        << " " << std::setprecision(8) << casa::MVAngle::Format(casa::MVAngle::ANGLE) <<
-    casa::MVAngle(dir.getLat("deg"));
+    os << std::setprecision(8) << casacore::MVAngle::Format(casacore::MVAngle::TIME)
+        << casacore::MVAngle(dir.getLong("deg"))
+        << " " << std::setprecision(8) << casacore::MVAngle::Format(casacore::MVAngle::ANGLE) <<
+    casacore::MVAngle(dir.getLat("deg"));
     return os.str();
 }
 
-std::string printLon(const casa::MDirection& dir)
+std::string printLon(const casacore::MDirection& dir)
 {
     std::ostringstream os;
-    os << std::setprecision(8) << casa::MVAngle::Format(casa::MVAngle::TIME)
-        << casa::MVAngle(dir.getValue().getLong("deg"));
+    os << std::setprecision(8) << casacore::MVAngle::Format(casacore::MVAngle::TIME)
+        << casacore::MVAngle(dir.getValue().getLong("deg"));
     return os.str();
 }
 
-std::string printLat(const casa::MDirection& dir)
+std::string printLat(const casacore::MDirection& dir)
 {
     std::ostringstream os;
-    os << std::setprecision(8) << casa::MVAngle::Format(casa::MVAngle::ANGLE)
-        << casa::MVAngle(dir.getValue().getLat("deg"));
+    os << std::setprecision(8) << casacore::MVAngle::Format(casacore::MVAngle::ANGLE)
+        << casacore::MVAngle(dir.getValue().getLat("deg"));
     return os.str();
 }
 
@@ -112,27 +112,27 @@ std::string toLower(std::string str)
     return str;
 }
 
-casa::Quantity asQuantity(const string& s, const std::string& unit)
+casacore::Quantity asQuantity(const string& s, const std::string& unit)
 {
-    casa::Quantity q;
-    casa::Quantity::read(q, s);
+    casacore::Quantity q;
+    casacore::Quantity::read(q, s);
 
-    if ((!unit.empty()) && (!q.isConform(casa::Unit(unit)))) {
+    if ((!unit.empty()) && (!q.isConform(casacore::Unit(unit)))) {
         ASKAPTHROW(AskapError, "Quantity: " << s << " does not conform to unit " << unit);
     }
 
     return q;
 }
 
-casa::MEpoch asMEpoch(const std::vector<std::string>& epoch)
+casacore::MEpoch asMEpoch(const std::vector<std::string>& epoch)
 {
     ASKAPCHECK(epoch.size() == 2, "Not a valid epoch");
 
-    casa::Quantity datetime;
-    casa::Quantity::read(datetime, epoch[0]);
-    casa::MEpoch::Types type;
-    casa::MEpoch::getType(type, epoch[1]);
-    casa::MEpoch ep(datetime, type);
+    casacore::Quantity datetime;
+    casacore::Quantity::read(datetime, epoch[0]);
+    casacore::MEpoch::Types type;
+    casacore::MEpoch::getType(type, epoch[1]);
+    casacore::MEpoch ep(datetime, type);
     return ep;
 }
 
@@ -155,36 +155,36 @@ static std::string convertLatitude(const std::string& s)
     return out;
 }
 
-casa::MDirection asMDirection(const std::vector<std::string>& direction)
+casacore::MDirection asMDirection(const std::vector<std::string>& direction)
 {
     ASKAPCHECK(direction.size() == 3, "Not a valid direction");
 
-    casa::Quantity lng;
-    casa::Quantity::read(lng, direction[0]);
+    casacore::Quantity lng;
+    casacore::Quantity::read(lng, direction[0]);
 
-    casa::Quantity lat;
-    casa::Quantity::read(lat, convertLatitude(direction[1]));
+    casacore::Quantity lat;
+    casacore::Quantity::read(lat, convertLatitude(direction[1]));
 
-    casa::MDirection::Types type;
-    casa::MDirection::getType(type, direction[2]);
-    casa::MDirection dir(lng, lat, type);
+    casacore::MDirection::Types type;
+    casacore::MDirection::getType(type, direction[2]);
+    casacore::MDirection dir(lng, lat, type);
     return dir;
 }
 
-casa::MPosition asMPosition(const std::vector<std::string>& position)
+casacore::MPosition asMPosition(const std::vector<std::string>& position)
 {
     ASKAPCHECK(position.size() == 4, "Not a valid position");
 
-    casa::Quantity lng;
-    casa::Quantity::read(lng, position[0]);
-    casa::Quantity lat;
-    casa::Quantity::read(lat, position[1]);
-    casa::Quantity height;
-    casa::Quantity::read(height, position[2]);
-    casa::MPosition::Types type;
-    casa::MPosition::getType(type, position[3]);
-    casa::MVPosition mvPos(height, lng, lat);
-    casa::MPosition pos(mvPos, type);
+    casacore::Quantity lng;
+    casacore::Quantity::read(lng, position[0]);
+    casacore::Quantity lat;
+    casacore::Quantity::read(lat, position[1]);
+    casacore::Quantity height;
+    casacore::Quantity::read(height, position[2]);
+    casacore::MPosition::Types type;
+    casacore::MPosition::getType(type, position[3]);
+    casacore::MVPosition mvPos(height, lng, lat);
+    casacore::MPosition pos(mvPos, type);
     return pos;
 }
 
@@ -193,23 +193,23 @@ casa::MPosition asMPosition(const std::vector<std::string>& position)
 /// @brief convert BAT to UTC Epoch via casa
 /// @param[in] bat BAT as 64-bit integer
 /// @return casa epoch measure in the UTC frame
-casa::MEpoch bat2epoch(const uint64_t &bat)
+casacore::MEpoch bat2epoch(const uint64_t &bat)
 {
-  const casa::MVEpoch timeTAI(static_cast<casa::Double>(bat / microsecondsPerDay),
-                              static_cast<casa::Double>(bat % microsecondsPerDay) /
-                              static_cast<casa::Double>(microsecondsPerDay));
-  const casa::MEpoch epoch = casa::MEpoch::Convert(casa::MEpoch(timeTAI, casa::MEpoch::Ref(casa::MEpoch::TAI)),
-                             casa::MEpoch::Ref(casa::MEpoch::UTC))();
+  const casacore::MVEpoch timeTAI(static_cast<casacore::Double>(bat / microsecondsPerDay),
+                              static_cast<casacore::Double>(bat % microsecondsPerDay) /
+                              static_cast<casacore::Double>(microsecondsPerDay));
+  const casacore::MEpoch epoch = casacore::MEpoch::Convert(casacore::MEpoch(timeTAI, casacore::MEpoch::Ref(casacore::MEpoch::TAI)),
+                             casacore::MEpoch::Ref(casacore::MEpoch::UTC))();
   return epoch;
 }
 
 /// @brief convert casa Epoch to BAT
 /// @param[in] epoch casa epoch measure, typically in UTC frame, but can be anything supported by casa
 /// @return BAT as 64-bit integer
-uint64_t epoch2bat(const casa::MEpoch &epoch)
+uint64_t epoch2bat(const casacore::MEpoch &epoch)
 {
-   const casa::MVEpoch epochTAI= casa::MEpoch::Convert(epoch,
-                  casa::MEpoch::Ref(casa::MEpoch::TAI))().getValue();
+   const casacore::MVEpoch epochTAI= casacore::MEpoch::Convert(epoch,
+                  casacore::MEpoch::Ref(casacore::MEpoch::TAI))().getValue();
    const uint64_t startOfDayBAT = static_cast<uint64_t>(epochTAI.getDay()*microsecondsPerDay);
    return startOfDayBAT + static_cast<uint64_t>(epochTAI.getDayFraction()*microsecondsPerDay);
 }
@@ -227,18 +227,18 @@ uint64_t epoch2bat(const casa::MEpoch &epoch)
 /// @return a pair with table date MJD (first) and the version string (second)
 std::pair<double, std::string> measuresTableVersion()
 {
-  casa::Table tab;
-  const bool ok = casa::MeasIERS::findTab(tab, 0, "measures.tai_utc.directory", "geodetic", "TAI_UTC");
-  ASKAPCHECK(ok, "Unable to open TAI_UTC measures table via casa::MeasIERS");
+  casacore::Table tab;
+  const bool ok = casacore::MeasIERS::findTab(tab, 0, "measures.tai_utc.directory", "geodetic", "TAI_UTC");
+  ASKAPCHECK(ok, "Unable to open TAI_UTC measures table via casacore::MeasIERS");
 
-  const casa::TableRecord kw(tab.keywordSet());
+  const casacore::TableRecord kw(tab.keywordSet());
 
   ASKAPCHECK(kw.isDefined("VS_DATE") && kw.isDefined("VS_VERSION"),
       "The measures table is incomplete, no date or version stored. type="<<tab.tableInfo().type());
-  casa::Quantity qDate;
-  ASKAPCHECK(casa::MVTime::read(qDate, kw.asString("VS_DATE")), "Unable to parse VS_DATE: "<<kw.asString("VS_DATE"));
+  casacore::Quantity qDate;
+  ASKAPCHECK(casacore::MVTime::read(qDate, kw.asString("VS_DATE")), "Unable to parse VS_DATE: "<<kw.asString("VS_DATE"));
 
-  return std::pair<double, std::string>(casa::MVTime(qDate), kw.asString("VS_VERSION"));
+  return std::pair<double, std::string>(casacore::MVTime(qDate), kw.asString("VS_VERSION"));
 }
 
 /// @brief helper method to check the validity of measures data
@@ -256,7 +256,7 @@ std::pair<double, std::string> measuresTableVersion()
 bool measuresValid(double mjd)
 {
    double res;
-   const bool ok = casa::MeasIERS::get(res, casa::MeasIERS::MEASURED, casa::MeasIERS::dUT1, mjd);
+   const bool ok = casacore::MeasIERS::get(res, casacore::MeasIERS::MEASURED, casacore::MeasIERS::dUT1, mjd);
    return ok;
 }
 

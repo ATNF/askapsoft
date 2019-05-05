@@ -34,50 +34,50 @@ ASKAP_LOGGER(logger, ".CASA");
 namespace askap {
 
   Log4cxxLogSink::Log4cxxLogSink()
-    : casa::LogSinkInterface (casa::LogFilter())
+    : casacore::LogSinkInterface (casacore::LogFilter())
   {}
 
-  Log4cxxLogSink::Log4cxxLogSink (casa::LogMessage::Priority filter)
-    : casa::LogSinkInterface (casa::LogFilter(filter))
+  Log4cxxLogSink::Log4cxxLogSink (casacore::LogMessage::Priority filter)
+    : casacore::LogSinkInterface (casacore::LogFilter(filter))
   {}
 
-  Log4cxxLogSink::Log4cxxLogSink (const casa::LogFilterInterface& filter)
-    : casa::LogSinkInterface (filter)
+  Log4cxxLogSink::Log4cxxLogSink (const casacore::LogFilterInterface& filter)
+    : casacore::LogSinkInterface (filter)
   {}
 
   Log4cxxLogSink::~Log4cxxLogSink()
   {}
 
-  casa::Bool Log4cxxLogSink::postLocally (const casa::LogMessage& message)
+  casacore::Bool Log4cxxLogSink::postLocally (const casacore::LogMessage& message)
   {
-    casa::Bool posted = casa::False;
+    casacore::Bool posted = casacore::False;
     if (filter().pass(message)) {
       std::string msg (message.origin().location() + ": " + message.message());
-      posted = casa::True;
+      posted = casacore::True;
       switch (message.priority()) {
-      case casa::LogMessage::DEBUGGING:
-      case casa::LogMessage::DEBUG2:
-      case casa::LogMessage::DEBUG1:
+      case casacore::LogMessage::DEBUGGING:
+      case casacore::LogMessage::DEBUG2:
+      case casacore::LogMessage::DEBUG1:
 	{
 	  ASKAPLOG_DEBUG (logger, msg);
 	  break;
 	}
-      case casa::LogMessage::NORMAL5:
-      case casa::LogMessage::NORMAL4:
-      case casa::LogMessage::NORMAL3:
-      case casa::LogMessage::NORMAL2:
-      case casa::LogMessage::NORMAL1:
-      case casa::LogMessage::NORMAL:
+      case casacore::LogMessage::NORMAL5:
+      case casacore::LogMessage::NORMAL4:
+      case casacore::LogMessage::NORMAL3:
+      case casacore::LogMessage::NORMAL2:
+      case casacore::LogMessage::NORMAL1:
+      case casacore::LogMessage::NORMAL:
 	{
 	  ASKAPLOG_INFO (logger, msg);
 	  break;
 	}
-      case casa::LogMessage::WARN:
+      case casacore::LogMessage::WARN:
 	{
 	  ASKAPLOG_WARN (logger, msg);
 	  break;
 	}
-      case casa::LogMessage::SEVERE:
+      case casacore::LogMessage::SEVERE:
 	{
 	  ASKAPLOG_ERROR (logger, msg);
 	  break;
@@ -90,14 +90,14 @@ namespace askap {
   void Log4cxxLogSink::clearLocally()
   {}
 
-  casa::String Log4cxxLogSink::localId()
+  casacore::String Log4cxxLogSink::localId()
   {
-    return casa::String("Log4cxxLogSink");
+    return casacore::String("Log4cxxLogSink");
   }
 
-  casa::String Log4cxxLogSink::id() const
+  casacore::String Log4cxxLogSink::id() const
   {
-    return casa::String("Log4cxxLogSink");
+    return casacore::String("Log4cxxLogSink");
   }
 
 } // end namespaces

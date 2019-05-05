@@ -45,9 +45,9 @@ struct CasaSyncHelper {
    /// @param[in] x first coordinate
    /// @param[in] y second coordinate
    template<typename T>
-   inline casa::Vector<T> zVector(const casa::Cube<T> &cube, const casa::uInt x, const casa::uInt y) const {
+   inline casacore::Vector<T> zVector(const casacore::Cube<T> &cube, const casacore::uInt x, const casacore::uInt y) const {
        boost::lock_guard<boost::mutex> lock(itsZVectorMutex);
-       casa::Vector<T> result = cube.yzPlane(x).row(y).copy();
+       casacore::Vector<T> result = cube.yzPlane(x).row(y).copy();
        return result;
    }   
 
@@ -68,7 +68,7 @@ struct CasaSyncHelper {
    /// @param[out] out direction measure to fill
    /// @param[in] pixel vector with pixel coordinate (size of two is expected)
    /// @return true if the conversion is successful
-   bool toWorld(const casa::DirectionCoordinate &dc, casa::MDirection &out, const casa::Vector<casa::Double> &pixel) const {
+   bool toWorld(const casacore::DirectionCoordinate &dc, casacore::MDirection &out, const casacore::Vector<casacore::Double> &pixel) const {
       boost::lock_guard<boost::mutex> lock(itsToWorldMutex);
       return dc.toWorld(out, pixel);
    }
@@ -92,7 +92,7 @@ private:
    /// @param[in] x first coordinate
    /// @param[in] y second coordinate
    template<typename T>
-   static inline casa::Vector<T> zVector(const casa::Cube<T> &cube, const casa::uInt x, const casa::uInt y) {
+   static inline casacore::Vector<T> zVector(const casacore::Cube<T> &cube, const casacore::uInt x, const casacore::uInt y) {
        return cube.yzPlane(x).row(y).copy();
    }
 
@@ -102,7 +102,7 @@ private:
    /// @param[out] out direction measure to fill
    /// @param[in] pixel vector with pixel coordinate (size of two is expected)
    /// @return true if the conversion is successful
-   static inline bool toWorld(const casa::DirectionCoordinate &dc, casa::MDirection &out, const casa::Vector<casa::Double> &pixel) {
+   static inline bool toWorld(const casacore::DirectionCoordinate &dc, casacore::MDirection &out, const casacore::Vector<casacore::Double> &pixel) {
       return dc.toWorld(out, pixel);
    }
 

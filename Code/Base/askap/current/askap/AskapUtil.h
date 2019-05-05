@@ -118,7 +118,7 @@ void printContainer(std::ostream& os, const Container& ctr,
 }
 
 /// @brief a helper method to print directions nicely
-/// @details By default an instance of casa::MVDirection is printed
+/// @details By default an instance of casacore::MVDirection is printed
 /// as 3 direction cosines. It is not very convenient. This method
 /// allows to print it in a more log-reader-friendly way.
 /// This is the only method in this file (so far) which introduces
@@ -126,22 +126,22 @@ void printContainer(std::ostream& os, const Container& ctr,
 /// if necessary
 /// @param[in] dir MVDirection object to print
 /// @return a string containing a nice representation of the direction
-std::string printDirection(const casa::MVDirection &dir);
+std::string printDirection(const casacore::MVDirection &dir);
 
 /// @brief a helper function to print the latitude component of
 /// an MDirection
 /// @param[in] dir MVDirection object to print
 /// @return a string containing a nice representation of the latitude component
-std::string printLat(const casa::MDirection& dir);
+std::string printLat(const casacore::MDirection& dir);
 
 /// @brief a helper function to print the longitude component of
 /// an MDirection
 /// @param[in] dir MVDirection object to print
 /// @return a string containing a nice representation of the longitude component
-std::string printLon(const casa::MDirection& dir);
+std::string printLon(const casacore::MDirection& dir);
 
 /// @brief Interpret string as a quantity.
-/// Interpret a string such as "2.5arcsec" as a casa::Quantity
+/// Interpret a string such as "2.5arcsec" as a casacore::Quantity
 ///
 /// @param[in] s    String to be interpreted
 /// @param[in] unit ensure the constructed quantity conforms to
@@ -149,22 +149,22 @@ std::string printLon(const casa::MDirection& dir);
 /// @throw AskapError   if the string "s" cannot be interpreted as
 ///                     a quantity which conforms to the units specified
 ///                     by the "unit" parameters.
-casa::Quantity asQuantity(const std::string& s,
+casacore::Quantity asQuantity(const std::string& s,
         const std::string& unit = "");
 
 /// @brief Interpret string as an MEpoch
 /// @param[in] epoch String to be interpreted
-casa::MEpoch asMEpoch(const std::vector<std::string>& epoch);
+casacore::MEpoch asMEpoch(const std::vector<std::string>& epoch);
 
 /// @brief Interpret string vector as an MDirection
 /// The string vector shall have RA in the first element, declination in
 /// the second and reference frame in the third. For example:
 /// [12h30m00.00, -45.00.00.00, J2000]
 /// @param[in] direction String to be interpreted
-casa::MDirection asMDirection(const std::vector<std::string>& direction);
+casacore::MDirection asMDirection(const std::vector<std::string>& direction);
 
 /// @brief Convert a string representation of a position to a
-/// casa::MPosition. Syntax for the position string is:
+/// casacore::MPosition. Syntax for the position string is:
 /// @verbatim
 /// [latitude, longitude, altitude, type]
 /// @endverbatim
@@ -177,7 +177,7 @@ casa::MDirection asMDirection(const std::vector<std::string>& direction);
 ///
 /// @param[in] position String to be interpreted
 /// @return an MPosition
-casa::MPosition asMPosition(const std::vector<std::string>& position);
+casacore::MPosition asMPosition(const std::vector<std::string>& position);
 
 /// a number of helper functions are gathered in this namespace
 namespace utility {
@@ -245,13 +245,13 @@ static const uint64_t microsecondsPerDay = 86400000000ull;
 /// @brief convert BAT to UTC Epoch via casa
 /// @param[in] bat BAT as 64-bit integer
 /// @return casa epoch measure in the UTC frame
-casa::MEpoch bat2epoch(const uint64_t &bat);
+casacore::MEpoch bat2epoch(const uint64_t &bat);
 
 
 /// @brief convert casa Epoch to BAT
 /// @param[in] epoch casa epoch measure, typically in UTC frame, but can be anything supported by casa
 /// @return BAT as 64-bit integer
-uint64_t epoch2bat(const casa::MEpoch &epoch);
+uint64_t epoch2bat(const casacore::MEpoch &epoch);
 
 /// @brief helper method to check the TAI_UTC measures table version
 /// @details casacore measures data need to be updated regularly. The TAI_UTC
