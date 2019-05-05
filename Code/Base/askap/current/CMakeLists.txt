@@ -76,12 +76,3 @@ set (_modules askap)
 foreach (module ${_modules})
 	add_subdirectory(${module})
 endforeach (module)
-
-install (
-TARGETS askap_askap
-RUNTIME DESTINATION bin
-LIBRARY DESTINATION lib
-ARCHIVE DESTINATION lib
-LIBRARY PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
-)
-
