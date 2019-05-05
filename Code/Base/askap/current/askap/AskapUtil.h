@@ -295,6 +295,11 @@ inline std::ostream& operator<<(std::ostream& os, const std::list<T>& c)
 {
     return casa::operator<<(os, c);
 }
+template<typename K, typename V>
+inline std::ostream& operator<<(std::ostream& os, const std::map<K, V>& c)
+{
+    return casa::operator<<(os, c);
+}
 //@}
 
 } // end namespace askap
