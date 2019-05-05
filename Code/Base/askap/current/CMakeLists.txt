@@ -59,6 +59,11 @@ if (CPPUNIT_FOUND)
 	include_directories(${CPPUNIT_INCLUDE_DIR})
 endif (CPPUNIT_FOUND)
 
+if (CASACORE3 OR CXX11)
+	set(CMAKE_CXX_STANDARD 11)
+	set(CMAKE_CXX_STANDARD_REQUIRED ON)
+endif()
+
 set (_modules askap)
 
 # add some more tests and sub-directories
