@@ -56,8 +56,8 @@ endif(ENABLE_SHARED)
 
 
 # find packages
-find_package(Boost REQUIRED)
-find_package(LOFAR REQUIRED)
+find_package(Boost REQUIRED COMPONENTS system signals program_options thread chrono )
+find_package(LofarCommon REQUIRED)
 find_package(log4cxx REQUIRED)
 find_package(Casacore REQUIRED COMPONENTS  ms images mirlib coordinates fits lattices measures scimath scimath_f tables casa)
 
@@ -72,9 +72,9 @@ if (log4cxx_FOUND)
     add_definitions(-DHAVE_LOG4CXX)
 endif(log4cxx_FOUND)
 
-if (LOFAR_FOUND)
-	include_directories(${LOFAR_COMMON_INCLUDE_DIRS})
-endif(LOFAR_FOUND)
+if (LofarCommon_FOUND)
+	include_directories(${LofarCommon_COMMON_INCLUDE_DIRS})
+endif(LofarCommon_FOUND)
 
 if (CASACORE_FOUND)
 	include_directories(${CASACORE_INCLUDE_DIRS})
@@ -95,5 +95,4 @@ LIBRARY DESTINATION lib
 ARCHIVE DESTINATION lib
 LIBRARY PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
 )
-
 

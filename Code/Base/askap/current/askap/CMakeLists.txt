@@ -34,3 +34,10 @@ StatReporter.h
 DESTINATION include/askap/askap
 )
 
+target_link_libraries(
+	askap_askap
+	${CASACORE_LIBRARIES}
+	${log4cxx_LIBRARY}
+	${Boost_LIBRARIES}
+	${LofarCommon_LIBRARY}
+	)
