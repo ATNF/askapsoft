@@ -27,6 +27,34 @@ if (CXX11)
     endif()
 endif()
 
+option (ENABLE_SHARED "Build shared libraries" YES)
+option (ENABLE_RPATH "Include rpath in executables and shared libraries" YES)
+
+
+# uninstall target
+if(NOT TARGET uninstall)
+    configure_file(
+        "${CMAKE_CURRENT_SOURCE_DIR}/cmake_uninstall.cmake.in"
+        "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake"
+        IMMEDIATE @ONLY)
+
+    add_custom_target(uninstall
+        COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
+endif()
+
+
+
+if (ENABLE_SHARED)
+option (BUILD_SHARED_LIBS "" YES)
+    if (ENABLE_RPATH)
+        # Set RPATH to use for installed targets; append linker search path
+        set(CMAKE_INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/lib" )
+        set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+        set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+    endif (ENABLE_RPATH)
+endif(ENABLE_SHARED)
+
+
 # find packages
 find_package(Boost REQUIRED)
 find_package(LOFAR REQUIRED)
@@ -59,4 +87,13 @@ set (_modules askap)
 foreach (module ${_modules})
 	add_subdirectory(${module})
 endforeach (module)
+
+install (
+TARGETS askap_askap
+RUNTIME DESTINATION bin
+LIBRARY DESTINATION lib
+ARCHIVE DESTINATION lib
+LIBRARY PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
+)
+
 
