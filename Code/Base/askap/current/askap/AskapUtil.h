@@ -39,6 +39,7 @@
 
 // ASKAPsoft includes
 #include "askap/AskapError.h"
+#include "askap/CasacoreFwdDefines.h"
 #include "casacore/casa/aips.h"
 #include "casacore/casa/Quanta.h"
 #include "casacore/casa/Quanta/MVDirection.h"

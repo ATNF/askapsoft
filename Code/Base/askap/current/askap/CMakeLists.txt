@@ -32,6 +32,7 @@ AskapLogging.h
 AskapTypes.h
 AskapTestRunner.h
 AskapUtil.h
+CasacoreFwdDefines.h
 CasaSyncHelper.h
 CircularBuffer.h
 ISignalHandler.h
