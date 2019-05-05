@@ -195,7 +195,7 @@ namespace utility {
 /// @param[in] str input string
 /// @return result of the conversion
 /// @exception AskapError is thrown if the conversion failed
-template<class T> T fromString(const std::string &str) throw(AskapError)
+template<class T> T fromString(const std::string &str)
 {
     std::istringstream is(str);
     T buf;
@@ -214,7 +214,7 @@ template<class T> T fromString(const std::string &str) throw(AskapError)
 /// @param[in] in a const reference to the value to convert
 /// @return resulting string
 /// @exception AskapError is thrown if the conversion failed
-template<class T> std::string toString(const T &in) throw(AskapError)
+template<class T> std::string toString(const T &in)
 {
     std::ostringstream os;
     os << in;
