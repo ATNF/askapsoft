@@ -85,13 +85,7 @@ public:
   /// @param[in] index ant/beam index 
   /// @param[in] leakages JonesDTerm object with leakages and validity flags
   virtual void setLeakage(const JonesIndex &index, const JonesDTerm &leakages);
-
-  /// @brief set gains for a single bandpass channel
-  /// @param[in] index ant/beam index
-  /// @param[in] bp JonesJTerm object with gains for the given channel and validity flags
-  /// @param[in] chan spectral channel
-  virtual void setBandpass(const JonesIndex &index, const JonesJTerm &bp, const casa::uInt chan);
-
+   
 protected:
     
   /// @brief helper method executed on every write

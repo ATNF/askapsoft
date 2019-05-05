@@ -112,7 +112,7 @@ JonesDTerm CachedCalSolutionAccessor::leakage(const JonesIndex &index) const
   }    
   return JonesDTerm(d12, d12Valid, d21, d21Valid);
 }
-
+   
 /// @brief obtain bandpass (frequency dependent J-Jones)
 /// @details This method retrieves parallel-hand spectral
 /// channel-dependent gain (also known as bandpass) for a
@@ -124,22 +124,10 @@ JonesDTerm CachedCalSolutionAccessor::leakage(const JonesIndex &index) const
 /// no bandpass is defined (at all or for this particular channel),
 /// gains of 1.0 are returned (with invalid flag is set).
 /// @return JonesJTerm object with gains and validity flags
-JonesJTerm CachedCalSolutionAccessor::bandpass(const JonesIndex &index, const casa::uInt chan) const
+JonesJTerm CachedCalSolutionAccessor::bandpass(const JonesIndex &, const casacore::uInt) const
 {
-    casa::Complex g1(1.,0.), g2(1.,0.);
-    bool g1Valid = false, g2Valid = false;
-    const std::string paramG1 = addChannelInfo(paramName(index, casa::Stokes::XX), chan);
-    const std::string paramG2 = addChannelInfo(paramName(index, casa::Stokes::YY), chan);
-
-    if (cache().has(paramG1)) {
-        g1Valid = true;
-        g1 = cache().complexValue(paramG1);
-    }
-    if (cache().has(paramG2)) {
-        g2Valid = true;
-        g2 = cache().complexValue(paramG2);
-    }
-    return JonesJTerm(g1, g1Valid, g2, g2Valid);
+  // always return 1.0 as bandpass gain for all spectral channels
+  return JonesJTerm(1., true, 1., true);
 }
 
 /// @brief helper method to update given parameter in the cache
@@ -194,8 +182,9 @@ void CachedCalSolutionAccessor::setLeakage(const JonesIndex &index, const JonesD
 /// gains set explicitly for each channel.
 void CachedCalSolutionAccessor::setBandpass(const JonesIndex &index, const JonesJTerm &bp, const casacore::uInt chan)
 {
-  updateParamInCache(addChannelInfo(paramName(index, casa::Stokes::XX), chan), bp.g1(), bp.g1IsValid());
-  updateParamInCache(addChannelInfo(paramName(index, casa::Stokes::YY), chan), bp.g2(), bp.g2IsValid());
+  ASKAPTHROW(AskapError, "Attempt to set bandpass for ant="<<index.antenna()<<" beam="<<index.beam()<<" chan="<<chan<<
+             "(g1="<<bp.g1()<<" g2="<<bp.g2()<<" validity flags: "<<
+             bp.g1IsValid()<<","<<bp.g2IsValid()<<"); Operation is not implemented");
 }
 
 /// @brief direct access to the cache
