@@ -20,7 +20,7 @@ StatReporter.cc
 )
 
 if (CPPUNIT_FOUND)
-	target_sources(askap_askap
+	target_sources(askap_askap PRIVATE
 		AskapTestRunner.cc
 	)
 endif()
