@@ -62,23 +62,12 @@ find_package(log4cxx REQUIRED)
 find_package(Casacore REQUIRED COMPONENTS  ms images mirlib coordinates fits lattices measures scimath scimath_f tables casa)
 
 # include directories
-include_directories( ${CMAKE_SOURCE_DIR} )
-if (Boost_FOUND)
-    include_directories (${Boost_INCLUDE_DIRS})
-    add_definitions(-DHAVE_BOOST)
-endif (Boost_FOUND)
-if (log4cxx_FOUND)
-    include_directories(${log4cxx_INCLUDE_DIRS})
-    add_definitions(-DHAVE_LOG4CXX)
-endif(log4cxx_FOUND)
-
-if (LofarCommon_FOUND)
-	include_directories(${LofarCommon_COMMON_INCLUDE_DIRS})
-endif(LofarCommon_FOUND)
-
-if (CASACORE_FOUND)
-	include_directories(${CASACORE_INCLUDE_DIRS})
-endif(CASACORE_FOUND)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+include_directories(${Boost_INCLUDE_DIRS})
+include_directories(${LofarCommon_INCLUDE_DIR})
+include_directories(${log4cxx_INCLUDE_DIRS})
+include_directories(${CASACORE_INCLUDE_DIRS})
+add_definitions(-DHAVE_BOOST -DHAVE_LOG4CXX)
 
 set (_modules askap)
 
