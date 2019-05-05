@@ -4,6 +4,7 @@
 add_library(askap_askap 
 Application.cc
 AskapError.cc
+AskapTestRunner.cc
 AskapUtil.cc
 ISignalHandler.cc
 IndexConverter.cc
@@ -12,6 +13,11 @@ RangePartition.cc
 SignalCounter.cc
 SignalManagerSingleton.cc
 StatReporter.cc
+../profile/AskapProfiler.cc
+../profile/ProfileData.cc
+../profile/ProfileNode.cc
+../profile/ProfileSingleton.cc
+../profile/ProfileTree.cc
 )
 
 install (FILES
@@ -19,6 +25,7 @@ Application.h
 AskapError.h
 AskapLogging.h
 AskapTypes.h
+AskapTestRunner.h
 AskapUtil.h
 CasaSyncHelper.h
 CircularBuffer.h
@@ -34,12 +41,23 @@ StatReporter.h
 DESTINATION include/askap/askap
 )
 
+install (FILES
+
+../profile/AskapProfiler.h
+../profile/ProfileData.h
+../profile/ProfileNode.h
+../profile/ProfileSingleton.h
+../profile/ProfileTree.h
+DESTINATION include/askap/profile
+)
+
 target_link_libraries(
 	askap_askap
 	${CASACORE_LIBRARIES}
 	${log4cxx_LIBRARY}
 	${Boost_LIBRARIES}
 	${LofarCommon_LIBRARY}
+	${CPPUNIT_LIBRARY}
 	)
 
 install (
