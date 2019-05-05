@@ -7,10 +7,15 @@ pipeline {
   }
   stages {
     stage('Building') {
-    steps { 
+      steps {
         dir(path: '/var/lib/jenkins/workspace/base-askap_develop') {
           sh '''if [ -d build ]; then
 echo "base-askap build directory already exists"
+cd build
+if [ -f install_manifest.txt ]; then
+cd make uninstall
+fi
+cd ..
 rm -rf build
 mkdir build
 else
@@ -30,6 +35,6 @@ make -j2 install
   }
   environment {
     WORKSPACE = '/var/lib/jenkins/workspace'
-    PREFIX = '/var/lib/jenkins/workspace/base-askap/install'
+    PREFIX = '/var/lib/jenkins/workspace/base-askap_develop/install'
   }
 }
