@@ -279,30 +279,24 @@ std::pair<double, std::string> measuresTableVersion();
 /// @param[in] mjd Modified Julian Date to check
 bool measuresValid(double mjd);
 
-
-} // end namespace askap
-
-// Now defined in the casa package
-//namespace std {
 /// @name operator<< Extensions
 /// Print the contents of a vector or list.
 ///
 /// Enclose it in square brackets, using a comma as separator.
 /// \note operator<<() must be defined for type \c T.
 //@{
-//template<typename T>
-//inline ostream& operator<<(ostream& os, const vector<T>& c)
-//{
-//    askap::printContainer(os, c, ",", "[", "]", size_t(20));
-//    return os;
-//}
-//template<typename T>
-//inline ostream& operator<<(ostream& os, const list<T>& c)
-//{
-//    askap::printContainer(os, c, ",", "[", "]", size_t(20));
-//    return os;
-//}
+template<typename T>
+inline std::ostream& operator<<(std::ostream& os, const std::vector<T>& c)
+{
+    return casa::operator<<(os, c);
+}
+template<typename T>
+inline std::ostream& operator<<(std::ostream& os, const std::list<T>& c)
+{
+    return casa::operator<<(os, c);
+}
 //@}
-//} // end namespace std
+
+} // end namespace askap
 
 #endif
