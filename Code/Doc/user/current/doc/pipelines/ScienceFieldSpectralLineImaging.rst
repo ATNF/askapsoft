@@ -192,7 +192,7 @@ produced by setting ``ALT_IMAGER_SINGLE_FILE=true``.
 +-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
 | ``GRIDDER_SPECTRAL_WMAX``                     | 2600                                | WProject.wmax                      | The wmax parameter for the gridder. The default for this depends  |
 |                                               | (``GRIDDER_SNAPSHOT_IMAGING=true``) | (:doc:`../calim/gridder`)          | on whether snapshot imaging is invoked or not                     |
-|                                               | or 30000                            |                                    | (``GRIDDER_SNAPSHOT_IMAGING``).                                   |
+|                                               | or 35000                            |                                    | (``GRIDDER_SNAPSHOT_IMAGING``).                                   |
 |                                               | (``GRIDDER_SNAPSHOT_IMAGING=false``)|                                    |                                                                   |
 +-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
 | ``GRIDDER_SPECTRAL_NWPLANES``                 | 257                                 | WProject.nwplanes                  | The nwplanes parameter for the gridder.                           |
