@@ -1,3 +1,25 @@
+0.24.1 (8 May 2019)
+-------------------
+
+A patch release, focusing only on fixes for pipeline issues:
+
+ * Default values for GRIDDER_WMAX_NO_SNAPSHOT and
+   GRIDDER_SPECTRAL_WMAX_NO_SNAPSHOT have been changed to 35000
+ * For the CASDA upload script, certain evaluation files have had the
+   pipeline timestamp added to their filename
+ * A few bugs were fixed:
+   
+   - The list of MSs given to the upload script were erroneously the
+     final time-window MS (when that mode is used).
+   - The continuum validation script was mistakenly making all files
+     group-writeable (rather than just the copied validation directory).
+   - The logic for checking the FREQ_FRAME parameter was incorrect and
+     should now do the right thing.
+
+The user documentation has also been updated, with a missing table
+added back in.
+
+
 0.24.0 (16 April 2019)
 ---------------------
 
