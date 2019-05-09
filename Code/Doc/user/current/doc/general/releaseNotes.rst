@@ -5,7 +5,29 @@ This page summarises the key changes in each tagged release of
 ASKAPsoft. This replicates the CHANGES file that is included in the
 code base.
 
-0.24.0 (12 April 2019)
+0.24.1 (8 May 2019)
+-------------------
+
+A patch release, focusing only on fixes for pipeline issues:
+
+ * Default values for GRIDDER_WMAX_NO_SNAPSHOT and
+   GRIDDER_SPECTRAL_WMAX_NO_SNAPSHOT have been changed to 35000
+ * For the CASDA upload script, certain evaluation files have had the
+   pipeline timestamp added to their filename
+ * A few bugs were fixed:
+   
+   - The list of MSs given to the upload script were erroneously the
+     final time-window MS (when that mode is used).
+   - The continuum validation script was mistakenly making all files
+     group-writeable (rather than just the copied validation directory).
+   - The logic for checking the FREQ_FRAME parameter was incorrect and
+     should now do the right thing.
+
+The user documentation has also been updated, with a missing table
+added back in.
+
+
+0.24.0 (16 April 2019)
 ---------------------
 
 A major release, with an improved framework for the pipeline scripts
@@ -60,6 +82,12 @@ Pipelines:
    CLEAN_THRESHOLD_MINORCYCLE. The last two parameters can have
    vectors for individual loops, and so this necessitates a new
    format, whereindividual loops are separated by ' ; '.
+ * Overall control over the spectral processing is now provided by
+   DO_SPECTRAL_PROCESSING. This defaults to false, meaning only the
+   continuum processing will be done. Turning this to true will result
+   in application of the selfcal gains, continuum subtraction,
+   spectral imaging and image-based continuum subtraction being done -
+   each of these are turned on by default.
  * Elevation-based flagging for the science observation is able to be
    configured through the pipeline parameters.
  * There are parameters to specify a given range of times to be used
@@ -98,6 +126,7 @@ Pipelines:
    - ELEVATION_FLAG_SCIENCE_HIGH=""
    - OUTPUT_CHANNELS_SL=""
    - FREQ_FRAME_SL=bary
+   - DO_SPECTRAL_PROCESSING=true
 
  * There are new default values for some pipeline parameters:
 
@@ -131,6 +160,8 @@ Pipelines:
    - TILENCHAN_SL=18
    - DO_APPLY_CAL_SL=true
    - DO_CONT_SUB_SL=true
+   - DO_SPECTRAL_IMAGING=true
+   - DO_SPECTRAL_IMSUB=true
    - NUM_PIXELS_SPECTRAL=1024
    - CELLSIZE_SPECTRAL=8
    - SPECTRAL_IMAGE_MAXUV=2000

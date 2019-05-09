@@ -32,8 +32,9 @@
 #
 
 # Define list of possible MSs:
-#msNameList=()
 msNameList=""
+# Turn off time splitting, so that we get the final MS names
+DO_SPLIT_TIMEWISE=false
 for BEAM in ${BEAMS_TO_USE}; do
     IFS="${IFS_FIELDS}"
     for FIELD in ${FIELD_LIST}; do
@@ -533,7 +534,7 @@ if [ "\${PREPARE_FOR_CASDA}" == "true" ]; then
     # Tar up the directory structure with the cal tables, logs,
     # slurm files & diagnostics etc, and add to the evaluation file list
 
-    tarfile=calibration-metadata-processing-logs.tar
+    tarfile=calibration-metadata-processing-logs_${NOW}.tar
 
     # cal tables
     for((i=0;i<\${#calTables[@]};i++)); do

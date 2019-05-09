@@ -73,9 +73,9 @@ self-calibration. This way, you can decrease, say, the detection
 threshold, or increase the number of major cycles, as the calibration
 steadily improves. These parameters are for:
 
-* Deconvolution: ``CLEAN_ALGORITHM``, ``CLEAN_GAIN``, ``CLEAN_PSFWIDTH``, 
-  ``CLEAN_THRESHOLD_MAJORCYCLE``, ``CLEAN_NUM_MAJORCYCLES``, 
-  ``CLEAN_MINORCYCLE_NITER``, ``CLEAN_THRESHOLD_MINORCYCLE`` and 
+* Deconvolution: ``CLEAN_ALGORITHM``, ``CLEAN_GAIN``, ``CLEAN_PSFWIDTH``,
+  ``CLEAN_THRESHOLD_MAJORCYCLE``, ``CLEAN_NUM_MAJORCYCLES``,
+  ``CLEAN_MINORCYCLE_NITER``, ``CLEAN_THRESHOLD_MINORCYCLE`` and
   ``CLEAN_SCALES``
 * Self-calibration: ``SELFCAL_SELAVY_THRESHOLD``, ``SELFCAL_INTERVAL``
   and ``SELFCAL_NORMALISE_GAINS``
@@ -83,8 +83,8 @@ steadily improves. These parameters are for:
 * Data selection in calibration: ``CCALIBRATOR_MINUV`` and ``CCALIBRATOR_MAXUV``
 
 To use this mode, the values for these parameters should be given as
-an array in the form ``SELFCAL_INTERVAL="[1800,1800,900,300]"``, or, 
-``CLEAN_SCALES="[0] ; [0,20] ; [0,20,120,240] ; [0,20,120,240,480]"``. 
+an array in the form ``SELFCAL_INTERVAL="[1800,1800,900,300]"``, or,
+``CLEAN_SCALES="[0] ; [0,20] ; [0,20,120,240] ; [0,20,120,240,480]"``.
 The size of these arrays should be one more than
 ``SELFCAL_NUM_LOOPS``. This is because loop 0 is just the imaging, and
 it is followed by ``SELFCAL_NUM_LOOPS`` loops of
@@ -135,7 +135,7 @@ the ``DO_CONVERT_TO_FITS`` flag, which makes use of the
 +============================================+=====================================+========================================================+===============================================================+
 | ``DO_CONT_IMAGING``                        | true                                | none                                                   | Whether to image the science MS                               |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
-| ``JOB_TIME_CONT_IMAGE``                    | ``JOB_TIME_DEFAULT`` (12:00:00)     | none                                                   | Time request for imaging the continuum (both types - with and |
+| ``JOB_TIME_CONT_IMAGE``                    | ``JOB_TIME_DEFAULT`` (24:00:00)     | none                                                   | Time request for imaging the continuum (both types - with and |
 |                                            |                                     |                                                        | without self-calibration)                                     |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
 | ``IMAGETYPE_CONT``                         | fits                                | imagetype (:doc:`../calim/cimager` and                 | Image format to use - can be either 'casa' or 'fits'.         |
@@ -149,7 +149,7 @@ the ``DO_CONVERT_TO_FITS`` flag, which makes use of the
 |                                            |                                     |                                                        | each imaging and calibration task (``true``) or whether to    |
 |                                            |                                     |                                                        | combine them all into a single slurm job.                     |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
-| ``JOB_TIME_CONT_SELFCAL``                  | ``JOB_TIME_DEFAULT`` (12:00:00)     | none                                                   | Time request for the calibration jobs when running with       |
+| ``JOB_TIME_CONT_SELFCAL``                  | ``JOB_TIME_DEFAULT`` (24:00:00)     | none                                                   | Time request for the calibration jobs when running with       |
 |                                            |                                     |                                                        | ``MULTI_JOB_SELFCAL=true``.                                   |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
 | **Basic variables**                        |                                     |                                                        |                                                               |
@@ -250,7 +250,7 @@ the ``DO_CONVERT_TO_FITS`` flag, which makes use of the
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
 | ``GRIDDER_WMAX``                           | 2600                                | WProject.wmax                                          | The wmax parameter for the gridder. The default for this      |
 |                                            | (``GRIDDER_SNAPSHOT_IMAGING=true``) | (:doc:`../calim/gridder`)                              | depends on whether snapshot imaging is invoked or not         |
-|                                            | or 30000                            |                                                        | (``GRIDDER_SNAPSHOT_IMAGING``).                               |
+|                                            | or 35000                            |                                                        | (``GRIDDER_SNAPSHOT_IMAGING``).                               |
 |                                            | (``GRIDDER_SNAPSHOT_IMAGING=false``)|                                                        |                                                               |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
 | ``GRIDDER_NWPLANES``                       | 99                                  | WProject.nwplanes                                      | The nwplanes parameter for the gridder. The default for this  |
@@ -280,13 +280,13 @@ the ``DO_CONVERT_TO_FITS`` flag, which makes use of the
 |                                            |                                     |                                                        | be used for ALL selfcal loops.                                |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
 | ``CLEAN_MINORCYCLE_NITER``                 | "[400,800]"                         | Clean.niter                                            | The number of iterations for the minor cycle clean. Can be    |
-|                                            |                                     | (:doc:`../calim/solver`)                               |varied for each selfcal cycle. (e.g. "[200,800,1000]")         |
+|                                            |                                     | (:doc:`../calim/solver`)                               | varied for each selfcal cycle. (e.g. "[200,800,1000]")        |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
 | ``CLEAN_GAIN``                             | 0.2                                 | Clean.gain                                             | The loop gain (fraction of peak subtracted per minor cycle).  |
 |                                            |                                     | (:doc:`../calim/solver`)                               | Can be varied for each selfcal cycle. (e.g. "[0.1,0.2,0.1]")  |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
 | ``CLEAN_PSFWIDTH``                         | 256                                 | Clean.psfwidth                                         | The width of the psf patch used in the minor cycle. Can be    |
-|                                            |                                     | (:doc:`../calim/solver`)                               |varied for each selfcal cycle. (e.g. "[256,512,4096]")         |
+|                                            |                                     | (:doc:`../calim/solver`)                               | varied for each selfcal cycle. (e.g. "[256,512,4096]")        |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
 | ``CLEAN_SCALES``                           | "[0,3,10]"                          | Clean.scales                                           | Set of scales (in pixels) to use with the multi-scale clean.  |
 |                                            |                                     | (:doc:`../calim/solver`)                               | Can be varied for each selfcal cycle (e.g. ```"[0] ;          |
@@ -294,9 +294,9 @@ the ``DO_CONVERT_TO_FITS`` flag, which makes use of the
 |                                            |                                     |                                                        | it.                                                           |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
 | ``CLEAN_THRESHOLD_MINORCYCLE``             | "[30%, 0.5mJy, 0.03mJy]"            | threshold.minorcycle                                   | Threshold for the minor cycle loop. Can be varied for each    |
-|                                            |                                     | (:doc:`../calim/cimager`)                              |selfcal cycle. (e.g. ```"[30%,1.8mJy,0.03mJy] ;                |
-|                                            |                                     | (:doc:`../calim/solver`)                               |[20%,0.5mJy,0.03mJy]"```) Notice the delimiter " ; " and the   |
-|                                            |                                     |                                                        |spaces around it.                                              |
+|                                            |                                     | (:doc:`../calim/cimager`)                              | selfcal cycle. (e.g. ```"[30%,1.8mJy,0.03mJy] ;               |
+|                                            |                                     | (:doc:`../calim/solver`)                               | [20%,0.5mJy,0.03mJy]"```) Notice the delimiter " ; " and the  |
+|                                            |                                     |                                                        | spaces around it.                                             |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
 | ``CLEAN_THRESHOLD_MAJORCYCLE``             | "0.035mJy"                          | threshold.majorcycle                                   | The target peak residual. Major cycles stop if this is        |
 |                                            |                                     | (:doc:`../calim/cimager`)                              | reached. A negative number ensures all major cycles requested |
@@ -310,7 +310,7 @@ the ``DO_CONVERT_TO_FITS`` flag, which makes use of the
 |                                            |                                     | (:doc:`../calim/cimager`)                              | .cycle suffix) after the end of each major cycle.             |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
 | ``CLEAN_SOLUTIONTYPE``                     | MAXBASE                             | Clean.solutiontype (see discussion at                  | The type of peak finding algorithm to use in the              |
-|                                            |                                     | :doc:`../recipes/imaging`)                             | deconvolution. Choices are MAXCHISQ, MAXTERM0, or MAXBASE.    |
+|                                            |                                     | :doc:`../recipes/Imaging`)                             | deconvolution. Choices are MAXCHISQ, MAXTERM0, or MAXBASE.    |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
 | **Preconditioning parameters**             |                                     |                                                        |                                                               |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
@@ -493,7 +493,7 @@ the ``DO_CONVERT_TO_FITS`` flag, which makes use of the
 | ``DO_APPLY_CAL_CONT``                      | true                                | none                                                   | Whether to apply the calibration to the averaged              |
 |                                            |                                     |                                                        | ("continuum") dataset.                                        |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
-| ``JOB_TIME_CONT_APPLYCAL``                 | ``JOB_TIME_DEFAULT`` (12:00:00)     | none                                                   | Time request for applying the calibration                     |
+| ``JOB_TIME_CONT_APPLYCAL``                 | ``JOB_TIME_DEFAULT`` (24:00:00)     | none                                                   | Time request for applying the calibration                     |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
 | ``KEEP_RAW_AV_MS``                         | true                                | none                                                   | Whether to make a copy of the averaged MS before applying     |
 |                                            |                                     |                                                        | the gains calibration (true), or to just overwrite with       |
@@ -503,7 +503,7 @@ the ``DO_CONVERT_TO_FITS`` flag, which makes use of the
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
 | ``DO_CONTCUBE_IMAGING``                    | false                               | none                                                   | Whether to create continuum cubes                             |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
-| ``JOB_TIME_CONTCUBE_IMAGE``                | ``JOB_TIME_DEFAULT`` (12:00:00)     | none                                                   | Time request for individual continuum cube jobs               |
+| ``JOB_TIME_CONTCUBE_IMAGE``                | ``JOB_TIME_DEFAULT`` (24:00:00)     | none                                                   | Time request for individual continuum cube jobs               |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
 | ``IMAGE_BASE_CONTCUBE``                    | i.SB%s.contcube                     | Helps form Images.name (:doc:`../calim/simager`)       | Base name for the continuum cubes. It should include "i.", as |
 |                                            |                                     |                                                        | the actual base name will include the correct polarisation    |
@@ -583,5 +583,5 @@ the ``DO_CONVERT_TO_FITS`` flag, which makes use of the
 |                                            |                                     | (:doc:`../calim/cimager`)                              | .cycle suffix) after the end of each major cycle.             |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
 | ``CLEAN_CONTCUBE_SOLUTIONTYPE``            | MAXCHISQ                            | Clean.solutiontype (see discussion at                  | The type of peak finding algorithm to use in the              |
-|                                            |                                     | :doc:`../recipes/imaging`)                             | deconvolution. Choices are MAXCHISQ, MAXTERM0, or MAXBASE.    |
+|                                            |                                     | :doc:`../recipes/Imaging`)                             | deconvolution. Choices are MAXCHISQ, MAXTERM0, or MAXBASE.    |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+

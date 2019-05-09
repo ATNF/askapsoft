@@ -405,8 +405,16 @@ EOFINNER
                 if [ "\${purgeCSV}" == "true" ]; then
                     rm -f \${validationDirCopy}/*.csv
                 fi
+                chmod -R g+w \${validationDirCopy}
             fi
-            chmod -R g+w \${validationDirCopy}
+
+            # Rename the validation XML file to include the timestamp
+            validationFileInitial=${validationFileInitial}
+            validationFile=${validationFile}
+            if [ -e \${validationDir}/\${validationFileInitial} ]; then
+                mv \${validationDir}/\${validationFileInitial} \${validationDir}/\${validationFile}
+            fi
+
         fi
     fi
 

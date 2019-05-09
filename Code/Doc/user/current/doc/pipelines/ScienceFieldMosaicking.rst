@@ -121,7 +121,7 @@ primary beam at the centre of each image.
 |                                    |                                    |                         | there is more than one in the MS). If set to false, only the |
 |                                    |                                    |                         | field-based mosaicking will be done.                         |
 +------------------------------------+------------------------------------+-------------------------+--------------------------------------------------------------+
-| ``JOB_TIME_LINMOS``                | ``JOB_TIME_DEFAULT`` (12:00:00)    | none                    | Time request for mosaicking                                  |
+| ``JOB_TIME_LINMOS``                | ``JOB_TIME_DEFAULT`` (24:00:00)    | none                    | Time request for mosaicking                                  |
 +------------------------------------+------------------------------------+-------------------------+--------------------------------------------------------------+
 | ``NUM_CPUS_CONTCUBE_LINMOS``       | ""                                 | none                    | Total number of cores used for each of the spectral-line     |
 |                                    |                                    |                         | mosaicking jobs. If blank (the default), the number used is  |

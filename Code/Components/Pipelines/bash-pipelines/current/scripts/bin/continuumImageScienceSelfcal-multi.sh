@@ -81,26 +81,6 @@ if [ "${DO_IT}" == "true" ] && [ "${DO_SELFCAL}" == "true" ]; then
         NUM_NODES_IMAGING=$(echo $NUM_CPUS_CONTIMG_SCI $CPUS_PER_CORE_CONT_IMAGING | awk '{if ($1%$2==0) print $1/$2; else print int($1/$2)+1}')
     fi
     
-    # Set elements of the metadata based on position & frequency
-    msMetadata="${MS_METADATA}"
-    ra=$(python "${PIPELINEDIR}/parseMSlistOutput.py" --file="$MS_METADATA" --val=RA)
-    dec=$(python "${PIPELINEDIR}/parseMSlistOutput.py" --file="$MS_METADATA" --val=Dec)
-    epoch=$(python "${PIPELINEDIR}/parseMSlistOutput.py" --file="$MS_METADATA" --val=Epoch)
-    bandwidth="$(python "${PIPELINEDIR}/parseMSlistOutput.py" --file="$MS_METADATA" --val=Bandwidth)"
-    centreFreq="$(python "${PIPELINEDIR}/parseMSlistOutput.py" --file="$MS_METADATA" --val=Freq)"
-
-    if [ "${DIRECTION}" != "" ]; then
-        modelDirection="${DIRECTION}"
-    else
-        modelDirection="[${ra}, ${dec}, ${epoch}]"
-    fi
-    # Reformat for Selavy's referenceDirection
-    ra=$(echo "$ra" | awk -F':' '{printf "%sh%sm%s",$1,$2,$3}')
-    refDirection="[${ra}, ${dec}, ${epoch}]"
-    unset ra
-    unset dec
-    unset epoch
-    
     # Details for the script to fix the position offsets
     script_location="${ACES_LOCATION}/tools"
     script_args="${RA_POSITION_OFFSET} ${DEC_POSITION_OFFSET}"
@@ -219,16 +199,16 @@ Cimager.calibrate                               = false
 # The below specifies the GSM source is a selavy output file
 Cmodel.gsm.database       = votable
 Cmodel.gsm.file           = selavy-results.components.xml
-Cmodel.gsm.ref_freq       = ${centreFreq}Hz
+Cmodel.gsm.ref_freq       = \${centreFreq}Hz
 
 # General parameters
 Cmodel.bunit              = Jy/pixel
-Cmodel.frequency          = ${centreFreq}Hz
-Cmodel.increment          = ${bandwidth}Hz
+Cmodel.frequency          = \${centreFreq}Hz
+Cmodel.increment          = \${bandwidth}Hz
 Cmodel.flux_limit         = ${SELFCAL_MODEL_FLUX_LIMIT}
 Cmodel.shape              = [${NUM_PIXELS_CONT},${NUM_PIXELS_CONT}]
 Cmodel.cellsize           = [${CELLSIZE_CONT}arcsec, ${CELLSIZE_CONT}arcsec]
-Cmodel.direction          = ${modelDirection}
+Cmodel.direction          = \${modelDirection}
 Cmodel.stokes             = [I]
 Cmodel.nterms             = ${NUM_TAYLOR_TERMS}
 
@@ -240,7 +220,7 @@ Cmodel.filename           = ${modelImage}"
 
                 CalibratorModelDefinition="# The model definition
 Ccalibrator.sources.names                       = [lsm]
-Ccalibrator.sources.lsm.direction               = ${modelDirection}
+Ccalibrator.sources.lsm.direction               = \${modelDirection}
 Ccalibrator.sources.lsm.model                   = ${modelImage}
 Ccalibrator.sources.lsm.nterms                  = ${NUM_TAYLOR_TERMS}"
                 if [ "${NUM_TAYLOR_TERMS}" -gt 1 ]; then
@@ -262,7 +242,7 @@ Ccalibrator.visweights.MFS.reffreq              = ${freq}"
                 CalibratorModelDefinition="# The model definition
 Ccalibrator.imagetype                           = ${IMAGETYPE_CONT}
 Ccalibrator.sources.names                       = [lsm]
-Ccalibrator.sources.lsm.direction               = ${modelDirection}
+Ccalibrator.sources.lsm.direction               = \${modelDirection}
 Ccalibrator.sources.lsm.model                   = ${OUTPUT}/${modelImage%%.taylor.0}
 Ccalibrator.sources.lsm.nterms                  = ${NUM_TAYLOR_TERMS}"
                 if [ "${NUM_TAYLOR_TERMS}" -gt 1 ]; then
@@ -286,7 +266,7 @@ Selavy.outputComponentParset                    = true
 Selavy.outputComponentParset.filename           = ${sources}
 # Reference direction for which component positions should be measured
 #  relative to.
-Selavy.outputComponentParset.referenceDirection = ${refDirection}
+Selavy.outputComponentParset.referenceDirection = \${refDirection}
 # Only use the brightest components in the parset
 Selavy.outputComponentParset.maxNumComponents   = 10"
 
@@ -328,6 +308,24 @@ thisfile="$sbatchfile"
 cp "\$thisfile" "\$(echo "\$thisfile" | sed -e "\$sedstr")"
 
 selfcalMethod=${SELFCAL_METHOD}
+
+# Set elements of the metadata based on position & frequency
+msMetadata="${MS_METADATA}"
+ra=\$(python "\${PIPELINEDIR}/parseMSlistOutput.py" --file="\$msMetadata" --val=RA)
+dec=\$(python "\${PIPELINEDIR}/parseMSlistOutput.py" --file="\$msMetadata" --val=Dec)
+epoch=\$(python "\${PIPELINEDIR}/parseMSlistOutput.py" --file="\$msMetadata" --val=Epoch)
+bandwidth="\$(python "\${PIPELINEDIR}/parseMSlistOutput.py" --file="\$msMetadata" --val=Bandwidth)"
+centreFreq="\$(python "\${PIPELINEDIR}/parseMSlistOutput.py" --file="\$msMetadata" --val=Freq)"
+
+direction="${DIRECTION}"
+if [ "\${direction}" != "" ]; then
+    modelDirection="\${direction}"
+else
+    modelDirection="[\${ra}, \${dec}, \${epoch}]"
+fi
+# Reformat for Selavy's referenceDirection
+ra=\$(echo "\$ra" | awk -F':' '{printf "%sh%sm%s",\$1,\$2,\$3}')
+refDirection="[\${ra}, \${dec}, \${epoch}]"
 
 parset="${parsets}/science_contSelfcal_${FIELDBEAM}_\${SLURM_JOB_ID}_LOOP${LOOP}.in"
 cat > \$parset << EOFINNER

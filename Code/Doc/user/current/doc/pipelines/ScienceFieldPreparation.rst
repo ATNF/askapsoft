@@ -54,21 +54,21 @@ The default behaviour is to process all fields within the science MS
 field being processed in its own sub-directory. The field selection is
 done in the splitting task, at the same time as the beam selection. It
 is possible, however, to select a single field to process via the
-``FIELD_SELECTION_SCIENCE`` parameter (by giving the field **name**). 
+``FIELD_SELECTION_SCIENCE`` parameter (by giving the field **name**).
 
-SPEEDING up processing: The pipeline has an option to speed up processing 
-by splitting the msdata in time. If sought, the timewise splitting of the 
-measurement sets for each beam are done upfront at the copy/split step. 
-This allows parallel execution of the non-imaging tasks (BandpassApplication, 
-Flagging, Averaging and ContinuumSubtraction) on the cluster, and helps 
-attain a massive reduction in processing times. The imaging is done per 
-beam using data in ALL the TimeWindows either by combining the TimeWise 
-split data in an intermediate step, or by passing to imager the list of 
-the TimeWise split measurement sets (the latter is being experimented and 
-should help reduce some duplication of data as well as save some time in 
-the combining process). 
-For details on making use of this feature, see the section on 
-**Processing by splitting data in time** in the table below. 
+SPEEDING up processing: The pipeline has an option to speed up processing
+by splitting the msdata in time. If sought, the timewise splitting of the
+measurement sets for each beam are done upfront at the copy/split step.
+This allows parallel execution of the non-imaging tasks (BandpassApplication,
+Flagging, Averaging and ContinuumSubtraction) on the cluster, and helps
+attain a massive reduction in processing times. The imaging is done per
+beam using data in ALL the TimeWindows either by combining the TimeWise
+split data in an intermediate step, or by passing to imager the list of
+the TimeWise split measurement sets (the latter is being experimented and
+should help reduce some duplication of data as well as save some time in
+the combining process).
+For details on making use of this feature, see the section on
+**Processing by splitting data in time** in the table below.
 
 
 +-----------------------------------------------+---------------------------------+-------------------------------------------------+-----------------------------------------------------------------------+
@@ -78,22 +78,22 @@ For details on making use of this feature, see the section on
 +-----------------------------------------------+---------------------------------+-------------------------------------------------+-----------------------------------------------------------------------+
 | ``DO_SPLIT_SCIENCE``                          | true                            | none                                            | Whether to split out the given beam from the science MS               |
 +-----------------------------------------------+---------------------------------+-------------------------------------------------+-----------------------------------------------------------------------+
-| ``JOB_TIME_SPLIT_SCIENCE``                    | ``JOB_TIME_DEFAULT`` (12:00:00) | none                                            | Time request for splitting the science MS                             |
+| ``JOB_TIME_SPLIT_SCIENCE``                    | ``JOB_TIME_DEFAULT`` (24:00:00) | none                                            | Time request for splitting the science MS                             |
 +-----------------------------------------------+---------------------------------+-------------------------------------------------+-----------------------------------------------------------------------+
 | ``DO_FLAG_SCIENCE``                           | true                            | none                                            | Whether to flag the (splitted) science MS                             |
 +-----------------------------------------------+---------------------------------+-------------------------------------------------+-----------------------------------------------------------------------+
-| ``JOB_TIME_FLAG_SCIENCE``                     | ``JOB_TIME_DEFAULT`` (12:00:00) | none                                            | Time request for flagging the science MS                              |
+| ``JOB_TIME_FLAG_SCIENCE``                     | ``JOB_TIME_DEFAULT`` (24:00:00) | none                                            | Time request for flagging the science MS                              |
 +-----------------------------------------------+---------------------------------+-------------------------------------------------+-----------------------------------------------------------------------+
 | ``DO_APPLY_BANDPASS``                         | true                            | none                                            | Whether to apply the bandpass calibration to the science              |
 |                                               |                                 |                                                 | observation                                                           |
 +-----------------------------------------------+---------------------------------+-------------------------------------------------+-----------------------------------------------------------------------+
-| ``JOB_TIME_APPLY_BANDPASS``                   | ``JOB_TIME_DEFAULT`` (12:00:00) | none                                            | Time request for applying the bandpass to the science data            |
+| ``JOB_TIME_APPLY_BANDPASS``                   | ``JOB_TIME_DEFAULT`` (24:00:00) | none                                            | Time request for applying the bandpass to the science data            |
 +-----------------------------------------------+---------------------------------+-------------------------------------------------+-----------------------------------------------------------------------+
 | ``NUM_CORES_CAL_APPLY``                       | 19                              | none                                            | Number of cores for the job to apply the bandpass to the science data.|
 +-----------------------------------------------+---------------------------------+-------------------------------------------------+-----------------------------------------------------------------------+
 | ``DO_AVERAGE_CHANNELS``                       | true                            | none                                            | Whether to average the science MS to continuum resolution             |
 +-----------------------------------------------+---------------------------------+-------------------------------------------------+-----------------------------------------------------------------------+
-| ``JOB_TIME_AVERAGE_MS``                       | ``JOB_TIME_DEFAULT`` (12:00:00) | none                                            | Time request for averaging the channels of the science data           |
+| ``JOB_TIME_AVERAGE_MS``                       | ``JOB_TIME_DEFAULT`` (24:00:00) | none                                            | Time request for averaging the channels of the science data           |
 +-----------------------------------------------+---------------------------------+-------------------------------------------------+-----------------------------------------------------------------------+
 | **Data selection**                            |                                 |                                                 |                                                                       |
 +-----------------------------------------------+---------------------------------+-------------------------------------------------+-----------------------------------------------------------------------+
@@ -311,7 +311,6 @@ For details on making use of this feature, see the section on
 |                                               |                                 |                                                 | into TimeWindows (see below for TimeWindow interval selection param). |
 |                                               |                                 |                                                 | This will speed-up the processing, especially when the observation    |
 |                                               |                                 |                                                 | duration exceeds a few hours.                                         |
-|                                               |                                 |                                                 |        |
 +-----------------------------------------------+---------------------------------+-------------------------------------------------+-----------------------------------------------------------------------+
 | ``SPLIT_INTERVAL_MINUTES``                    | 60                              | none                                            | If ``DO_SPLIT_TIMEWISE`` is set to true, the pipeline will split data |
 |                                               |                                 |                                                 | in to ``T/SPLIT_INTERVAL_MINUTES`` time-windows (where, ``T=total obs |
@@ -322,4 +321,3 @@ For details on making use of this feature, see the section on
 
 
  .. _MS selection :  http://www.aoc.nrao.edu/~sbhatnag/misc/msselection/msselection.html
- 

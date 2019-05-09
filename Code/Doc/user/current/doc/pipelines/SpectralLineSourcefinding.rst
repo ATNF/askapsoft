@@ -21,7 +21,7 @@ reconstruction (to enhance the signal-to-noise of real sources).
 |                                     |                                 |                                              | field mosaics. Will be set to false if the number of fields |
 |                                     |                                 |                                              | is one.                                                     |
 +-------------------------------------+---------------------------------+----------------------------------------------+-------------------------------------------------------------+
-|   ``JOB_TIME_SOURCEFINDING_SPEC``   | ``JOB_TIME_DEFAULT`` (12:00:00) | none                                         | Time request for source-finding jobs                        |
+|   ``JOB_TIME_SOURCEFINDING_SPEC``   | ``JOB_TIME_DEFAULT`` (24:00:00) | none                                         | Time request for source-finding jobs                        |
 |                                     |                                 |                                              |                                                             |
 +-------------------------------------+---------------------------------+----------------------------------------------+-------------------------------------------------------------+
 | ``CPUS_PER_CORE_SELAVY_SPEC``       | ""                              | none                                         | Number of cores used on each node. If not provided, it will |
