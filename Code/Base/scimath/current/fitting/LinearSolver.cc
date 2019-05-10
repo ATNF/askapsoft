@@ -371,43 +371,7 @@ std::pair<double,double> LinearSolver::solveSubsetOfNormalEquations(Params &para
           gsl_matrix_free(V);
     }
     else if (algorithm() == "LSQR") {
-        bool addSmoothnessConstraints = false;
-        double smoothingWeight = 0;
-        size_t nChannels = 0;
-
-        // Reading the smoothing weight.
-        if (parameters().count("smoothingWeight") > 0) {
-            smoothingWeight = std::atof(parameters().at("smoothingWeight").c_str());
-            if (smoothingWeight > 0) {
-                addSmoothnessConstraints = true;
-            }
-        }
-        // Reading the number of channels.
-        if (parameters().count("nChan") > 0) {
-            nChannels = std::atoi(parameters().at("nChan").c_str());
-        }
-
-        if (addSmoothnessConstraints) {
-            ASKAPCHECK(nChannels > 1, "Wrong number of channels for smoothness constraints!");
-        }
-
-        std::map<std::pair<casa::uInt, std::string>, size_t> gainIndexesReal;
-        std::map<std::pair<casa::uInt, std::string>, size_t> gainIndexesImag;
-
-        if (addSmoothnessConstraints) {
-            // Build indexes maps (needed to add smoothness constraints to the matrix).
-            for (std::vector<std::pair<string, int> >::const_iterator indit = indices.begin();
-                 indit != indices.end(); ++indit) {
-                // Make sure there are two unknowns per parameter: real and imaginary parts of the complex gain value.
-                ASKAPCHECK(params.value(indit->first).nelements() == 2, "Number of unknowns per parameter name is not correct!");
-
-                // Extracting channel and parameter name.
-                std::pair<casa::uInt, std::string> paramInfo = extractChannelInfo(indit->first);
-
-                gainIndexesReal.insert(make_pair(paramInfo, indit->second));     // real part
-                gainIndexesImag.insert(make_pair(paramInfo, indit->second + 1)); // imaginary part
-            }
-        }
+        ASKAPLOG_INFO_STR(logger, "Solving normal equations using the LSQR solver");
 
         int myrank = 0;
         int nbproc = 1;
@@ -419,18 +383,11 @@ std::pair<double,double> LinearSolver::solveSubsetOfNormalEquations(Params &para
         comm = (void *)&comm_world;
 #endif
 
-        // Setting damping parameters.
-        double alpha = 0.01;
-        if (parameters().count("alpha") > 0) {
-            alpha = std::atof(parameters().at("alpha").c_str());
+        bool addSmoothnessConstraints = false;
+        if (parameters().count("smoothing") > 0
+            && parameters().at("smoothing") == "true") {
+            addSmoothnessConstraints = true;
         }
-
-        double norm = 2.0;
-        if (parameters().count("norm") > 0) {
-            norm = std::atof(parameters().at("norm").c_str());
-        }
-
-        ASKAPLOG_INFO_STR(logger, "Solving normal equations using the LSQR solver, with alpha = " << alpha);
 
         size_t ncolumms = nParameters;
         size_t nrows = nParameters;
@@ -445,7 +402,7 @@ std::pair<double,double> LinearSolver::solveSubsetOfNormalEquations(Params &para
         lsqr::SparseMatrix matrix(nrows, nnz, comm);
         lsqr::Vector b_RHS(nrows, 0.);
 
-        // Define the matrix values.
+        // Define the Jacobian matrix values.
         for (size_t j = 0; j < size_t(nParameters); ++j) {
             matrix.NewRow();
             for (size_t i = 0; i < size_t(nParameters); ++i) {
@@ -456,11 +413,64 @@ std::pair<double,double> LinearSolver::solveSubsetOfNormalEquations(Params &para
             }
         }
 
+        // Define the right-hand side (the data misfit part).
+        for (std::vector<std::pair<string, int> >::const_iterator indit1=indices.begin();indit1!=indices.end(); ++indit1) {
+            const casa::Vector<double> &dv = normalEquations().dataVector(indit1->first);
+            for (size_t row=0; row<dv.nelements(); ++row) {
+                 const double elem = dv(row);
+                 ASKAPCHECK(!std::isnan(elem), "Data vector seems to have NaN for row = "<<row<<", this shouldn't happen!");
+                 //gsl_vector_set(B, row+(indit1->second), elem);
+                 b_RHS[row+(indit1->second)] = elem;
+            }
+        }
+
         if (addSmoothnessConstraints) {
+        //-----------------------------------------------
         // Adding smoothness constraints.
+        //-----------------------------------------------
+            // Setting the smoothing weight.
+            double smoothingWeight = 0.;
+            if (addSmoothnessConstraints) {
+                double smoothingMinWeight = 0.;
+                if (parameters().count("smoothingMinWeight") > 0) {
+                    smoothingMinWeight = std::atof(parameters().at("smoothingMinWeight").c_str());
+                }
+
+                double smoothingMaxWeight = 3.e+6;
+                if (parameters().count("smoothingMaxWeight") > 0) {
+                    smoothingMaxWeight = std::atof(parameters().at("smoothingMaxWeight").c_str());
+                }
+
+                size_t nsteps = 10;
+                if (parameters().count("smoothingNsteps") > 0) {
+                    nsteps = std::atoi(parameters().at("smoothingNsteps").c_str());
+                }
+
+                if (itsMajorLoopIterationNumber < nsteps) {
+                    if (smoothingMinWeight == smoothingMaxWeight) {
+                        smoothingWeight = smoothingMaxWeight;
+                    } else {
+                        double span = smoothingMaxWeight - smoothingMinWeight;
+                        ASKAPCHECK(span > 0, "Wrong smoothing weight!");
+
+                        // Logarithmic sweep (between the min and max weights).
+                        smoothingWeight = smoothingMinWeight + std::pow(10., log10(span) / (double)(nsteps) * (double)(itsMajorLoopIterationNumber));
+                    }
+                } else {
+                    // Relaxation with constant weight.
+                    smoothingWeight = smoothingMaxWeight;
+                }
+            }
             ASKAPLOG_INFO_STR(logger, "Adding smoothness constraints, with weight = " << smoothingWeight);
 
-            // Solution at the current major iteration (before the update).
+            // Reading the number of channels.
+            size_t nChannels = 0;
+            if (parameters().count("nChan") > 0) {
+                nChannels = std::atoi(parameters().at("nChan").c_str());
+            }
+            ASKAPCHECK(nChannels > 1, "Wrong number of channels for smoothness constraints!");
+
+            // Extract the solution at the current major iteration (before the update).
             std::vector<double> x0(nParameters);
             int counter = 0;
             for (std::vector<std::pair<string, int> >::const_iterator indit = indices.begin();
@@ -473,6 +483,21 @@ std::pair<double,double> LinearSolver::solveSubsetOfNormalEquations(Params &para
                 }
             }
             ASKAPCHECK(counter == nParameters, "Wrong number of parameters!");
+
+            // Build indexes maps (needed to add smoothness constraints to the matrix).
+            std::map<std::pair<casa::uInt, std::string>, size_t> gainIndexesReal;
+            std::map<std::pair<casa::uInt, std::string>, size_t> gainIndexesImag;
+            for (std::vector<std::pair<string, int> >::const_iterator indit = indices.begin();
+                 indit != indices.end(); ++indit) {
+                // Make sure there are two unknowns per parameter: real and imaginary parts of the complex gain value.
+                ASKAPCHECK(params.value(indit->first).nelements() == 2, "Number of unknowns per parameter name is not correct!");
+
+                // Extracting channel and parameter name.
+                std::pair<casa::uInt, std::string> paramInfo = extractChannelInfo(indit->first);
+
+                gainIndexesReal.insert(make_pair(paramInfo, indit->second));     // real part
+                gainIndexesImag.insert(make_pair(paramInfo, indit->second + 1)); // imaginary part
+            }
 
             double cost = 0.;
             for (std::vector<std::pair<string, int> >::const_iterator indit = indices.begin();
@@ -521,9 +546,10 @@ std::pair<double,double> LinearSolver::solveSubsetOfNormalEquations(Params &para
                     matrix.NewRow();
                 }
             }
-            ASKAPLOG_INFO_STR(logger, "Smoothness constraints cost = " << cost);
+            ASKAPLOG_INFO_STR(logger, "Smoothness constraints cost (weighted) = " << cost);
+            ASKAPLOG_INFO_STR(logger, "Smoothness constraints cost = " << cost / (smoothingWeight * smoothingWeight));
         }
-        // Completed matrix building.
+        // Completed the matrix building.
         matrix.Finalize(ncolumms);
 
         // A simple approximation for the upper bound of the rank of the  A'A matrix.
@@ -531,29 +557,37 @@ std::pair<double,double> LinearSolver::solveSubsetOfNormalEquations(Params &para
 
         //std::cout << "Matrix sparsity: " << (double)matrix.GetNumberElements() / (double)(nrows * ncolumms) << std::endl;
 
-        for (std::vector<std::pair<string, int> >::const_iterator indit1=indices.begin();indit1!=indices.end(); ++indit1) {
-            const casa::Vector<double> &dv = normalEquations().dataVector(indit1->first);
-            for (size_t row=0; row<dv.nelements(); ++row) {
-                 const double elem = dv(row);
-                 ASKAPCHECK(!std::isnan(elem), "Data vector seems to have NaN for row = "<<row<<", this shouldn't happem!");
-                 //gsl_vector_set(B, row+(indit1->second), elem);
-                 b_RHS[row+(indit1->second)] = elem;
-            }
+        //-----------------------------------------------
+        // Adding damping.
+        //-----------------------------------------------
+        // Setting damping parameters.
+        double alpha = 0.01;
+        if (parameters().count("alpha") > 0) {
+            alpha = std::atof(parameters().at("alpha").c_str());
         }
 
-        //-----------------------------------------------
-        // Add damping.
-        //-----------------------------------------------
+        double norm = 2.0;
+        if (parameters().count("norm") > 0) {
+            norm = std::atof(parameters().at("norm").c_str());
+        }
+
+        ASKAPLOG_INFO_STR(logger, "Adding model damping, with alpha = " << alpha);
 
         lsqr::ModelDamping damping(ncolumms);
         damping.Add(alpha, norm, matrix, b_RHS, NULL, NULL, NULL, myrank, nbproc);
 
-        //-------------------------------------
-        // Solve matrix system.
-        //-------------------------------------
+        //-----------------------------------------------
+        // Calculating the total cost.
+        //-----------------------------------------------
+        double total_cost = 0.;
+        for (size_t i = 0; i < b_RHS.size(); ++i) {
+            total_cost += b_RHS[i] * b_RHS[i];
+        }
+        ASKAPLOG_INFO_STR(logger, "Total cost = " << total_cost);
 
+        //-----------------------------------------------
         // Setting solver parameters.
-
+        //-----------------------------------------------
         int niter = 100;
         if (parameters().count("niter") > 0) {
             niter = std::atoi(parameters().at("niter").c_str());
@@ -570,14 +604,18 @@ std::pair<double,double> LinearSolver::solveSubsetOfNormalEquations(Params &para
             suppress_output = false;
         }
 
+        //-----------------------------------------------
+        // Solving the matrix system.
+        //-----------------------------------------------
         lsqr::Vector x(ncolumms, 0.0);
         lsqr::LSQRSolver solver(matrix.GetCurrentNumberRows(), ncolumms);
 
         solver.Solve(niter, rmin, matrix, b_RHS, x, myrank, nbproc, suppress_output);
 
         //------------------------------------------------------------------------
-        // Update the parameters for the calculated changes. Exploit reference
-        // semantics of casa::Array.
+        // Update the parameters for the calculated changes.
+        // Exploit reference semantics of casa::Array.
+        //------------------------------------------------------------------------
         std::vector<std::pair<string, int> >::const_iterator indit;
         for (indit=indices.begin();indit!=indices.end();++indit) {
             casa::IPosition vecShape(1, params.value(indit->first).nelements());
