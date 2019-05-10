@@ -112,7 +112,7 @@ private:
        if ((currentBAT < itsLastBAT) && !firstRun) {
            ASKAPLOG_WARN_STR(logger, "Received metadata for earlier time than before!");
            ASKAPLOG_WARN_STR(logger, "   was: "<<bat2epoch(itsLastBAT)<<" BAT = "<<std::hex<<itsLastBAT<< 
-                      " now: "<<bat2epoch(currentBAT)<<" BAT = "<<std::hex<<currentBAT);
+                      " now: "<<bat2epoch(currentBAT)<<" BAT = "<<std::hex<<currentBAT<<" scan = "<<std::dec<<itsMetadata->scanId());
        } else if (currentBAT == itsLastBAT) {
            ASKAPLOG_WARN_STR(logger, "Received duplicated metadata for "<<bat2epoch(currentBAT)<<" BAT = "<<std::hex<<currentBAT);
        } else {

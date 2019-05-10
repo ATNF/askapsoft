@@ -296,17 +296,22 @@ VisChunk::ShPtr MergedSource::next(void)
 
     // Find data with matching timestamps
     bool logCatchup = true;
+    uint64_t lastCatchupVisBAT = 0ul;
     while (itsMetadata->time() != itsVis->timestamp) {
 
         // If the VisDatagram timestamps are in the past (with respect to the
         // TosMetadata) then read VisDatagrams until they catch up
         if (itsMetadata->time() > itsVis->timestamp) {
             ASKAPDEBUGASSERT(itsVis);
+            if (!logCatchup && lastCatchupVisBAT != itsVis->timestamp) {
+                logCatchup = true;
+            }
             if (logCatchup) {
                 ASKAPLOG_DEBUG_STR(logger, "Reading extra VisDatagrams to catch up for stream id="<<itsVisConverter.config().receiverId()<<
                                            ", metadata time: "<<bat2epoch(itsMetadata->time()).getValue()<<
                                            " visibility time: "<<bat2epoch(itsVis->timestamp).getValue());
                 logCatchup = false;
+                lastCatchupVisBAT = itsVis->timestamp;
             }
             itsVis.reset();
 
