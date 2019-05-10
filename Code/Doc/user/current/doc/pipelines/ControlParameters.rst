@@ -63,7 +63,7 @@ see the *Slurm time requests* section below for details.
 |                                     |                         |for checking if things are to your liking).                                      |
 |                                     |                         |                                                                                 |
 +-------------------------------------+-------------------------+---------------------------------------------------------------------------------+
-| ``ASKAPSOFT_VERSION``               | ""                      |The version number of the askapsoft module to use for the processing. If not     |
+| ``ASKAPSOFT_VERSION``               | ``""``                  |The version number of the askapsoft module to use for the processing. If not     |
 |                                     |                         |given, or if the requested version is not valid, the version defined in the      |
 |                                     |                         |~/.bashrc file is used, or the default version should none be defined by the     |
 |                                     |                         |~/.bashrc file.                                                                  |
@@ -79,14 +79,14 @@ see the *Slurm time requests* section below for details.
 +-------------------------------------+-------------------------+---------------------------------------------------------------------------------+
 | ``QUEUE``                           | workq                   |This should be left as is unless you know better.                                |
 +-------------------------------------+-------------------------+---------------------------------------------------------------------------------+
-| ``CONSTRAINT``                      | ""                      |This allows one to provide slurm with additional constraints. While not needed   |
+| ``CONSTRAINT``                      | ``""``                  |This allows one to provide slurm with additional constraints. While not needed   |
 |                                     |                         |for galaxy, this can be of use in other clusters (particularly those that have a |
 |                                     |                         |mix of technologies).                                                            |
 +-------------------------------------+-------------------------+---------------------------------------------------------------------------------+
-| ``ACCOUNT``                         | ""                      |This is the account that the jobs should be charged to. If left blank, then the  |
+| ``ACCOUNT``                         | ``""``                  |This is the account that the jobs should be charged to. If left blank, then the  |
 |                                     |                         |user's default account will be used.                                             |
 +-------------------------------------+-------------------------+---------------------------------------------------------------------------------+
-| ``RESERVATION``                     | ""                      |If there is a reservation you specify the name of it here.  If you don't have a  |
+| ``RESERVATION``                     | ``""``                  |If there is a reservation you specify the name of it here.  If you don't have a  |
 |                                     |                         |reservation, leave this alone and it will be submitted as a regular job.         |
 |                                     |                         |                                                                                 |
 +-------------------------------------+-------------------------+---------------------------------------------------------------------------------+
@@ -100,7 +100,7 @@ see the *Slurm time requests* section below for details.
 |                                     |                         |default being that directory.                                                    |
 |                                     |                         |                                                                                 |
 +-------------------------------------+-------------------------+---------------------------------------------------------------------------------+
-| ``EMAIL``                           | ""                      |An email address to which you want slurm notifications sent (this will be passed |
+| ``EMAIL``                           | ``""``                  |An email address to which you want slurm notifications sent (this will be passed |
 |                                     |                         |to the ``--mail-user`` option of sbatch).  Leaving it blank will mean no         |
 |                                     |                         |notifications are sent.                                                          |
 |                                     |                         |                                                                                 |
@@ -116,7 +116,7 @@ see the *Slurm time requests* section below for details.
 |                                     |                         |directory defined by your environment. If ``$ACES`` is not set, then             |
 |                                     |                         |``USE_ACES_OPS`` will be set back to true.                                       |
 +-------------------------------------+-------------------------+---------------------------------------------------------------------------------+
-| ``ACESOPS_VERSION``                 | ""                      |The version of the **acesops** module used by the pipeline. Leaving blank will   |
+| ``ACESOPS_VERSION``                 | ``""``                  |The version of the **acesops** module used by the pipeline. Leaving blank will   |
 |                                     |                         |make it use the default at the time.                                             |
 +-------------------------------------+-------------------------+---------------------------------------------------------------------------------+
 
@@ -257,7 +257,7 @@ the science field processing.
 +-----------------------------+---------+-------------------------------------------------------------+
 | ``DO_SELFCAL``              | true    | Whether to self-calibrate the science data when imaging     |
 +-----------------------------+---------+-------------------------------------------------------------+
-| ``DO_SOURCE_FINDING_CONT``  | ""      | Whether to do the continuum source-finding with Selavy. If  |
+| ``DO_SOURCE_FINDING_CONT``  | ``""``  | Whether to do the continuum source-finding with Selavy. If  |
 |                             |         | not given, the default value is that of ``DO_CONT_IMAGING``.|
 |                             |         | Source finding on the individual beam images is done by     |
 |                             |         | setting the parameter ``DO_SOURCE_FINDING_BEAMWISE`` to     |
@@ -286,7 +286,7 @@ the science field processing.
 +-----------------------------+---------+-------------------------------------------------------------+
 | ``DO_SPECTRAL_IMSUB``       | false   | Whether to do the image-based continuum subtraction.        |
 +-----------------------------+---------+-------------------------------------------------------------+
-| ``DO_SOURCE_FINDING_SPEC``  | ""      | Whether to do the spectral-line source-finding with         |
+| ``DO_SOURCE_FINDING_SPEC``  | ``""``  | Whether to do the spectral-line source-finding with         |
 |                             |         | Selavy. If not given the default value is that of           |
 |                             |         | ``DO_SPECTRAL_IMAGING``. Source finding on the individual   |
 |                             |         | beam cubes is done by setting the parameter                 |
