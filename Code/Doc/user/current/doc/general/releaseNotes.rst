@@ -28,7 +28,7 @@ added back in.
 
 
 0.24.0 (16 April 2019)
----------------------
+----------------------
 
 A major release, with an improved framework for the pipeline scripts
 to handle large datasets efficiently, along with several performance
