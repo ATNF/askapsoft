@@ -10,7 +10,7 @@ reconstruction (to enhance the signal-to-noise of real sources).
 +-------------------------------------+---------------------------------+----------------------------------------------+-------------------------------------------------------------+
 | Variable                            |             Default             | Parset equivalent                            | Description                                                 |
 +=====================================+=================================+==============================================+=============================================================+
-| ``DO_SOURCE_FINDING_SPEC``          | ""                              | none                                         | Whether to do the source-finding with Selavy on the         |
+| ``DO_SOURCE_FINDING_SPEC``          | ``""``                          | none                                         | Whether to do the source-finding with Selavy on the         |
 |                                     |                                 |                                              | final mosaic images. If not given in the config file, it    |
 |                                     |                                 |                                              | takes on the value of ``DO_SPECTRAL_IMAGING``.              |
 +-------------------------------------+---------------------------------+----------------------------------------------+-------------------------------------------------------------+
@@ -24,7 +24,7 @@ reconstruction (to enhance the signal-to-noise of real sources).
 |   ``JOB_TIME_SOURCEFINDING_SPEC``   | ``JOB_TIME_DEFAULT`` (24:00:00) | none                                         | Time request for source-finding jobs                        |
 |                                     |                                 |                                              |                                                             |
 +-------------------------------------+---------------------------------+----------------------------------------------+-------------------------------------------------------------+
-| ``CPUS_PER_CORE_SELAVY_SPEC``       | ""                              | none                                         | Number of cores used on each node. If not provided, it will |
+| ``CPUS_PER_CORE_SELAVY_SPEC``       | ``""``                          | none                                         | Number of cores used on each node. If not provided, it will |
 |                                     |                                 |                                              | be the lower of the number of cores requested or the maximum|
 |                                     |                                 |                                              | number of cores available per node.                         | 
 +-------------------------------------+---------------------------------+----------------------------------------------+-------------------------------------------------------------+
@@ -58,14 +58,14 @@ reconstruction (to enhance the signal-to-noise of real sources).
 | ``SELAVY_SPEC_GROWTH_CUT``          | 3.0                             | growthCut (:doc:`../analysis/selavy`)        | The secondary signal-to-noise threshold to which detections |
 |                                     |                                 |                                              | should be grown.                                            |
 +-------------------------------------+---------------------------------+----------------------------------------------+-------------------------------------------------------------+
-| ``SELAVY_SPEC_FLUX_THRESHOLD``      | ""                              | threshold (:doc:`../analysis/selavy`)        | The flux threshold to use in the source-detection. If left  |
+| ``SELAVY_SPEC_FLUX_THRESHOLD``      | ``""``                          | threshold (:doc:`../analysis/selavy`)        | The flux threshold to use in the source-detection. If left  |
 |                                     |                                 |                                              | blank, we use the SNR threshold ``SELAVY_SNR_CUT``.         |
 +-------------------------------------+---------------------------------+----------------------------------------------+-------------------------------------------------------------+
-| ``SELAVY_SPEC_GROWTH_THRESHOLD``    | ""                              | growthCut (:doc:`../analysis/selavy`)        | The secondary signal-to-noise threshold to which detections |
+| ``SELAVY_SPEC_GROWTH_THRESHOLD``    | ``""``                          | growthCut (:doc:`../analysis/selavy`)        | The secondary signal-to-noise threshold to which detections |
 |                                     |                                 |                                              | should be grown. Only used if ``SELAVY_FLUX_THRESHOLD`` is  |
 |                                     |                                 |                                              | given.                                                      |
 +-------------------------------------+---------------------------------+----------------------------------------------+-------------------------------------------------------------+
-| ``SELAVY_SPEC_WEIGHTS_CUTOFF``      | ""                              | Weights.weightsCutoff                        | The cutoff level, as a fraction of the peak in the weights  |
+| ``SELAVY_SPEC_WEIGHTS_CUTOFF``      | ``""``                          | Weights.weightsCutoff                        | The cutoff level, as a fraction of the peak in the weights  |
 |                                     |                                 | (:doc:`../analysis/thresholds`)              | image, used in the source-finding. Only applies if the image|
 |                                     |                                 |                                              | being searched has a corresponding weights image. If not    |
 |                                     |                                 |                                              | given, the value used is the square of ``LINMOS_CUTOFF``    |
@@ -112,8 +112,8 @@ reconstruction (to enhance the signal-to-noise of real sources).
 | ``SELAVY_SPEC_SPATIAL_KERNEL``      | 3                               | kernMaj, kernMin, kernPA                     | The specs for the spatial Gaussian smoothing kernel. Either |
 |                                     |                                 | (:doc:`../analysis/preprocessing`)           | a single number, which is interpreted as a circular Gaussian|
 |                                     |                                 |                                              | (kernMaj=kernMin, kernPA=0), or a string with three values  |
-|                                     |                                 |                                              | enclosed by square brackets (eg. "[4,3,45]"), interpreted as|
-|                                     |                                 |                                              | "[kernMaj,kernMin,kernPA]".                                 |
+|                                     |                                 |                                              | enclosed by square brackets (eg. ``"[4,3,45]"``),           |
+|                                     |                                 |                                              | interpreted as "[kernMaj,kernMin,kernPA]".                  |
 +-------------------------------------+---------------------------------+----------------------------------------------+-------------------------------------------------------------+
 | ``SELAVY_SPEC_FLAG_WAVELET``        | false                           | flagAtrous                                   | Whether to use the multi-resolution wavelet reconstruction. |
 |                                     |                                 | (:doc:`../analysis/preprocessing`)           |                                                             |

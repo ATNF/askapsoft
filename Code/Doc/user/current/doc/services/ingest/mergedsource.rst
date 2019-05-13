@@ -151,9 +151,10 @@ have UVWs at all or have it not for all beams ingest pipeline is set up to recor
 
 The task performs some basic cross-checks of UVW vectors encountered in the metadata stream. The first two cause the execution to
 abort with the exception. The third one may either result in an exception or just flagged data (see **baduvw_maxcycles** parameter)
-    values are not zeros or NaNs
-    UVW vector length is roughly the Earth radius (tolerance allows for the actual shape of the Earth)
-    UVW vector length is within 1mm of the baseline length expected from the array layout
+
+ * values are not zeros or NaNs
+ * UVW vector length is roughly the Earth radius (tolerance allows for the actual shape of the Earth)
+ * UVW vector length is within 1mm of the baseline length expected from the array layout
 
 
 Example

@@ -43,7 +43,7 @@ is only the latter that are passsed to CASDA).
 +-------------------------------------+------------------------------------------+-------------------------------------+-------------------------------------------------------------+
 | Variable                            |             Default                      | Parset equivalent                   | Description                                                 |
 +=====================================+==========================================+=====================================+=============================================================+
-| ``DO_SOURCE_FINDING_CONT``          | ""                                       | none                                | Whether to do the source-finding with Selavy on the         |
+| ``DO_SOURCE_FINDING_CONT``          | ``""``                                   | none                                | Whether to do the source-finding with Selavy on the         |
 |                                     |                                          |                                     | final mosaic continuum images. If not given in the config   |
 |                                     |                                          |                                     | file, it takes on the value of ``DO_CONT_IMAGING``.         |
 +-------------------------------------+------------------------------------------+-------------------------------------+-------------------------------------------------------------+
@@ -100,14 +100,14 @@ is only the latter that are passsed to CASDA).
 | ``SELAVY_GROWTH_CUT``               | 3.0                                      | growthCut                           | The secondary signal-to-noise threshold to which detections |
 |                                     |                                          | (:doc:`../analysis/selavy`)         | should be grown.                                            | 
 +-------------------------------------+------------------------------------------+-------------------------------------+-------------------------------------------------------------+
-| ``SELAVY_FLUX_THRESHOLD``           | ""                                       | threshold                           | The flux threshold to use in the source-detection. If left  |
+| ``SELAVY_FLUX_THRESHOLD``           | ``""``                                   | threshold                           | The flux threshold to use in the source-detection. If left  |
 |                                     |                                          | (:doc:`../analysis/selavy`)         | blank, we use the SNR threshold ``SELAVY_SNR_CUT``.         |
 +-------------------------------------+------------------------------------------+-------------------------------------+-------------------------------------------------------------+ 
-| ``SELAVY_GROWTH_THRESHOLD``         | ""                                       | growthCut                           | The secondary signal-to-noise threshold to which detections |
+| ``SELAVY_GROWTH_THRESHOLD``         | ``""``                                   | growthCut                           | The secondary signal-to-noise threshold to which detections |
 |                                     |                                          | (:doc:`../analysis/selavy`)         | should be grown. Only used if ``SELAVY_FLUX_THRESHOLD`` is  |
 |                                     |                                          |                                     | given.                                                      |
 +-------------------------------------+------------------------------------------+-------------------------------------+-------------------------------------------------------------+
-| ``SELAVY_WEIGHTS_CUTOFF``           | ""                                       | Weights.weightsCutoff               | The cutoff level, as a fraction of the peak in the weights  |
+| ``SELAVY_WEIGHTS_CUTOFF``           | ``""``                                   | Weights.weightsCutoff               | The cutoff level, as a fraction of the peak in the weights  |
 |                                     |                                          | (:doc:`../analysis/thresholds`)     | image, used in the source-finding. Only applies if the image| 
 |                                     |                                          |                                     | being searched has a corresponding weights image. If not    |
 |                                     |                                          |                                     | given, the value used is the square of ``LINMOS_CUTOFF``    |
@@ -172,7 +172,7 @@ is only the latter that are passsed to CASDA).
 +-------------------------------------+------------------------------------------+-------------------------------------+-------------------------------------------------------------+
 | ``SELAVY_POL_MODEL_TYPE``           | taylor                                   | RMSynthesis.modelType               | The type of Stokes-I model to use. Either "taylor"          |
 |                                     |                                          | (:doc:`../analysis/postprocessing`) | (Taylor-term decomposition from the MFS imaging), or "poly" |
-|                                     |                                          |                                     | (polynomial fit to the Stokes-I spectrum".                  |
+|                                     |                                          |                                     | (polynomial fit to the Stokes-I spectrum).                  |
 +-------------------------------------+------------------------------------------+-------------------------------------+-------------------------------------------------------------+
 | ``SELAVY_POL_MODEL_ORDER``          | 3                                        | RMSynthesis.modelPolyOrder          | When ``SELAVY_POL_MODEL_TYPE=poly``, this gives the order of|
 |                                     |                                          | (:doc:`../analysis/postprocessing`) | the polynomial that is fit to the Stokes-I spectrum.        |

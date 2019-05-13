@@ -225,7 +225,7 @@ Ccalibrator.sources.lsm.model                   = ${modelImage}
 Ccalibrator.sources.lsm.nterms                  = ${NUM_TAYLOR_TERMS}"
                 if [ "${NUM_TAYLOR_TERMS}" -gt 1 ]; then
                     if [ "$MFS_REF_FREQ" == "" ]; then
-                        freq="${centreFreq}"
+                        freq="\${centreFreq}"
                     else
                         freq="${MFS_REF_FREQ}"
                     fi
@@ -247,7 +247,7 @@ Ccalibrator.sources.lsm.model                   = ${OUTPUT}/${modelImage%%.taylo
 Ccalibrator.sources.lsm.nterms                  = ${NUM_TAYLOR_TERMS}"
                 if [ "${NUM_TAYLOR_TERMS}" -gt 1 ]; then
                     if [ "$MFS_REF_FREQ" == "" ]; then
-                        freq="${centreFreq}"
+                        freq="\${centreFreq}"
                     else
                         freq=${MFS_REF_FREQ}
                     fi

@@ -54,8 +54,8 @@ run the splitting, so that there is a local copy of the individual beam data.
 +========================+=========================================================+============================================================+
 | ``DIR_SB``             | /astro/askaprt/askapops/askap-scheduling-blocks         | Location (on galaxy) of the scheduling blocks. This is used|
 |                        |                                                         | when specifying SB numbers - the default is the standard   |
-|                        |                                                         | location for ASKAP operation. If blank (""), the MS used   |
-|                        |                                                         | will be given by ``MS_INPUT_SCIENCE`` and                  |
+|                        |                                                         | location for ASKAP operation. If blank (``""``), the MS    |
+|                        |                                                         | used will be given by ``MS_INPUT_SCIENCE`` and             |
 |                        |                                                         | ``MS_INPUT_1934``.                                         |
 +------------------------+---------------------------------------------------------+------------------------------------------------------------+
 | ``SB_1934``            | no default                                              | SB number for the 1934-638 calibration observation.        |
@@ -72,7 +72,7 @@ run the splitting, so that there is a local copy of the individual beam data.
 These parameters determine which beams in the data to process. The
 beams can be listed explicitly via the ``BEAMLIST`` parameter, given
 as a comma-separated list of beams and beam ranges, such as
-""0,1,4,7,8-10".
+``"0,1,4,7,8-10"``.
 Alternatively (and if ``BEAMLIST`` is not provided), the ``BEAM_MIN``
 and ``BEAM_MAX`` parameters are used to specify an inclusive
 range. Note that in all cases the beams are numbered from zero
@@ -91,9 +91,9 @@ the relevant scheduling blocks.
 +----------------+-----------+--------------------------------------------------+
 | Variable       | Default   | Description                                      |
 +================+===========+==================================================+
-| ``BEAMLIST``   | ""        | A comma-separated list of beams and beam ranges  |
-|                |           | (for instance "0,1,4,7,8-10"), to specify the set|
-|                |           | of beams than should be processed from the       |
+| ``BEAMLIST``   | ``""``    | A comma-separated list of beams and beam ranges  |
+|                |           | (for instance ``"0,1,4,7,8-10"``), to specify the|
+|                |           | set of beams than should be processed from the   |
 |                |           | science observation. Beam numbers are 0-based.   |
 +----------------+-----------+--------------------------------------------------+
 | ``BEAM_MIN``   | 0         | First beam number (0-based). Used when           |

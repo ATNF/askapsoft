@@ -223,10 +223,10 @@ produced by setting ``ALT_IMAGER_SINGLE_FILE=true``.
 | ``CLEAN_SPECTRAL_PSFWIDTH``                   | 256                                 | Clean.psfwidth                     | The width of the psf patch used in the minor cycle.               |
 |                                               |                                     | (:doc:`../calim/solver`)           |                                                                   |
 +-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
-| ``CLEAN_SPECTRAL_SCALES``                     | "[0,3,10,30]"                       | Clean.scales                       | Set of scales (in pixels) to use with the multi-scale clean.      |
+| ``CLEAN_SPECTRAL_SCALES``                     | ``"[0,3,10,30]"``                   | Clean.scales                       | Set of scales (in pixels) to use with the multi-scale clean.      |
 |                                               |                                     | (:doc:`../calim/solver`)           |                                                                   |
 +-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
-| ``CLEAN_SPECTRAL_THRESHOLD_MINORCYCLE``       | "[45%, 3.5mJy, 0.5mJy]"             | threshold.minorcycle               | Threshold for the minor cycle loop.                               |
+| ``CLEAN_SPECTRAL_THRESHOLD_MINORCYCLE``       | ``"[45%, 3.5mJy, 0.5mJy]"``         | threshold.minorcycle               | Threshold for the minor cycle loop.                               |
 |                                               |                                     | (:doc:`../calim/solver`)           |                                                                   |
 +-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
 | ``CLEAN_SPECTRAL_THRESHOLD_MAJORCYCLE``       | 0.5mJy                              | threshold.majorcycle               | The target peak residual. Major cycles stop if this is reached. A |
@@ -239,21 +239,21 @@ produced by setting ``ALT_IMAGER_SINGLE_FILE=true``.
 |                                               |                                     | (:doc:`../calim/simager`)          | suffix) after the end of each major cycle.                        |
 +-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
 | ``CLEAN_SPECTRAL_SOLUTIONTYPE``               | MAXCHISQ                            | Clean.solutiontype (see discussion | The type of peak finding algorithm to use in the                  |
-|                                               |                                     | at :doc:`../recipes/imaging`)      | deconvolution. Choices are MAXCHISQ, MAXTERM0, or MAXBASE.        |
+|                                               |                                     | at :doc:`../recipes/Imaging`)      | deconvolution. Choices are MAXCHISQ, MAXTERM0, or MAXBASE.        |
 +-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
 | **Preconditioning**                           |                                     |                                    |                                                                   |
 +-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
-| ``PRECONDITIONER_LIST_SPECTRAL``              | "[Wiener, GaussianTaper]"           | preconditioner.Names               | List of preconditioners to apply.                                 |
+| ``PRECONDITIONER_LIST_SPECTRAL``              | ``"[Wiener, GaussianTaper]"``       | preconditioner.Names               | List of preconditioners to apply.                                 |
 |                                               |                                     | (:doc:`../calim/solver`)           |                                                                   |
 +-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
-| ``PRECONDITIONER_SPECTRAL_GAUSS_TAPER``       | "[20arcsec, 20arcsec, 0deg]"        | preconditioner.GaussianTaper       | Size of the Gaussian taper - either single value (for circular    |
+| ``PRECONDITIONER_SPECTRAL_GAUSS_TAPER``       | ``"[20arcsec, 20arcsec, 0deg]"``    | preconditioner.GaussianTaper       | Size of the Gaussian taper - either single value (for circular    |
 |                                               |                                     | (:doc:`../calim/solver`)           | taper) or 3 values giving an elliptical size.                     |
 +-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
 | ``PRECONDITIONER_SPECTRAL_WIENER_ROBUSTNESS`` | 0.5                                 | preconditioner.Wiener.robustness   | Robustness value for the Wiener filter.                           |
 |                                               |                                     | (:doc:`../calim/solver`)           |                                                                   |
 +-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
-| ``PRECONDITIONER_SPECTRAL_WIENER_TAPER``      | ""                                  | preconditioner.Wiener.taper        | Size of gaussian taper applied in image domain to Wiener filter.  |
-|                                               |                                     | (:doc:`../calim/solver`)           | Ignored if blank (ie. “”).                                        |
+| ``PRECONDITIONER_SPECTRAL_WIENER_TAPER``      | ``""``                              | preconditioner.Wiener.taper        | Size of gaussian taper applied in image domain to Wiener filter.  |
+|                                               |                                     | (:doc:`../calim/solver`)           | Ignored if blank (ie. ``""``).                                    |
 +-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
 | **Restoring**                                 |                                     |                                    |                                                                   |
 +-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
@@ -262,7 +262,7 @@ produced by setting ``ALT_IMAGER_SINGLE_FILE=true``.
 +-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
 | ``RESTORING_BEAM_SPECTRAL``                   | fit                                 | restore.beam                       | Restoring beam to use: 'fit' will fit the PSF in each channel     |
 |                                               |                                     | (:doc:`../calim/simager`)          | separately to determine the appropriate beam for that channel,    |
-|                                               |                                     |                                    | else give a size (such as “[30arcsec, 30arcsec, 0deg]”).          |
+|                                               |                                     |                                    | else give a size (such as ``“[30arcsec, 30arcsec, 0deg]”``).      |
 +-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
 | ``RESTORING_BEAM_CUTOFF_SPECTRAL``            | 0.5                                 | restore.beam.cutoff                | Cutoff value used in determining the support for the fitting      |
 |                                               |                                     | (:doc:`../calim/simager`)          | (ie. the rectangular area given to the fitting routine). Value is |
@@ -274,8 +274,8 @@ produced by setting ``ALT_IMAGER_SINGLE_FILE=true``.
 +-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
 | **New imager parameters**                     |                                     |                                    |                                                                   |
 +-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
-| ``DO_ALT_IMAGER_SPECTRAL``                    | ""                                  | none                               | If true, the spectral-line imaging is done by imager              |
-|                                               |                                     |                                    | (:doc:`../calim/imager`). If false, it is done by simager         |
+| ``DO_ALT_IMAGER_SPECTRAL``                    | ``""``                              | none                               | If true, the spectral-line imaging is done by imager              |
+|                                               |                                     |                                    | (doc:`../calim/imager`). If false, it is done by simager          |
 |                                               |                                     |                                    | (:doc:`../calim/simager`). When true, the following parameters are|
 |                                               |                                     |                                    | used. If left blank (the default), the value is given by the      |
 |                                               |                                     |                                    | overall parameter ``DO_ALT_IMAGER`` (see                          |
@@ -305,7 +305,7 @@ produced by setting ``ALT_IMAGER_SINGLE_FILE=true``.
 |                                               |                                     |                                    | topo, bary, lsrk. Anything else (or an unset value) default to    |
 |                                               |                                     |                                    | bary.                                                             |
 +-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
-| ``OUTPUT_CHANNELS_SL``                        | ""                                  | Frequencies                        | The output channels for the spectral cube. Should be of the form  |
+| ``OUTPUT_CHANNELS_SL``                        | ``""``                              | Frequencies                        | The output channels for the spectral cube. Should be of the form  |
 |                                               |                                     | (:doc:`../calim/imager`)           | [number,start,width], with the start and width parameters are in  |
 |                                               |                                     |                                    | Hz. If not given, the behaviour is to use the same frequency      |
 |                                               |                                     |                                    | values as the input MS, albeit in the requested frequency frame.  |
@@ -317,7 +317,7 @@ produced by setting ``ALT_IMAGER_SINGLE_FILE=true``.
 +-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
 | ``JOB_TIME_SPECTRAL_IMCONTSUB``               | ``JOB_TIME_DEFAULT`` (24:00:00)     | none                               | Time request for image-based continuum subtraction                |
 +-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
-| ``SPECTRAL_IMSUB_SCRIPT``                     | "robust_contsub.py"                 | none                               | The name of the script from the ACES repository to use for        |
+| ``SPECTRAL_IMSUB_SCRIPT``                     | ``"robust_contsub.py"``             | none                               | The name of the script from the ACES repository to use for        |
 |                                               |                                     |                                    | image-based continuum subtraction. The only two accepted values   |
 |                                               |                                     |                                    | are "robust_contsub.py" and "contsub_im.py". Anything else reverts|
 |                                               |                                     |                                    | to the default.                                                   |
