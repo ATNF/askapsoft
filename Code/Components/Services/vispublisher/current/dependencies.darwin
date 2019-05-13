@@ -1,8 +1,8 @@
 boost=/usr/local
 common=3rdParty/LOFAR/Common/Common-3.3
-askap=Code/Base/askap/current
-scimath=Code/Base/scimath/current
-logfilters=Code/Base/logfilters/current
+askap=/usr/local
+scimath=/usr/local
+logfilters=/usr/local
 zeromq=3rdParty/zeromq/zeromq-4.0.4
 logappenders=Code/Base/logappenders/current
 casacore=3rdParty/casacore/casacore-2.0.3;casa_ms casa_images casa_mirlib casa_coordinates casa_fits casa_lattices casa_measures casa_scimath casa_scimath_f casa_tables casa_casa

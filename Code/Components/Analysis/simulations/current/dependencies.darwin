@@ -1,6 +1,6 @@
-askap=Code/Base/askap/current
+askap=/usr/local
 common=3rdParty/LOFAR/Common/Common-3.3
-askapparallel=Code/Base/askapparallel/current
+askapparallel=/usr/local
 #analysis=Code/Components/Analysis/analysis/current
 analysisutilities=Code/Components/Analysis/analysisutilities/current
 wcslib=3rdParty/wcslib/wcslib-4.18

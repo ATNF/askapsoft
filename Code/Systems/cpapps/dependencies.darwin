@@ -1,10 +1,10 @@
-accessors=Code/Base/accessors/current
-synthesis=Code/Components/Synthesis/synthesis/current
+accessors=/usr/local
+synthesis=/usr/local
 analysis=Code/Components/Analysis/analysis/current
 pipelinetasks=Code/Components/CP/pipelinetasks/current
 simager=Code/Components/CP/simager/current
 utilities=Code/Components/Utilities/current
 simulations=Code/Components/Analysis/simulations/current
-askap_imager=Code/Components/CP/askap_imager/current
+askap_imager=/usr/local
 evalution=Code/Components/Analysis/evaluation/current
 python-casacore=3rdParty/python-casacore/python-casacore-2.1.0

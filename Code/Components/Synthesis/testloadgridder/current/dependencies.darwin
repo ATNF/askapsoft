@@ -1,3 +1,3 @@
-synthesis=Code/Components/Synthesis/synthesis/current
-askapparallel=Code/Base/askapparallel/current
-accessors=Code/Base/accessors/current
+synthesis=/usr/local
+askapparallel=/usr/local
+accessors=/usr/local

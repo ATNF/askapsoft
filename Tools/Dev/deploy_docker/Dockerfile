@@ -1,32 +1,40 @@
-FROM ubuntu
-WORKDIR /apps
-COPY . /apps
-RUN tar -xvf /apps/askap_apps.tar.gz 
-RUN cd /usr/local ; tar -xvf /apps/WSRT_Measures.ztar 
+FROM ubuntu:18.04
 RUN apt-get update
-RUN apt-get install -y wget subversion build-essential gfortran python-dev flex bison openjdk-8-jdk libfreetype6-dev libpng-dev autoconf
-RUN apt-get install -y --no-install-recommends libboost-system1.65.1 \
-    && apt-get install -y --no-install-recommends libboost-filesystem1.65.1 \
-    && apt-get install -y --no-install-recommends libboost-regex1.65.1 \
-    && apt-get install -y --no-install-recommends libboost-program-options1.65.1 \
-    && apt-get install -y --no-install-recommends libboost-thread1.65.1 \
-    && apt-get install -y --no-install-recommends libcfitsio5 \
-    && apt-get install -y --no-install-recommends libgfortran5 \
-    && apt-get install -y --no-install-recommends libgfortran4 \
-    && apt-get install -y --no-install-recommends libzeroc-ice3.7 \
-    && apt-get clean
-RUN mkdir /build
-WORKDIR build
-RUN wget http://www.mpich.org/static/downloads/3.1.4/mpich-3.1.4.tar.gz
-RUN tar xvf mpich-3.1.4.tar.gz
-WORKDIR mpich-3.1.4
-RUN bash ./configure
-RUN make VERBOSE=1
-RUN make install
-RUN apt-get update
-WORKDIR /
-RUN rm -rf /build
-RUN ldconfig
+RUN apt-get install -y cmake \         
+	&& apt-get install    -y    flex bison  \
+	&& apt-get install    -y    gfortran    \            
+	&& apt-get install    -y    git         \           
+	&& apt-get install    -y    g++                   \
+	&& apt-get install    -y    libboost-dev \        
+	&& apt-get install    -y     libboost-python-dev \
+	&& apt-get install    -y     libboost-filesystem-dev \
+	&& apt-get install    -y     libboost-program-options-dev \
+	&& apt-get install    -y     libboost-signals-dev   \   
+	&& apt-get install    -y     libboost-system-dev    \  
+	&& apt-get install    -y    libboost-thread-dev     \ 
+	&& apt-get install    -y    libcfitsio-dev     \     
+	&& apt-get install    -y    libffi-dev       \      
+	&& apt-get install    -y    libfftw3-dev    \      
+	&& apt-get install    -y    libgsl-dev     \        
+	&& apt-get install    -y  liblog4cxx-dev   \         
+	&& apt-get install    -y  libopenblas-dev   \        
+	&& apt-get install    -y  libopenmpi-dev     \       
+	&& apt-get install    -y  libpython-dev    \ 
+	&& apt-get install    -y  make              \ 
+	&& apt-get install    -y  patch             \   
+	&& apt-get install    -y  python-pip       \      
+	&& apt-get install    -y  subversion       \        
+	&& apt-get install    -y  wget             \        
+        && apt-get install    -y  docker           \
+	&& apt-get install    -y  wcslib-dev                
+RUN cd /usr/local 
+RUN wget ftp://ftp.astron.nl/outgoing/Measures/WSRT_Measures.ztar
+RUN mv WSRT_Measures.ztar WSRT_Measures.tar.gz
+RUN gunzip WSRT_Measures.tar.gz
+RUN tar -xvf WSRT_Measures.tar
+RUN rm WSRT_Measures.tar
+RUN mkdir /var/lib/jenkins
+RUN mkdir /var/lib/jenkins/workspace
 
-ENV PATH "$PATH:/apps/askap_apps"
+
 
