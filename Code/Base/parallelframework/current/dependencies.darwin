@@ -1,4 +1,4 @@
-blob=3rdParty/LOFAR/Blob/Blob-1.2
+blob=/usr/local; Blob
 boost=/usr/local
 askap=/usr/local
 logfilters=/usr/local

@@ -1,5 +1,5 @@
 askap=/usr/local
-common=3rdParty/LOFAR/Common/Common-3.3
+common=/usr/local; Common
 askapparallel=/usr/local
 #analysis=Code/Components/Analysis/analysis/current
 analysisutilities=Code/Components/Analysis/analysisutilities/current

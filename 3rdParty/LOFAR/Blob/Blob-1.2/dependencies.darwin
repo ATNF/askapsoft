@@ -1,6 +1,0 @@
-# This file lists the external dependencies
-# use pkgname=ASKAP_ROOT_relative_path
-common=3rdParty/LOFAR/Common/Common-3.3
-casacore=3rdParty/casacore/casacore-2.0.3; casa_casa
-#already in Common
-#boost=/usr/local

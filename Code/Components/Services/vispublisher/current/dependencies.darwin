@@ -1,5 +1,5 @@
 boost=/usr/local
-common=3rdParty/LOFAR/Common/Common-3.3
+common=/usr/local; Common
 askap=/usr/local
 scimath=/usr/local
 logfilters=/usr/local

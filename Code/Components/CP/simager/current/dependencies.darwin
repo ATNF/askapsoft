@@ -1,6 +1,6 @@
 boost=/usr/local
-common=3rdParty/LOFAR/Common/Common-3.3
-blob=3rdParty/LOFAR/Blob/Blob-1.2
+common=/usr/local; Common
+blob=/usr/local; Blob
 askap=/usr/local
 logfilters=/usr/local
 cmdlineparser=3rdParty/cmdlineparser/cmdlineparser-0.1.1

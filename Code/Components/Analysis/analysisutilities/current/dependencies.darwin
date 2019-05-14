@@ -1,7 +1,9 @@
-askapparallel=/usr/local
+askapparallel=/usr/local; askap_askapparallel
 casacore=3rdParty/casacore/casacore-2.0.3;casa_ms casa_images casa_mirlib casa_coordinates casa_fits casa_lattices casa_measures casa_scimath casa_scimath_f casa_tables casa_casa
 casa_components=3rdParty/casa-components/casa-components-1.6.0
-common=3rdParty/LOFAR/Common/Common-3.3
-askap=/usr/local
+common=/usr/local; Common
+askap=/usr/local; askap_askap
 duchamp=3rdParty/Duchamp/Duchamp-1.6.2
 gsl=3rdParty/gsl/gsl-1.16;gsl gslcblas
+apr=/usr/local
+apr-util=/usr/local
