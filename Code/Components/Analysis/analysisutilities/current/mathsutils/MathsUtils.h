@@ -29,8 +29,8 @@
 #ifndef ASKAP_ANALYSISUTILS_MATHS_H_
 #define ASKAP_ANALYSISUTILS_MATHS_H_
 
-#include <askap/AskapLogging.h>
-#include <askap/AskapError.h>
+#include <askap/askap/AskapLogging.h>
+#include <askap/askap/AskapError.h>
 
 #include <casacore/casa/namespace.h>
 #include <casacore/scimath/Functionals/Gaussian2D.h>

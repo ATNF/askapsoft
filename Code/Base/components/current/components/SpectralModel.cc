@@ -33,7 +33,7 @@
 // System includes
 
 // ASKAPsoft includes
-#include "askap/AskapError.h"
+#include "askap/askap/AskapError.h"
 
 // Local package includes
 #include "ComponentType.h"

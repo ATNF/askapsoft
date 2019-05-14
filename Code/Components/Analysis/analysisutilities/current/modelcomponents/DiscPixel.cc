@@ -31,8 +31,8 @@
 #include <modelcomponents/Ellipse.h>
 #include <vector>
 
-#include <askap/AskapLogging.h>
-#include <askap/AskapError.h>
+#include <askap/askap/AskapLogging.h>
+#include <askap/askap/AskapError.h>
 ASKAP_LOGGER(logger, ".discpixel");
 
 namespace askap {

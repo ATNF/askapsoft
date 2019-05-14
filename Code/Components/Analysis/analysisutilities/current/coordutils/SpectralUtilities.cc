@@ -34,8 +34,8 @@
 #include <math.h>
 #include <stdlib.h>
 
-#include <askap/AskapLogging.h>
-#include <askap/AskapError.h>
+#include <askap/askap/AskapLogging.h>
+#include <askap/askap/AskapError.h>
 
 ASKAP_LOGGER(logger, ".spectrautils");
 

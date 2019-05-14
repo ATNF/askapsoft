@@ -33,7 +33,7 @@
 #include <vector>
 #include <set>
 
-#include <askapparallel/AskapParallel.h>
+#include <askap/askapparallel/AskapParallel.h>
 
 #include <Common/ParameterSet.h>
 

@@ -34,7 +34,7 @@
 #include <cmath>
 
 // ASKAPsoft includes
-#include "askap/AskapError.h"
+#include "askap/askap/AskapError.h"
 
 // Local package includes
 #include "SpectralModel.h"

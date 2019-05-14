@@ -37,8 +37,8 @@
 
 #include <casacore/scimath/Functionals/Gaussian1D.h>
 
-#include <askap/AskapLogging.h>
-#include <askap/AskapError.h>
+#include <askap/askap/AskapLogging.h>
+#include <askap/askap/AskapError.h>
 
 ASKAP_LOGGER(logger, ".flashprofile");
 

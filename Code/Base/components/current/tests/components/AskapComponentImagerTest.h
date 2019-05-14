@@ -31,9 +31,9 @@
 #include <cppunit/extensions/HelperMacros.h>
 
 // Support classes
-#include "askap/AskapLogging.h"
-#include "askap/AskapError.h"
-#include "askap/Log4cxxLogSink.h"
+#include "askap/askap/AskapLogging.h"
+#include "askap/askap/AskapError.h"
+#include "askap/askap/Log4cxxLogSink.h"
 #include "casacore/casa/aipstype.h"
 #include "casacore/casa/Arrays/IPosition.h"
 #include "casacore/casa/Quanta.h"

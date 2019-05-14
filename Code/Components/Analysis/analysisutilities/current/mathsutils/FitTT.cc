@@ -29,8 +29,8 @@
 #include <mathsutils/FitTT.h>
 #include <askap_analysisutilities.h>
 
-#include <askap/AskapLogging.h>
-#include <askap/AskapError.h>
+#include <askap/askap/AskapLogging.h>
+#include <askap/askap/AskapError.h>
 
 #include <gsl/gsl_multifit.h>
 #include <gsl/gsl_multifit_nlin.h>
