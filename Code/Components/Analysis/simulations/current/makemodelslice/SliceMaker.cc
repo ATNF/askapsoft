@@ -36,8 +36,8 @@
 #include <iomanip>
 #include <sstream>
 
-#include <askap/AskapLogging.h>
-#include <askap/AskapError.h>
+#include <askap/askap/AskapLogging.h>
+#include <askap/askap/AskapError.h>
 
 #include <simulationutilities/SimulationUtilities.h>
 #include <analysisparallel/SubimageDef.h>

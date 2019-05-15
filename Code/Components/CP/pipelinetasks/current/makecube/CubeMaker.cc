@@ -37,9 +37,9 @@
 #include <vector>
 
 // ASKAPsoft includes
-#include <askap/AskapError.h>
-#include <askap/AskapLogging.h>
-#include <imageaccess/BeamLogger.h>
+#include <askap/askap/AskapError.h>
+#include <askap/askap/AskapLogging.h>
+#include <askap/imageaccess/BeamLogger.h>
 #include <boost/scoped_ptr.hpp>
 #include <Common/ParameterSet.h>
 #include <casacore/casa/Arrays/IPosition.h>

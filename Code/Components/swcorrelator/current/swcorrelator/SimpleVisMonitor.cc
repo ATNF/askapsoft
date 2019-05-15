@@ -34,9 +34,9 @@
 #include <askap_swcorrelator.h>
 #include <swcorrelator/BasicMonitor.h>
 #include <swcorrelator/SimpleVisMonitor.h>
-#include <askap/AskapLogging.h>
-#include <askap/AskapError.h>
-#include <askap/AskapUtil.h>
+#include <askap/askap/AskapLogging.h>
+#include <askap/askap/AskapError.h>
+#include <askap/askap/AskapUtil.h>
 
 
 #include <fstream>

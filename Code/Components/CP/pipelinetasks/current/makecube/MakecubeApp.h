@@ -28,7 +28,7 @@
 #define ASKAP_CP_PIPELINETASKS_MAKECUBEAPP_H
 
 // ASKAPsoft includes
-#include <askap/Application.h>
+#include <askap/askap/Application.h>
 
 namespace askap {
 namespace cp {

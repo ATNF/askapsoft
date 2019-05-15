@@ -31,11 +31,11 @@
 /// @author Max Voronkov <maxim.voronkov@csiro.au>
 
 #include <swcorrelator/ExtendedBufferManager.h>
-#include <askap/AskapError.h>
+#include <askap/askap/AskapError.h>
 #include <swcorrelator/CorrProducts.h>
 #include <boost/thread/thread.hpp>
 #include <askap_swcorrelator.h>
-#include <askap/AskapLogging.h>
+#include <askap/askap/AskapLogging.h>
 
 #include <set>
 

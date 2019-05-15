@@ -36,7 +36,7 @@
 #include <sourcefitting/RadioSource.h>
 #include <sourcefitting/FittingParameters.h>
 #include <outputs/AskapVOTableCatalogueWriter.h>
-#include <askapparallel/AskapParallel.h>
+#include <askap/askapparallel/AskapParallel.h>
 
 namespace askap {
 

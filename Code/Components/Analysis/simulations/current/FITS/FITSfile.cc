@@ -28,8 +28,8 @@
 ///
 #include <askap_simulations.h>
 
-#include <askap/AskapLogging.h>
-#include <askap/AskapError.h>
+#include <askap/askap/AskapLogging.h>
+#include <askap/askap/AskapError.h>
 
 #include <FITS/FITSfile.h>
 #include <simulationutilities/SimulationUtilities.h>

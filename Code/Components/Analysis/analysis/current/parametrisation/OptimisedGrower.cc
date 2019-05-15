@@ -30,8 +30,8 @@
 #include <parametrisation/OptimisedGrower.h>
 #include <askap_analysis.h>
 
-#include <askap/AskapLogging.h>
-#include <askap/AskapError.h>
+#include <askap/askap/AskapLogging.h>
+#include <askap/askap/AskapError.h>
 
 #include <duchamp/Detection/ObjectGrower.hh>
 #include <duchamp/Detection/detection.hh>

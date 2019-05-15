@@ -34,7 +34,7 @@
 #include <vector>
 
 //ASKAP includes
-#include <askapparallel/AskapParallel.h>
+#include <askap/askapparallel/AskapParallel.h>
 #include <sourcefitting/RadioSource.h>
 
 //3rd-party includes

@@ -31,7 +31,7 @@
 #define ASKAP_ANALYSIS_DISTRIB_IMAGE_WRITER_H_
 
 #include <outputs/ImageWriter.h>
-#include <askapparallel/AskapParallel.h>
+#include <askap/askapparallel/AskapParallel.h>
 #include <string>
 #include <duchamp/Cubes/cubes.hh>
 #include <casacore/casa/aipstype.h>

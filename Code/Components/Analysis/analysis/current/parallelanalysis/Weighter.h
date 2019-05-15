@@ -29,7 +29,7 @@
 #ifndef ASKAP_ANALYSIS_WEIGHTER_H_
 #define ASKAP_ANALYSIS_WEIGHTER_H_
 
-#include <askapparallel/AskapParallel.h>
+#include <askap/askapparallel/AskapParallel.h>
 #include <casainterface/CasaInterface.h>
 #include <duchamp/Utils/Section.hh>
 #include <casacore/casa/aipstype.h>

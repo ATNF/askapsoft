@@ -28,12 +28,12 @@
 /// @author Matthew Whiting <matthew.whiting@csiro.au>
 #include <askap_analysis.h>
 
-#include <askap/AskapLogging.h>
-#include <askap/AskapError.h>
+#include <askap/askap/AskapLogging.h>
+#include <askap/askap/AskapError.h>
 #include <casacore/casa/Logging/LogIO.h>
 #include <askap/Log4cxxLogSink.h>
 
-#include <askapparallel/AskapParallel.h>
+#include <askap/askapparallel/AskapParallel.h>
 #include <parallelanalysis/DuchampParallel.h>
 #include <patternmatching/CatalogueMatcher.h>
 

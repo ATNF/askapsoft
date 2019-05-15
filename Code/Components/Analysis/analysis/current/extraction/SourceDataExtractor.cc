@@ -29,13 +29,13 @@
 #include <extraction/SourceDataExtractor.h>
 #include <askap_analysis.h>
 
-#include <askap/AskapLogging.h>
-#include <askap/AskapError.h>
+#include <askap/askap/AskapLogging.h>
+#include <askap/askap/AskapError.h>
 
 #include <string>
 #include <sourcefitting/RadioSource.h>
 #include <casainterface/CasaInterface.h>
-#include <imageaccess/ImageAccessFactory.h>
+#include <askap/imageaccess/ImageAccessFactory.h>
 #include <catalogues/CasdaComponent.h>
 #include <catalogues/CasdaIsland.h>
 

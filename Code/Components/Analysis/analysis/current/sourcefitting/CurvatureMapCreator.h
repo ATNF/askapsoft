@@ -28,7 +28,7 @@
 ///
 #ifndef ASKAP_ANALYSIS_CURVATURE_MAP_H_
 #define ASKAP_ANALYSIS_CURVATURE_MAP_H_
-#include <askapparallel/AskapParallel.h>
+#include <askap/askapparallel/AskapParallel.h>
 #include <Common/ParameterSet.h>
 #include <string>
 #include <casacore/casa/Arrays/MaskedArray.h>

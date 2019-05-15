@@ -29,7 +29,7 @@
 #ifndef ASKAP_SIMULATIONS_FITSPARALLEL_H_
 #define ASKAP_SIMULATIONS_FITSPARALLEL_H_
 
-#include <askapparallel/AskapParallel.h>
+#include <askap/askapparallel/AskapParallel.h>
 
 #include <Common/ParameterSet.h>
 #include <duchamp/Utils/Section.hh>

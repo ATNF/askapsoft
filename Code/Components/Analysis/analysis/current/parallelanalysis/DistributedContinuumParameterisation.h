@@ -30,7 +30,7 @@
 #define ASKAP_DISTRIB_RMSYNTH_H_
 
 #include <parallelanalysis/DistributedParameteriserBase.h>
-#include <askapparallel/AskapParallel.h>
+#include <askap/askapparallel/AskapParallel.h>
 #include <catalogues/CasdaIsland.h>
 #include <catalogues/CasdaComponent.h>
 #include <casacore/casa/Arrays/Array.h>

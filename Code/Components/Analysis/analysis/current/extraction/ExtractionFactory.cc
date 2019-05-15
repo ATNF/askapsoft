@@ -34,14 +34,14 @@
 #include <extraction/MomentMapExtractor.h>
 #include <extraction/CubeletExtractor.h>
 
-#include <askap/AskapLogging.h>
-#include <askap/AskapError.h>
+#include <askap/askap/AskapLogging.h>
+#include <askap/askap/AskapError.h>
 
 //System includes
 #include <vector>
 
 //ASKAP includes
-#include <askapparallel/AskapParallel.h>
+#include <askap/askapparallel/AskapParallel.h>
 #include <sourcefitting/RadioSource.h>
 #include <catalogues/CasdaComponent.h>
 

@@ -40,7 +40,7 @@
 
 // logging stuff
 #include <askap_accessors.h>
-#include <askap/AskapLogging.h>
+#include <askap/askap/AskapLogging.h>
 ASKAP_LOGGER(logger, ".calibaccess");
 
 namespace askap {

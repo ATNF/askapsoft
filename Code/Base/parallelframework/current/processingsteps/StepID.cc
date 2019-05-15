@@ -33,7 +33,7 @@
 
 // own includes
 #include "processingsteps/StepID.h"
-#include <askap/AskapError.h>
+#include <askap/askap/AskapError.h>
 
 namespace askap {
 

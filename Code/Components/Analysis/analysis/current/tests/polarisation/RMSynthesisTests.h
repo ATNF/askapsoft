@@ -29,8 +29,8 @@
 #include <polarisation/RMSynthesis.h>
 #include <polarisation/RMData.h>
 #include <cppunit/extensions/HelperMacros.h>
-#include <askap/AskapLogging.h>
-#include <askap/AskapError.h>
+#include <askap/askap/AskapLogging.h>
+#include <askap/askap/AskapError.h>
 
 ASKAP_LOGGER(logger, ".rmSynthesisTest");
 namespace askap {

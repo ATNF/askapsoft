@@ -31,16 +31,16 @@
 /// @author Max Voronkov <maxim.voronkov@csiro.au>
 
 // own includes
-#include <askap/AskapError.h>
+#include <askap/askap/AskapError.h>
 #include <askap_swcorrelator.h>
-#include <askap/AskapLogging.h>
+#include <askap/askap/AskapLogging.h>
 #include <swcorrelator/CorrServer.h>
 
 // casa includes
 #include <casacore/casa/OS/Timer.h>
 
 // other 3rd party
-#include <askapparallel/AskapParallel.h>
+#include <askap/askapparallel/AskapParallel.h>
 #include <Common/ParameterSet.h>
 #include <CommandLineParser.h>
 #include <signal.h>

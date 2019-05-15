@@ -31,9 +31,9 @@
 
 #include <casainterface/CasaInterface.h>
 
-#include <askapparallel/AskapParallel.h>
-#include <askap/AskapLogging.h>
-#include <askap/AskapError.h>
+#include <askap/askapparallel/AskapParallel.h>
+#include <askap/askap/AskapLogging.h>
+#include <askap/askap/AskapError.h>
 
 #include <casacore/casa/aipstype.h>
 #include <casacore/casa/Arrays/Vector.h>

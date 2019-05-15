@@ -30,7 +30,7 @@
 #define ASKAP_DISTRIB_HIEMISSION_H_
 
 #include <parallelanalysis/DistributedParameteriserBase.h>
-#include <askapparallel/AskapParallel.h>
+#include <askap/askapparallel/AskapParallel.h>
 #include <catalogues/CasdaHiEmissionObject.h>
 #include <vector>
 

@@ -28,14 +28,14 @@
 ///
 /// @author Max Voronkov <maxim.voronkov@csiro.au>
 
-#include <askap/AskapError.h>
+#include <askap/askap/AskapError.h>
 #include <fft/FFTWrapper.h>
 #include <casacore/casa/Arrays/Vector.h>
 #include <casacore/casa/BasicSL/Constants.h>
 #include <casacore/casa/OS/Timer.h>
 #include <askap_swcorrelator.h>
-#include <askap/AskapLogging.h>
-#include <askapparallel/AskapParallel.h>
+#include <askap/askap/AskapLogging.h>
+#include <askap/askapparallel/AskapParallel.h>
 // we don't use the manager as such, but it is handy to use other stuff defined there
 #include <swcorrelator/BufferManager.h>
 

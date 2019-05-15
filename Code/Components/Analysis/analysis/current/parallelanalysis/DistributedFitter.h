@@ -30,7 +30,7 @@
 #define ASKAP_DISTRIB_FITTER_H_
 
 #include <parallelanalysis/DistributedParameteriserBase.h>
-#include <askapparallel/AskapParallel.h>
+#include <askap/askapparallel/AskapParallel.h>
 #include <parallelanalysis/DuchampParallel.h>
 #include <sourcefitting/RadioSource.h>
 #include <vector>

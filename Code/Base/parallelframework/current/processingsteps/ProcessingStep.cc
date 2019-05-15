@@ -34,7 +34,7 @@
 
 // for logging
 #include "askap_parallelframework.h"
-#include <askap/AskapLogging.h>
+#include <askap/askap/AskapLogging.h>
 ASKAP_LOGGER(logger, ".parallelframework");
 
 namespace askap {

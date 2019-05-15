@@ -29,7 +29,7 @@
 /// @author Max Voronkov <maxim.voronkov@csiro.au>
 
 #include <dataformats/SwinReader.h>
-#include <askap/AskapError.h>
+#include <askap/askap/AskapError.h>
 #include <casacore/casa/OS/File.h>
 #include <inttypes.h>
 #include <utils/PolConverter.h>

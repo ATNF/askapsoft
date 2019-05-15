@@ -27,12 +27,12 @@
 
 #include <dataaccess/TableDataSource.h>
 #include <askap_accessors.h>
-#include <askap/AskapLogging.h>
-#include <askap/AskapUtil.h>
+#include <askap/askap/AskapLogging.h>
+#include <askap/askap/AskapUtil.h>
 ASKAP_LOGGER(logger, "");
 
-#include <askap/AskapError.h>
-#include <askap/Application.h>
+#include <askap/askap/AskapError.h>
+#include <askap/askap/Application.h>
 #include <dataaccess/SharedIter.h>
 #include <dataaccess/TableManager.h>
 #include <dataaccess/IDataConverterImpl.h>

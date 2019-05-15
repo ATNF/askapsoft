@@ -36,7 +36,7 @@
 #include <calweightsolver/EigenSolve.h>
 
 #include <calweightsolver/IlluminationUtils.h>
-#include <askap/AskapError.h>
+#include <askap/askap/AskapError.h>
 
 #include <fstream>
 

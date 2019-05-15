@@ -34,9 +34,9 @@
 #include <iostream>
 
 // ASKAPSoft includes
-#include <askap/Application.h>
-#include <askap/AskapError.h>
-#include <askap/AskapLogging.h>
+#include <askap/askap/Application.h>
+#include <askap/askap/AskapError.h>
+#include <askap/askap/AskapLogging.h>
 #include <parallelanalysis/DuchampParallel.h>
 #include <Common/ParameterSet.h>
 #include <duchamp/Cubes/cubes.hh>

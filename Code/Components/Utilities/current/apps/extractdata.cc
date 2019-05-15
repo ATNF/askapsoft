@@ -26,10 +26,10 @@
 
 #include <dataaccess/TableDataSource.h>
 #include <askap_accessors.h>
-#include <askap/AskapLogging.h>
+#include <askap/askap/AskapLogging.h>
 ASKAP_LOGGER(logger, "");
 
-#include <askap/AskapError.h>
+#include <askap/askap/AskapError.h>
 #include <dataaccess/SharedIter.h>
 #include <utils/PolConverter.h>
 

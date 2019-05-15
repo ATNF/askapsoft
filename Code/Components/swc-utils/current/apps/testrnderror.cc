@@ -25,7 +25,7 @@
 ///
 /// @author Max Voronkov <maxim.voronkov@csiro.au>
 
-#include <askap/AskapError.h>
+#include <askap/askap/AskapError.h>
 #include <fft/FFTWrapper.h>
 #include <casacore/casa/Arrays/Vector.h>
 #include <casacore/casa/BasicSL/Constants.h>

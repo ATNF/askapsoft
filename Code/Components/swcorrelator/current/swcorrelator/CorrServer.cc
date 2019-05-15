@@ -30,9 +30,9 @@
 /// @author Max Voronkov <maxim.voronkov@csiro.au>
 
 // own includes
-#include <askap/AskapError.h>
+#include <askap/askap/AskapError.h>
 #include <askap_swcorrelator.h>
-#include <askap/AskapLogging.h>
+#include <askap/askap/AskapLogging.h>
 #include <swcorrelator/CorrServer.h>
 #include <swcorrelator/FillerWorker.h>
 #include <swcorrelator/ExtendedBufferManager.h>

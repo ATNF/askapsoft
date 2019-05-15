@@ -35,9 +35,9 @@
 // Boost includes
 
 // ASKAPsoft includes
-#include <askap/Application.h>
-#include <askap/AskapLogging.h>
-#include <askap/AskapError.h>
+#include <askap/askap/Application.h>
+#include <askap/askap/AskapLogging.h>
+#include <askap/askap/AskapError.h>
 #include <askap/StatReporter.h>
 #include <Common/ParameterSet.h>
 #include <IceUtil/Exception.h>

@@ -26,9 +26,9 @@
 #include <outputs/ImageWriter.h>
 #include <outputs/DistributedImageWriter.h>
 
-#include <askap/AskapLogging.h>
-#include <askap/AskapError.h>
-#include <askapparallel/AskapParallel.h>
+#include <askap/askap/AskapLogging.h>
+#include <askap/askap/AskapError.h>
+#include <askap/askapparallel/AskapParallel.h>
 
 #include <string>
 #include <duchamp/Cubes/cubes.hh>

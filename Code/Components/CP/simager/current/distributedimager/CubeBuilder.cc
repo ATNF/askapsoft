@@ -37,8 +37,8 @@
 #include <vector>
 
 // ASKAPsoft includes
-#include <askap/AskapError.h>
-#include <askap/AskapLogging.h>
+#include <askap/askap/AskapError.h>
+#include <askap/askap/AskapLogging.h>
 #include <measurementequation/SynthesisParamsHelper.h>
 #include <Common/ParameterSet.h>
 #include <utils/PolConverter.h>

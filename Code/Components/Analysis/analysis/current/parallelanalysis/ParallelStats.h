@@ -29,7 +29,7 @@
 #ifndef ASKAP_ANALYSIS_PARALLELSTATS_H_
 #define ASKAP_ANALYSIS_PARALLELSTATS_H_
 
-#include <askapparallel/AskapParallel.h>
+#include <askap/askapparallel/AskapParallel.h>
 #include <duchamp/Cubes/cubes.hh>
 
 namespace askap {

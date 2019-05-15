@@ -32,7 +32,7 @@
 #define ASKAP_ASKAPPARALLEL_STEP_ID_TEST_H
 
 #include "processingsteps/StepID.h"
-#include <askap/AskapError.h>
+#include <askap/askap/AskapError.h>
 
 #include <cppunit/extensions/HelperMacros.h>
 

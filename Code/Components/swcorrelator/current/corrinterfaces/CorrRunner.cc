@@ -34,9 +34,9 @@
 
 #include <corrinterfaces/CorrRunner.h>
 #include <corrinterfaces/CorrRunnerThread.h>
-#include <askap/AskapUtil.h>
+#include <askap/askap/AskapUtil.h>
 #include <askap_swcorrelator.h>
-#include <askap/AskapLogging.h>
+#include <askap/askap/AskapLogging.h>
 #include <swcorrelator/MonitorFactory.h>
 #include <corrinterfaces/CallBackMonitor.h>
 

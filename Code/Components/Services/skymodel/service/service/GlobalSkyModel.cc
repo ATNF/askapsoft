@@ -34,8 +34,8 @@
 #include <string>
 
 // ASKAPsoft includes
-#include <askap/AskapError.h>
-#include <askap/AskapLogging.h>
+#include <askap/askap/AskapError.h>
+#include <askap/askap/AskapLogging.h>
 #include <votable/VOTable.h>
 
 // ODB includes

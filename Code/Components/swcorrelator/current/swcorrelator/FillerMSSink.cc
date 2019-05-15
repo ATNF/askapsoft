@@ -32,10 +32,10 @@
 
 // own includes
 #include <swcorrelator/FillerMSSink.h>
-#include <askap/AskapError.h>
+#include <askap/askap/AskapError.h>
 #include <askap_swcorrelator.h>
-#include <askap/AskapLogging.h>
-#include <askap/AskapUtil.h>
+#include <askap/askap/AskapLogging.h>
+#include <askap/askap/AskapUtil.h>
 #include <utils/PolConverter.h>
 
 // casa includes

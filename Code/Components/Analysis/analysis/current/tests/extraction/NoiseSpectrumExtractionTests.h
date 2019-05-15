@@ -26,8 +26,8 @@
 #include <extraction/NoiseSpectrumExtractor.h>
 #include <sourcefitting/RadioSource.h>
 #include <cppunit/extensions/HelperMacros.h>
-#include <askap/AskapLogging.h>
-#include <askap/AskapError.h>
+#include <askap/askap/AskapLogging.h>
+#include <askap/askap/AskapError.h>
 
 #include <Common/ParameterSet.h>
 #include <Common/KVpair.h>
@@ -39,7 +39,7 @@
 #include <casacore/coordinates/Coordinates/CoordinateSystem.h>
 #include <casacore/coordinates/Coordinates/DirectionCoordinate.h>
 #include <casacore/coordinates/Coordinates/SpectralCoordinate.h>
-#include <imageaccess/CasaImageAccess.h>
+#include <askap/imageaccess/CasaImageAccess.h>
 #include <duchamp/Detection/finders.hh>
 #include <duchamp/PixelMap/Object2D.hh>
 #include <casainterface/CasaInterface.h>

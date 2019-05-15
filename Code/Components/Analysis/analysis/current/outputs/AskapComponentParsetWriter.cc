@@ -29,8 +29,8 @@
 #include <outputs/AskapComponentParsetWriter.h>
 #include <askap_analysis.h>
 
-#include <askap/AskapLogging.h>
-#include <askap/AskapError.h>
+#include <askap/askap/AskapLogging.h>
+#include <askap/askap/AskapError.h>
 
 #include <outputs/ParsetComponent.h>
 #include <sourcefitting/RadioSource.h>

@@ -29,7 +29,7 @@
 #ifndef ASKAP_DISTRIB_PARAMER_BASE_H_
 #define ASKAP_DISTRIB_PARAMER_BASE_H_
 
-#include <askapparallel/AskapParallel.h>
+#include <askap/askapparallel/AskapParallel.h>
 #include <parallelanalysis/DuchampParallel.h>
 #include <vector>
 #include <boost/shared_ptr.hpp>

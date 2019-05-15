@@ -25,8 +25,8 @@
 #include <askap_analysis.h>
 #include <outputs/ImageWriter.h>
 
-#include <askap/AskapLogging.h>
-#include <askap/AskapError.h>
+#include <askap/askap/AskapLogging.h>
+#include <askap/askap/AskapError.h>
 
 #include <string>
 #include <duchamp/Cubes/cubes.hh>
@@ -43,7 +43,7 @@
 #include <casainterface/CasaInterface.h>
 #include <casacore/casa/aipstype.h>
 
-#include <imageaccess/ImageAccessFactory.h>
+#include <askap/imageaccess/ImageAccessFactory.h>
 ///@brief Where the log messages go.
 ASKAP_LOGGER(logger, ".imagewriter");
 

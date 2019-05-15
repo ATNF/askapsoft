@@ -30,7 +30,7 @@
 #define ASKAP_DISTRIB_ABSORPTION_H_
 
 #include <parallelanalysis/DistributedParameteriserBase.h>
-#include <askapparallel/AskapParallel.h>
+#include <askap/askapparallel/AskapParallel.h>
 #include <catalogues/CasdaAbsorptionObject.h>
 #include <vector>
 

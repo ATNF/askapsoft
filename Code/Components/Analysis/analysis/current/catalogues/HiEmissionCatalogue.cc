@@ -29,8 +29,8 @@
 #include <catalogues/HiEmissionCatalogue.h>
 #include <askap_analysis.h>
 
-#include <askap/AskapLogging.h>
-#include <askap/AskapError.h>
+#include <askap/askap/AskapLogging.h>
+#include <askap/askap/AskapError.h>
 
 #include <parallelanalysis/DistributedHIemission.h>
 #include <catalogues/CasdaHiEmissionObject.h>

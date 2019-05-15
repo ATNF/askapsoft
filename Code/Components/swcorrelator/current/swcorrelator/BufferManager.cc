@@ -32,10 +32,10 @@
 /// @author Max Voronkov <maxim.voronkov@csiro.au>
 
 #include <swcorrelator/BufferManager.h>
-#include <askap/AskapError.h>
+#include <askap/askap/AskapError.h>
 #include <boost/thread/thread.hpp>
 #include <askap_swcorrelator.h>
-#include <askap/AskapLogging.h>
+#include <askap/askap/AskapLogging.h>
 
 
 ASKAP_LOGGER(logger, ".swcorrelator");

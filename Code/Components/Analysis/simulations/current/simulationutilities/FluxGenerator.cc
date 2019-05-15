@@ -31,8 +31,8 @@
 #include <simulationutilities/FluxGenerator.h>
 #include <modelcomponents/Spectrum.h>
 
-#include <askap/AskapLogging.h>
-#include <askap/AskapError.h>
+#include <askap/askap/AskapLogging.h>
+#include <askap/askap/AskapError.h>
 
 #include <wcslib/wcs.h>
 #include <duchamp/Utils/utils.hh>

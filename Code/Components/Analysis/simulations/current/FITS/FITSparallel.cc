@@ -28,14 +28,14 @@
 ///
 #include <askap_simulations.h>
 
-#include <askap/AskapLogging.h>
-#include <askap/AskapError.h>
+#include <askap/askap/AskapLogging.h>
+#include <askap/askap/AskapError.h>
 
 #include <FITS/FITSparallel.h>
 #include <FITS/FITSfile.h>
 #include <simulationutilities/SimulationUtilities.h>
 
-#include <askapparallel/AskapParallel.h>
+#include <askap/askapparallel/AskapParallel.h>
 #include <duchamp/Utils/Section.hh>
 #include <analysisparallel/SubimageDef.h>
 

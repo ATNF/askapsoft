@@ -27,17 +27,17 @@
 
 #include <dataaccess/TableDataSource.h>
 #include <askap_swcutils.h>
-#include <askap/AskapLogging.h>
+#include <askap/askap/AskapLogging.h>
 ASKAP_LOGGER(logger, "");
 
-#include <askap/AskapError.h>
+#include <askap/askap/AskapError.h>
 #include <dataaccess/SharedIter.h>
 #include <dataaccess/ParsetInterface.h>
 
 #include <dataaccess/TableManager.h>
 #include <dataaccess/IDataConverterImpl.h>
 #include <utils/EigenDecompose.h>
-#include <askap/AskapUtil.h>
+#include <askap/askap/AskapUtil.h>
 
 
 // casa

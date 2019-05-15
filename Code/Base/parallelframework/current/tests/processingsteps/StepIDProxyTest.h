@@ -34,7 +34,7 @@
 #include "processingsteps/StepID.h"
 #include "processingsteps/StepIDProxy.h"
 #include "processingsteps/CompositeStep.h"
-#include <askap/AskapError.h>
+#include <askap/askap/AskapError.h>
 
 #include <cppunit/extensions/HelperMacros.h>
 

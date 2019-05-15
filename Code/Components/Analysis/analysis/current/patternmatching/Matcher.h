@@ -29,8 +29,8 @@
 #ifndef ASKAP_ANALYSIS_MATCHER_H_
 #define ASKAP_ANALYSIS_MATCHER_H_
 
-#include <askap/AskapLogging.h>
-#include <askap/AskapError.h>
+#include <askap/askap/AskapLogging.h>
+#include <askap/askap/AskapError.h>
 
 #include <patternmatching/Triangle.h>
 #include <patternmatching/Point.h>

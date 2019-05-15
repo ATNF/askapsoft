@@ -30,8 +30,8 @@
 #include <askap_analysis.h>
 #include <extraction/SourceDataExtractor.h>
 
-#include <askap/AskapLogging.h>
-#include <askap/AskapError.h>
+#include <askap/askap/AskapLogging.h>
+#include <askap/askap/AskapError.h>
 
 #include <string>
 #include <iostream>
@@ -39,7 +39,7 @@
 
 #include <sourcefitting/RadioSource.h>
 
-#include <imageaccess/ImageAccessFactory.h>
+#include <askap/imageaccess/ImageAccessFactory.h>
 
 #include <casacore/casa/Arrays/IPosition.h>
 #include <casacore/casa/Arrays/Array.h>

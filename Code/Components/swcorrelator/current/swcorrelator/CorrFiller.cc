@@ -32,9 +32,9 @@
 #include <swcorrelator/CorrFiller.h>
 #include <swcorrelator/FillerMSSink.h>
 #include <swcorrelator/DataMonitors.h>
-#include <askap/AskapError.h>
+#include <askap/askap/AskapError.h>
 #include <askap_swcorrelator.h>
-#include <askap/AskapLogging.h>
+#include <askap/askap/AskapLogging.h>
 
 ASKAP_LOGGER(logger, ".corrfiller");
 

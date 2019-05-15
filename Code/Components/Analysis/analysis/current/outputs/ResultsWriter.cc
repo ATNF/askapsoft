@@ -29,9 +29,9 @@
 #include <outputs/ResultsWriter.h>
 #include <askap_analysis.h>
 
-#include <askap/AskapLogging.h>
-#include <askap/AskapError.h>
-#include <askapparallel/AskapParallel.h>
+#include <askap/askap/AskapLogging.h>
+#include <askap/askap/AskapError.h>
+#include <askap/askapparallel/AskapParallel.h>
 
 #include <parallelanalysis/DuchampParallel.h>
 #include <parallelanalysis/DistributedContinuumParameterisation.h>
@@ -44,7 +44,7 @@
 #include <catalogues/HiEmissionCatalogue.h>
 #include <catalogues/RMCatalogue.h>
 #include <catalogues/FitCatalogue.h>
-#include <imageaccess/ImageAccessFactory.h>
+#include <askap/imageaccess/ImageAccessFactory.h>
 
 #include <duchamp/Cubes/cubes.hh>
 #include <duchamp/Outputs/CatalogueSpecification.hh>

@@ -28,7 +28,7 @@
 ///
 #ifndef ASKAP_ANALYSIS_VAR_THRESH_H_
 #define ASKAP_ANALYSIS_VAR_THRESH_H_
-#include <askapparallel/AskapParallel.h>
+#include <askap/askapparallel/AskapParallel.h>
 #include <analysisparallel/SubimageDef.h>
 #include <outputs/ImageWriter.h>
 #include <Common/ParameterSet.h>

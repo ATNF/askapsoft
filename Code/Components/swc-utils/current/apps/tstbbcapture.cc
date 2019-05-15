@@ -35,7 +35,7 @@
 #include <casacore/scimath/Mathematics/FFTServer.h>
 #include <casacore/scimath/Mathematics/StatAcc.h>
 #include <casacore/scimath/Mathematics/HistAcc.h>
-#include <askap/AskapError.h>
+#include <askap/askap/AskapError.h>
 
 
 using namespace askap;

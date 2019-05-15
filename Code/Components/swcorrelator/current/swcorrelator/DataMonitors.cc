@@ -29,8 +29,8 @@
 /// @author Max Voronkov <maxim.voronkov@csiro.au>
 
 #include <askap_swcorrelator.h>
-#include <askap/AskapError.h>
-#include <askap/AskapLogging.h>
+#include <askap/askap/AskapError.h>
+#include <askap/askap/AskapLogging.h>
 
 #include <swcorrelator/DataMonitors.h>
 #include <swcorrelator/MonitorFactory.h>

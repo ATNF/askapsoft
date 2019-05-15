@@ -34,9 +34,9 @@
 #include <corrinterfaces/CorrRunnerThread.h>
 #include <corrinterfaces/CorrRunner.h>
 #include <swcorrelator/CorrServer.h>
-#include <askap/AskapError.h>
+#include <askap/askap/AskapError.h>
 #include <askap_swcorrelator.h>
-#include <askap/AskapLogging.h>
+#include <askap/askap/AskapLogging.h>
 
 ASKAP_LOGGER(logger, ".corrinterfaces");
 

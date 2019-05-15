@@ -32,15 +32,15 @@
 #include <catalogues/Casda.h>
 #include <askap_analysis.h>
 
-#include <askap/AskapLogging.h>
-#include <askap/AskapError.h>
+#include <askap/askap/AskapLogging.h>
+#include <askap/askap/AskapError.h>
 
 #include <sourcefitting/RadioSource.h>
 #include <sourcefitting/FitResults.h>
 #include <outputs/CataloguePreparation.h>
 #include <mathsutils/MathsUtils.h>
 #include <coordutils/SpectralUtilities.h>
-#include <imageaccess/CasaImageAccess.h>
+#include <askap/imageaccess/CasaImageAccess.h>
 #include <casainterface/CasaInterface.h>
 #include <duchampinterface/DuchampInterface.h>
 

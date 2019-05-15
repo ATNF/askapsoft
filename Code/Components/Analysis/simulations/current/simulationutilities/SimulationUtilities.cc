@@ -31,8 +31,8 @@
 #include <simulationutilities/SimulationUtilities.h>
 #include <simulationutilities/FluxGenerator.h>
 #include <mathsutils/MathsUtils.h>
-#include <askap/AskapLogging.h>
-#include <askap/AskapError.h>
+#include <askap/askap/AskapLogging.h>
+#include <askap/askap/AskapError.h>
 
 #include <casacore/scimath/Functionals/Gaussian1D.h>
 #include <casacore/scimath/Functionals/Gaussian2D.h>

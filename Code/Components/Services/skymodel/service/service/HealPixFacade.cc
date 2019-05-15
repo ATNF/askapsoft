@@ -34,8 +34,8 @@
 #include <string>
 
 // ASKAPsoft includes
-#include <askap/AskapError.h>
-#include <askap/AskapLogging.h>
+#include <askap/askap/AskapError.h>
+#include <askap/askap/AskapLogging.h>
 #include <Common/ParameterSet.h>
 #include <boost/scoped_ptr.hpp>
 #include <healpix_cxx/healpix_base.h>

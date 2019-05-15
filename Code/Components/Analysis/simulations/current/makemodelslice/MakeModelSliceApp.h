@@ -25,7 +25,7 @@
 #define ASKAP_SIMULATIONS_MAKEMODELSLICEAPP_H_
 
 // ASKAPsoft includes
-#include <askap/Application.h>
+#include <askap/askap/Application.h>
 
 namespace askap {
 

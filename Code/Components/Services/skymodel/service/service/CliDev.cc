@@ -40,7 +40,7 @@
 #include "boost/random/linear_congruential.hpp"
 
 // ASKAPsoft includes
-#include <askap/AskapLogging.h>
+#include <askap/askap/AskapLogging.h>
 #include <Common/ParameterSet.h>
 
 // ODB includes

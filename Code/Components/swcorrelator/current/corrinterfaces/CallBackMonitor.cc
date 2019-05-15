@@ -35,8 +35,8 @@
 #include <corrinterfaces/CallBackMonitor.h>
 #include <swcorrelator/BasicMonitor.h>
 #include <corrinterfaces/MonitoringData.h>
-#include <askap/AskapLogging.h>
-#include <askap/AskapError.h>
+#include <askap/askap/AskapLogging.h>
+#include <askap/askap/AskapError.h>
 
 // casa includes
 #include <casacore/casa/BasicSL.h>

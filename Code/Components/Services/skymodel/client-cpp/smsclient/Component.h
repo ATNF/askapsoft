@@ -28,7 +28,7 @@
 #define ASKAP_CP_SMS_COMPONENT_H
 
 /// ASKAPsoft includes
-#include <askap/AskapTypes.h>
+#include <askap/askap/AskapTypes.h>
 #include "casacore/casa/aipstype.h"
 #include "casacore/casa/Quanta/Quantum.h"
 

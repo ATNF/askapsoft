@@ -36,8 +36,8 @@
 #include <boost/shared_ptr.hpp>
 
 // ASKAPsoft includes
-#include <askap/AskapError.h>
-#include <askap/AskapLogging.h>
+#include <askap/askap/AskapError.h>
+#include <askap/askap/AskapLogging.h>
 
 // Ice interfaces
 #include <SkyModelService.h>

@@ -28,8 +28,8 @@
 ///
 #include <outputs/ParsetComponent.h>
 #include <askap_analysis.h>
-#include <askap/AskapLogging.h>
-#include <askap/AskapError.h>
+#include <askap/askap/AskapLogging.h>
+#include <askap/askap/AskapError.h>
 #include <outputs/CataloguePreparation.h>
 
 #include <sourcefitting/RadioSource.h>

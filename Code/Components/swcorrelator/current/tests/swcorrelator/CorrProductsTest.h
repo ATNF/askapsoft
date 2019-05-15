@@ -30,7 +30,7 @@
 #define ASKAP_SWCORRELATOR_CORR_PRODUCTS_TEST_H
 
 #include <cppunit/extensions/HelperMacros.h>
-#include <askap/AskapError.h>
+#include <askap/askap/AskapError.h>
 
 // Class under test
 #include <swcorrelator/CorrProducts.h>

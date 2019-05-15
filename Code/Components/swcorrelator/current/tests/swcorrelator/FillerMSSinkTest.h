@@ -34,7 +34,7 @@
 #include <casacore/casa/OS/RegularFile.h>
 #include <casacore/casa/OS/Directory.h>
 #include <casacore/casa/OS/File.h>
-#include <askap/AskapError.h>
+#include <askap/askap/AskapError.h>
 
 // Class under test
 #include <swcorrelator/FillerMSSink.h>

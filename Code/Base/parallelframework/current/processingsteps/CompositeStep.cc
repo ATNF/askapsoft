@@ -33,12 +33,12 @@
 #include "processingsteps/CompositeStep.h"
 
 // ASKAP includes
-#include <askap/AskapError.h>
-#include <askap/AskapUtil.h>
+#include <askap/askap/AskapError.h>
+#include <askap/askap/AskapUtil.h>
 
 // for logging
 #include "askap_parallelframework.h"
-#include <askap/AskapLogging.h>
+#include <askap/askap/AskapLogging.h>
 ASKAP_LOGGER(logger, ".parallelframework");
 
 namespace askap {

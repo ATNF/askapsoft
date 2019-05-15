@@ -38,8 +38,8 @@
 #include <boost/lexical_cast.hpp>
 
 // ASKAPsoft includes
-#include <askap/AskapError.h>
-#include <askap/AskapLogging.h>
+#include <askap/askap/AskapError.h>
+#include <askap/askap/AskapLogging.h>
 
 // Local package includes
 #include "HealPixFacade.h"

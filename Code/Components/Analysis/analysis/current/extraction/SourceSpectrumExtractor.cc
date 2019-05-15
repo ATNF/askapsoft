@@ -31,13 +31,13 @@
 #include <extraction/SourceDataExtractor.h>
 #include <extraction/SpectralBoxExtractor.h>
 
-#include <askap/AskapLogging.h>
-#include <askap/AskapError.h>
+#include <askap/askap/AskapLogging.h>
+#include <askap/askap/AskapError.h>
 
 #include <sourcefitting/RadioSource.h>
 
-#include <imageaccess/CasaImageAccess.h>
-#include <imageaccess/BeamLogger.h>
+#include <askap/imageaccess/CasaImageAccess.h>
+#include <askap/imageaccess/BeamLogger.h>
 
 #include <duchamp/PixelMap/Object2D.hh>
 

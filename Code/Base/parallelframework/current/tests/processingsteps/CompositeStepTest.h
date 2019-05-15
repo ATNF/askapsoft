@@ -32,8 +32,8 @@
 #define ASKAP_ASKAPPARALLEL_COMPOSITE_STEP_TEST_H
 
 #include "processingsteps/CompositeStep.h"
-#include <askap/AskapError.h>
-#include <askap/AskapUtil.h>
+#include <askap/askap/AskapError.h>
+#include <askap/askap/AskapUtil.h>
 
 #include <cppunit/extensions/HelperMacros.h>
 

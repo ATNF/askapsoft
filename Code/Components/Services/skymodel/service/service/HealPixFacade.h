@@ -31,7 +31,7 @@
 #include <vector>
 
 // ASKAPsoft and 3rdParty includes
-#include <askap/AskapError.h>
+#include <askap/askap/AskapError.h>
 #include <boost/cstdint.hpp>
 #include <boost/noncopyable.hpp>
 #include <Common/ParameterSet.h>

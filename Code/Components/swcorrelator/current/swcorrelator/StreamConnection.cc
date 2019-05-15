@@ -34,9 +34,9 @@
 
 #include <swcorrelator/StreamConnection.h>
 #include <swcorrelator/BufferHeader.h>
-#include <askap/AskapError.h>
+#include <askap/askap/AskapError.h>
 #include <askap_swcorrelator.h>
-#include <askap/AskapLogging.h>
+#include <askap/askap/AskapLogging.h>
 #include <boost/thread.hpp>
 
 ASKAP_LOGGER(logger, ".corrworker");

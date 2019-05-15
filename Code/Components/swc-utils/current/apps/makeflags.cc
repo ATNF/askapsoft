@@ -30,9 +30,9 @@
 /// @author Max Voronkov <maxim.voronkov@csiro.au>
 
 // own includes
-#include <askap/AskapError.h>
+#include <askap/askap/AskapError.h>
 #include <askap_swcorrelator.h>
-#include <askap/AskapLogging.h>
+#include <askap/askap/AskapLogging.h>
 #include <utils/MultiDimArrayPlaneIter.h>
 
 // casa includes
@@ -49,7 +49,7 @@
 #include <casacore/images/Images/PagedImage.h>
 
 // other 3rd party
-#include <askapparallel/AskapParallel.h>
+#include <askap/askapparallel/AskapParallel.h>
 #include <CommandLineParser.h>
 
 

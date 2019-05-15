@@ -34,8 +34,8 @@
 #include <vector>
 
 // ASKAPsoft includes
-#include <askap/AskapLogging.h>
-#include <askap/AskapError.h>
+#include <askap/askap/AskapLogging.h>
+#include <askap/askap/AskapError.h>
 #include <fitting/Equation.h>
 #include <fitting/INormalEquations.h>
 #include <fitting/ImagingNormalEquations.h>

@@ -31,7 +31,7 @@
 #include <string>
 #include <boost/filesystem.hpp>
 #include <votable/VOTable.h>
-#include <askap/AskapError.h>
+#include <askap/askap/AskapError.h>
 
 // Classes to test
 #include "service/HealPixFacade.h"

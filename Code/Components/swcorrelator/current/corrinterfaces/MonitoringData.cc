@@ -34,7 +34,7 @@
 /// @author Max Voronkov <maxim.voronkov@csiro.au>
 
 #include <corrinterfaces/MonitoringData.h>
-#include <askap/AskapError.h>
+#include <askap/askap/AskapError.h>
 #include <casacore/casa/Quanta/MVEpoch.h>
 
 #include <sstream>

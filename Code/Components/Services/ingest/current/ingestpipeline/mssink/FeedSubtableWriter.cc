@@ -31,7 +31,7 @@
 #include "ingestpipeline/mssink/FeedSubtableWriter.h"
 #include "askap/AskapLogging.h"
 #include "askap/AskapError.h"
-#include <askap/AskapUtil.h>
+#include <askap/askap/AskapUtil.h>
 
 // boost includes
 #include <boost/noncopyable.hpp>

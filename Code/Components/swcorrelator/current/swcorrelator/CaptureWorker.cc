@@ -32,11 +32,11 @@
 /// @author Max Voronkov <maxim.voronkov@csiro.au>
 
 #include <swcorrelator/CaptureWorker.h>
-#include <askap/AskapError.h>
+#include <askap/askap/AskapError.h>
 #include <askap_swcorrelator.h>
-#include <askap/AskapLogging.h>
+#include <askap/askap/AskapLogging.h>
 #include <boost/thread.hpp>
-#include <askap/AskapUtil.h>
+#include <askap/askap/AskapUtil.h>
 
 #include <casacore/scimath/Mathematics/StatAcc.h>
 #include <casacore/scimath/Mathematics/HistAcc.h>

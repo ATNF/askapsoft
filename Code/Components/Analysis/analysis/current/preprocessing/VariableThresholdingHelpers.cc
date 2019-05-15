@@ -33,8 +33,8 @@
 
 #include <duchamp/Utils/Statistics.hh>
 
-#include <askap/AskapLogging.h>
-#include <askap/AskapError.h>
+#include <askap/askap/AskapLogging.h>
+#include <askap/askap/AskapError.h>
 
 ///@brief Where the log messages go.
 ASKAP_LOGGER(logger, ".varthreshhelp");

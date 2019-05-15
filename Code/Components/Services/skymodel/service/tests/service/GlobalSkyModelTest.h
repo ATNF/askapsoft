@@ -29,7 +29,7 @@
 
 // Support classes
 #include <string>
-#include <askap/AskapError.h>
+#include <askap/askap/AskapError.h>
 #include <boost/cstdint.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/date_time/posix_time/posix_time_types.hpp>
