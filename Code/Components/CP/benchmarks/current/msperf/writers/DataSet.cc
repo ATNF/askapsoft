@@ -42,7 +42,7 @@
 #include <casacore/tables/Tables/TiledShapeStMan.h>
 #include <casacore/ms/MeasurementSets/MSColumns.h>
 
-using namespace casa;
+using namespace casacore;
 using LOFAR::ParameterSet;
 
 DataSet::DataSet(const std::string& filename, const LOFAR::ParameterSet& parset)

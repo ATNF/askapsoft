@@ -31,8 +31,8 @@
 // ASKAPsoft includes
 #include "casacore/casa/aipstype.h"
 #include "casacore/images/Images/ImageInterface.h"
-#include "components/ComponentModels/ComponentList.h"
-#include "components/ComponentModels/SkyComponent.h"
+#include "casarest/components/ComponentModels/ComponentList.h"
+#include "casarest/components/ComponentModels/SkyComponent.h"
 #include "casacore/images/Images/ImageInterface.h"
 #include "casacore/coordinates/Coordinates/DirectionCoordinate.h"
 #include "casacore/measures/Measures/Stokes.h"

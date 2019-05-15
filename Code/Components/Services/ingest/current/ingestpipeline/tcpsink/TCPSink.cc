@@ -55,7 +55,7 @@
 ASKAP_LOGGER(logger, ".TCPSink");
 
 using namespace askap;
-using namespace casa;
+using namespace casacore;
 using namespace askap::cp::common;
 using namespace askap::cp::ingest;
 using boost::asio::ip::tcp;

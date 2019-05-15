@@ -62,7 +62,7 @@ ASKAP_LOGGER(logger, ".StokesVFlagger");
 
 using namespace std;
 using namespace askap;
-using namespace casa;
+using namespace casacore;
 using namespace askap::cp::pipelinetasks;
 
 vector< boost::shared_ptr<IFlagger> > StokesVFlagger::build(

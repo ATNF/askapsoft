@@ -75,7 +75,7 @@ ASKAP_LOGGER(logger, ".AskapComponentImager");
 
 using namespace askap;
 using namespace askap::components;
-using namespace casa;
+using namespace casacore;
 
 template <class T>
 void AskapComponentImager::project(casacore::ImageInterface<T>& image,

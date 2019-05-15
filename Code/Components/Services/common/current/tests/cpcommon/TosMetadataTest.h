@@ -41,7 +41,7 @@
 #include "cpcommon/TosMetadata.h"
 
 // Using
-using namespace casa;
+using namespace casacore;
 
 namespace askap {
 namespace cp {

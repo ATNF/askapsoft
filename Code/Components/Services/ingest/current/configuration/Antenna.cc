@@ -45,7 +45,7 @@ ASKAP_LOGGER(logger, ".Antenna");
 
 using namespace askap;
 using namespace askap::cp::ingest;
-using namespace casa;
+using namespace casacore;
 
 Antenna::Antenna(const casacore::String& name,
                  const casacore::String& mount,

@@ -57,7 +57,7 @@
 // Using
 using namespace askap;
 using namespace askap::components;
-using namespace casa;
+using namespace casacore;
 using namespace std;
 
 casacore::CoordinateSystem createCoordinateSystem(casacore::uInt nx, casacore::uInt ny)

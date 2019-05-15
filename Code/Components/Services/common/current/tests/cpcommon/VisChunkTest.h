@@ -40,7 +40,7 @@
 #include "cpcommon/VisChunk.h"
 
 using namespace askap::cp::common;
-using namespace casa;
+using namespace casacore;
 
 namespace askap {
 namespace cp {

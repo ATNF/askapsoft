@@ -66,7 +66,7 @@ using namespace askap;
 using namespace askap::cp;
 using namespace askap::interfaces;
 using namespace askap::interfaces::datapublisher;
-using namespace casa;
+using namespace casacore;
 
 ASKAP_LOGGER(logger, ".TosSimulator");
 

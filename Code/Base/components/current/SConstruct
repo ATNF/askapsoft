@@ -11,6 +11,7 @@ pkg = env.AskapPackage("components")
 pkg.AddSubPackage("components")
 
 env.Append(CCFLAGS=['-O3'])
-
+# for casarest
+env.AppendUnique(CCFLAGS=['-I/usr/local/include/casarest'])
 # run the build process
 pkg()

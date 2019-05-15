@@ -49,7 +49,7 @@
 
 #include <askap/askap/AskapError.h>
 
-using namespace casa;
+using namespace casacore;
 using namespace std;
 
 using namespace askap;

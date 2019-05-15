@@ -55,7 +55,7 @@
 ASKAP_LOGGER(logger, ".CubeBuilder");
 
 using namespace askap::cp;
-using namespace casa;
+using namespace casacore;
 using namespace std;
 using namespace askap::synthesis;
 

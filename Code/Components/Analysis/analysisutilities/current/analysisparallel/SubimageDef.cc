@@ -54,7 +54,7 @@
 #include <duchamp/param.hh>
 #include <duchamp/Outputs/KarmaAnnotationWriter.hh>
 
-using namespace casa;
+using namespace casacore;
 
 ///@brief Where the log messages go.
 ASKAP_LOGGER(logger, ".subimagedef");

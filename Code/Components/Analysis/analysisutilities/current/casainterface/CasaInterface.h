@@ -51,7 +51,7 @@
 #include <casacore/casa/Arrays/Slicer.h>
 #include <casacore/images/Images/ImageInterface.h>
 #include <casacore/images/Images/SubImage.h>
-using namespace casa;
+using namespace casacore;
 
 namespace askap {
 

@@ -32,7 +32,7 @@
 #include <casacore/casa/Containers/RecordInterface.h>
 
 
-using namespace casa;
+using namespace casacore;
 #include <sstream>
 #include <string>
 using namespace std;

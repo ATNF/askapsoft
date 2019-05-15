@@ -57,7 +57,7 @@
 #include <boost/shared_ptr.hpp>
 
 using namespace askap;
-using namespace casa;
+using namespace casacore;
 
 ASKAP_LOGGER(logger, "fitsToSPWS.log");
 

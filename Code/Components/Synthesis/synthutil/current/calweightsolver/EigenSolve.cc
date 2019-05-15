@@ -42,7 +42,7 @@
 #include <gsl/gsl_vector.h>
 #include <gsl/gsl_linalg.h>
 
-using namespace casa;
+using namespace casacore;
 using namespace std;
 
 using namespace askap;

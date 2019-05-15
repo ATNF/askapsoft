@@ -49,7 +49,7 @@
 // Using
 using namespace askap::cp::icewrapper;
 using namespace askap::interfaces;
-using namespace casa;
+using namespace casacore;
 
 ASKAP_LOGGER(logger, ".MetadataConverter");
 

@@ -42,7 +42,7 @@
 // Classes to test
 #include "ingestpipeline/calcuvwtask/CalcUVWTask.h"
 
-using namespace casa;
+using namespace casacore;
 using askap::cp::common::VisChunk;
 
 namespace askap {

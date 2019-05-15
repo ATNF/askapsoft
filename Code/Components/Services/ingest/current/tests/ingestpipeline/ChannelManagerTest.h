@@ -35,7 +35,7 @@
 // Classes to test
 #include "ingestpipeline/sourcetask/ChannelManager.h"
 
-using namespace casa;
+using namespace casacore;
 
 namespace askap {
 namespace cp {

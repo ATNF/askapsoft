@@ -44,7 +44,7 @@
 // Classes to test
 #include "ingestpipeline/chanavgtask/ChannelAvgTask.h"
 
-using namespace casa;
+using namespace casacore;
 using askap::cp::common::VisChunk;
 
 namespace askap {

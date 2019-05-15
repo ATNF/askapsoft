@@ -56,7 +56,7 @@
 using namespace std;
 using namespace askap;
 using namespace askap::cp::pipelinetasks;
-using namespace casa;
+using namespace casacore;
 
 ASKAP_LOGGER(logger, ".CflagApp");
 

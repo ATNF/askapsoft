@@ -45,7 +45,7 @@
 // Using
 using namespace std;
 using namespace askap::cp::pipelinetasks;
-using namespace casa;
+using namespace casacore;
 using namespace xercesc;
 using askap::utility::toString;
 using askap::accessors::XercescUtils;

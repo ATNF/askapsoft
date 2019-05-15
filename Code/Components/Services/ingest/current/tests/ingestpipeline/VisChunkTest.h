@@ -35,7 +35,7 @@
 // Classes to test
 #include "cpcommon/VisChunk.h"
 
-using namespace casa;
+using namespace casacore;
 using askap::cp::common::VisChunk;
 
 namespace askap {

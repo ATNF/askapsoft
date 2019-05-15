@@ -40,7 +40,7 @@
 
 #include <fstream>
 
-using namespace casa;
+using namespace casacore;
 using namespace std;
 using namespace askap;
 

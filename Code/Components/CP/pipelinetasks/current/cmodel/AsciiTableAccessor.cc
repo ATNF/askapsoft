@@ -53,7 +53,7 @@
 #include "casacore/casa/Quanta/MVDirection.h"
 
 // Using
-using namespace casa;
+using namespace casacore;
 using namespace std;
 using namespace askap::cp::pipelinetasks;
 using namespace askap::cp::sms::client;

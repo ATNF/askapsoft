@@ -77,7 +77,7 @@
 #include <duchamp/param.hh>
 #include <duchamp/Cubes/cubes.hh>
 
-using namespace casa;
+using namespace casacore;
 using namespace duchamp;
 
 ///@brief Where the log messages go.

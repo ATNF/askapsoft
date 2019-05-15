@@ -33,7 +33,7 @@
 // Classes to test
 #include "cmodel/AsciiTableAccessor.h"
 
-using namespace casa;
+using namespace casacore;
 using namespace askap::cp::sms::client;
 
 namespace askap {

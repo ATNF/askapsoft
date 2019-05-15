@@ -55,7 +55,7 @@
 ASKAP_LOGGER(logger, ".SelectionFlagger");
 
 using namespace askap;
-using namespace casa;
+using namespace casacore;
 using namespace askap::cp::pipelinetasks;
 
 vector< boost::shared_ptr<IFlagger> > SelectionFlagger::build(

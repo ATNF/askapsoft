@@ -42,7 +42,7 @@
 #include "cpcommon/TosMetadataAntenna.h"
 
 // Using
-using namespace casa;
+using namespace casacore;
 using namespace LOFAR;
 
 namespace askap {

@@ -36,7 +36,7 @@
 // Classes to test
 #include "cflag/FlaggerFactory.h"
 
-using namespace casa;
+using namespace casacore;
 
 namespace askap {
 namespace cp {

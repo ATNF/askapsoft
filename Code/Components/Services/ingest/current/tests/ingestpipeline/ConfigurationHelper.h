@@ -36,7 +36,7 @@
 // Local package includes
 #include "configuration/Configuration.h"
 
-using namespace casa;
+using namespace casacore;
 using askap::cp::common::VisChunk;
 
 namespace askap {

@@ -53,7 +53,7 @@
 ASKAP_LOGGER(logger, ".MSGroupInfo");
 
 using namespace askap::cp;
-using namespace casa;
+using namespace casacore;
 using namespace std;
 
 MSGroupInfo::MSGroupInfo() : itsTotalNumChannels(0)

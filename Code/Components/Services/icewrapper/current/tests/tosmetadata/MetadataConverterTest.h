@@ -47,7 +47,7 @@
 
 // Using
 using namespace std;
-using namespace casa;
+using namespace casacore;
 using namespace askap::interfaces;
 
 namespace askap {

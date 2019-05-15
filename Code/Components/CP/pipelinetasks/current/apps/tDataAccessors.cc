@@ -46,7 +46,7 @@
 using namespace askap;
 using namespace askap::cp::pipelinetasks;
 using namespace askap::cp::sms::client;
-using namespace casa;
+using namespace casacore;
 
 ASKAP_LOGGER(logger, ".tDataAccessors");
 

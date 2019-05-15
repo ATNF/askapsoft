@@ -79,7 +79,7 @@
 
 using namespace askap;
 using namespace askap::cp;
-using namespace casa;
+using namespace casacore;
 
 // Forward declaration
 void checkStokesType (const Stokes::StokesTypes& stokestype);

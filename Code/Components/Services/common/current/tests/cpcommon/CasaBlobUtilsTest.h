@@ -39,7 +39,7 @@
 // Classes to test
 #include "cpcommon/CasaBlobUtils.h"
 
-using namespace casa;
+using namespace casacore;
 using namespace LOFAR;
 
 namespace askap {

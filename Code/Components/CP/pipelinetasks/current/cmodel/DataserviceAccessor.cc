@@ -37,7 +37,7 @@
 #include "askap/AskapError.h"
 
 // Using
-using namespace casa;
+using namespace casacore;
 using namespace askap;
 using namespace askap::cp::pipelinetasks;
 using namespace askap::cp::sms::client;

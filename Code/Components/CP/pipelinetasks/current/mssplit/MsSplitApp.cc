@@ -73,7 +73,7 @@ ASKAP_LOGGER(logger, ".mssplitapp");
 
 using namespace askap;
 using namespace askap::cp::pipelinetasks;
-using namespace casa;
+using namespace casacore;
 using namespace std;
 
 MsSplitApp::MsSplitApp()

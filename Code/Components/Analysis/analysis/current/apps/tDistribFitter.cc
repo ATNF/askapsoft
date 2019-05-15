@@ -69,7 +69,7 @@ using namespace LOFAR::TYPES;
 
 #include <wcslib/wcs.h>
 
-using namespace casa;
+using namespace casacore;
 using namespace askap;
 using namespace askap::askapparallel;
 using namespace askap::analysis;

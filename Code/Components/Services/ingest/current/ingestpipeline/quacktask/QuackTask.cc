@@ -37,7 +37,7 @@
 
 ASKAP_LOGGER(logger, ".QuackTask");
 
-using namespace casa;
+using namespace casacore;
 using namespace askap;
 using namespace askap::cp::common;
 using namespace askap::cp::ingest;

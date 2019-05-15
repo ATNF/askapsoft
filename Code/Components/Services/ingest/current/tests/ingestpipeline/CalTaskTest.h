@@ -39,7 +39,7 @@
 // Classes to test
 #include "ingestpipeline/caltask/CalTask.h"
 
-using namespace casa;
+using namespace casacore;
 using askap::cp::common::VisChunk;
 
 namespace askap {

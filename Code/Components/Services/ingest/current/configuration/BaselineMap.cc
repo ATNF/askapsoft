@@ -49,7 +49,7 @@ using namespace askap;
 using namespace askap::utility;
 using namespace askap::cp;
 using namespace askap::cp::ingest;
-using namespace casa;
+using namespace casacore;
 
 BaselineMap::BaselineMap()
 {
