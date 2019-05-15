@@ -86,7 +86,7 @@ void CalcUVWTask::process(VisChunk::ShPtr& chunk)
         ASKAPLOG_INFO_STR(logger, "Use dynamic beam offset information, overriding existing arrangement if present");
         setupBeamOffsets(chunk->beamOffsets());
     }
-    for (casa::uInt row = 0; row < chunk->nRow(); ++row) {
+    for (casacore::uInt row = 0; row < chunk->nRow(); ++row) {
         calcForRow(chunk, row);
     }
 }
@@ -97,11 +97,11 @@ void CalcUVWTask::process(VisChunk::ShPtr& chunk)
 /// @param[in] dishPointing pointing centre for the whole dish
 /// @param[in] beam beam index to work 
 /// @return direction measure for the phase centre
-casa::MDirection CalcUVWTask::phaseCentre(const casa::MDirection &dishPointing,
-                                          const casa::uInt beam) const
+casacore::MDirection CalcUVWTask::phaseCentre(const casacore::MDirection &dishPointing,
+                                          const casacore::uInt beam) const
 {
     // Current phase center
-    casa::MDirection fpc(dishPointing);
+    casacore::MDirection fpc(dishPointing);
     ASKAPCHECK(beam < itsBeamOffset.size(), "Beam index (" << beam << ") is invalid");
 
     // Shift per beam offsets
@@ -113,7 +113,7 @@ casa::MDirection CalcUVWTask::phaseCentre(const casa::MDirection &dishPointing,
 /// @brief obtain gast for the given epoch
 /// @param[in] epoch UTC epoch to convert to GAST
 /// @return gast in radians modulo 2pi
-double CalcUVWTask::calcGAST(const casa::MVEpoch &epoch)
+double CalcUVWTask::calcGAST(const casacore::MVEpoch &epoch)
 {
     // Determine Greenwich Apparent Sidereal Time
     MEpoch epUT1(epoch, MEpoch::UTC);
@@ -123,12 +123,12 @@ double CalcUVWTask::calcGAST(const casa::MVEpoch &epoch)
     return (gast - Int(gast)) * C::_2pi; // Into Radians
 }
 
-void CalcUVWTask::calcForRow(VisChunk::ShPtr chunk, const casa::uInt row)
+void CalcUVWTask::calcForRow(VisChunk::ShPtr chunk, const casacore::uInt row)
 {
-    const casa::uInt ant1 = chunk->antenna1()(row);
-    const casa::uInt ant2 = chunk->antenna2()(row);
+    const casacore::uInt ant1 = chunk->antenna1()(row);
+    const casacore::uInt ant2 = chunk->antenna2()(row);
 
-    const casa::uInt nAnt = nAntennas();
+    const casacore::uInt nAnt = nAntennas();
 
     ASKAPCHECK(ant1 < nAnt, "Antenna index (" << ant1 << ") is invalid");
     ASKAPCHECK(ant2 < nAnt, "Antenna index (" << ant2 << ") is invalid");
@@ -136,31 +136,31 @@ void CalcUVWTask::calcForRow(VisChunk::ShPtr chunk, const casa::uInt row)
 
     /*
     // reference point, could've used one of the antennas
-    const casa::MPosition mroPos(casa::MVPosition(casa::Quantity(370.81, "m"),
-                            casa::Quantity(116.6310372795, "deg"),
-                            casa::Quantity(-26.6991531922, "deg")),
-                            casa::MPosition::Ref(casa::MPosition::WGS84));
+    const casacore::MPosition mroPos(casacore::MVPosition(casacore::Quantity(370.81, "m"),
+                            casacore::Quantity(116.6310372795, "deg"),
+                            casacore::Quantity(-26.6991531922, "deg")),
+                            casacore::MPosition::Ref(casacore::MPosition::WGS84));
     */
 
-    const casa::MPosition mroPos(casa::MVPosition(antXYZ(0)), casa::MPosition::ITRF);
+    const casacore::MPosition mroPos(casacore::MVPosition(antXYZ(0)), casacore::MPosition::ITRF);
    
 
     // Determine Greenwich Apparent Sidereal Time
     //const double gast = calcGAST(chunk->time()); 
-    casa::MeasFrame frame(casa::MEpoch(chunk->time(), casa::MEpoch::UTC), mroPos);
+    casacore::MeasFrame frame(casacore::MEpoch(chunk->time(), casacore::MEpoch::UTC), mroPos);
 
     // phase center for a given beam
         
-    const casa::MDirection fpc = casa::MDirection::Convert(phaseCentre(chunk->phaseCentre()(row),chunk->beam1()(row)),
-                                    casa::MDirection::Ref(casa::MDirection::TOPO, frame))();
+    const casacore::MDirection fpc = casacore::MDirection::Convert(phaseCentre(chunk->phaseCentre()(row),chunk->beam1()(row)),
+                                    casacore::MDirection::Ref(casacore::MDirection::TOPO, frame))();
 
     /*
     const double ra = fpc.getAngle().getValue()(0);
     const double dec = fpc.getAngle().getValue()(1);
     */
-    const casa::MDirection hadec = casa::MDirection::Convert(phaseCentre(chunk->phaseCentre()(row),
+    const casacore::MDirection hadec = casacore::MDirection::Convert(phaseCentre(chunk->phaseCentre()(row),
                        chunk->beam1()(row)),
-                       casa::MDirection::Ref(casa::MDirection::HADEC, frame))();
+                       casacore::MDirection::Ref(casacore::MDirection::HADEC, frame))();
     const double H0 = hadec.getValue().getLong() - mroPos.getValue().getLong();
     const double dec = hadec.getValue().getLat();
 
@@ -185,7 +185,7 @@ void CalcUVWTask::calcForRow(VisChunk::ShPtr chunk, const casa::uInt row)
     Matrix<double> antUVW(3, nAnt);
     
     for (uInt i = 0; i < nAnt; ++i) {
-        antUVW.column(i) = casa::product(trans, antXYZ(i));
+        antUVW.column(i) = casacore::product(trans, antXYZ(i));
     }
 
     double x1 = antUVW(0, ant1), y1 = antUVW(1, ant1), z1 = antUVW(2, ant1);
@@ -198,14 +198,14 @@ void CalcUVWTask::calcForRow(VisChunk::ShPtr chunk, const casa::uInt row)
 
     const Vector<double> baseline = antXYZ(ant2) - antXYZ(ant1);
     ASKAPDEBUGASSERT(baseline.nelements() == 3);
-    Vector<double> uvwvec = casa::product(trans,baseline);
+    Vector<double> uvwvec = casacore::product(trans,baseline);
     ASKAPDEBUGASSERT(uvwvec.nelements() == 3);
     // do the conversion to J2000 in a quick and dirty way for now
     // some optimisation and caching of rotation matrix are definitely possible here
     // but cache class in accessors needs to be adapted first.
     // commented out hadec-based transformation, see ADESCOM-342 and ASKAPSDP-3033
-    //casa::UVWMachine uvm(casa::MDirection::Ref(casa::MDirection::J2000), hadec, frame);
-    casa::UVWMachine uvm(casa::MDirection::Ref(casa::MDirection::J2000), fpc);
+    //casacore::UVWMachine uvm(casacore::MDirection::Ref(casacore::MDirection::J2000), hadec, frame);
+    casacore::UVWMachine uvm(casacore::MDirection::Ref(casacore::MDirection::J2000), fpc);
     uvm.convertUVW(uvwvec);
     ASKAPDEBUGASSERT(uvwvec.nelements() == 3);
 
@@ -214,7 +214,7 @@ void CalcUVWTask::calcForRow(VisChunk::ShPtr chunk, const casa::uInt row)
     // calculated earlier in the processing chain.
     // note, now it doesn't quite match as we using the frame related to each
     // particular antenna rather than antenna 0. This gives about 0.1mm error
-    casa::Vector<double> diff = uvwvec.copy();
+    casacore::Vector<double> diff = uvwvec.copy();
     diff(0) -= chunk->uvw()(row)(0);
     diff(1) -= chunk->uvw()(row)(1);
     diff(2) -= chunk->uvw()(row)(2);
@@ -240,7 +240,7 @@ void CalcUVWTask::calcForRow(VisChunk::ShPtr chunk, const casa::uInt row)
 /// @details
 /// @param[in] ant antenna index
 /// @return 3-element vector with X,Y and Z
-casa::Vector<double> CalcUVWTask::antXYZ(const casa::uInt ant) const
+casacore::Vector<double> CalcUVWTask::antXYZ(const casacore::uInt ant) const
 {
    return itsAntXYZ.column(ant);
 }
@@ -249,7 +249,7 @@ void CalcUVWTask::createPositionMatrix(const Configuration& config)
 {
     const std::vector<Antenna> antennas = config.antennas();
     const size_t nAnt = antennas.size();
-    itsAntXYZ = casa::Matrix<double>(3, nAnt);
+    itsAntXYZ = casacore::Matrix<double>(3, nAnt);
     for (size_t i = 0; i < nAnt; ++i) {
         itsAntXYZ(0, i) = antennas.at(i).position()(0); // x
         itsAntXYZ(1, i) = antennas.at(i).position()(1); // y
@@ -257,7 +257,7 @@ void CalcUVWTask::createPositionMatrix(const Configuration& config)
     }
 }
 
-void CalcUVWTask::setupBeamOffsets(const casa::Matrix<casa::Double>& offsets)
+void CalcUVWTask::setupBeamOffsets(const casacore::Matrix<casacore::Double>& offsets)
 {
     if (itsBeamOffset.nelements() != offsets.ncolumn()) {
         itsBeamOffset.resize(offsets.ncolumn());

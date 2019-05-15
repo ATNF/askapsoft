@@ -140,15 +140,15 @@ class VariableThresholder {
         /// distributed fashion to a CASA or FITS image on disk. The
         /// 'accumulate' method for DistributedImageWriter::write is
         /// used, taking into account any overlapping border regions.
-        void writeImage(casa::Array<Float> &arr,
-                        casa::Array<bool> &mask,
+        void writeImage(casacore::Array<Float> &arr,
+                        casacore::Array<bool> &mask,
                         std::string imageName,
-                        casa::IPosition &loc);
+                        casacore::IPosition &loc);
 
-        void defineChunk(casa::Array<Float> &inputChunkArr,
-                         casa::MaskedArray<Float> &outputChunk, size_t ctr);
+        void defineChunk(casacore::Array<Float> &inputChunkArr,
+                         casacore::MaskedArray<Float> &outputChunk, size_t ctr);
 
-        void saveSNRtoCube(casa::Array<casa::Float> &snr, size_t ctr);
+        void saveSNRtoCube(casacore::Array<casacore::Float> &snr, size_t ctr);
 
         /// @brief The MPI communication information
         askap::askapparallel::AskapParallel *itsComms;
@@ -188,11 +188,11 @@ class VariableThresholder {
         analysisutilities::SubimageDef *itsSubimageDef;
         duchamp::Cube *itsCube;
         boost::shared_ptr<Weighter> itsWeighter;
-        casa::Slicer itsSlicer;
-        casa::IPosition itsInputShape;
-        casa::IPosition itsLocation;
-        casa::CoordinateSystem itsInputCoordSys;
-        casa::Array<bool> itsMask;
+        casacore::Slicer itsSlicer;
+        casacore::IPosition itsInputShape;
+        casacore::IPosition itsLocation;
+        casacore::CoordinateSystem itsInputCoordSys;
+        casacore::Array<bool> itsMask;
 
 };
 

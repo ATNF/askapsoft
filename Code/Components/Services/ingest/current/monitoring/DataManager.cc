@@ -99,9 +99,9 @@ IcePointStatus DataManager::toIceStatus(const MonitorPointStatus_t status)
 
 long DataManager::getTime(void)
 {
-    casa::Time date;
-    casa::MEpoch now(casa::MVEpoch(date.modifiedJulianDay()),
-                     casa::MEpoch::Ref(casa::MEpoch::UTC));
+    casacore::Time date;
+    casacore::MEpoch now(casacore::MVEpoch(date.modifiedJulianDay()),
+                     casacore::MEpoch::Ref(casacore::MEpoch::UTC));
     return static_cast<long>(askap::epoch2bat(now));
 }
 

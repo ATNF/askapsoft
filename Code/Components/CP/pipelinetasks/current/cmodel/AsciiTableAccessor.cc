@@ -83,10 +83,10 @@ AsciiTableAccessor::~AsciiTableAccessor()
 }
 
 ComponentListPtr AsciiTableAccessor::coneSearch(
-    const casa::Quantity& ra,
-    const casa::Quantity& dec,
-    const casa::Quantity& searchRadius,
-    const casa::Quantity& fluxLimit)
+    const casacore::Quantity& ra,
+    const casacore::Quantity& dec,
+    const casacore::Quantity& searchRadius,
+    const casacore::Quantity& fluxLimit)
 {
     ASKAPLOG_INFO_STR(logger, "Cone search - ra: " << ra.getValue("deg")
                            << " deg, dec: " << dec.getValue("deg")
@@ -98,7 +98,7 @@ ComponentListPtr AsciiTableAccessor::coneSearch(
     std::string line;
     itsBelowFluxLimit = 0;
     itsOutsideSearchCone = 0;
-    casa::uLong total = 0;
+    casacore::uLong total = 0;
 
     // Initially built as a list to allow efficient growth
     std::list<askap::cp::sms::client::Component> list;
@@ -123,17 +123,17 @@ ComponentListPtr AsciiTableAccessor::coneSearch(
 
 void AsciiTableAccessor::processLine(
     const std::string& line,
-    const casa::Quantity& searchRA,
-    const casa::Quantity& searchDec,
-    const casa::Quantity& searchRadius,
-    const casa::Quantity& fluxLimit,
+    const casacore::Quantity& searchRA,
+    const casacore::Quantity& searchDec,
+    const casacore::Quantity& searchRadius,
+    const casacore::Quantity& fluxLimit,
     std::list<askap::cp::sms::client::Component>& list)
 {
     // Create these once to avoid the performance impact of creating them over and over.
-    static casa::Unit deg("deg");
-    static casa::Unit rad("rad");
-    static casa::Unit arcsec("arcsec");
-    static casa::Unit Jy("Jy");
+    static casacore::Unit deg("deg");
+    static casacore::Unit rad("rad");
+    static casacore::Unit arcsec("arcsec");
+    static casacore::Unit Jy("Jy");
 
     // Tokenize the line
     stringstream iss(line);
@@ -143,8 +143,8 @@ void AsciiTableAccessor::processLine(
          istream_iterator<string>(),
          back_inserter<vector<string> >(tokens));
 
-    const casa::Quantity ra(boost::lexical_cast<casa::Double>(tokens[itsFields[RA].first]), itsFields[RA].second);
-    const casa::Quantity dec(boost::lexical_cast<casa::Double>(tokens[itsFields[DEC].first]), itsFields[DEC].second);
+    const casacore::Quantity ra(boost::lexical_cast<casacore::Double>(tokens[itsFields[RA].first]), itsFields[RA].second);
+    const casacore::Quantity dec(boost::lexical_cast<casacore::Double>(tokens[itsFields[DEC].first]), itsFields[DEC].second);
     // Discard if outside cone
     const MVDirection searchRefDir(searchRA, searchDec);
     const MVDirection componentDir(ra, dec);
@@ -154,16 +154,16 @@ void AsciiTableAccessor::processLine(
         return;
     }
 
-    const casa::Quantity flux(boost::lexical_cast<casa::Double>(tokens[itsFields[FLUX].first]), itsFields[FLUX].second);
+    const casacore::Quantity flux(boost::lexical_cast<casacore::Double>(tokens[itsFields[FLUX].first]), itsFields[FLUX].second);
     // Discard if below flux limit
     if (flux.getValue(Jy) < fluxLimit.getValue(Jy)) {
         itsBelowFluxLimit++;
         return;
     }
 
-    casa::Quantity majorAxis(boost::lexical_cast<casa::Double>(tokens[itsFields[MAJOR_AXIS].first]), itsFields[MAJOR_AXIS].second);
-    casa::Quantity minorAxis(boost::lexical_cast<casa::Double>(tokens[itsFields[MINOR_AXIS].first]), itsFields[MINOR_AXIS].second);
-    const casa::Quantity positionAngle(boost::lexical_cast<casa::Double>(tokens[itsFields[POSITION_ANGLE].first]), itsFields[POSITION_ANGLE].second);
+    casacore::Quantity majorAxis(boost::lexical_cast<casacore::Double>(tokens[itsFields[MAJOR_AXIS].first]), itsFields[MAJOR_AXIS].second);
+    casacore::Quantity minorAxis(boost::lexical_cast<casacore::Double>(tokens[itsFields[MINOR_AXIS].first]), itsFields[MINOR_AXIS].second);
+    const casacore::Quantity positionAngle(boost::lexical_cast<casacore::Double>(tokens[itsFields[POSITION_ANGLE].first]), itsFields[POSITION_ANGLE].second);
 
     // Ensure major axis is larger than minor axis
     if (majorAxis.getValue() < minorAxis.getValue()) {
@@ -172,19 +172,19 @@ void AsciiTableAccessor::processLine(
 
     // Ensure if major axis is non-zero, so is the minor axis
     if (majorAxis.getValue() > 0.0 && minorAxis.getValue() == 0.0) {
-        minorAxis = casa::Quantity(1.0e-15, arcsec);
+        minorAxis = casacore::Quantity(1.0e-15, arcsec);
     }
 
     // Spectral Index if present
     double spectralIndex = 0.0;
     if (itsFields.find(SPECTRAL_INDEX) != itsFields.end()) {
-        spectralIndex = boost::lexical_cast<casa::Double>(tokens[itsFields[SPECTRAL_INDEX].first]);
+        spectralIndex = boost::lexical_cast<casacore::Double>(tokens[itsFields[SPECTRAL_INDEX].first]);
     }
 
     // Spectral Curvature if present
     double spectralCurvature = 0.0;
     if (itsFields.find(SPECTRAL_CURVATURE) != itsFields.end()) {
-        spectralCurvature = boost::lexical_cast<casa::Double>(tokens[itsFields[SPECTRAL_CURVATURE].first]);
+        spectralCurvature = boost::lexical_cast<casacore::Double>(tokens[itsFields[SPECTRAL_CURVATURE].first]);
     }
 
     // Build the Component object and add to the list. This component
@@ -195,13 +195,13 @@ void AsciiTableAccessor::processLine(
     list.push_back(c);
 }
 
-std::pair< short, casa::Unit > AsciiTableAccessor::makeFieldDescEntry(
+std::pair< short, casacore::Unit > AsciiTableAccessor::makeFieldDescEntry(
         const LOFAR::ParameterSet& parset,
         const std::string& colkey,
         const std::string& unitskey)
 {
     const short pos = parset.getUint(colkey);
-    const casa::Unit units(parset.getString(unitskey));
+    const casacore::Unit units(parset.getString(unitskey));
     return make_pair(pos, units);
 }
 

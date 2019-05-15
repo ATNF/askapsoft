@@ -73,10 +73,10 @@ using namespace askap::accessors;
 double convertQuantity(const std::string &strval,
                       const std::string &unit)
 {
-    casa::Quantity q;
+    casacore::Quantity q;
       
-    casa::Quantity::read(q, strval);
-    return q.getValue(casa::Unit(unit));
+    casacore::Quantity::read(q, strval);
+    return q.getValue(casacore::Unit(unit));
 }
         
 /// @brief A helper method to parse string of quantities
@@ -116,7 +116,7 @@ public:
     /// @param[in] dir source direction
     /// @param[in] ref reference direction
     /// @param[in] optional factor to scale that offset 
-    void add(const casa::MVDirection &dir, const casa::MVDirection &ref, const double factor = 1.);
+    void add(const casacore::MVDirection &dir, const casacore::MVDirection &ref, const double factor = 1.);
 
     /// @brief add an offset by forming a triangle with two existing ones 
     /// @details helper method to add extra offset to the list of offsets to form an equilateral triangle with two 
@@ -189,20 +189,20 @@ void OffsetManager::complementTriangle(size_t pt1, size_t pt2, bool raAdd)
 /// @param[in] dir source direction
 /// @param[in] ref reference direction
 /// @param[in] optional factor to scale that offset 
-void OffsetManager::add(const casa::MVDirection &dir, const casa::MVDirection &ref, const double factor)
+void OffsetManager::add(const casacore::MVDirection &dir, const casacore::MVDirection &ref, const double factor)
 {
   const double offset1 = sin(dir.getLong() - ref.getLong()) * cos(dir.getLat());
   const double offset2 = sin(dir.getLat()) * cos(ref.getLat()) - cos(dir.getLat()) * sin(ref.getLat())
                                                   * cos(dir.getLong() - ref.getLong());
-  add(factor * offset1 / casa::C::pi * 180., factor * offset2 / casa::C::pi * 180.);
+  add(factor * offset1 / casacore::C::pi * 180., factor * offset2 / casacore::C::pi * 180.);
 }
 
 /// @brief helper method to extract direction string
 /// @param[in] dirStr vector of strings representing direction
 /// @return direction
-casa::MVDirection  extractDir(const std::vector<std::string> &dirStr) {
+casacore::MVDirection  extractDir(const std::vector<std::string> &dirStr) {
    ASKAPCHECK(dirStr.size() >= 2, "Expect at least two elements in the direction string; you have="<<dirStr);
-   const casa::MVDirection dir(convertQuantity(dirStr[0],"rad"), convertQuantity(dirStr[1],"rad"));
+   const casacore::MVDirection dir(convertQuantity(dirStr[0],"rad"), convertQuantity(dirStr[1],"rad"));
    return dir;
 }
  
@@ -218,7 +218,7 @@ size_t extractIndex(const std::vector<std::string> &vec, const std::string &val)
 } 
 
 void makeOffsets(const LOFAR::ParameterSet &parset) {
-  std::vector<casa::MVDirection> directions;
+  std::vector<casacore::MVDirection> directions;
   const std::vector<std::string> srcNames = parset.getStringVector("sources",std::vector<std::string>());
   for (std::vector<std::string>::const_iterator ci = srcNames.begin(); ci != srcNames.end(); ++ci) {
        directions.push_back(extractDir(parset.getStringVector("sources." + *ci)));                      
@@ -273,15 +273,15 @@ void makeOffsets(const LOFAR::ParameterSet &parset) {
   }
   // reference position
   // default - Sun at MRO
-  casa::MPosition mroPos(casa::MVPosition(casa::Quantity(370.81, "m"), casa::Quantity(116.6310372795, "deg"), 
-                          casa::Quantity(-26.6991531922, "deg")), casa::MPosition::Ref(casa::MPosition::WGS84));
-  casa::Quantity q;
-  ASKAPCHECK(casa::MVTime::read(q, "today"), "MVTime::read failed");
+  casacore::MPosition mroPos(casacore::MVPosition(casacore::Quantity(370.81, "m"), casacore::Quantity(116.6310372795, "deg"), 
+                          casacore::Quantity(-26.6991531922, "deg")), casacore::MPosition::Ref(casacore::MPosition::WGS84));
+  casacore::Quantity q;
+  ASKAPCHECK(casacore::MVTime::read(q, "today"), "MVTime::read failed");
   std::cout<<"Current UT MJD: "<<q<<std::endl;
-  const casa::MEpoch::Ref utcRef(casa::MEpoch::UTC);
-  casa::MEpoch when(casa::MVEpoch(q), utcRef);
-  casa::MeasFrame frame(mroPos, when);
-  casa::MVDirection refDir = casa::MDirection::Convert(casa::MDirection(casa::MDirection::SUN), casa::MDirection::Ref(casa::MDirection::J2000,frame))().getValue();
+  const casacore::MEpoch::Ref utcRef(casacore::MEpoch::UTC);
+  casacore::MEpoch when(casacore::MVEpoch(q), utcRef);
+  casacore::MeasFrame frame(mroPos, when);
+  casacore::MVDirection refDir = casacore::MDirection::Convert(casacore::MDirection(casacore::MDirection::SUN), casacore::MDirection::Ref(casacore::MDirection::J2000,frame))().getValue();
   if (parset.isDefined("refdir")) {
       refDir = extractDir(parset.getStringVector("refdir"));
   }
@@ -290,10 +290,10 @@ void makeOffsets(const LOFAR::ParameterSet &parset) {
   
   for (size_t i=0; i<ofm.size(); ++i) {
        std::pair<double,double> offsetsInDeg = ofm[i];
-       const double offset1 = offsetsInDeg.first / 180. * casa::C::pi;
-       const double offset2 = offsetsInDeg.second / 180. * casa::C::pi;
-       casa::MVDirection testDir = refDir;
-       testDir.shift(offset1*factor,offset2*factor, casa::True);
+       const double offset1 = offsetsInDeg.first / 180. * casacore::C::pi;
+       const double offset2 = offsetsInDeg.second / 180. * casacore::C::pi;
+       casacore::MVDirection testDir = refDir;
+       testDir.shift(offset1*factor,offset2*factor, casacore::True);
        std::cout<<"offset ("<<offsetsInDeg.first<<","<<offsetsInDeg.second<<") applied to test direction: "<<printDirection(testDir)<<std::endl;
   }
   
@@ -306,7 +306,7 @@ int main(int argc, char **argv) {
 	 return -2;
      }
 
-     casa::Timer timer;
+     casacore::Timer timer;
 
      timer.mark();
      std::cerr<<"Initialization: "<<timer.real()<<std::endl;

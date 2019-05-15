@@ -66,7 +66,7 @@ SliceMaker::SliceMaker(const LOFAR::ParameterSet& parset)
     this->itsSubimageDef = analysisutilities::SubimageDef(parset);
     this->itsNumChunks = this->itsSubimageDef.nsubx() * this->itsSubimageDef.nsuby() *
                          this->itsSubimageDef.nsubz();
-//      this->itsSliceShape = casa::IPosition(parset.getIntVector("sliceshape"));
+//      this->itsSliceShape = casacore::IPosition(parset.getIntVector("sliceshape"));
 
     this->itsNpix = parset.getIntVector("npixslice");
     this->itsNchan = parset.getInt("nchanslice");
@@ -86,7 +86,7 @@ void SliceMaker::initialise()
     std::stringstream firstChunk;
     firstChunk << this->itsModelName << "_w1__0_0_0_0__";
 
-    const casa::PagedImage<float> refImage(firstChunk.str());
+    const casacore::PagedImage<float> refImage(firstChunk.str());
     this->itsRefShape = refImage.shape();
     this->itsRefCoordinates = refImage.coordinates();
     this->itsRefUnits = refImage.units();
@@ -95,7 +95,7 @@ void SliceMaker::initialise()
     this->itsLngAxis = this->itsRefCoordinates.directionAxesNumbers()[0];
     this->itsLatAxis = this->itsRefCoordinates.directionAxesNumbers()[1];
 
-    this->itsSliceShape = casa::IPosition(this->itsRefShape);
+    this->itsSliceShape = casacore::IPosition(this->itsRefShape);
     this->itsSliceShape[this->itsLngAxis] = this->itsNpix[0];
     this->itsSliceShape[this->itsLatAxis] = this->itsNpix[1];
     this->itsSliceShape[this->itsSpcAxis] = this->itsNchan;
@@ -129,8 +129,8 @@ void SliceMaker::initialise()
 void SliceMaker::createSlice()
 {
 
-    casa::CoordinateSystem newCoords = this->itsRefCoordinates;
-    casa::Vector<double> refPix = newCoords.referencePixel();
+    casacore::CoordinateSystem newCoords = this->itsRefCoordinates;
+    casacore::Vector<double> refPix = newCoords.referencePixel();
     refPix[this->itsLngAxis] = this->itsSliceShape[this->itsLngAxis] / 2.;
     refPix[this->itsLatAxis] = this->itsSliceShape[this->itsLatAxis] / 2.;
     refPix[this->itsSpcAxis] -= this->itsChanRange[0];
@@ -141,7 +141,7 @@ void SliceMaker::createSlice()
                       << " of shape " << this->itsSliceShape
                       << " and size approximately " << std::setprecision(2)
                       << (size / 1024.0 / 1024.0) << "MB.");
-    itsSlice.reset(new casa::PagedImage<float>(casa::TiledShape(this->itsSliceShape),
+    itsSlice.reset(new casacore::PagedImage<float>(casacore::TiledShape(this->itsSliceShape),
                    newCoords, itsSliceName));
 
     itsSlice->setUnits(this->itsRefUnits);
@@ -151,24 +151,24 @@ void SliceMaker::createSlice()
 const void SliceMaker::writeChunks()
 {
 
-    casa::IPosition stride(this->itsSliceShape.size(), 1);
+    casacore::IPosition stride(this->itsSliceShape.size(), 1);
     for (unsigned int i = 0; i < this->itsNumChunks; i++) {
 
         ASKAPLOG_DEBUG_STR(logger, "Reading image " << this->itsChunkList[i]);
-        const casa::PagedImage<float> img(this->itsChunkList[i]);
+        const casacore::PagedImage<float> img(this->itsChunkList[i]);
         ASKAPLOG_DEBUG_STR(logger, "Image has shape " << img.shape());
 
-        casa::IPosition blc(this->itsSliceShape.size(), 0);
-        casa::IPosition trc = img.shape() - 1;
+        casacore::IPosition blc(this->itsSliceShape.size(), 0);
+        casacore::IPosition trc = img.shape() - 1;
         blc[this->itsSpcAxis] = std::min(this->itsChanRange[0], this->itsChanRange[1]);
         trc[this->itsSpcAxis] = std::max(this->itsChanRange[0], this->itsChanRange[1]);
         ASKAPLOG_INFO_STR(logger, "Chunk #" << i << ": blc=" << blc << ", trc=" << trc);
-        casa::Slicer slicer(blc, trc, casa::Slicer::endIsLast);
+        casacore::Slicer slicer(blc, trc, casacore::Slicer::endIsLast);
         ASKAPLOG_DEBUG_STR(logger, "Will use slicer " << slicer << " to extract");
 
-        casa::Array<float> arr = img.getSlice(slicer);
+        casacore::Array<float> arr = img.getSlice(slicer);
 
-        casa::IPosition where(this->itsSliceShape.size(), 0);
+        casacore::IPosition where(this->itsSliceShape.size(), 0);
         if (this->itsNumChunks > 1) where = this->itsSubimageDef.blc(i);
 
         ASKAPLOG_INFO_STR(logger,

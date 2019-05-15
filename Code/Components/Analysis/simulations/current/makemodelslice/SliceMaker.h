@@ -62,8 +62,8 @@ class SliceMaker {
         std::string itsModelName;
         std::string itsSliceName;
 
-        boost::scoped_ptr< casa::PagedImage<float> > itsSlice;
-        casa::IPosition itsSliceShape;
+        boost::scoped_ptr< casacore::PagedImage<float> > itsSlice;
+        casacore::IPosition itsSliceShape;
         std::vector<int> itsNpix;
         int itsNchan;
         unsigned int itsLngAxis;
@@ -71,9 +71,9 @@ class SliceMaker {
         unsigned int itsSpcAxis;
 
 
-        casa::CoordinateSystem itsRefCoordinates;
-        casa::Unit itsRefUnits;
-        casa::IPosition itsRefShape;
+        casacore::CoordinateSystem itsRefCoordinates;
+        casacore::Unit itsRefUnits;
+        casacore::IPosition itsRefShape;
         std::vector<int> itsChanRange;
 
 

@@ -66,7 +66,7 @@ FrtCommunicator::FrtCommunicator(const LOFAR::ParameterSet& parset, const Config
    itsFRUpdateBATs.resize(nAnt, 0u);
    itsAntennaNames.resize(nAnt);
    for (size_t i = 0; i < nAnt; ++i) {
-        itsAntennaNames[i] = casa::downcase(antennas.at(i).name());
+        itsAntennaNames[i] = casacore::downcase(antennas.at(i).name());
    }
    
    const std::string locatorHost = parset.getString("ice.locator_host");
@@ -96,7 +96,7 @@ FrtCommunicator::FrtCommunicator(const LOFAR::ParameterSet& parset, const Config
 /// @brief get requested DRx delay
 /// @param[in] ant antenna index 
 /// @return DRx delay setting
-int FrtCommunicator::requestedDRxDelay(const casa::uInt ant) const
+int FrtCommunicator::requestedDRxDelay(const casacore::uInt ant) const
 {
   ASKAPASSERT(ant < itsRequestedDRxDelays.size());
   return itsRequestedDRxDelays[ant];
@@ -105,7 +105,7 @@ int FrtCommunicator::requestedDRxDelay(const casa::uInt ant) const
 /// @brief get requested FR phase rate
 /// @param[in] ant antenna index 
 /// @return FR phase rate (in hardware units)
-int FrtCommunicator::requestedFRPhaseRate(const casa::uInt ant) const
+int FrtCommunicator::requestedFRPhaseRate(const casacore::uInt ant) const
 {
   ASKAPASSERT(ant < itsRequestedFRPhaseRates.size());
   return itsRequestedFRPhaseRates[ant];
@@ -115,7 +115,7 @@ int FrtCommunicator::requestedFRPhaseRate(const casa::uInt ant) const
 /// @brief get requested FR phase frequency slope
 /// @param[in] ant antenna index 
 /// @return FR phase frequency slope (in hardware units)
-int FrtCommunicator::requestedFRPhaseSlope(const casa::uInt ant) const
+int FrtCommunicator::requestedFRPhaseSlope(const casacore::uInt ant) const
 {
   ASKAPASSERT(ant < itsRequestedFRPhaseSlopes.size());
   return itsRequestedFRPhaseSlopes[ant];
@@ -125,7 +125,7 @@ int FrtCommunicator::requestedFRPhaseSlope(const casa::uInt ant) const
 /// @brief get requested FR phase offset
 /// @param[in] ant antenna index
 /// @return FR phase offset (in hardware units)
-int FrtCommunicator::requestedFRPhaseOffset(const casa::uInt ant) const
+int FrtCommunicator::requestedFRPhaseOffset(const casacore::uInt ant) const
 {
   ASKAPASSERT(ant < itsRequestedFRPhaseOffsets.size());
   return itsRequestedFRPhaseOffsets[ant];
@@ -134,7 +134,7 @@ int FrtCommunicator::requestedFRPhaseOffset(const casa::uInt ant) const
 /// @brief get the BAT of the last FR parameter update
 /// @param[in] ant antenna index
 /// @return BAT when the last update was implemented
-uint64_t FrtCommunicator::lastFRUpdateBAT(const casa::uInt ant) const
+uint64_t FrtCommunicator::lastFRUpdateBAT(const casacore::uInt ant) const
 {
   ASKAPASSERT(ant < itsFRUpdateBATs.size());
   return itsFRUpdateBATs[ant];
@@ -148,7 +148,7 @@ uint64_t FrtCommunicator::lastFRUpdateBAT(const casa::uInt ant) const
 /// @param[in] ant antenna index
 /// @return true, if FR parameters have ever been updated or
 /// false otherwise
-bool FrtCommunicator::hadFRUpdate(const casa::uInt ant) const
+bool FrtCommunicator::hadFRUpdate(const casacore::uInt ant) const
 {
   ASKAPASSERT(ant < itsFRUpdateBATs.size());
   return itsFRUpdateBATs[ant] != 0u;
@@ -157,7 +157,7 @@ bool FrtCommunicator::hadFRUpdate(const casa::uInt ant) const
 /// @brief test if antenna produces valid data
 /// @param[in] ant antenna index
 /// @return true, if the given antenna produces valid data
-bool FrtCommunicator::isValid(const casa::uInt ant) const
+bool FrtCommunicator::isValid(const casacore::uInt ant) const
 {
   ASKAPASSERT(ant < itsAntennaStatuses.size());
   return itsAntennaStatuses[ant] == ANT_VALID;
@@ -166,7 +166,7 @@ bool FrtCommunicator::isValid(const casa::uInt ant) const
 /// @brief test if antenna is uninitialised
 /// @param[in] ant antenna index
 /// @return true, if the given antenna is uninitialised
-bool FrtCommunicator::isUninitialised(const casa::uInt ant) const
+bool FrtCommunicator::isUninitialised(const casacore::uInt ant) const
 {
   ASKAPASSERT(ant < itsAntennaStatuses.size());
   return itsAntennaStatuses[ant] == ANT_UNINITIALISED;
@@ -174,7 +174,7 @@ bool FrtCommunicator::isUninitialised(const casa::uInt ant) const
 
 /// @brief invalidate the antenna
 /// @param[in] ant antenna index
-void FrtCommunicator::invalidate(const casa::uInt ant) 
+void FrtCommunicator::invalidate(const casacore::uInt ant) 
 {
   ASKAPASSERT(ant < itsAntennaStatuses.size());
   itsAntennaStatuses[ant] = ANT_UNINITIALISED;
@@ -183,14 +183,14 @@ void FrtCommunicator::invalidate(const casa::uInt ant)
 /// @brief signal of the new time stamp
 /// @details Without asynchronous thread, the current implementation relies on this method
 /// being called every cycle. It manages time outs and flags/unflags antennas as necessary.
-void FrtCommunicator::newTimeStamp(const casa::MVEpoch &epoch)
+void FrtCommunicator::newTimeStamp(const casacore::MVEpoch &epoch)
 {
   // first check any requests waiting for completion
   const double timeOut = itsInterval * (0.5 + itsCyclesToWait);
-  //const uint64_t currentBAT = epoch2bat(casa::MEpoch(epoch, casa::MEpoch::UTC));
+  //const uint64_t currentBAT = epoch2bat(casacore::MEpoch(epoch, casacore::MEpoch::UTC));
   for (size_t ant = 0; ant < itsAntennaStatuses.size(); ++ant) {
        if (itsAntennaStatuses[ant] == ANT_BEING_UPDATED) {
-           const casa::MVEpoch timeSince = epoch - itsRequestCompletedTimes[ant];
+           const casacore::MVEpoch timeSince = epoch - itsRequestCompletedTimes[ant];
            // remove test related to the fudge factor as it is now a configurable parameter. timeOut should be
            // adjusted appropriately if longer flagging period is necessary
            // look at issue #5736 for the 14.5s fudge factor
@@ -251,7 +251,7 @@ void FrtCommunicator::newTimeStamp(const casa::MVEpoch &epoch)
 /// @brief request DRx delay
 /// @param[in] ant antenna index
 /// @param[in] int delay setting (in the units required by hardware)
-void FrtCommunicator::setDRxDelay(const casa::uInt ant, const int delay)
+void FrtCommunicator::setDRxDelay(const casacore::uInt ant, const int delay)
 {
    ASKAPDEBUGASSERT(ant < itsAntennaRequestIDs.size());
    ASKAPDEBUGASSERT(ant < itsAntennaStatuses.size());
@@ -269,7 +269,7 @@ void FrtCommunicator::setDRxDelay(const casa::uInt ant, const int delay)
 /// @param[in] ant antenna index
 /// @param[in] delay delay setting (in the units required by hardware)
 /// @return map with the message
-std::map<std::string, int> FrtCommunicator::getDRxDelayMsg(const casa::uInt ant, const int delay)
+std::map<std::string, int> FrtCommunicator::getDRxDelayMsg(const casacore::uInt ant, const int delay)
 {
    ASKAPASSERT(ant < itsAntennaNames.size());
    std::map<std::string, int> msg;
@@ -285,7 +285,7 @@ std::map<std::string, int> FrtCommunicator::getDRxDelayMsg(const casa::uInt ant,
 /// @param[in] phaseRate phase rate to set (in the units required by hardware)
 /// @param[in] phaseSlope phase slope to set (in the units required by hardware)
 /// @param[in] phaseOffset phase offset to set (in the units required by hardware)
-void FrtCommunicator::setFRParameters(const casa::uInt ant, const int phaseRate,
+void FrtCommunicator::setFRParameters(const casacore::uInt ant, const int phaseRate,
                                       const int phaseSlope, const int phaseOffset)
 {
    ASKAPDEBUGASSERT(ant < itsAntennaRequestIDs.size());
@@ -305,7 +305,7 @@ void FrtCommunicator::setFRParameters(const casa::uInt ant, const int phaseRate,
 /// @param[in] phaseSlope phase slope to set (in the units required by hardware)
 /// @param[in] phaseOffset phase offset to set (in the units required by hardware)
 /// @return map with the message
-std::map<std::string, int> FrtCommunicator::getFRParametersMsg(const casa::uInt ant, const int phaseRate,
+std::map<std::string, int> FrtCommunicator::getFRParametersMsg(const casacore::uInt ant, const int phaseRate,
                                                                const int phaseSlope, const int phaseOffset)
 {
    ASKAPASSERT(ant < itsAntennaNames.size());
@@ -331,7 +331,7 @@ std::map<std::string, int> FrtCommunicator::getFRParametersMsg(const casa::uInt 
 /// @param[in] phaseRate phase rate to set (in the units required by hardware)
 /// @param[in] phaseSlope phase slope to set (in the units required by hardware)
 /// @param[in] phaseOffset phase offset to set (in the units required by hardware)
-void FrtCommunicator::setDRxAndFRParameters(const casa::uInt ant, const int delay, const int phaseRate,
+void FrtCommunicator::setDRxAndFRParameters(const casacore::uInt ant, const int delay, const int phaseRate,
                                             const int phaseSlope, const int phaseOffset)
 {
    ASKAPDEBUGASSERT(ant < itsAntennaRequestIDs.size());

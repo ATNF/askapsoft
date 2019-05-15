@@ -85,7 +85,7 @@ class PolarisationData {
         }
 
         /// @brief Return the model Stokes I spectrum as a vector
-        casa::Vector<float> Imod()
+        casacore::Vector<float> Imod()
         {
             return itsModelStokesI.modelSpectrum();
         }
@@ -94,15 +94,15 @@ class PolarisationData {
         StokesImodel &model() {return itsModelStokesI;};
 
         /// @brief Return the noise spectrum as a vector
-        casa::Vector<float> &noise()
+        casacore::Vector<float> &noise()
         {
-            casa::Vector<float> &ref = itsAverageNoiseSpectrum; return ref;
+            casacore::Vector<float> &ref = itsAverageNoiseSpectrum; return ref;
         }
 
         /// @brief Return the vector of lambda-squared values
-        casa::Vector<float> &l2()
+        casacore::Vector<float> &l2()
         {
-            casa::Vector<float> &ref = itsLambdaSquared; return ref;
+            casacore::Vector<float> &ref = itsLambdaSquared; return ref;
         }
 
     protected:
@@ -122,12 +122,12 @@ class PolarisationData {
         StokesImodel        itsModelStokesI;
 
         /// @brief The noise spectrum, averaged between Q & U
-        casa::Vector<float> itsAverageNoiseSpectrum;
+        casacore::Vector<float> itsAverageNoiseSpectrum;
 
         /// @brief The frequency values for the spectra
-        casa::Vector<float> itsFrequencies;
+        casacore::Vector<float> itsFrequencies;
         /// @brief The lambda-squared values for the spectra
-        casa::Vector<float> itsLambdaSquared;
+        casacore::Vector<float> itsLambdaSquared;
 
 };
 

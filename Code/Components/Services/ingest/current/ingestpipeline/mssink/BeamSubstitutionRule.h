@@ -75,7 +75,7 @@ protected:
    /// array with different numbers cause an exception.
    /// @param[in] vec vector with elements
    /// @return the value this vector has
-   static casa::uInt checkAllValuesAreTheSame(const casa::Vector<casa::uInt> &vec);
+   static casacore::uInt checkAllValuesAreTheSame(const casacore::Vector<casacore::uInt> &vec);
 };
 
 

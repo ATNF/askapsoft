@@ -36,7 +36,7 @@
 #include <askap_swcorrelator.h>
 #include <askap/askap/AskapLogging.h>
 #include <askap/askap/AskapUtil.h>
-#include <utils/PolConverter.h>
+#include <askap/scimath/utils/PolConverter.h>
 
 // casa includes
 #include <casacore/casa/OS/File.h>
@@ -119,14 +119,14 @@ FillerMSSink::FillerMSSink(const LOFAR::ParameterSet &parset) : itsParset(parset
 /// @param[in] buf products buffer
 /// @note The calculation is bypassed if itsUVWValid flag is already set in the buffer
 /// @return time epoch corresponding to the BAT of the buffer
-casa::MEpoch FillerMSSink::calculateUVW(CorrProducts &buf) const
+casacore::MEpoch FillerMSSink::calculateUVW(CorrProducts &buf) const
 {
   // note, we need to specify 'ull' type for the constant as the value exceeds the capacity of long, 
   // which is assumed by default
   const uint64_t microsecondsPerDay = 86400000000ull;
-  const casa::MVEpoch timeTAI(double(buf.itsBAT / microsecondsPerDay), double(buf.itsBAT % microsecondsPerDay)/double(microsecondsPerDay));
-  const casa::MEpoch epoch = casa::MEpoch::Convert(casa::MEpoch(timeTAI, casa::MEpoch::Ref(casa::MEpoch::TAI)), 
-                             casa::MEpoch::Ref(casa::MEpoch::UTC))();
+  const casacore::MVEpoch timeTAI(double(buf.itsBAT / microsecondsPerDay), double(buf.itsBAT % microsecondsPerDay)/double(microsecondsPerDay));
+  const casacore::MEpoch epoch = casacore::MEpoch::Convert(casacore::MEpoch(timeTAI, casacore::MEpoch::Ref(casacore::MEpoch::TAI)), 
+                             casacore::MEpoch::Ref(casacore::MEpoch::UTC))();
   if (buf.itsUVWValid) {
       return epoch;
   }
@@ -140,26 +140,26 @@ casa::MEpoch FillerMSSink::calculateUVW(CorrProducts &buf) const
   ASKAPDEBUGASSERT(itsAntXYZ.nrow() >= buf.nAnt());
   ASKAPDEBUGASSERT(buf.itsBeam < int(itsBeamOffsets.nrow()));
   ASKAPDEBUGASSERT(itsBeamOffsets.ncolumn() == 2);
-  casa::MDirection phaseCntr(itsDishPointing);
+  casacore::MDirection phaseCntr(itsDishPointing);
 
   // need to rotate beam offsets here if the dish rotation does not compensate parallactic angle rotation perfectly
   // moreover, the following operation implicitly assumes that parallactic angle is tracked in J2000
   // (in fact it is probably JTRUE, need to think about this).
   if (itsBeamOffsetUVW) {
-      phaseCntr.shift(-itsBeamOffsets(buf.itsBeam,0), itsBeamOffsets(buf.itsBeam,1), casa::True);
+      phaseCntr.shift(-itsBeamOffsets(buf.itsBeam,0), itsBeamOffsets(buf.itsBeam,1), casacore::True);
       ASKAPLOG_DEBUG_STR(logger, " after offset for beam "<<buf.itsBeam<<" is applied -> "<<printDirection(phaseCntr.getValue())<<" (J2000)");
   }
 
-  casa::MeasFrame frame(epoch);
-  const casa::MDirection phaseCntrJTrue = casa::MDirection::Convert(phaseCntr, casa::MDirection::Ref(casa::MDirection::JTRUE,frame))();
+  casacore::MeasFrame frame(epoch);
+  const casacore::MDirection phaseCntrJTrue = casacore::MDirection::Convert(phaseCntr, casacore::MDirection::Ref(casacore::MDirection::JTRUE,frame))();
   ASKAPLOG_DEBUG_STR(logger, "calculateUVW for direction "<<printDirection(phaseCntr.getValue())<<" (J2000) -> "<<printDirection(phaseCntrJTrue.getValue())<<" (JTRUE)");
   
   const double ra = phaseCntr.getAngle().getValue()(0);
   const double dec = phaseCntr.getAngle().getValue()(1);
   const double raJTrue = phaseCntrJTrue.getAngle().getValue()(0);
   const double decJTrue = phaseCntrJTrue.getAngle().getValue()(1);
-  const double gmstInDays = casa::MEpoch::Convert(epoch,casa::MEpoch::Ref(casa::MEpoch::GMST1))().get("d").getValue("d");
-  const double gmst = (gmstInDays - casa::Int(gmstInDays)) * casa::C::_2pi; // in radians
+  const double gmstInDays = casacore::MEpoch::Convert(epoch,casacore::MEpoch::Ref(casacore::MEpoch::GMST1))().get("d").getValue("d");
+  const double gmst = (gmstInDays - casacore::Int(gmstInDays)) * casacore::C::_2pi; // in radians
   
   const double H0 = gmst - ra, H0JTrue = gmst - raJTrue;
   const double sH0 = sin(H0), cH0 = cos(H0), sd = sin(dec), cd = cos(dec);
@@ -167,16 +167,16 @@ casa::MEpoch FillerMSSink::calculateUVW(CorrProducts &buf) const
   
   // quick and dirty calculation without taking aberration and other fine effects into account
   // it should be fine for the sort of baselines we have with BETA3
-  casa::Matrix<double> trans(4, 3, 0.);
+  casacore::Matrix<double> trans(4, 3, 0.);
   trans(0, 0) = -sH0; trans(0, 1) = -cH0;
   trans(1, 0) = sd * cH0; trans(1, 1) = -sd * sH0; trans(1, 2) = -cd;
   trans(2, 0) = -cd * cH0; trans(2, 1) = cd * sH0; trans(2, 2) = -sd;
   // the 4th row is for the delay in JTrue
   trans(3, 0) = -cdJTrue * cH0JTrue; trans(3, 1) = cdJTrue * sH0JTrue; trans(3, 2) = -sdJTrue;
-  const casa::Matrix<double> antUVW = casa::product(trans,casa::transpose(itsAntXYZ));
+  const casacore::Matrix<double> antUVW = casacore::product(trans,casacore::transpose(itsAntXYZ));
   ASKAPDEBUGASSERT(antUVW.nrow() == buf.itsUVW.ncolumn() + 1);
-  for (casa::uInt baseline = 0; baseline < buf.itsUVW.nrow(); ++baseline) {
-       for (casa::uInt dim = 0; dim < buf.itsUVW.ncolumn(); ++dim) {
+  for (casacore::uInt baseline = 0; baseline < buf.itsUVW.nrow(); ++baseline) {
+       for (casacore::uInt dim = 0; dim < buf.itsUVW.ncolumn(); ++dim) {
             buf.itsUVW(baseline,dim) = antUVW(dim,substituteAntId(buf.second(baseline), buf.itsBeam)) - antUVW(dim,substituteAntId(buf.first(baseline), buf.itsBeam));
        }
        buf.itsDelays[baseline] = antUVW(buf.itsUVW.ncolumn(),substituteAntId(buf.second(baseline), buf.itsBeam)) - 
@@ -195,11 +195,11 @@ casa::MEpoch FillerMSSink::calculateUVW(CorrProducts &buf) const
 /// calculate uvw's ahead of writing the buffer if we implement some form of delay tracking).
 void FillerMSSink::write(CorrProducts &buf)
 {
-  const casa::MEpoch epoch = calculateUVW(buf);
+  const casacore::MEpoch epoch = calculateUVW(buf);
   // deal with CONTROL word, if necessary
   bool forceFlag = false; // we change it to true to flag the integration, if CONTROL is different for different antennas
   ASKAPDEBUGASSERT(buf.itsControl.nelements() >= 1);
-  for (casa::uInt i = 1; i<buf.itsControl.nelements(); ++i) {
+  for (casacore::uInt i = 1; i<buf.itsControl.nelements(); ++i) {
        if (buf.itsControl[i] != buf.itsControl[0]) {
            forceFlag = true;
            ASKAPLOG_INFO_STR(logger, "Different CONTROL on different antennas: "<<buf.itsControl<<", flagging the integration");
@@ -222,9 +222,9 @@ void FillerMSSink::write(CorrProducts &buf)
               ASKAPLOG_INFO_STR(logger, "CONTROL changed to "<<buf.itsControl[0]<<" new centre frequency is "<<
                                 (itsCurrentStartFreq + centreOff)/1e6<<" MHz");
                                 
-              const casa::Int newSpWin = addSpectralWindow(std::string("USER_CONTROL_") + utility::toString(buf.itsControl[0]),
+              const casacore::Int newSpWin = addSpectralWindow(std::string("USER_CONTROL_") + utility::toString(buf.itsControl[0]),
                                 itsNumberOfChannels, itsCurrentStartFreq, itsCurrentFreqInc);
-              const casa::Int dataDescID = addDataDesc(newSpWin, 0); // assume polID=0 for simplicity
+              const casacore::Int dataDescID = addDataDesc(newSpWin, 0); // assume polID=0 for simplicity
               setDataDescID(dataDescID);
                                 
               if (itsTrackPhase && itsAutoLOFreq) {
@@ -241,18 +241,18 @@ void FillerMSSink::write(CorrProducts &buf)
   if (itsTrackPhase) {
       ASKAPDEBUGASSERT(buf.itsUVWValid);
       ASKAPDEBUGASSERT(buf.itsDelays.nelements() == buf.itsVisibility.nrow());
-      for (casa::uInt baseline = 0; baseline < buf.itsDelays.nelements(); ++baseline) {
-          const float phase = -2 * float(casa::C::pi * itsEffectiveLOFreq * buf.itsDelays(baseline) / casa::C::c);
-          const casa::Complex phasor(cos(phase),sin(phase));
-          casa::Vector<casa::Complex> allChan = buf.itsVisibility.row(baseline);
+      for (casacore::uInt baseline = 0; baseline < buf.itsDelays.nelements(); ++baseline) {
+          const float phase = -2 * float(casacore::C::pi * itsEffectiveLOFreq * buf.itsDelays(baseline) / casacore::C::c);
+          const casacore::Complex phasor(cos(phase),sin(phase));
+          casacore::Vector<casacore::Complex> allChan = buf.itsVisibility.row(baseline);
           allChan *= phasor;
       }
   }
   //
   ASKAPDEBUGASSERT(itsMs);
-  casa::MSColumns msc(*itsMs);
-  const casa::uInt baseRow = msc.nrow();
-  const casa::uInt newRows = buf.nBaseline();
+  casacore::MSColumns msc(*itsMs);
+  const casacore::uInt baseRow = msc.nrow();
+  const casacore::uInt newRows = buf.nBaseline();
   ASKAPDEBUGASSERT(newRows >= 3);
   itsMs->addRow(newRows);
 
@@ -273,10 +273,10 @@ void FillerMSSink::write(CorrProducts &buf)
   msc.stateId().put(baseRow, -1);
  
   // non-standard CONTROL column with user-defined values passed via epics keyword
-  casa::ScalarColumn<casa::uInt> ctrlCol(*itsMs,"CONTROL"); 
+  casacore::ScalarColumn<casacore::uInt> ctrlCol(*itsMs,"CONTROL"); 
  
-  for (casa::uInt i = 0; i < newRows; ++i) {
-       const casa::uInt row = i + baseRow;
+  for (casacore::uInt i = 0; i < newRows; ++i) {
+       const casacore::uInt row = i + baseRow;
        msc.antenna1().put(row, substituteAntId(buf.first(i), buf.itsBeam));
        msc.antenna2().put(row, substituteAntId(buf.second(i), buf.itsBeam));
        msc.feed1().put(row, buf.itsBeam);
@@ -284,20 +284,20 @@ void FillerMSSink::write(CorrProducts &buf)
        msc.uvw().put(row, buf.itsUVW.row(i));
    
        // non-standard control column
-       ctrlCol.put(row,casa::uInt(buf.itsControl[0]));
+       ctrlCol.put(row,casacore::uInt(buf.itsControl[0]));
 
-       const casa::uInt npol = 2;
-       casa::Matrix<casa::Complex> visBuf(npol,buf.itsVisibility.ncolumn());
-       casa::Matrix<casa::Bool> flagBuf(npol,buf.itsFlag.ncolumn());
-       for (casa::uInt pol = 0; pol < npol; ++pol) {
+       const casacore::uInt npol = 2;
+       casacore::Matrix<casacore::Complex> visBuf(npol,buf.itsVisibility.ncolumn());
+       casacore::Matrix<casacore::Bool> flagBuf(npol,buf.itsFlag.ncolumn());
+       for (casacore::uInt pol = 0; pol < npol; ++pol) {
             visBuf.row(pol) = buf.itsVisibility.row(i);
             flagBuf.row(pol) = buf.itsFlag.row(i) || forceFlag;
        }
        msc.data().put(row, visBuf);
        msc.flag().put(row, flagBuf);
-       msc.flagRow().put(row, casa::False);
+       msc.flagRow().put(row, casacore::False);
 
-       const casa::Vector<casa::Float> tmp(npol, 1.0);
+       const casacore::Vector<casacore::Float> tmp(npol, 1.0);
        msc.weight().put(row, tmp);
        msc.sigma().put(row, tmp);
   }
@@ -307,15 +307,15 @@ void FillerMSSink::write(CorrProducts &buf)
   //
   // If this is the first integration cycle update the start time,
   // otherwise just update the end time.
-  const casa::Double Tstart = epoch.getValue().getTime().getValue("s");
+  const casacore::Double Tstart = epoch.getValue().getTime().getValue("s");
 
-  casa::MSObservationColumns& obsc = msc.observation();
-  casa::Vector<casa::Double> timeRange = obsc.timeRange()(0);
+  casacore::MSObservationColumns& obsc = msc.observation();
+  casacore::Vector<casacore::Double> timeRange = obsc.timeRange()(0);
   if (timeRange(0) == 0) {
       timeRange(0) = Tstart; 
   }
 
-  const casa::Double Tend = Tstart + 1;
+  const casacore::Double Tend = Tstart + 1;
   timeRange(1) = Tend;
   obsc.timeRange().put(0, timeRange);  
   // to avoid a corrupted MS if the process terminates abnormally outside write
@@ -340,7 +340,7 @@ void FillerMSSink::readBeamInfo()
 
     double spacing = 1.;
     if (parset.isDefined("feeds.spacing")) {
-        const casa::Quantity qspacing = asQuantity(parset.getString("feeds.spacing"));
+        const casacore::Quantity qspacing = asQuantity(parset.getString("feeds.spacing"));
         spacing = qspacing.getValue("rad");
         ASKAPLOG_INFO_STR(logger, "Scaling beam offsets by " << qspacing);
     }
@@ -365,7 +365,7 @@ void FillerMSSink::initAntennasAndBeams()
   readBeamInfo();
   ASKAPDEBUGASSERT(itsBeamOffsets.nrow()>0);
   ASKAPDEBUGASSERT(itsBeamOffsets.ncolumn() == 2);  
-  const casa::Vector<casa::String> polTypes(itsBeamOffsets.nrow(), "X Y");
+  const casacore::Vector<casacore::String> polTypes(itsBeamOffsets.nrow(), "X Y");
   
   // read antenna layout
   LOFAR::ParameterSet parset(itsParset);
@@ -400,7 +400,7 @@ void FillerMSSink::initAntennasAndBeams()
   itsAntXYZ.resize(nAnt,3);
 
   /// antennas.ASKAP.location=[+115deg, -26deg, 192km, WGS84]
-  casa::MPosition location;
+  casacore::MPosition location;
   if (coordinates == "local") {
       location = asMPosition(antParset.getStringVector("location"));
   }
@@ -414,9 +414,9 @@ void FillerMSSink::initAntennasAndBeams()
        itsAntXYZ(iant,1) = xyz[1] * scale;
        itsAntXYZ(iant,2) = xyz[2] * scale;
        if (coordinates == "local") {
-           casa::MPosition::Convert loc2(location, casa::MPosition::ITRF);
-           const casa::MPosition locitrf(loc2());
-           const casa::Vector<double> angRef = locitrf.getAngle("rad").getValue();
+           casacore::MPosition::Convert loc2(location, casacore::MPosition::ITRF);
+           const casacore::MPosition locitrf(loc2());
+           const casacore::Vector<double> angRef = locitrf.getAngle("rad").getValue();
            const double cosLong = cos(angRef(0));
            const double sinLong = sin(angRef(0));
            const double cosLat = cos(angRef(1));
@@ -425,7 +425,7 @@ void FillerMSSink::initAntennasAndBeams()
            const double xG1 = -sinLat * itsAntXYZ(iant,1) + cosLat * itsAntXYZ(iant,2);
            const double yG1 = itsAntXYZ(iant,0);
 
-           casa::Vector<double> xyzNew = locitrf.get("m").getValue();
+           casacore::Vector<double> xyzNew = locitrf.get("m").getValue();
            xyzNew(0) += cosLong * xG1 - sinLong * yG1;
            xyzNew(1) += sinLong * xG1 + cosLong * yG1;
            xyzNew(2) += cosLat * itsAntXYZ(iant,1) + sinLat * itsAntXYZ(iant,2);
@@ -435,7 +435,7 @@ void FillerMSSink::initAntennasAndBeams()
        
        // setup feeds corresponding to this antenna
        ASKAPDEBUGASSERT(iant>=0);
-       addFeeds(casa::uInt(iant), itsBeamOffsets.column(0), itsBeamOffsets.column(1), polTypes);
+       addFeeds(casacore::uInt(iant), itsBeamOffsets.column(0), itsBeamOffsets.column(1), polTypes);
    }
    ASKAPLOG_INFO_STR(logger, "Successfully defined " << nAnt
            << " antennas of " << telName);  
@@ -458,9 +458,9 @@ void FillerMSSink::initFields()
    for (size_t i = 0; i < sources.size(); ++i) {
         ASKAPLOG_INFO_STR(logger, "Defining FIELD table entry for " << sources[i]);
         const std::string dirPar = std::string("sources.") + sources[i] + ".direction";
-        const casa::MDirection direction(asMDirection(parset.getStringVector(dirPar)));
+        const casacore::MDirection direction(asMDirection(parset.getStringVector(dirPar)));
         const std::string calCode = parset.getString("sources." + sources[i] + ".calcode", "");
-        const casa::uInt fieldID = addField(sources[i], direction, calCode); 
+        const casacore::uInt fieldID = addField(sources[i], direction, calCode); 
         if (sources[i] == defaultName) {
             itsFieldID = fieldID;
             defaultNameSighted = true;
@@ -488,16 +488,16 @@ void FillerMSSink::initDataDesc()
    for (size_t spw = 0; spw < nSpw; ++spw) {
         std::vector<std::string> line = parset.getStringVector("spws." + names[spw]);
         ASKAPASSERT(line.size() >= 4);
-        const casa::Quantity startFreq = asQuantity(line[1]);
-        const casa::Quantity freqInc = asQuantity(line[2]);
+        const casacore::Quantity startFreq = asQuantity(line[1]);
+        const casacore::Quantity freqInc = asQuantity(line[2]);
         ASKAPCHECK(startFreq.isConform("Hz"), "start frequency for spectral window " << names[spw] << " is supposed to be in units convertible to Hz, you gave " <<
                    line[1]);
         ASKAPCHECK(freqInc.isConform("Hz"), "frequency increment for spectral window " << names[spw] << " is supposed to be in units convertible to Hz, you gave " <<
                    line[1]);
         const int numChan = askap::utility::fromString<int>(line[0]);           
-        const casa::Int spWinID = addSpectralWindow(names[spw], numChan, startFreq, freqInc);
-        const casa::Int polID = addPolarisation(scimath::PolConverter::fromString(line[3]));
-        const casa::Int dataDescID = addDataDesc(spWinID, polID);
+        const casacore::Int spWinID = addSpectralWindow(names[spw], numChan, startFreq, freqInc);
+        const casacore::Int polID = addPolarisation(scimath::PolConverter::fromString(line[3]));
+        const casacore::Int dataDescID = addDataDesc(spWinID, polID);
         if (names[spw] == defaultWindow) {
             itsDataDescID = dataDescID;
             itsNumberOfChannels = numChan;
@@ -527,7 +527,7 @@ double FillerMSSink::guessEffectiveLOFreq() const
 /// @brief helper method to make a string out of an integer
 /// @param[in] in unsigned integer number
 /// @return a string padded with zero on the left size, if necessary
-std::string FillerMSSink::makeString(const casa::uInt in)
+std::string FillerMSSink::makeString(const casacore::uInt in)
 {
   ASKAPASSERT(in<100);
   std::string result;
@@ -543,17 +543,17 @@ std::string FillerMSSink::makeString(const casa::uInt in)
 void FillerMSSink::create()
 {
     // Get configuration first to ensure all parameters are present
-    casa::uInt bucketSize = itsParset.getUint32("stman.bucketsize", 128 * 1024);
-    casa::uInt tileNcorr = itsParset.getUint32("stman.tilencorr", 4);
-    casa::uInt tileNchan = itsParset.getUint32("stman.tilenchan", 1);
-    casa::String filename = itsParset.getString("filename","");
+    casacore::uInt bucketSize = itsParset.getUint32("stman.bucketsize", 128 * 1024);
+    casacore::uInt tileNcorr = itsParset.getUint32("stman.tilencorr", 4);
+    casacore::uInt tileNchan = itsParset.getUint32("stman.tilenchan", 1);
+    casacore::String filename = itsParset.getString("filename","");
     if (filename == "") {
-        casa::Time tm;
+        casacore::Time tm;
         tm.now();
         filename = utility::toString(tm.year())+"-"+makeString(tm.month())+"-"+makeString(tm.dayOfMonth())+"_"+
                    makeString(tm.hours())+makeString(tm.minutes())+makeString(tm.seconds())+".ms";        
     }
-    casa::Path outPath(itsParset.getString("basepath",""));
+    casacore::Path outPath(itsParset.getString("basepath",""));
     outPath.append(filename);
     filename = outPath.expandedName();
 
@@ -568,24 +568,24 @@ void FillerMSSink::create()
     }
 
     ASKAPLOG_INFO_STR(logger, "Creating dataset " << filename);
-    ASKAPCHECK(!casa::File(filename).exists(), "File or table "<<filename<<" already exists!");
+    ASKAPCHECK(!casacore::File(filename).exists(), "File or table "<<filename<<" already exists!");
 
     // Make MS with standard columns
-    casa::TableDesc msDesc(casa::MS::requiredTableDesc());
+    casacore::TableDesc msDesc(casacore::MS::requiredTableDesc());
 
     // Add the DATA column.
-    casa::MS::addColumnToDesc(msDesc, casa::MS::DATA, 2);
+    casacore::MS::addColumnToDesc(msDesc, casacore::MS::DATA, 2);
    
     // additional non-standard columns
-    msDesc.addColumn(casa::ScalarColumnDesc<casa::uInt>("CONTROL","User-defined number sent via epics (for channel 0, antenna 0)"));
+    msDesc.addColumn(casacore::ScalarColumnDesc<casacore::uInt>("CONTROL","User-defined number sent via epics (for channel 0, antenna 0)"));
     //
 
-    casa::SetupNewTable newMS(filename, msDesc, casa::Table::New);
+    casacore::SetupNewTable newMS(filename, msDesc, casacore::Table::New);
 
     // Set the default Storage Manager to be the Incr one
     {
-        casa::IncrementalStMan incrStMan("ismdata", bucketSize);
-        newMS.bindAll(incrStMan, casa::True);
+        casacore::IncrementalStMan incrStMan("ismdata", bucketSize);
+        newMS.bindAll(incrStMan, casacore::True);
     }
 
     // Bind ANTENNA1, and ANTENNA2 to the standardStMan 
@@ -593,61 +593,61 @@ void FillerMSSink::create()
     // incremental storage manager inefficient for these columns.
 
     {
-        casa::StandardStMan ssm("ssmdata", bucketSize);
-        newMS.bindColumn(casa::MS::columnName(casa::MS::ANTENNA1), ssm);
-        newMS.bindColumn(casa::MS::columnName(casa::MS::ANTENNA2), ssm);
-        newMS.bindColumn(casa::MS::columnName(casa::MS::UVW), ssm);
+        casacore::StandardStMan ssm("ssmdata", bucketSize);
+        newMS.bindColumn(casacore::MS::columnName(casacore::MS::ANTENNA1), ssm);
+        newMS.bindColumn(casacore::MS::columnName(casacore::MS::ANTENNA2), ssm);
+        newMS.bindColumn(casacore::MS::columnName(casacore::MS::UVW), ssm);
     }
 
     // These columns contain the bulk of the data so save them in a tiled way
     {
         // Get nr of rows in a tile.
         const int nrowTile = std::max(1u, bucketSize / (8*tileNcorr*tileNchan));
-        casa::TiledShapeStMan dataMan("TiledData",
-                casa::IPosition(3, tileNcorr, tileNchan, nrowTile));
-        newMS.bindColumn(casa::MeasurementSet::columnName(casa::MeasurementSet::DATA),
+        casacore::TiledShapeStMan dataMan("TiledData",
+                casacore::IPosition(3, tileNcorr, tileNchan, nrowTile));
+        newMS.bindColumn(casacore::MeasurementSet::columnName(casacore::MeasurementSet::DATA),
                 dataMan);
-        newMS.bindColumn(casa::MeasurementSet::columnName(casa::MeasurementSet::FLAG),
+        newMS.bindColumn(casacore::MeasurementSet::columnName(casacore::MeasurementSet::FLAG),
                 dataMan);
     }
     {
         const int nrowTile = std::max(1u, bucketSize / (4*8));
-        casa::TiledShapeStMan dataMan("TiledWeight",
-                casa::IPosition(2, 4, nrowTile));
-        newMS.bindColumn(casa::MeasurementSet::columnName(casa::MeasurementSet::SIGMA),
+        casacore::TiledShapeStMan dataMan("TiledWeight",
+                casacore::IPosition(2, 4, nrowTile));
+        newMS.bindColumn(casacore::MeasurementSet::columnName(casacore::MeasurementSet::SIGMA),
                 dataMan);
-        newMS.bindColumn(casa::MeasurementSet::columnName(casa::MeasurementSet::WEIGHT),
+        newMS.bindColumn(casacore::MeasurementSet::columnName(casacore::MeasurementSet::WEIGHT),
                 dataMan);
     }
 
     // Now we can create the MeasurementSet and add the (empty) subtables
-    itsMs.reset(new casa::MeasurementSet(newMS, 0));
-    itsMs->createDefaultSubtables(casa::Table::New);
+    itsMs.reset(new casacore::MeasurementSet(newMS, 0));
+    itsMs->createDefaultSubtables(casacore::Table::New);
     itsMs->flush();
 
     // Set the TableInfo
     {
-        casa::TableInfo& info(itsMs->tableInfo());
-        info.setType(casa::TableInfo::type(casa::TableInfo::MEASUREMENTSET));
-        info.setSubType(casa::String(""));
+        casacore::TableInfo& info(itsMs->tableInfo());
+        info.setType(casacore::TableInfo::type(casacore::TableInfo::MEASUREMENTSET));
+        info.setSubType(casacore::String(""));
         info.readmeAddLine("This is a MeasurementSet Table holding astronomical observations obtained with ASKAP software correlator");
         info.readmeAddLine("Software correlator package version: " + getAskapPackageVersion_swcorrelator());
     }
 }
 
 // methods borrowed from Ben's MSSink class (see CP/ingest)
-casa::Int FillerMSSink::addObs(const casa::String& telescope, 
-        const casa::String& observer,
+casacore::Int FillerMSSink::addObs(const casacore::String& telescope, 
+        const casacore::String& observer,
         const double obsStartTime,
         const double obsEndTime)
 {
-    casa::MSColumns msc(*itsMs);
-    casa::MSObservation& obs = itsMs->observation();
-    casa::MSObservationColumns& obsc = msc.observation();
-    const casa::uInt row = obsc.nrow();
+    casacore::MSColumns msc(*itsMs);
+    casacore::MSObservation& obs = itsMs->observation();
+    casacore::MSObservationColumns& obsc = msc.observation();
+    const casacore::uInt row = obsc.nrow();
     obs.addRow();
     obsc.telescopeName().put(row, telescope);
-    casa::Vector<double> timeRange(2);
+    casacore::Vector<double> timeRange(2);
     timeRange(0) = obsStartTime;
     timeRange(1) = obsEndTime;
     obsc.timeRange().put(row, timeRange);
@@ -659,13 +659,13 @@ casa::Int FillerMSSink::addObs(const casa::String& telescope,
     return row;
 }
 
-casa::Int FillerMSSink::addField(const casa::String& fieldName,
-        const casa::MDirection& fieldDirection,
-        const casa::String& calCode)
+casacore::Int FillerMSSink::addField(const casacore::String& fieldName,
+        const casacore::MDirection& fieldDirection,
+        const casacore::String& calCode)
 {
-    casa::MSColumns msc(*itsMs);
-    casa::MSFieldColumns& fieldc = msc.field();
-    const casa::uInt row = fieldc.nrow();
+    casacore::MSColumns msc(*itsMs);
+    casacore::MSFieldColumns& fieldc = msc.field();
+    const casacore::uInt row = fieldc.nrow();
 
     ASKAPLOG_INFO_STR(logger, "Creating new field " << fieldName << ", ID "
             << row);
@@ -676,7 +676,7 @@ casa::Int FillerMSSink::addField(const casa::String& fieldName,
     fieldc.time().put(row, 0.0);
     fieldc.numPoly().put(row, 0);
     fieldc.sourceId().put(row, 0);
-    casa::Vector<casa::MDirection> direction(1);
+    casacore::Vector<casacore::MDirection> direction(1);
     direction(0) = fieldDirection;
     fieldc.delayDirMeasCol().put(row, direction);
     fieldc.phaseDirMeasCol().put(row, direction);
@@ -688,25 +688,25 @@ casa::Int FillerMSSink::addField(const casa::String& fieldName,
     return row;
 }
 
-void FillerMSSink::addFeeds(const casa::Int antennaID,
-        const casa::Vector<double>& x,
-        const casa::Vector<double>& y,
-        const casa::Vector<casa::String>& polType)
+void FillerMSSink::addFeeds(const casacore::Int antennaID,
+        const casacore::Vector<double>& x,
+        const casacore::Vector<double>& y,
+        const casacore::Vector<casacore::String>& polType)
 {
     // Pre-conditions
-    const casa::uInt nFeeds = x.size();
+    const casacore::uInt nFeeds = x.size();
     ASKAPCHECK(nFeeds == y.size(), "X and Y vectors must be of equal length");
     ASKAPCHECK(nFeeds == polType.size(),
             "Pol type vector must have the same length as X and Y");
 
     // Add to the Feed table
-    casa::MSColumns msc(*itsMs);
-    casa::MSFeedColumns& feedc = msc.feed();
-    const casa::uInt startRow = feedc.nrow();
+    casacore::MSColumns msc(*itsMs);
+    casacore::MSFeedColumns& feedc = msc.feed();
+    const casacore::uInt startRow = feedc.nrow();
     itsMs->feed().addRow(nFeeds);
 
-    for (casa::uInt i = 0; i < nFeeds; ++i) {
-        casa::uInt row = startRow + i;
+    for (casacore::uInt i = 0; i < nFeeds; ++i) {
+        casacore::uInt row = startRow + i;
         feedc.antennaId().put(row, antennaID);
         feedc.feedId().put(row, i);
         feedc.spectralWindowId().put(row, -1);
@@ -714,11 +714,11 @@ void FillerMSSink::addFeeds(const casa::Int antennaID,
         feedc.numReceptors().put(row, 2);
 
         // Feed position
-        casa::Vector<double> feedXYZ(3, 0.0);
+        casacore::Vector<double> feedXYZ(3, 0.0);
         feedc.position().put(row, feedXYZ);
 
         // Beam offset
-        casa::Matrix<double> beamOffset(2, 2);
+        casacore::Matrix<double> beamOffset(2, 2);
         beamOffset(0, 0) = x(i);
         beamOffset(1, 0) = y(i);
         beamOffset(0, 1) = x(i);
@@ -726,7 +726,7 @@ void FillerMSSink::addFeeds(const casa::Int antennaID,
         feedc.beamOffset().put(row, beamOffset);
 
         // Polarisation type
-        casa::Vector<casa::String> feedPol(2);
+        casacore::Vector<casacore::String> feedPol(2);
         if (polType(i).contains("X", 0)) {
             feedPol(0) = "X";
             feedPol(1) = "Y";
@@ -737,14 +737,14 @@ void FillerMSSink::addFeeds(const casa::Int antennaID,
         feedc.polarizationType().put(row, feedPol);
 
         // Polarisation response
-        casa::Matrix<casa::Complex> polResp(2, 2);
-        polResp = casa::Complex(0.0, 0.0);
-        polResp(1, 1) = casa::Complex(1.0, 0.0);
-        polResp(0, 0) = casa::Complex(1.0, 0.0);
+        casacore::Matrix<casacore::Complex> polResp(2, 2);
+        polResp = casacore::Complex(0.0, 0.0);
+        polResp(1, 1) = casacore::Complex(1.0, 0.0);
+        polResp(0, 0) = casacore::Complex(1.0, 0.0);
         feedc.polResponse().put(row, polResp);
 
         // Receptor angle
-        casa::Vector<double> feedAngle(2, 0.0);
+        casacore::Vector<double> feedAngle(2, 0.0);
         feedc.receptorAngle().put(row, feedAngle);
 
         // Time
@@ -759,21 +759,21 @@ void FillerMSSink::addFeeds(const casa::Int antennaID,
     itsNumberOfBeams = int(nFeeds);
 }
 
-casa::Int FillerMSSink::addAntenna(const casa::String& station,
-        const casa::Vector<double>& antXYZ,
-        const casa::String& name,
-        const casa::String& mount,
-        const casa::Double& dishDiameter)
+casacore::Int FillerMSSink::addAntenna(const casacore::String& station,
+        const casacore::Vector<double>& antXYZ,
+        const casacore::String& name,
+        const casacore::String& mount,
+        const casacore::Double& dishDiameter)
 {
     // Pre-conditions
     ASKAPCHECK(antXYZ.size() == 3, "Antenna position vector must contain 3 elements");
 
     // Write the rows to the measurement set
-    casa::MSColumns msc(*itsMs);
-    casa::MSAntennaColumns& antc = msc.antenna();
-    const casa::uInt row = antc.nrow();
+    casacore::MSColumns msc(*itsMs);
+    casacore::MSAntennaColumns& antc = msc.antenna();
+    const casacore::uInt row = antc.nrow();
 
-    casa::MSAntenna& ant = itsMs->antenna();
+    casacore::MSAntenna& ant = itsMs->antenna();
     ant.addRow();
 
     antc.name().put(row, name);
@@ -790,16 +790,16 @@ casa::Int FillerMSSink::addAntenna(const casa::String& station,
     return row;
 }
 
-casa::Int FillerMSSink::addDataDesc(const casa::Int spwId, const casa::Int polId)
+casacore::Int FillerMSSink::addDataDesc(const casacore::Int spwId, const casacore::Int polId)
 {
     // 1: Add new row and determine its offset
-    casa::MSColumns msc(*itsMs);
-    casa::MSDataDescColumns& ddc = msc.dataDescription();
-    const casa::uInt row = ddc.nrow();
+    casacore::MSColumns msc(*itsMs);
+    casacore::MSDataDescColumns& ddc = msc.dataDescription();
+    const casacore::uInt row = ddc.nrow();
     itsMs->dataDescription().addRow();
 
     // 2: Populate DATA DESCRIPTION table
-    ddc.flagRow().put(row, casa::False);
+    ddc.flagRow().put(row, casacore::False);
     ddc.spectralWindowId().put(row, spwId);
     ddc.polarizationId().put(row, polId);
 
@@ -810,14 +810,14 @@ casa::Int FillerMSSink::addDataDesc(const casa::Int spwId, const casa::Int polId
     return row;
 }
 
-casa::Int FillerMSSink::addSpectralWindow(const casa::String& spwName,
+casacore::Int FillerMSSink::addSpectralWindow(const casacore::String& spwName,
             const int nChan,
-            const casa::Quantity& startFreq,
-            const casa::Quantity& freqInc)
+            const casacore::Quantity& startFreq,
+            const casacore::Quantity& freqInc)
 {
-    casa::MSColumns msc(*itsMs);
-    casa::MSSpWindowColumns& spwc = msc.spectralWindow();
-    const casa::uInt row = spwc.nrow();
+    casacore::MSColumns msc(*itsMs);
+    casacore::MSSpWindowColumns& spwc = msc.spectralWindow();
+    const casacore::uInt row = spwc.nrow();
     ASKAPLOG_INFO_STR(logger, "Creating new spectral window " << spwName
             << ", ID " << row);
 
@@ -829,16 +829,16 @@ casa::Int FillerMSSink::addSpectralWindow(const casa::String& spwName,
     spwc.ifConvChain().put(row, 0);
     spwc.freqGroup().put(row, 0);
     spwc.freqGroupName().put(row, "Group 1");
-    spwc.flagRow().put(row, casa::False);
-    spwc.measFreqRef().put(row, casa::MFrequency::TOPO);
+    spwc.flagRow().put(row, casacore::False);
+    spwc.measFreqRef().put(row, casacore::MFrequency::TOPO);
 
-    casa::Vector<double> freqs(nChan);
-    casa::Vector<double> bandwidth(nChan, freqInc.getValue("Hz"));
+    casacore::Vector<double> freqs(nChan);
+    casacore::Vector<double> bandwidth(nChan, freqInc.getValue("Hz"));
 
     double vStartFreq(startFreq.getValue("Hz"));
     double vFreqInc(freqInc.getValue("Hz"));
 
-    for (casa::Int chan = 0; chan < nChan; chan++) {
+    for (casacore::Int chan = 0; chan < nChan; chan++) {
         freqs(chan) = vStartFreq + chan * vFreqInc;
     }
 
@@ -852,28 +852,28 @@ casa::Int FillerMSSink::addSpectralWindow(const casa::String& spwName,
     return row;
 }
 
-casa::Int FillerMSSink::addPolarisation(const casa::Vector<casa::Stokes::StokesTypes>& stokesTypes)
+casacore::Int FillerMSSink::addPolarisation(const casacore::Vector<casacore::Stokes::StokesTypes>& stokesTypes)
 {
-    const casa::Int nCorr = stokesTypes.size();
+    const casacore::Int nCorr = stokesTypes.size();
 
-    casa::MSColumns msc(*itsMs);
-    casa::MSPolarizationColumns& polc = msc.polarization();
-    const casa::uInt row = polc.nrow();
+    casacore::MSColumns msc(*itsMs);
+    casacore::MSPolarizationColumns& polc = msc.polarization();
+    const casacore::uInt row = polc.nrow();
     itsMs->polarization().addRow();
 
-    polc.flagRow().put(row, casa::False);
+    polc.flagRow().put(row, casacore::False);
     polc.numCorr().put(row, nCorr);
 
     // Translate stokesTypes into receptor products, catch invalid
     // fallibles.
-    casa::Matrix<casa::Int> corrProduct(casa::uInt(2), casa::uInt(nCorr));
-    casa::Fallible<casa::Int> fi;
+    casacore::Matrix<casacore::Int> corrProduct(casacore::uInt(2), casacore::uInt(nCorr));
+    casacore::Fallible<casacore::Int> fi;
 
-    casa::Vector<casa::Int> stokesTypesInt(nCorr);
-    for (casa::Int i = 0; i < nCorr; i++) {
-        fi = casa::Stokes::receptor1(stokesTypes(i));
+    casacore::Vector<casacore::Int> stokesTypesInt(nCorr);
+    for (casacore::Int i = 0; i < nCorr; i++) {
+        fi = casacore::Stokes::receptor1(stokesTypes(i));
         corrProduct(0, i) = (fi.isValid() ? fi.value() : 0);
-        fi = casa::Stokes::receptor2(stokesTypes(i));
+        fi = casacore::Stokes::receptor2(stokesTypes(i));
         corrProduct(1, i) = (fi.isValid() ? fi.value() : 0);
         stokesTypesInt(i) = stokesTypes(i);
     }
@@ -936,7 +936,7 @@ int FillerMSSink::nBeam() const
 /// @note a negative value is returned if the given baseline is not found
 /// with the recent changes to CorrProducts this methid could be made redundant, provide it for
 /// compatibility for the time being
-int FillerMSSink::baselineIndex(const casa::uInt ant1, const casa::uInt ant2)
+int FillerMSSink::baselineIndex(const casacore::uInt ant1, const casacore::uInt ant2)
 {
    return ant1<ant2 ? CorrProducts::baseline(ant1,ant2) : -1;
 }

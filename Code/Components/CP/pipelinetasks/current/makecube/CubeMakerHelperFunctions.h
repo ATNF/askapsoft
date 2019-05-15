@@ -55,21 +55,21 @@ class CubeMakerHelperFunctions {
         /// have the same number of coordinates, pixel axes and world axes, the same
         /// type, and matching coordinate numbers for the SPECTRAL, STOKES and
         /// DIRECTION coordinates.
-        static bool compatibleCoordinates(const casa::CoordinateSystem& c1,
-                                          const casa::CoordinateSystem& c2);
+        static bool compatibleCoordinates(const casacore::CoordinateSystem& c1,
+                                          const casacore::CoordinateSystem& c2);
 
         /// Ensures the coordinate system has a single spectral coordinate axis.
-        static void assertValidCoordinates(const casa::CoordinateSystem& csys);
+        static void assertValidCoordinates(const casacore::CoordinateSystem& csys);
 
         /// @details Return the frequency value for channel zero of the spectral
         /// axis within the provided coordinate system.
-        static double getChanFreq(const casa::CoordinateSystem& csys);
+        static double getChanFreq(const casacore::CoordinateSystem& csys);
 
         /// Returns the increment between two coordinate systems. The channel-zero
         /// frequencies are extracted for each coodinate system, and the differnce
         /// is returned.
-        static double getFreqIncrement(const casa::CoordinateSystem& c1,
-                                       const casa::CoordinateSystem& c2);
+        static double getFreqIncrement(const casacore::CoordinateSystem& c1,
+                                       const casacore::CoordinateSystem& c2);
 
         /// A new coordinate system is constructed. All coordinates from the first
         /// system are kept, with the exception of the spectral coordinate. This
@@ -77,9 +77,9 @@ class CubeMakerHelperFunctions {
         /// the difference between the zero-channel frequencies of the two systems.
         /// The reference pixel is set to zero and the reference value set to the
         /// zero-channel frequency of the first system.
-        static casa::CoordinateSystem makeCoordinates(const casa::CoordinateSystem& c1,
-                const casa::CoordinateSystem& c2,
-                const casa::IPosition& refShape);
+        static casacore::CoordinateSystem makeCoordinates(const casacore::CoordinateSystem& c1,
+                const casacore::CoordinateSystem& c2,
+                const casacore::IPosition& refShape);
 };
 }
 }

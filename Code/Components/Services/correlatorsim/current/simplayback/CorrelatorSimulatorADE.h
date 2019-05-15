@@ -158,7 +158,7 @@ class CorrelatorSimulatorADE : public ISimulator {
 		uint32_t itsDataSentCounter;
 
         // Measurement set
-        boost::scoped_ptr<casa::MeasurementSet> itsMS;
+        boost::scoped_ptr<casacore::MeasurementSet> itsMS;
 
         // Port for output of metadata
         boost::scoped_ptr<askap::cp::VisPortADE> itsPort;
@@ -181,7 +181,7 @@ class CorrelatorSimulatorADE : public ISimulator {
         /// @param[in] stokesType   Stokes type (XX, XY, YX, YY)
         uint32_t getCorrProdIndex
                 (uint32_t ant1, uint32_t ant2,
-                const casa::Stokes::StokesTypes& stokesType);
+                const casacore::Stokes::StokesTypes& stokesType);
 
         /// Initialize buffer for intermediate storage
         void initBuffer();

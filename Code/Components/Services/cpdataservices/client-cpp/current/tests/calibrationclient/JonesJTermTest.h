@@ -53,17 +53,17 @@ class JonesJTermTest : public CppUnit::TestFixture {
 
         void testDefaultConstructor() {
             accessors::JonesJTerm jterm;
-            CPPUNIT_ASSERT_EQUAL(casa::Complex(-1.0, -1.0), jterm.g1());
+            CPPUNIT_ASSERT_EQUAL(casacore::Complex(-1.0, -1.0), jterm.g1());
             CPPUNIT_ASSERT_EQUAL(false, jterm.g1IsValid());
-            CPPUNIT_ASSERT_EQUAL(casa::Complex(-1.0, -1.0), jterm.g2());
+            CPPUNIT_ASSERT_EQUAL(casacore::Complex(-1.0, -1.0), jterm.g2());
             CPPUNIT_ASSERT_EQUAL(false, jterm.g2IsValid());
         }
 
         void testConstructor() {
-            casa::Complex g1(1.0, 1.0);
-            casa::Bool g1Valid = true;
-            casa::Complex g2(1.1, 1.1);
-            casa::Bool g2Valid = false;
+            casacore::Complex g1(1.0, 1.0);
+            casacore::Bool g1Valid = true;
+            casacore::Complex g2(1.1, 1.1);
+            casacore::Bool g2Valid = false;
             accessors::JonesJTerm jterm(g1, g1Valid, g2, g2Valid);
 
             CPPUNIT_ASSERT_EQUAL(g1, jterm.g1());

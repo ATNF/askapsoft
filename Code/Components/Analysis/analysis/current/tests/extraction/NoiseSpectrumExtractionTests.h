@@ -68,7 +68,7 @@ class NoiseSpectrumExtractionTest : public CppUnit::TestFixture {
         RadioSource object;
         float area, bmaj, bmin, bpa;
         std::string basePolList;
-        casa::IPosition cubeShape, outShape;
+        casacore::IPosition cubeShape, outShape;
 
     public:
 
@@ -82,30 +82,30 @@ class NoiseSpectrumExtractionTest : public CppUnit::TestFixture {
             outfile = "tempOutputFromNoiseExtractionTest";
             basePolList = "Q";
             area = 50.;
-            cubeShape = casa::IPosition(4, dim, dim, basePolList.size(), 10);
-            outShape = casa::IPosition(4, 1, 1, basePolList.size(), 10);
+            cubeShape = casacore::IPosition(4, dim, dim, basePolList.size(), 10);
+            outShape = casacore::IPosition(4, 1, 1, basePolList.size(), 10);
             //-----------------------------------
             // Make the coordinate system for the images
 
             Matrix<Double> xform(2, 2); xform = 0.; xform.diagonal() = 1.;
-            casa::DirectionCoordinate dircoo(MDirection::J2000, Projection(Projection::SIN),
-                                             casa::Quantum<Double>(187.5, "deg"),
-                                             casa::Quantum<Double>(-45., "deg"),
-                                             casa::Quantum<Double>(10. / 3600., "deg"),
-                                             casa::Quantum<Double>(10. / 3600., "deg"),
+            casacore::DirectionCoordinate dircoo(MDirection::J2000, Projection(Projection::SIN),
+                                             casacore::Quantum<Double>(187.5, "deg"),
+                                             casacore::Quantum<Double>(-45., "deg"),
+                                             casacore::Quantum<Double>(10. / 3600., "deg"),
+                                             casacore::Quantum<Double>(10. / 3600., "deg"),
                                              xform, 5, 5);
 
-            casa::SpectralCoordinate spcoo(MFrequency::TOPO, 1.4e9, 1.e6, 0, 1420405751.786);
-            casa::Stokes stk;
-            casa::Vector<Int> stvec(basePolList.size());
+            casacore::SpectralCoordinate spcoo(MFrequency::TOPO, 1.4e9, 1.e6, 0, 1420405751.786);
+            casacore::Stokes stk;
+            casacore::Vector<Int> stvec(basePolList.size());
             for (size_t i = 0; i < basePolList.size(); i++) {
                 stvec[i] = stk.type(String(basePolList[i]));
             }
-            casa::StokesCoordinate stkcoo(stvec);
-            casa::CoordinateSystem coo = casa::CoordinateUtil::defaultCoords4D();
-            coo.replaceCoordinate(dircoo, coo.findCoordinate(casa::Coordinate::DIRECTION));
-            coo.replaceCoordinate(spcoo, coo.findCoordinate(casa::Coordinate::SPECTRAL));
-            coo.replaceCoordinate(stkcoo, coo.findCoordinate(casa::Coordinate::STOKES));
+            casacore::StokesCoordinate stkcoo(stvec);
+            casacore::CoordinateSystem coo = casacore::CoordinateUtil::defaultCoords4D();
+            coo.replaceCoordinate(dircoo, coo.findCoordinate(casacore::Coordinate::DIRECTION));
+            coo.replaceCoordinate(spcoo, coo.findCoordinate(casacore::Coordinate::SPECTRAL));
+            coo.replaceCoordinate(stkcoo, coo.findCoordinate(casacore::Coordinate::STOKES));
             //-----------------------------------
             // make a synthetic array where the box sum of a given width will be equal to the width
             const size_t sqSize = dim * dim;
@@ -120,16 +120,16 @@ class NoiseSpectrumExtractionTest : public CppUnit::TestFixture {
                                      -16., -16., -16., -16., -16., -16., -16., -16., -16.
                                    };
 
-            casa::IPosition shape(cubeShape), shapeSml(cubeShape);
+            casacore::IPosition shape(cubeShape), shapeSml(cubeShape);
             shapeSml(2) = shapeSml(3) = 1;
-            casa::Array<Float> array(shape), arrSml(shapeSml);
+            casacore::Array<Float> array(shape), arrSml(shapeSml);
             for (int s = 0; s < 1; s++) {
                 for (int y = 0; y < 9; y++) {
                     for (int x = 0; x < 9; x++) {
-                        casa::IPosition locSml(4, x, y, 0, 0);
+                        casacore::IPosition locSml(4, x, y, 0, 0);
                         arrSml(locSml) = pixels[y * 9 + x];
                         for (int z = 0; z < 10; z++) {
-                            casa::IPosition loc(4, x, y, s, z);
+                            casacore::IPosition loc(4, x, y, s, z);
                             array(loc) = arrSml(locSml);
                         }
                     }

@@ -45,24 +45,24 @@ using namespace askap;
 using namespace askap::scimath;
 using namespace askap::swcorrelator;
 
-casa::Complex sampledFunc(const float time, const float delay)
+casacore::Complex sampledFunc(const float time, const float delay)
 {
   /*
   const float freq = 1/3.33*1e6;//0.5e6; // 1 MHz
-  const float phase = -2.*casa::C::pi*freq*(time-delay);
-  return casa::Complex(cos(phase),sin(phase));
+  const float phase = -2.*casacore::C::pi*freq*(time-delay);
+  return casacore::Complex(cos(phase),sin(phase));
   */
-  casa::Complex res = 0.;
+  casacore::Complex res = 0.;
   const int spPt = 200;
   for (int i=0; i<spPt; ++i) {
        const float freq = 1e6/sqrt(2.)*float(i-spPt/2)/float(spPt);
-       const float phase = -2.*casa::C::pi*freq*(time-delay);
-       res += casa::Complex(cos(phase),sin(phase))/float(spPt);
+       const float phase = -2.*casacore::C::pi*freq*(time-delay);
+       res += casacore::Complex(cos(phase),sin(phase))/float(spPt);
   }
   return res;
 }
 
-void acquire(casa::Vector<casa::Complex> &buf1, casa::Vector<casa::Complex> &buf2, const float delay, 
+void acquire(casacore::Vector<casacore::Complex> &buf1, casacore::Vector<casacore::Complex> &buf2, const float delay, 
                  const int nSamples, const float rate)
 {
   buf1.resize(nSamples);
@@ -74,10 +74,10 @@ void acquire(casa::Vector<casa::Complex> &buf1, casa::Vector<casa::Complex> &buf
   }
 }
 
-void storeArray(const std::string &name, const casa::Vector<casa::Complex> &buf) {
+void storeArray(const std::string &name, const casacore::Vector<casacore::Complex> &buf) {
   ofstream os(name.c_str());
   for (int i=0; i<int(buf.nelements()); ++i) {
-     os<<i<<" "<<real(buf[i])<<" "<<imag(buf[i])<<" "<<abs(buf[i])<<" "<<arg(buf[i])/casa::C::pi*180<<std::endl;
+     os<<i<<" "<<real(buf[i])<<" "<<imag(buf[i])<<" "<<abs(buf[i])<<" "<<arg(buf[i])/casacore::C::pi*180<<std::endl;
   }
 }
 
@@ -86,12 +86,12 @@ void storeArray(const std::string &name, const casa::Vector<casa::Complex> &buf)
 int main(int, const char** argv)
 {
     try {
-       casa::Timer timer;
+       casacore::Timer timer;
        timer.mark();
     
        const float samplingRate = 32./27.*1e6; // in samples per second
-       casa::Vector<casa::Complex> buf1;
-       casa::Vector<casa::Complex> buf2;
+       casacore::Vector<casacore::Complex> buf1;
+       casacore::Vector<casacore::Complex> buf2;
        /*
        acquire(buf1,buf2,5.2e-6,32,samplingRate);
        fft(buf1, true);       
@@ -105,7 +105,7 @@ int main(int, const char** argv)
        */
        acquire(buf1,buf2,5.2e-6,32*31250,samplingRate);
        // assume that antenna1 = antenna3 for this simple test
-       casa::Vector<casa::Complex> buf3(buf1);
+       casacore::Vector<casacore::Complex> buf3(buf1);
        /*
        std::vector<std::complex<int> > ant1(buf1.nelements());
        std::vector<std::complex<int> > ant2(buf2.nelements());
@@ -122,7 +122,7 @@ int main(int, const char** argv)
        timer.mark();
        int nDelays = 1;
        //typedef std::complex<int> accType;
-       typedef casa::Complex accType;
+       typedef casacore::Complex accType;
        Simple3BaselineCorrelator<accType> s3bc;
        /*
        SimpleCorrelator<accType> sc12(nDelays);

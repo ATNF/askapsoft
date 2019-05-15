@@ -47,11 +47,11 @@ BeamSubstitutionRule::BeamSubstitutionRule(const std::string &kw, const Configur
 /// array with different numbers cause an exception.
 /// @param[in] vec vector with elements
 /// @return the value this vector has
-casa::uInt BeamSubstitutionRule::checkAllValuesAreTheSame(const casa::Vector<casa::uInt> &vec)
+casacore::uInt BeamSubstitutionRule::checkAllValuesAreTheSame(const casacore::Vector<casacore::uInt> &vec)
 {
    ASKAPCHECK(vec.nelements() > 0, "BeamSubstitutionRule is not supposed to be used with empty data chunk");
-   const casa::uInt res = vec[0];
-   for (casa::uInt index = 1; index < vec.nelements(); ++index) {
+   const casacore::uInt res = vec[0];
+   for (casacore::uInt index = 1; index < vec.nelements(); ++index) {
         ASKAPCHECK(res == vec[index], "Different beam indices are encountered in the data chunk while beam substitution rule is used");
    }
    return res;
@@ -71,8 +71,8 @@ void BeamSubstitutionRule::verifyChunk(const boost::shared_ptr<common::VisChunk>
 {
    if (inUse()) {
        ASKAPASSERT(chunk);
-       const casa::uInt beam = checkAllValuesAreTheSame(chunk->beam1());
-       const casa::uInt beam2 = checkAllValuesAreTheSame(chunk->beam2());
+       const casacore::uInt beam = checkAllValuesAreTheSame(chunk->beam1());
+       const casacore::uInt beam2 = checkAllValuesAreTheSame(chunk->beam2());
        ASKAPCHECK(beam == beam2, "Beam1 and Beam2 in the visibility chunks are expected to be the same, you have "<<beam<<" and "<<beam2);
        ASKAPCHECK(value() == static_cast<int>(beam), "Beam substitution rule for this rank setup to require beam "<<value()<<
                   ", while data chunk has beam "<<beam<<" in it!");
@@ -91,8 +91,8 @@ void BeamSubstitutionRule::initialise(const boost::shared_ptr<common::VisChunk> 
        return;
    }
    ASKAPASSERT(chunk);
-   const casa::uInt beam = checkAllValuesAreTheSame(chunk->beam1());
-   const casa::uInt beam2 = checkAllValuesAreTheSame(chunk->beam2());
+   const casacore::uInt beam = checkAllValuesAreTheSame(chunk->beam1());
+   const casacore::uInt beam2 = checkAllValuesAreTheSame(chunk->beam2());
    ASKAPCHECK(beam == beam2, "Beam1 and Beam2 in the visibility chunks are expected to be the same, you have "<<beam<<" and "<<beam2);
    ASKAPDEBUGASSERT(!inUse());
    setValue(static_cast<int>(beam));

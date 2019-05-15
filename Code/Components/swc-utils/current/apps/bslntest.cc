@@ -69,7 +69,7 @@ const double antITRFpos[3][3]={{-2555397.93943903,5097670.48452923,-2848570.3617
                                {-2556005.813742, 5097327.008027, -2848641.257970},
                                {-2555892.578900, 5097559.600315, -2848328.739449}};
 
-void heightCorrected(double h, casa::uInt ant) 
+void heightCorrected(double h, casacore::uInt ant) 
 {
    ASKAPDEBUGASSERT(ant<3);
    const double length=sqrt(antITRFpos[ant][0]*antITRFpos[ant][0]+antITRFpos[ant][1]*antITRFpos[ant][1]+antITRFpos[ant][2]*antITRFpos[ant][2]);
@@ -85,7 +85,7 @@ void heightCorrected(double h, casa::uInt ant)
 
 struct RateEstimator {
    // note with 1/2pi resolution delay estimator just gives the slope coefficient
-   RateEstimator() : itsCounter(0), itsTime(0.), itsStartTime(0.), itsEndTime(0.), itsEstimator(1./2./casa::C::pi) { itsPhases.reserve(260); }
+   RateEstimator() : itsCounter(0), itsTime(0.), itsStartTime(0.), itsEndTime(0.), itsEstimator(1./2./casacore::C::pi) { itsPhases.reserve(260); }
 
    void init() { itsPhases.erase(itsPhases.begin(), itsPhases.end()); itsTime = 0.; itsStartTime = 0.; ASKAPDEBUGASSERT(itsPhases.size()==0);}
 
@@ -122,11 +122,11 @@ struct RateEstimator {
       ASKAPDEBUGASSERT(interval > 0.);
 
       // just for simplicity - reuse the existing code
-      casa::Vector<casa::Complex> buf(itsPhases.size(),0.);
+      casacore::Vector<casacore::Complex> buf(itsPhases.size(),0.);
       //std::ofstream os("dbg.dat");
-      for (casa::uInt i = 0; i<buf.nelements(); ++i) {
-           buf[i] = casa::polar(1.,itsPhases[i]);
-           //os<<itsPhases[i]*180./casa::C::pi<<std::endl;
+      for (casacore::uInt i = 0; i<buf.nelements(); ++i) {
+           buf[i] = casacore::polar(1.,itsPhases[i]);
+           //os<<itsPhases[i]*180./casacore::C::pi<<std::endl;
       }
       //std::cout<<itsEstimator.getDelay(buf) / interval<<" interval="<<interval<<std::endl;
       //if (++itsCounter >=3) { throw 1;}
@@ -144,7 +144,7 @@ private:
    scimath::DelayEstimator itsEstimator;
 };
 
-void finaliseRate(RateEstimator &re, scimath::GenericNormalEquations &gne, casa::uInt index1, casa::uInt index2, double cH0, double sH0, double cd, double effLO)
+void finaliseRate(RateEstimator &re, scimath::GenericNormalEquations &gne, casacore::uInt index1, casacore::uInt index2, double cH0, double sH0, double cd, double effLO)
 {
    if (re.size() < 2) {
        return;
@@ -155,15 +155,15 @@ void finaliseRate(RateEstimator &re, scimath::GenericNormalEquations &gne, casa:
    const std::string ant2str = utility::toString(index2);
    const double rate = re.getRate();
 
-   if ((rate*180./casa::C::pi > 0.5) || (rate*180./casa::C::pi <-0.1)) { return; }
+   if ((rate*180./casacore::C::pi > 0.5) || (rate*180./casacore::C::pi <-0.1)) { return; }
 
-   const double siderealRate = casa::C::_2pi / 86400. / (1. - 1./365.25);
+   const double siderealRate = casacore::C::_2pi / 86400. / (1. - 1./365.25);
 
    
-   dm.addDerivative("x"+ant1str, casa::Vector<casa::Double>(1,sH0*cd*siderealRate));
-   dm.addDerivative("x"+ant2str, casa::Vector<casa::Double>(1,-sH0*cd*siderealRate));
-   dm.addDerivative("y"+ant1str, casa::Vector<casa::Double>(1,cH0*cd*siderealRate));
-   dm.addDerivative("y"+ant2str, casa::Vector<casa::Double>(1,-cH0*cd*siderealRate));
+   dm.addDerivative("x"+ant1str, casacore::Vector<casacore::Double>(1,sH0*cd*siderealRate));
+   dm.addDerivative("x"+ant2str, casacore::Vector<casacore::Double>(1,-sH0*cd*siderealRate));
+   dm.addDerivative("y"+ant1str, casacore::Vector<casacore::Double>(1,cH0*cd*siderealRate));
+   dm.addDerivative("y"+ant2str, casacore::Vector<casacore::Double>(1,-cH0*cd*siderealRate));
    
 
    /*
@@ -176,19 +176,19 @@ void finaliseRate(RateEstimator &re, scimath::GenericNormalEquations &gne, casa:
    const double coeffY1 = antITRFpos[index1][1]/length1;
    const double coeffX2 = antITRFpos[index2][0]/length2;
    const double coeffY2 = antITRFpos[index2][1]/length2;
-   dm.addDerivative("h"+ant1str, casa::Vector<casa::Double>(1,-sH0*cd*siderealRate*coeffX1-cH0*cd*siderealRate*coeffY1));
-   dm.addDerivative("h"+ant2str, casa::Vector<casa::Double>(1,sH0*cd*siderealRate*coeffX2+cH0*cd*siderealRate*coeffY2));
+   dm.addDerivative("h"+ant1str, casacore::Vector<casacore::Double>(1,-sH0*cd*siderealRate*coeffX1-cH0*cd*siderealRate*coeffY1));
+   dm.addDerivative("h"+ant2str, casacore::Vector<casacore::Double>(1,sH0*cd*siderealRate*coeffX2+cH0*cd*siderealRate*coeffY2));
    */
        
-   dm.addResidual(casa::Vector<casa::Double>(1,rate*casa::C::c/effLO/2./casa::C::pi), casa::Vector<double>(1, 1.));
+   dm.addResidual(casacore::Vector<casacore::Double>(1,rate*casacore::C::c/effLO/2./casacore::C::pi), casacore::Vector<double>(1, 1.));
 
    gne.add(dm);
    
    
-   const double factor = 360.*effLO/casa::C::c*cd*siderealRate;
+   const double factor = 360.*effLO/casacore::C::c*cd*siderealRate;
    if ((index1 == 0) && (index2 == 1)) 
-       //std::cout<<rate*180/casa::C::pi<<" "<<sH0*factor<<" "<<cH0*factor<<" "<<(sH0*siderealRate*coeffX1+cH0*siderealRate*coeffY1)*360.*effLO/casa::C::c<<std::endl;
-       std::cout<<rate*180/casa::C::pi<<" "<<sH0*factor<<" "<<cH0*factor<<std::endl;
+       //std::cout<<rate*180/casacore::C::pi<<" "<<sH0*factor<<" "<<cH0*factor<<" "<<(sH0*siderealRate*coeffX1+cH0*siderealRate*coeffY1)*360.*effLO/casacore::C::c<<std::endl;
+       std::cout<<rate*180/casacore::C::pi<<" "<<sH0*factor<<" "<<cH0*factor<<std::endl;
    
    re.init();
 }
@@ -202,31 +202,31 @@ void processDelays(scimath::GenericNormalEquations &gne, const accessors::IConst
    // the following assumes averaging down to 1 MHz
    //const double effectiveLO = 1e6*(acc.frequency()[0] - 343 - 0.018518518/2.);
    scimath::DelayEstimator de(1e6*(acc.frequency()[1]-acc.frequency()[0]));
-   casa::Matrix<casa::Complex> vis = acc.visibility().xyPlane(3);
-   casa::Matrix<casa::Bool> flags = acc.flag().xyPlane(3);
+   casacore::Matrix<casacore::Complex> vis = acc.visibility().xyPlane(3);
+   casacore::Matrix<casacore::Bool> flags = acc.flag().xyPlane(3);
   
    //const double accTime = re[0].getMidPoint();
 
    const double accTime = acc.time();
-   const casa::MEpoch epoch(casa::Quantity(56100.0+accTime/86400.,"d"), casa::MEpoch::Ref(casa::MEpoch::UTC));
-   casa::MeasFrame frame(epoch);
-   const casa::MVDirection dir = casa::MDirection::Convert(casa::MDirection(acc.pointingDir1()[0]), 
-                                 casa::MDirection::Ref(casa::MDirection::JTRUE, frame))().getAngle();
+   const casacore::MEpoch epoch(casacore::Quantity(56100.0+accTime/86400.,"d"), casacore::MEpoch::Ref(casacore::MEpoch::UTC));
+   casacore::MeasFrame frame(epoch);
+   const casacore::MVDirection dir = casacore::MDirection::Convert(casacore::MDirection(acc.pointingDir1()[0]), 
+                                 casacore::MDirection::Ref(casacore::MDirection::JTRUE, frame))().getAngle();
    //std::cout<<epoch<<std::endl;
    //std::cout<<printDirection(dir)<<std::endl;
    const double ra = dir.getValue()(0);
    const double dec = dir.getValue()(1);
-   const double gmstInDays = casa::MEpoch::Convert(epoch,casa::MEpoch::Ref(casa::MEpoch::GMST1))().get("d").getValue("d");
-   const double gmst = (gmstInDays - casa::Int(gmstInDays)) * casa::C::_2pi; // in radians
+   const double gmstInDays = casacore::MEpoch::Convert(epoch,casacore::MEpoch::Ref(casacore::MEpoch::GMST1))().get("d").getValue("d");
+   const double gmst = (gmstInDays - casacore::Int(gmstInDays)) * casacore::C::_2pi; // in radians
   
    const double H0 = gmst - ra, sH0 = sin(H0), cH0 = cos(H0), sd = sin(dec), cd = cos(dec);
   
-   for (casa::uInt baseline = 0; baseline < vis.nrow(); ++baseline) {
-        const casa::uInt index1 = acc.antenna1()[baseline];
-        const casa::uInt index2 = acc.antenna2()[baseline];
+   for (casacore::uInt baseline = 0; baseline < vis.nrow(); ++baseline) {
+        const casacore::uInt index1 = acc.antenna1()[baseline];
+        const casacore::uInt index2 = acc.antenna2()[baseline];
 
         bool flagged = false;
-        for (casa::uInt ch = 0; ch < flags.ncolumn(); ++ch) {
+        for (casacore::uInt ch = 0; ch < flags.ncolumn(); ++ch) {
              flagged |= flags(baseline,ch);
         }
         if (flagged) {
@@ -242,7 +242,7 @@ void processDelays(scimath::GenericNormalEquations &gne, const accessors::IConst
 
         
         // phase as a proxy
-        //casa::Complex avgVis = casa::sum(vis.row(baseline)) / casa::Float(vis.ncolumn());
+        //casacore::Complex avgVis = casacore::sum(vis.row(baseline)) / casacore::Float(vis.ncolumn());
         //const double phase = arg(avgVis);
 
         if (!re[baseline].isEmpty() && (re[baseline].getDuration() > 300.)) {
@@ -250,7 +250,7 @@ void processDelays(scimath::GenericNormalEquations &gne, const accessors::IConst
         }
         //re[baseline].add(phase, acc.time());
 
-        //const double delay = phase / 2. / casa::C::pi / effectiveLO;
+        //const double delay = phase / 2. / casacore::C::pi / effectiveLO;
         
 
         const std::string ant1str = utility::toString(index1);
@@ -266,53 +266,53 @@ void processDelays(scimath::GenericNormalEquations &gne, const accessors::IConst
         const double length2=sqrt(antITRFpos[index2][0]*antITRFpos[index2][0]+antITRFpos[index2][1]*antITRFpos[index2][1]+antITRFpos[index2][2]*antITRFpos[index2][2]);
 
         const double coeff1 = -cH0*cd*antITRFpos[index1][0]/length1+sH0*cd*antITRFpos[index1][1]/length1-sd*antITRFpos[index1][2]/length1;
-        dm.addDerivative("h"+ant1str, casa::Vector<casa::Double>(1,coeff1));
-        dm.addDerivative("h"+ant2str, casa::Vector<casa::Double>(1,cH0*cd*antITRFpos[index2][0]/length2-sH0*cd*antITRFpos[index2][1]/length2+sd*antITRFpos[index2][2]/length2));
+        dm.addDerivative("h"+ant1str, casacore::Vector<casacore::Double>(1,coeff1));
+        dm.addDerivative("h"+ant2str, casacore::Vector<casacore::Double>(1,cH0*cd*antITRFpos[index2][0]/length2-sH0*cd*antITRFpos[index2][1]/length2+sd*antITRFpos[index2][2]/length2));
 
         if (baseline == 0)
-        std::cout<<baseline<<" "<<acc.antenna1()[baseline]<<" "<<acc.antenna2()[baseline]<<" "<<-cH0*cd<<" "<<sH0*cd<<" "<<-sd<<" "<<H0/casa::C::pi*180.<<" "<<delay*casa::C::c<<" "<<coeff1<<std::endl;
+        std::cout<<baseline<<" "<<acc.antenna1()[baseline]<<" "<<acc.antenna2()[baseline]<<" "<<-cH0*cd<<" "<<sH0*cd<<" "<<-sd<<" "<<H0/casacore::C::pi*180.<<" "<<delay*casacore::C::c<<" "<<coeff1<<std::endl;
 
         */
         /*
-        dm.addDerivative("d"+ant1str, casa::Vector<casa::Double>(1,casa::C::c*1e-9));
-        dm.addDerivative("d"+ant2str, casa::Vector<casa::Double>(1,-casa::C::c*1e-9));
+        dm.addDerivative("d"+ant1str, casacore::Vector<casacore::Double>(1,casacore::C::c*1e-9));
+        dm.addDerivative("d"+ant2str, casacore::Vector<casacore::Double>(1,-casacore::C::c*1e-9));
         */
         /*
-        dm.addDerivative("p"+ant1str, casa::Vector<casa::Double>(1,360.*effectiveLO*casa::C::c));
-        dm.addDerivative("p"+ant2str, casa::Vector<casa::Double>(1,-360.*effectiveLO*casa::C::c));
+        dm.addDerivative("p"+ant1str, casacore::Vector<casacore::Double>(1,360.*effectiveLO*casacore::C::c));
+        dm.addDerivative("p"+ant2str, casacore::Vector<casacore::Double>(1,-360.*effectiveLO*casacore::C::c));
         */
  
         
-        dm.addDerivative("x"+ant1str, casa::Vector<casa::Double>(1,cH0*cd));
-        dm.addDerivative("x"+ant2str, casa::Vector<casa::Double>(1,-cH0*cd));
-        dm.addDerivative("y"+ant1str, casa::Vector<casa::Double>(1,-sH0*cd));
-        dm.addDerivative("y"+ant2str, casa::Vector<casa::Double>(1,sH0*cd));
-        dm.addDerivative("z"+ant1str, casa::Vector<casa::Double>(1,sd));
-        dm.addDerivative("z"+ant2str, casa::Vector<casa::Double>(1,-sd));
+        dm.addDerivative("x"+ant1str, casacore::Vector<casacore::Double>(1,cH0*cd));
+        dm.addDerivative("x"+ant2str, casacore::Vector<casacore::Double>(1,-cH0*cd));
+        dm.addDerivative("y"+ant1str, casacore::Vector<casacore::Double>(1,-sH0*cd));
+        dm.addDerivative("y"+ant2str, casacore::Vector<casacore::Double>(1,sH0*cd));
+        dm.addDerivative("z"+ant1str, casacore::Vector<casacore::Double>(1,sd));
+        dm.addDerivative("z"+ant2str, casacore::Vector<casacore::Double>(1,-sd));
         
-        dm.addResidual(casa::Vector<casa::Double>(1,-delay*casa::C::c), casa::Vector<double>(1, 1.));
+        dm.addResidual(casacore::Vector<casacore::Double>(1,-delay*casacore::C::c), casacore::Vector<double>(1, 1.));
         gne.add(dm);
         
    }
 }
 
-void publish(std::ostream &os, const casa::Vector<casa::Complex> &vis, double startTime, double avgTime, const casa::MVDirection &dir, const casa::Vector<double> &wBuf)
+void publish(std::ostream &os, const casacore::Vector<casacore::Complex> &vis, double startTime, double avgTime, const casacore::MVDirection &dir, const casacore::Vector<double> &wBuf)
 {
    ASKAPDEBUGASSERT(wBuf.nelements() == 3);
-   const casa::MEpoch epoch(casa::Quantity(56100.0+avgTime/86400.,"d"), casa::MEpoch::Ref(casa::MEpoch::UTC));
+   const casacore::MEpoch epoch(casacore::Quantity(56100.0+avgTime/86400.,"d"), casacore::MEpoch::Ref(casacore::MEpoch::UTC));
    const double ra = dir.getValue()(0);
    const double dec = dir.getValue()(1);
-   const double gmstInDays = casa::MEpoch::Convert(epoch,casa::MEpoch::Ref(casa::MEpoch::GMST1))().get("d").getValue("d");
-   const double gmst = (gmstInDays - casa::Int(gmstInDays)) * casa::C::_2pi; // in radians
+   const double gmstInDays = casacore::MEpoch::Convert(epoch,casacore::MEpoch::Ref(casacore::MEpoch::GMST1))().get("d").getValue("d");
+   const double gmst = (gmstInDays - casacore::Int(gmstInDays)) * casacore::C::_2pi; // in radians
   
    const double H0 = gmst - ra, sH0 = sin(H0), cH0 = cos(H0), sd = sin(dec), cd = cos(dec);
   
 
    os<<std::scientific<<std::setprecision(15)<<startTime<<" "<<avgTime<<" "<<std::fixed<<std::setprecision(6);
-   for (casa::uInt baseline = 0; baseline<vis.nelements(); ++baseline) {
-        os<<" "<<std::fixed<<arg(vis[baseline])/casa::C::pi*180.<<" "<<std::setprecision(15)<<std::scientific<<wBuf[baseline];
+   for (casacore::uInt baseline = 0; baseline<vis.nelements(); ++baseline) {
+        os<<" "<<std::fixed<<arg(vis[baseline])/casacore::C::pi*180.<<" "<<std::setprecision(15)<<std::scientific<<wBuf[baseline];
    }
-   os<<" "<<std::fixed<<-cH0*cd<<" "<<sH0*cd<<" "<<-sd<<" "<<H0/casa::C::pi*180.<<std::endl;
+   os<<" "<<std::fixed<<-cH0*cd<<" "<<sH0*cd<<" "<<-sd<<" "<<H0/casacore::C::pi*180.<<std::endl;
 }
 
 void process(scimath::GenericNormalEquations &gne, const IConstDataSource &ds, size_t nAvg) {
@@ -323,20 +323,20 @@ void process(scimath::GenericNormalEquations &gne, const IConstDataSource &ds, s
   sel->chooseFeed(0);
   sel->chooseCrossCorrelations();
   IDataConverterPtr conv=ds.createConverter();  
-  conv->setFrequencyFrame(casa::MFrequency::Ref(casa::MFrequency::TOPO),"MHz");
-  conv->setEpochFrame(casa::MEpoch(casa::Quantity(56100.0,"d"),
-                      casa::MEpoch::Ref(casa::MEpoch::UTC)),"s");
-  conv->setDirectionFrame(casa::MDirection::Ref(casa::MDirection::J2000));                    
+  conv->setFrequencyFrame(casacore::MFrequency::Ref(casacore::MFrequency::TOPO),"MHz");
+  conv->setEpochFrame(casacore::MEpoch(casacore::Quantity(56100.0,"d"),
+                      casacore::MEpoch::Ref(casacore::MEpoch::UTC)),"s");
+  conv->setDirectionFrame(casacore::MDirection::Ref(casacore::MDirection::J2000));                    
   size_t counter = 0;
-  casa::Vector<casa::Complex> buf(3, casa::Complex(0.,0.));
-  casa::uInt nChan = 0;
+  casacore::Vector<casacore::Complex> buf(3, casacore::Complex(0.,0.));
+  casacore::uInt nChan = 0;
   double startTime = 0;
   double avgTime = 0;
-  casa::Vector<double> wBuf(3,0.);
-  casa::MVDirection dir;
+  casacore::Vector<double> wBuf(3,0.);
+  casacore::MVDirection dir;
 
-  casa::Vector<casa::uInt> ant1IDs;
-  casa::Vector<casa::uInt> ant2IDs;
+  casacore::Vector<casacore::uInt> ant1IDs;
+  casacore::Vector<casacore::uInt> ant2IDs;
 
   std::ofstream os("result.dat");
   for (IConstDataSharedIter it=ds.createConstIterator(sel,conv);it!=it.end();++it) {  
@@ -345,7 +345,7 @@ void process(scimath::GenericNormalEquations &gne, const IConstDataSource &ds, s
            startTime = it->time();
            ant1IDs = it->antenna1().copy();
            ant2IDs = it->antenna2().copy();
-           for (casa::uInt row = 0; row<it->nRow();++row) {
+           for (casacore::uInt row = 0; row<it->nRow();++row) {
                 std::cout<<"plane "<<row<<" corresponds to "<<ant1IDs[row]<<" - "<<ant2IDs[row]<<" baseline"<<std::endl;
            }
        } else { 
@@ -357,7 +357,7 @@ void process(scimath::GenericNormalEquations &gne, const IConstDataSource &ds, s
            } 
            //ASKAPDEBUGASSERT(ant1IDs.nelements() == it->nRow());
            //ASKAPDEBUGASSERT(ant2IDs.nelements() == it->nRow());
-           for (casa::uInt row = 0; row<it->nRow(); ++row) {
+           for (casacore::uInt row = 0; row<it->nRow(); ++row) {
                 ASKAPCHECK(ant1IDs[row] == it->antenna1()[row], "Mismatch of antenna 1 index for row "<<row<<
                            " - got "<<it->antenna1()[row]<<" expected "<<ant1IDs[row]);
                 ASKAPCHECK(ant2IDs[row] == it->antenna2()[row], "Mismatch of antenna 2 index for row "<<row<<
@@ -367,8 +367,8 @@ void process(scimath::GenericNormalEquations &gne, const IConstDataSource &ds, s
        ASKAPCHECK(it->nRow() == 3, "Expect 3 baselines, the accessor has "<<it->nRow()<<" rows");
        ASKAPASSERT(it->nPol() >= 1);
        ASKAPASSERT(it->nChannel() >= 1);
-       casa::Vector<casa::Complex> freqAvBuf(it->nRow(), casa::Complex(0.,0.));
-       for (casa::uInt ch=0; ch<it->nChannel(); ++ch) {
+       casacore::Vector<casacore::Complex> freqAvBuf(it->nRow(), casacore::Complex(0.,0.));
+       for (casacore::uInt ch=0; ch<it->nChannel(); ++ch) {
             freqAvBuf += it->visibility().xyPlane(3).column(ch);
        }
        freqAvBuf /= float(it->nChannel());
@@ -376,11 +376,11 @@ void process(scimath::GenericNormalEquations &gne, const IConstDataSource &ds, s
        if (counter == 0) {
            startTime = it->time();
            dir = it->pointingDir1()[0];
-           for (casa::uInt row = 0; row<it->nRow(); ++row) {
-               wBuf[row] = it->uvw()[row](2) / casa::C::c * 2 * casa::C::pi;
+           for (casacore::uInt row = 0; row<it->nRow(); ++row) {
+               wBuf[row] = it->uvw()[row](2) / casacore::C::c * 2 * casacore::C::pi;
            }
        }
-       for (casa::uInt row=0; row<it->nRow(); ++row) {
+       for (casacore::uInt row=0; row<it->nRow(); ++row) {
             ASKAPCHECK(dir.separation(it->pointingDir1()[row])<1e-6, "Pointing/phase centre differs for row="<<row<<" time="<<it->time());
             ASKAPCHECK(dir.separation(it->pointingDir2()[row])<1e-6, "Pointing/phase centre differs for row="<<row<<" time="<<it->time());
        }
@@ -392,7 +392,7 @@ void process(scimath::GenericNormalEquations &gne, const IConstDataSource &ds, s
            buf /= float(nAvg);
            avgTime /= double(nAvg);
            publish(os, buf, startTime, avgTime,dir,wBuf);
-           buf.set(casa::Complex(0.,0.));
+           buf.set(casacore::Complex(0.,0.));
            counter = 0;
            avgTime = 0.;
        }
@@ -413,7 +413,7 @@ int main(int argc, char **argv) {
 	 return -2;
      }
 
-     casa::Timer timer;
+     casacore::Timer timer;
 
      timer.mark();
 

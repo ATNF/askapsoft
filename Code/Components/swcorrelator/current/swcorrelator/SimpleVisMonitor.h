@@ -106,7 +106,7 @@ public:
   /// @param[in] vis visibility matrix (rows are baselines, columns are channels)
   /// @return delays in seconds for each baseline
   /// @note the routine assumes 1 MHz channel spacing and will not work for a very quick wrap
-  static casa::Vector<casa::Float> estimateDelays(const casa::Matrix<casa::Complex> &vis);
+  static casacore::Vector<casacore::Float> estimateDelays(const casacore::Matrix<casacore::Complex> &vis);
 
 private:
   
@@ -120,13 +120,13 @@ private:
   std::ofstream itsOStream;
 
   /// @brief buffer for visibilities for all beams and baselines
-  casa::Matrix<casa::Complex> itsVisBuffer;
+  casacore::Matrix<casacore::Complex> itsVisBuffer;
 
   /// @brief buffer for delays for all beams and baselines
-  casa::Matrix<casa::Float> itsDelayBuffer; 
+  casacore::Matrix<casacore::Float> itsDelayBuffer; 
 
   /// @brief buffer for user defined control words for all antennas
-  casa::Vector<uint32_t> itsControlBuffer;
+  casacore::Vector<uint32_t> itsControlBuffer;
 };
 
 } // namespace swcorrelator

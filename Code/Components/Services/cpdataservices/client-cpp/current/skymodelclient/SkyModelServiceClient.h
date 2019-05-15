@@ -79,10 +79,10 @@ namespace skymodelservice {
             ///                     (Unit conformance: Jy).
             /// @throw  AskapError  in the case one ore more of the Quantities does not
             ///                     conform to the appropriate unit.
-            ComponentResultSet coneSearch(const casa::Quantity& ra,
-                    const casa::Quantity& dec,
-                    const casa::Quantity& searchRadius,
-                    const casa::Quantity& fluxLimit);
+            ComponentResultSet coneSearch(const casacore::Quantity& ra,
+                    const casacore::Quantity& dec,
+                    const casacore::Quantity& searchRadius,
+                    const casacore::Quantity& fluxLimit);
 
         private:
 

@@ -78,8 +78,8 @@ using namespace askap::components;
 using namespace casa;
 
 template <class T>
-void AskapComponentImager::project(casa::ImageInterface<T>& image,
-                                   const casa::ComponentList& list, const unsigned int term)
+void AskapComponentImager::project(casacore::ImageInterface<T>& image,
+                                   const casacore::ComponentList& list, const unsigned int term)
 {
     if (list.nelements() == 0) {
         return;
@@ -190,14 +190,14 @@ void AskapComponentImager::project(casa::ImageInterface<T>& image,
 }
 
 template <class T>
-void AskapComponentImager::projectPointShape(casa::ImageInterface<T>& image,
-        const casa::SkyComponent& c,
-        const casa::Int latAxis, const casa::Int longAxis,
-        const casa::DirectionCoordinate& dirCoord,
-        const casa::Int freqAxis, const casa::uInt freqIdx,
-        const casa::Flux<casa::Double>& flux,
-        const casa::Int polAxis, const casa::uInt polIdx,
-        const casa::Stokes::StokesTypes& stokes)
+void AskapComponentImager::projectPointShape(casacore::ImageInterface<T>& image,
+        const casacore::SkyComponent& c,
+        const casacore::Int latAxis, const casacore::Int longAxis,
+        const casacore::DirectionCoordinate& dirCoord,
+        const casacore::Int freqAxis, const casacore::uInt freqIdx,
+        const casacore::Flux<casacore::Double>& flux,
+        const casacore::Int polAxis, const casacore::uInt polIdx,
+        const casacore::Stokes::StokesTypes& stokes)
 {
     // Convert world position to pixel position
     const MDirection& dir = c.shape().refDirection();
@@ -223,14 +223,14 @@ void AskapComponentImager::projectPointShape(casa::ImageInterface<T>& image,
 }
 
 template <class T>
-void AskapComponentImager::projectGaussianShape(casa::ImageInterface<T>& image,
-        const casa::SkyComponent& c,
-        const casa::Int latAxis, const casa::Int longAxis,
-        const casa::DirectionCoordinate& dirCoord,
-        const casa::Int freqAxis, const casa::uInt freqIdx,
-        const casa::Flux<casa::Double>& flux,
-        const casa::Int polAxis, const casa::uInt polIdx,
-        const casa::Stokes::StokesTypes& stokes)
+void AskapComponentImager::projectGaussianShape(casacore::ImageInterface<T>& image,
+        const casacore::SkyComponent& c,
+        const casacore::Int latAxis, const casacore::Int longAxis,
+        const casacore::DirectionCoordinate& dirCoord,
+        const casacore::Int freqAxis, const casacore::uInt freqIdx,
+        const casacore::Flux<casacore::Double>& flux,
+        const casacore::Int polAxis, const casacore::uInt polIdx,
+        const casacore::Stokes::StokesTypes& stokes)
 {
     // Convert world position to pixel position
     const MDirection& dir = c.shape().refDirection();
@@ -295,10 +295,10 @@ void AskapComponentImager::projectGaussianShape(casa::ImageInterface<T>& image,
     }
 }
 
-IPosition AskapComponentImager::makePosition(const casa::Int latAxis, const casa::Int longAxis,
-        const casa::Int spectralAxis, const casa::Int polAxis,
-        const casa::uInt latIdx, const casa::uInt longIdx,
-        const casa::uInt spectralIdx, const casa::uInt polIdx)
+IPosition AskapComponentImager::makePosition(const casacore::Int latAxis, const casacore::Int longAxis,
+        const casacore::Int spectralAxis, const casacore::Int polAxis,
+        const casacore::uInt latIdx, const casacore::uInt longIdx,
+        const casacore::uInt spectralIdx, const casacore::uInt polIdx)
 {
     // Count the number of valid axes
     uInt naxis = 0;
@@ -318,8 +318,8 @@ IPosition AskapComponentImager::makePosition(const casa::Int latAxis, const casa
     return pos;
 }
 
-casa::Flux<casa::Double> AskapComponentImager::makeFlux(const casa::SkyComponent& c,
-        const casa::MFrequency& chanFrequency,
+casacore::Flux<casacore::Double> AskapComponentImager::makeFlux(const casacore::SkyComponent& c,
+        const casacore::MFrequency& chanFrequency,
         const unsigned int term)
 {
     // Transform flux for the given spectral model
@@ -346,8 +346,8 @@ casa::Flux<casa::Double> AskapComponentImager::makeFlux(const casa::SkyComponent
         // I1 = I(v0) * alpha
         Double alpha = 0.0;
         if (c.spectrum().type() == ComponentType::SPECTRAL_INDEX) {
-            const casa::SpectralIndex& spectralModel =
-                dynamic_cast<const casa::SpectralIndex&>(c.spectrum());
+            const casacore::SpectralIndex& spectralModel =
+                dynamic_cast<const casacore::SpectralIndex&>(c.spectrum());
             alpha = spectralModel.index();
         }
         flux.scaleValue(alpha, alpha, alpha, alpha);
@@ -356,8 +356,8 @@ casa::Flux<casa::Double> AskapComponentImager::makeFlux(const casa::SkyComponent
         // I2 = I(v0) * (0.5 * alpha * (alpha - 1) + beta)
         Double alpha = 0.0;
         if (c.spectrum().type() == ComponentType::SPECTRAL_INDEX) {
-            const casa::SpectralIndex& spectralModel =
-                dynamic_cast<const casa::SpectralIndex&>(c.spectrum());
+            const casacore::SpectralIndex& spectralModel =
+                dynamic_cast<const casacore::SpectralIndex&>(c.spectrum());
             alpha = spectralModel.index();
         }
         const Double beta = 0.0;
@@ -550,7 +550,7 @@ double AskapComponentImager::evaluateGaussian1D(const Gaussian2D<T> &gauss,
         // define with the height, but set the flux directly (which
         // will implicitly reset the height value).
 
-        casa::Gaussian1D<T> gauss1d(gauss.height(), 0., gauss.majorAxis());
+        casacore::Gaussian1D<T> gauss1d(gauss.height(), 0., gauss.majorAxis());
         gauss1d.setFlux(gauss.flux());
         // ASKAPLOG_DEBUG_STR(logger, "Defined a 1D Gaussian with height=" << gauss1d.height() << ", flux="<<
         //                    gauss1d.flux() << " and FWHM="<<gauss1d.width());
@@ -572,11 +572,11 @@ double AskapComponentImager::evaluateGaussian1D(const Gaussian2D<T> &gauss,
 
 
 // Explicit instantiation
-template void AskapComponentImager::project(casa::ImageInterface<float>&,
-        const casa::ComponentList&, const unsigned int);
-template void AskapComponentImager::project(casa::ImageInterface<double>&,
-        const casa::ComponentList&, const unsigned int);
-template double AskapComponentImager::evaluateGaussian(const casa::Gaussian2D<float> &gauss,
+template void AskapComponentImager::project(casacore::ImageInterface<float>&,
+        const casacore::ComponentList&, const unsigned int);
+template void AskapComponentImager::project(casacore::ImageInterface<double>&,
+        const casacore::ComponentList&, const unsigned int);
+template double AskapComponentImager::evaluateGaussian(const casacore::Gaussian2D<float> &gauss,
         const int xpix, const int ypix);
-template double AskapComponentImager::evaluateGaussian(const casa::Gaussian2D<double> &gauss,
+template double AskapComponentImager::evaluateGaussian(const casacore::Gaussian2D<double> &gauss,
         const int xpix, const int ypix);

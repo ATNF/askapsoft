@@ -317,33 +317,33 @@ float findSurroundingNoise(std::string filename, float xpt, float ypt, int noise
 
 //**************************************************************//
 
-// casa::Array<casa::Float> getPixelsInBox(std::string imageName, casa::Slicer box, bool fixSlice)
-casa::MaskedArray<casa::Float> getPixelsInBox(std::string imageName, casa::Slicer box, bool fixSlice)
+// casacore::Array<casacore::Float> getPixelsInBox(std::string imageName, casacore::Slicer box, bool fixSlice)
+casacore::MaskedArray<casacore::Float> getPixelsInBox(std::string imageName, casacore::Slicer box, bool fixSlice)
 {
     /// @details Extract a set of pixel values from a region of
-    /// an image. The region is defined by a casa::Slicer
+    /// an image. The region is defined by a casacore::Slicer
     /// object, and the pixel values are returned in a
-    /// casa::Vector object - this is suitable for
+    /// casacore::Vector object - this is suitable for
     /// RadioSource::findAlpha() etc.
     /// @param imageName The image to get the data from
     /// @param box The region within in the image
-    /// @return A casa::Vector of casa::Double pixel values
+    /// @return A casacore::Vector of casacore::Double pixel values
 
     const boost::shared_ptr<ImageInterface<Float> > imagePtr = openImage(imageName);
 
     lengthenSlicer(box, imagePtr->ndim());
-    casa::Slicer newSlicer = box;
+    casacore::Slicer newSlicer = box;
     if (fixSlice) {
         wcsprm *tempwcs = casaImageToWCS(imagePtr);
         fixSlicer(newSlicer, tempwcs);
     }
 
     const boost::shared_ptr<SubImage<Float> > sub(new SubImage<Float>(*imagePtr, newSlicer));
-    casa::Array<Float> subarray(sub->shape());
-    const casa::MaskedArray<Float> msub(sub->get(), sub->getMask());
+    casacore::Array<Float> subarray(sub->shape());
+    const casacore::MaskedArray<Float> msub(sub->get(), sub->getMask());
     return msub;
     
-    // casa::Array<Float> array = imagePtr->getSlice(newSlicer, true);
+    // casacore::Array<Float> array = imagePtr->getSlice(newSlicer, true);
 
     // return array;
 }
@@ -362,7 +362,7 @@ void readBeamInfo(const boost::shared_ptr<ImageInterface<Float> > imagePtr,
     /// beam info in the image, or to store the beam size (in
     /// pixels) if there is.
 
-    casa::Vector<casa::Quantum<Double> > beam = imagePtr->imageInfo().restoringBeam().toVector();
+    casacore::Vector<casacore::Quantum<Double> > beam = imagePtr->imageInfo().restoringBeam().toVector();
     if (doLogging){
         ASKAPLOG_INFO_STR(logger, "Read beam from casa image: " << beam);
     }
@@ -618,26 +618,26 @@ wcsprm *casaImageToWCS(const boost::shared_ptr<ImageInterface<Float> > imagePtr)
 
 //**************************************************************//
 
-casa::CoordinateSystem wcsToCASAcoord(wcsprm *wcs, int nstokes)
+casacore::CoordinateSystem wcsToCASAcoord(wcsprm *wcs, int nstokes)
 {
     /// @details Convert a wcslib WCS specification to a casa-compatible specification.
 
-    casa::CoordinateSystem csys;
+    casacore::CoordinateSystem csys;
 
     ASKAPLOG_INFO_STR(logger, "Defining direction coords");
 
     Matrix<Double> xform(2, 2);
     xform = 0.0; xform.diagonal() = 1.0;
-    casa::DirectionCoordinate dirCoo(MDirection::J2000,
+    casacore::DirectionCoordinate dirCoo(MDirection::J2000,
                                      Projection(Projection::SIN),
-                                     wcs->crval[wcs->lng]*casa::C::pi / 180.,
-                                     wcs->crval[wcs->lat]*casa::C::pi / 180.,
-                                     wcs->cdelt[wcs->lng]*casa::C::pi / 180.,
-                                     wcs->cdelt[wcs->lat]*casa::C::pi / 180.,
+                                     wcs->crval[wcs->lng]*casacore::C::pi / 180.,
+                                     wcs->crval[wcs->lat]*casacore::C::pi / 180.,
+                                     wcs->cdelt[wcs->lng]*casacore::C::pi / 180.,
+                                     wcs->cdelt[wcs->lat]*casacore::C::pi / 180.,
                                      xform,
                                      wcs->crpix[wcs->lng] - 1, wcs->crpix[wcs->lat] - 1);
 
-    casa::SpectralCoordinate specCoo(MFrequency::TOPO,
+    casacore::SpectralCoordinate specCoo(MFrequency::TOPO,
                                      wcs->crval[wcs->spec],
                                      wcs->cdelt[wcs->spec],
                                      wcs->crpix[wcs->spec] - 1,
@@ -645,15 +645,15 @@ casa::CoordinateSystem wcsToCASAcoord(wcsprm *wcs, int nstokes)
 
 
     Vector<Int> stokes(nstokes);
-    stokes(0) = casa::Stokes::I;
+    stokes(0) = casacore::Stokes::I;
 
     if (nstokes == 4) {
-        stokes(1) = casa::Stokes::Q;
-        stokes(2) = casa::Stokes::U;
-        stokes(3) = casa::Stokes::V;
+        stokes(1) = casacore::Stokes::Q;
+        stokes(2) = casacore::Stokes::U;
+        stokes(3) = casacore::Stokes::V;
     }
 
-    casa::StokesCoordinate stokesCoo(stokes);
+    casacore::StokesCoordinate stokesCoo(stokes);
 
     for (int i = 0; i < wcs->naxis; i++) {
         if (i == wcs->lng || i == wcs->lat) {

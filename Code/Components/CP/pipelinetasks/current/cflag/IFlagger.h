@@ -46,9 +46,9 @@ namespace pipelinetasks {
 
 //                   fieldID    feed1      feed2      antenna1   antenna2   polarisation
 #ifdef TUPLE_INDEX
-typedef boost::tuple<casa::Int, casa::Int, casa::Int, casa::Int, casa::Int, casa::Int> rowKey;
+typedef boost::tuple<casacore::Int, casacore::Int, casacore::Int, casacore::Int, casacore::Int, casacore::Int> rowKey;
 #else
-typedef casa::uLong rowKey;
+typedef casacore::uLong rowKey;
 #endif
 
 /// @brief An interface for classes that perform flagging on a per row basis.
@@ -67,16 +67,16 @@ class IFlagger {
         /// @param[in] dryRun   if true the measurement set will not be modified,
         ///                     however statistics will be calculated indicating
         ///                     what flagging would have been done.
-        virtual void processRow(casa::MSColumns& msc, const casa::uInt pass,
-                                const casa::uInt row, const bool dryRun) = 0;
+        virtual void processRow(casacore::MSColumns& msc, const casacore::uInt pass,
+                                const casacore::uInt row, const bool dryRun) = 0;
 
         /// Like processRow, but process nrows
         /// Default implementation just calls processRow
-        virtual void processRows(casa::MSColumns& msc, const casa::uInt pass,
-                                 const casa::uInt row, const casa::uInt nrow,
+        virtual void processRows(casacore::MSColumns& msc, const casacore::uInt pass,
+                                 const casacore::uInt row, const casacore::uInt nrow,
                                  const bool dryRun)
         {
-            for (casa::uInt i = row; i < row + nrow; i++)
+            for (casacore::uInt i = row; i < row + nrow; i++)
                 processRow(msc, pass, i, dryRun);
         }  
 
@@ -85,7 +85,7 @@ class IFlagger {
 
         /// Functions associated with multiple passees
         /// @param[in] pass     number of passes over the data already performed
-        virtual casa::Bool processingRequired(const casa::uInt pass) = 0;
+        virtual casacore::Bool processingRequired(const casacore::uInt pass) = 0;
 
 };
 

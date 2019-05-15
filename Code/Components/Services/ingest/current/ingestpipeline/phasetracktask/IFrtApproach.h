@@ -61,7 +61,7 @@ class IFrtApproach {
         ///                  beams (columns) in radians per second
         /// @param[in] effLO effective LO frequency in Hz
         virtual void process(const askap::cp::common::VisChunk::ShPtr& chunk,
-                             const casa::Matrix<double> &delays, const casa::Matrix<double> &rates, const double effLO) = 0;
+                             const casacore::Matrix<double> &delays, const casacore::Matrix<double> &rates, const double effLO) = 0;
 
         /// Shared pointer definition
         typedef boost::shared_ptr<IFrtApproach> ShPtr;

@@ -65,7 +65,7 @@ xercesc::DOMElement* ObservationElement::toXmlElement(xercesc::DOMDocument& doc)
     return e;
 }
 
-void ObservationElement::setObsTimeRange(const casa::MEpoch& start, const casa::MEpoch& end)
+void ObservationElement::setObsTimeRange(const casacore::MEpoch& start, const casacore::MEpoch& end)
 {
     itsObsStart = start;
     itsObsEnd = end;

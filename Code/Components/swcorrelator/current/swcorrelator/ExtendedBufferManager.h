@@ -124,7 +124,7 @@ private:
    
    /// @brief buffers for each antenna for the channel/beam being processed
    /// @details Negative value means the numbers have not been initialised.
-   mutable casa::Vector<int> itsBuffers;
+   mutable casacore::Vector<int> itsBuffers;
    
    /// @brief iteration plan
    /// @details Each BufferSet stores antenna indices (after pre-processing) rather than buffer indices.
@@ -136,7 +136,7 @@ private:
    /// @brief release counters
    /// @details There is one item per baseline set stored in itsPlan. The element is true if a particular
    /// combination is not released. All elements false means that this channel/beam is either done or not started
-   mutable casa::Vector<bool> itsReleaseFlags;
+   mutable casacore::Vector<bool> itsReleaseFlags;
    
    /// @brief true if we are (already) waiting for a new complete set of data
    /// @details This is an additional synchronisation flag to prevent a race condition when a number of threads

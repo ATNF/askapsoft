@@ -88,11 +88,11 @@ const unsigned int defaultNumSubThresholds = 20;
 const float defaultMaxReducedChisq = 5.;
 
 /// @brief Default value for the maxRMS parameter passed to the
-/// casa::fitGaussian::fit() function.
+/// casacore::fitGaussian::fit() function.
 const Double defaultMaxRMS = 1.;
 
 /// @brief Default value for the maxRetries parameters used by
-/// casa::fitGaussian
+/// casacore::fitGaussian
 const unsigned int defaultMaxRetries = 0;
 
 const std::string availableFitTypesArray[5] = {"full", "psf", "shape", "height", "guess"};
@@ -170,7 +170,7 @@ class FittingParameters {
         void setChisqConfidence(float f) {itsChisqConfidence = f;};
         void setMaxReducedChisq(float f) {itsMaxReducedChisq = f;};
         void setBoxFlux(float f) {itsBoxFlux = f;};
-        void setBoxFlux(casa::Vector<casa::Double> f);
+        void setBoxFlux(casacore::Vector<casacore::Double> f);
         void setFlagFitJustDetection(bool b) {itsFlagFitJustDetection = b;};
         void setPeakFlux(float f) {itsSrcPeak = f;};
         void setDetectThresh(float f) {itsDetectThresh = f;};
@@ -262,7 +262,7 @@ class FittingParameters {
         /// @param box A list of pairs of minimum & maximum values,
         /// one pair for each axis (only x- and y-axes required, as elements 0 and
         /// 1 respectively).
-        void saveBox(casa::Slicer box)
+        void saveBox(casacore::Slicer box)
         {
             itsXmin = box.start()[0];
             itsXmax = box.end()[0];
@@ -282,7 +282,7 @@ class FittingParameters {
         unsigned int itsBoxPadSize;
 
         /// @brief The maxRMS parameter passed to the
-        /// casa::FitGaussian::fit() function.
+        /// casacore::FitGaussian::fit() function.
         Double itsMaxRMS;
 
         /// @brief The maximum number of Gaussian components to be
@@ -345,18 +345,18 @@ class FittingParameters {
         float itsBeamSize;
 
         /// @brief The maximum number of retries used by
-        /// casa::FitGaussian::fit
+        /// casacore::FitGaussian::fit
         unsigned int itsMaxRetries;
 
         /// @brief The convergence criterium
         Double itsCriterium;
 
         /// @brief The maximum number of iterations for
-        /// casa::FitGaussian::fit()
+        /// casacore::FitGaussian::fit()
         unsigned int itsMaxIter;
 
         /// @brief Whether to calculate the noise surrounding the
-        /// object and use it as the sigma in casa::FitGaussian::fit()
+        /// object and use it as the sigma in casacore::FitGaussian::fit()
         bool itsUseNoise;
 
         /// @brief The noise level to use when not calculating it

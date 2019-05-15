@@ -34,7 +34,7 @@
 #include <extraction/SourceSpectrumExtractor.h>
 #include <extraction/NoiseSpectrumExtractor.h>
 
-#include <utils/PolConverter.h>
+#include <askap/scimath/utils/PolConverter.h>
 
 #include <Common/ParameterSet.h>
 #include <Common/KVpair.h>
@@ -121,8 +121,8 @@ void StokesSpectrum::extractSpectrum()
 
     itsSpecExtractor->setSource(itsComponent);
     itsSpecExtractor->extract();
-    itsSpectrum = casa::Vector<float>(itsSpecExtractor->array());
-    itsMedianValue = casa::median(itsSpectrum);
+    itsSpectrum = casacore::Vector<float>(itsSpecExtractor->array());
+    itsMedianValue = casacore::median(itsSpectrum);
 
     itsFrequencies = itsSpecExtractor->frequencies();
 
@@ -133,8 +133,8 @@ void StokesSpectrum::extractNoise()
 
     itsNoiseExtractor->setSource(itsComponent);
     itsNoiseExtractor->extract();
-    itsNoiseSpectrum = casa::Vector<float>(itsNoiseExtractor->array());
-    itsMedianNoise = casa::median(itsNoiseSpectrum);
+    itsNoiseSpectrum = casacore::Vector<float>(itsNoiseExtractor->array());
+    itsMedianNoise = casacore::median(itsNoiseSpectrum);
 
 }
 

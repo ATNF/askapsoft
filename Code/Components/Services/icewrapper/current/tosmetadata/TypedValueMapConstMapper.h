@@ -58,25 +58,25 @@ class TypedValueMapConstMapper {
         /// @brief Destructor.
         virtual ~TypedValueMapConstMapper() {};
         
-        virtual casa::Int getInt(const std::string& key) const;
-        virtual casa::Long getLong(const std::string& key) const;
-        virtual casa::String getString(const std::string& key) const;
-        virtual casa::Bool getBool(const std::string& key) const;
-        virtual casa::Float getFloat(const std::string& key) const;
-        virtual casa::Double getDouble(const std::string& key) const;
-        virtual casa::Complex getFloatComplex(const std::string& key) const;
-        virtual casa::DComplex getDoubleComplex(const std::string& key) const;
-        virtual casa::MDirection getDirection(const std::string& key) const;
+        virtual casacore::Int getInt(const std::string& key) const;
+        virtual casacore::Long getLong(const std::string& key) const;
+        virtual casacore::String getString(const std::string& key) const;
+        virtual casacore::Bool getBool(const std::string& key) const;
+        virtual casacore::Float getFloat(const std::string& key) const;
+        virtual casacore::Double getDouble(const std::string& key) const;
+        virtual casacore::Complex getFloatComplex(const std::string& key) const;
+        virtual casacore::DComplex getDoubleComplex(const std::string& key) const;
+        virtual casacore::MDirection getDirection(const std::string& key) const;
 
-        virtual std::vector<casa::Int> getIntSeq(const std::string& key) const;
-        virtual std::vector<casa::Long> getLongSeq(const std::string& key) const;
-        virtual std::vector<casa::String> getStringSeq(const std::string& key) const;
-        virtual std::vector<casa::Bool> getBoolSeq(const std::string& key) const;
-        virtual std::vector<casa::Float> getFloatSeq(const std::string& key) const;
-        virtual std::vector<casa::Double> getDoubleSeq(const std::string& key) const;
-        virtual std::vector<casa::Complex> getFloatComplexSeq(const std::string& key) const;
-        virtual std::vector<casa::DComplex> getDoubleComplexSeq(const std::string& key) const;
-        virtual std::vector<casa::MDirection> getDirectionSeq(const std::string& key) const;
+        virtual std::vector<casacore::Int> getIntSeq(const std::string& key) const;
+        virtual std::vector<casacore::Long> getLongSeq(const std::string& key) const;
+        virtual std::vector<casacore::String> getStringSeq(const std::string& key) const;
+        virtual std::vector<casacore::Bool> getBoolSeq(const std::string& key) const;
+        virtual std::vector<casacore::Float> getFloatSeq(const std::string& key) const;
+        virtual std::vector<casacore::Double> getDoubleSeq(const std::string& key) const;
+        virtual std::vector<casacore::Complex> getFloatComplexSeq(const std::string& key) const;
+        virtual std::vector<casacore::DComplex> getDoubleComplexSeq(const std::string& key) const;
+        virtual std::vector<casacore::MDirection> getDirectionSeq(const std::string& key) const;
 
         /// @brief test that the particular key exists in the metadata
         /// @details
@@ -98,8 +98,8 @@ class TypedValueMapConstMapper {
         T get(const std::string& key) const;
 
         /// @brief Convert a TypedValue (Slice) direction type to a
-        /// casa::MDirection
-        casa::MDirection convertDirection(const askap::interfaces::Direction& dir) const;
+        /// casacore::MDirection
+        casacore::MDirection convertDirection(const askap::interfaces::Direction& dir) const;
 
         /// @brief The TypedValueMap this mapper maps from/to.
         const askap::interfaces::TypedValueMap itsConstMap;

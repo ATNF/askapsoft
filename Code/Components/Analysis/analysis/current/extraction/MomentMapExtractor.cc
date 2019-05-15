@@ -108,16 +108,16 @@ MomentMapExtractor::MomentMapExtractor(const LOFAR::ParameterSet& parset):
     if (haveDud) {
         ASKAPLOG_WARN_STR(logger,
                           "You requested invalid moments. Only doing " <<
-                          casa::Vector<Int>(momentsUsed));
+                          casacore::Vector<Int>(momentsUsed));
     } else {
         ASKAPLOG_INFO_STR(logger,
                           "Will compute the following moments " <<
-                          casa::Vector<Int>(momentsUsed));
+                          casacore::Vector<Int>(momentsUsed));
     }
 
-    itsMom0map = casa::Array<Float>();
-    itsMom1map = casa::Array<Float>();
-    itsMom2map = casa::Array<Float>();
+    itsMom0map = casacore::Array<Float>();
+    itsMom1map = casacore::Array<Float>();
+    itsMom2map = casacore::Array<Float>();
 
 }
 
@@ -126,8 +126,8 @@ void MomentMapExtractor::defineSlicer()
 
     if (this->openInput()) {
         IPosition shape = itsInputCubePtr->shape();
-        casa::IPosition blc(shape.size(), 0);
-        casa::IPosition trc = shape - 1;
+        casacore::IPosition blc(shape.size(), 0);
+        casacore::IPosition trc = shape - 1;
 
         long zero = 0;
         blc(itsSpcAxis) = std::max(zero, itsSource->getZmin() - 3 + itsSource->getZOffset());
@@ -152,7 +152,7 @@ void MomentMapExtractor::defineSlicer()
                        itsSpatialMethod << "') in cube cutout");
         }
 
-        itsSlicer = casa::Slicer(blc, trc, casa::Slicer::endIsLast);
+        itsSlicer = casacore::Slicer(blc, trc, casacore::Slicer::endIsLast);
         ASKAPLOG_DEBUG_STR(logger, itsSlicer);
         this->closeInput();
         this->initialiseArray();
@@ -161,19 +161,19 @@ void MomentMapExtractor::defineSlicer()
     }
 }
 
-casa::IPosition MomentMapExtractor::arrayShape()
+casacore::IPosition MomentMapExtractor::arrayShape()
 {
     int lngsize = itsSlicer.length()(itsLngAxis);
     int latsize = itsSlicer.length()(itsLatAxis);
-    casa::IPosition shape(4, lngsize, latsize, 1, 1);
+    casacore::IPosition shape(4, lngsize, latsize, 1, 1);
     return shape;
 }
 
 void MomentMapExtractor::initialiseArray()
 {
     if (this->openInput()) {
-        casa::IPosition shape = this->arrayShape();
-        itsArray = casa::Array<Float>(shape, 0.0);
+        casacore::IPosition shape = this->arrayShape();
+        itsArray = casacore::Array<Float>(shape, 0.0);
         this->closeInput();
     } else {
         ASKAPLOG_ERROR_STR(logger, "Could not open image");
@@ -194,8 +194,8 @@ void MomentMapExtractor::extract()
         sub(new SubImage<Float>(*itsInputCubePtr, itsSlicer));
 
         ASKAPASSERT(sub->size() > 0);
-        const casa::MaskedArray<Float> msub(sub->get(), sub->getMask());
-        casa::Array<Float> subarray(sub->shape());
+        const casacore::MaskedArray<Float> msub(sub->get(), sub->getMask());
+        casacore::Array<Float> subarray(sub->shape());
         subarray = msub;
 
         if (itsMomentRequest[0]) {
@@ -220,30 +220,30 @@ void MomentMapExtractor::writeImage()
     itsInputCube = itsInputCubeList[0];
     if (this->openInput()) {
         IPosition inshape = itsInputCubePtr->shape();
-        casa::CoordinateSystem newcoo = casa::CoordinateUtil::defaultCoords4D();
+        casacore::CoordinateSystem newcoo = casacore::CoordinateUtil::defaultCoords4D();
 
-        int dirCoNum = itsInputCoords.findCoordinate(casa::Coordinate::DIRECTION);
-        int spcCoNum = itsInputCoords.findCoordinate(casa::Coordinate::SPECTRAL);
-        int stkCoNum = itsInputCoords.findCoordinate(casa::Coordinate::STOKES);
+        int dirCoNum = itsInputCoords.findCoordinate(casacore::Coordinate::DIRECTION);
+        int spcCoNum = itsInputCoords.findCoordinate(casacore::Coordinate::SPECTRAL);
+        int stkCoNum = itsInputCoords.findCoordinate(casacore::Coordinate::STOKES);
 
-        casa::DirectionCoordinate dircoo(itsInputCoords.directionCoordinate(dirCoNum));
-        casa::SpectralCoordinate spcoo(itsInputCoords.spectralCoordinate(spcCoNum));
-        casa::Vector<Int> stkvec(itsStokesList.size());
+        casacore::DirectionCoordinate dircoo(itsInputCoords.directionCoordinate(dirCoNum));
+        casacore::SpectralCoordinate spcoo(itsInputCoords.spectralCoordinate(spcCoNum));
+        casacore::Vector<Int> stkvec(itsStokesList.size());
         for (size_t i = 0; i < stkvec.size(); i++) {
             stkvec[i] = itsStokesList[i];
         }
-        casa::StokesCoordinate stkcoo(stkvec);
+        casacore::StokesCoordinate stkcoo(stkvec);
 
-        newcoo.replaceCoordinate(dircoo, newcoo.findCoordinate(casa::Coordinate::DIRECTION));
-        newcoo.replaceCoordinate(spcoo, newcoo.findCoordinate(casa::Coordinate::SPECTRAL));
+        newcoo.replaceCoordinate(dircoo, newcoo.findCoordinate(casacore::Coordinate::DIRECTION));
+        newcoo.replaceCoordinate(spcoo, newcoo.findCoordinate(casacore::Coordinate::SPECTRAL));
         if (stkCoNum >= 0) {
-            newcoo.replaceCoordinate(stkcoo, newcoo.findCoordinate(casa::Coordinate::STOKES));
+            newcoo.replaceCoordinate(stkcoo, newcoo.findCoordinate(casacore::Coordinate::STOKES));
         }
 
         int lngAxis = newcoo.directionAxesNumbers()[0];
         int latAxis = newcoo.directionAxesNumbers()[1];
         int stkAxis = newcoo.polarizationAxisNumber();
-        casa::IPosition outshape(4, 1);
+        casacore::IPosition outshape(4, 1);
         outshape(lngAxis) = itsSlicer.length()(itsLngAxis);
         outshape(latAxis) = itsSlicer.length()(itsLatAxis);
         outshape(stkAxis) = stkvec.size();
@@ -252,18 +252,18 @@ void MomentMapExtractor::writeImage()
             // that the RA/DEC (or whatever) are correct. Leave the
             // spectral/stokes axes untouched.  only want to do this
             // if we are trimming.
-            casa::Vector<Float> shift(outshape.size(), 0);
-            casa::Vector<Float> incrFac(outshape.size(), 1);
+            casacore::Vector<Float> shift(outshape.size(), 0);
+            casacore::Vector<Float> incrFac(outshape.size(), 1);
             shift(lngAxis) = itsSource->getXmin() - itsPadSize + itsSource->getXOffset();
             shift(latAxis) = itsSource->getYmin() - itsPadSize + itsSource->getYOffset();
-            casa::Vector<Int> newshape = outshape.asVector();
+            casacore::Vector<Int> newshape = outshape.asVector();
             newcoo.subImageInSitu(shift, incrFac, newshape);
         }
 
         for (int i = 0; i < 3; i++) {
             if (itsMomentRequest[i]) {
 
-                casa::LogicalArray theMask;
+                casacore::LogicalArray theMask;
                 std::string newunits;
                 switch (i) {
                     case 0:
@@ -314,7 +314,7 @@ void MomentMapExtractor::writeImage()
                 updateHeaders(filename);
 
                 ia->makeDefaultMask(filename);
-                ia->writeMask(filename, theMask, casa::IPosition(outshape.nelements(),0));
+                ia->writeMask(filename, theMask, casacore::IPosition(outshape.nelements(),0));
 
             }
         }
@@ -341,8 +341,8 @@ std::string MomentMapExtractor::outfile(int moment)
 double MomentMapExtractor::getSpectralIncrement()
 {
     double specIncr;
-    int spcCoNum = itsInputCoords.findCoordinate(casa::Coordinate::SPECTRAL);
-    casa::SpectralCoordinate spcoo(itsInputCoords.spectralCoordinate(spcCoNum));
+    int spcCoNum = itsInputCoords.findCoordinate(casacore::Coordinate::SPECTRAL);
+    casacore::SpectralCoordinate spcoo(itsInputCoords.spectralCoordinate(spcCoNum));
     if (spcoo.restFrequency() > 0.) {
         // can convert to velocity
         double vel1, vel2;
@@ -358,11 +358,11 @@ double MomentMapExtractor::getSpectralIncrement()
 
 double MomentMapExtractor::getSpectralIncrement(int z)
 {
-    int spcCoNum = itsInputCoords.findCoordinate(casa::Coordinate::SPECTRAL);
-    casa::SpectralCoordinate spcoo(itsInputCoords.spectralCoordinate(spcCoNum));
+    int spcCoNum = itsInputCoords.findCoordinate(casacore::Coordinate::SPECTRAL);
+    casacore::SpectralCoordinate spcoo(itsInputCoords.spectralCoordinate(spcCoNum));
     double specIncr;
     if (spcoo.restFrequency() > 0.) {
-        casa::Quantum<Double> vel, velMinus, velPlus;
+        casacore::Quantum<Double> vel, velMinus, velPlus;
         ASKAPASSERT(spcoo.pixelToVelocity(vel, double(z)));
         ASKAPASSERT(spcoo.pixelToVelocity(velMinus, double(z - 1)));
         ASKAPASSERT(spcoo.pixelToVelocity(velPlus, double(z + 1)));
@@ -378,11 +378,11 @@ double MomentMapExtractor::getSpectralIncrement(int z)
 
 double MomentMapExtractor::getSpecVal(int z)
 {
-    int spcCoNum = itsInputCoords.findCoordinate(casa::Coordinate::SPECTRAL);
-    casa::SpectralCoordinate spcoo(itsInputCoords.spectralCoordinate(spcCoNum));
+    int spcCoNum = itsInputCoords.findCoordinate(casacore::Coordinate::SPECTRAL);
+    casacore::SpectralCoordinate spcoo(itsInputCoords.spectralCoordinate(spcCoNum));
     double specval;
     if (spcoo.restFrequency() > 0.) {
-        casa::Quantum<Double> vel;
+        casacore::Quantum<Double> vel;
         ASKAPASSERT(spcoo.pixelToVelocity(vel, double(z)));
         specval = vel.getValue();
     } else {
@@ -391,29 +391,29 @@ double MomentMapExtractor::getSpecVal(int z)
     return specval;
 }
 
-void MomentMapExtractor::getMom0(const casa::Array<Float> &subarray)
+void MomentMapExtractor::getMom0(const casacore::Array<Float> &subarray)
 {
 
     ASKAPLOG_INFO_STR(logger, "Extracting moment-0 map");
-    itsMom0map = casa::Array<Float>(this->arrayShape(), 0.0);
+    itsMom0map = casacore::Array<Float>(this->arrayShape(), 0.0);
     uint zeroInt = 0;
-    casa::LogicalArray basemask(this->arrayShape(), true);
+    casacore::LogicalArray basemask(this->arrayShape(), true);
     if (itsInputCubePtr->hasPixelMask()) {
-        casa::LogicalArray mskslice = itsInputCubePtr->pixelMask().getSlice(itsSlicer);
-        casa::LogicalArray
-        mskTmp = (partialNTrue(mskslice, casa::IPosition(1, itsSpcAxis)) > zeroInt);
+        casacore::LogicalArray mskslice = itsInputCubePtr->pixelMask().getSlice(itsSlicer);
+        casacore::LogicalArray
+        mskTmp = (partialNTrue(mskslice, casacore::IPosition(1, itsSpcAxis)) > zeroInt);
         basemask = mskTmp.reform(this->arrayShape());
     }
-    itsMom0mask = casa::LogicalArray(this->arrayShape(), false);
+    itsMom0mask = casacore::LogicalArray(this->arrayShape(), false);
 
     // To get the mask to be applied in FITS images, we divide through
     // at the end by this array. Valid pixels have value of 1. Masked
     // pixels have value of 0. That way the pixels that should be
     // masked are converted to nans.
-    casa::Array<float> maskScaler(this->arrayShape(), 0.);
+    casacore::Array<float> maskScaler(this->arrayShape(), 0.);
 
-    casa::IPosition outloc(4, 0), inloc(4, 0);
-    casa::IPosition start = itsSlicer.start();
+    casacore::IPosition outloc(4, 0), inloc(4, 0);
+    casacore::IPosition start = itsSlicer.start();
 
     if (itsFlagUseDetection) {
         std::vector<PixelInfo::Voxel> voxlist = itsSource->getPixelSet();
@@ -432,8 +432,8 @@ void MomentMapExtractor::getMom0(const casa::Array<Float> &subarray)
         }
     } else {
         // just sum each spectrum over the slicer's range.
-        casa::IPosition outBLC(4, 0), outTRC(itsMom0map.shape() - 1);
-        casa::Array<Float> sumarray = partialSums(subarray, casa::IPosition(1, itsSpcAxis));
+        casacore::IPosition outBLC(4, 0), outTRC(itsMom0map.shape() - 1);
+        casacore::Array<Float> sumarray = partialSums(subarray, casacore::IPosition(1, itsSpcAxis));
         itsMom0map(outBLC, outTRC) = sumarray.reform(itsMom0map(outBLC, outTRC).shape()) * getSpectralIncrement();
         itsMom0mask(outBLC, outTRC) = true;
     }
@@ -443,27 +443,27 @@ void MomentMapExtractor::getMom0(const casa::Array<Float> &subarray)
 
 }
 
-void MomentMapExtractor::getMom1(const casa::Array<Float> &subarray)
+void MomentMapExtractor::getMom1(const casacore::Array<Float> &subarray)
 {
     ASKAPLOG_INFO_STR(logger, "Extracting moment-1 map");
-    itsMom1map = casa::Array<Float>(this->arrayShape(), 0.0);
+    itsMom1map = casacore::Array<Float>(this->arrayShape(), 0.0);
     uint zeroInt = 0;
-    casa::LogicalArray basemask(this->arrayShape(), true);
+    casacore::LogicalArray basemask(this->arrayShape(), true);
     if (itsInputCubePtr->hasPixelMask()) {
-        casa::LogicalArray mskslice = itsInputCubePtr->pixelMask().getSlice(itsSlicer);
-        casa::LogicalArray
-        mskTmp = (partialNTrue(mskslice, casa::IPosition(1, itsSpcAxis)) > zeroInt);
+        casacore::LogicalArray mskslice = itsInputCubePtr->pixelMask().getSlice(itsSlicer);
+        casacore::LogicalArray
+        mskTmp = (partialNTrue(mskslice, casacore::IPosition(1, itsSpcAxis)) > zeroInt);
         basemask = mskTmp.reform(this->arrayShape());
     }
-    itsMom1mask = casa::LogicalArray(this->arrayShape(), false);
+    itsMom1mask = casacore::LogicalArray(this->arrayShape(), false);
 
-    casa::IPosition start = itsSlicer.start();
+    casacore::IPosition start = itsSlicer.start();
 
     if (itsMom0map.size() == 0) this->getMom0(subarray);
-    casa::Array<Float> sumNuS(itsMom1map.shape(), 0.0);
-    casa::Array<Float> sumS = itsMom0map / this->getSpectralIncrement();
+    casacore::Array<Float> sumNuS(itsMom1map.shape(), 0.0);
+    casacore::Array<Float> sumS = itsMom0map / this->getSpectralIncrement();
     if (itsFlagUseDetection) {
-        casa::IPosition outloc(4, 0), inloc(4, 0);
+        casacore::IPosition outloc(4, 0), inloc(4, 0);
         std::vector<PixelInfo::Voxel> voxlist = itsSource->getPixelSet();
         std::vector<PixelInfo::Voxel>::iterator vox;
         for (vox = voxlist.begin(); vox != voxlist.end(); vox++) {
@@ -480,15 +480,15 @@ void MomentMapExtractor::getMom1(const casa::Array<Float> &subarray)
         }
     } else {
         // just sum each spectrum over the slicer's range.
-        casa::IPosition outBLC(itsMom1map.ndim(), 0), outTRC(itsMom1map.shape() - 1);
-        casa::Array<Float> nuArray(subarray.shape(), 0.);
+        casacore::IPosition outBLC(itsMom1map.ndim(), 0), outTRC(itsMom1map.shape() - 1);
+        casacore::Array<Float> nuArray(subarray.shape(), 0.);
         for (int z = 0; z < subarray.shape()(itsSpcAxis); z++) {
-            casa::IPosition blc(subarray.ndim(), 0), trc = subarray.shape() - 1;
+            casacore::IPosition blc(subarray.ndim(), 0), trc = subarray.shape() - 1;
             blc(itsSpcAxis) = trc(itsSpcAxis) = z;
             nuArray(blc, trc) = this->getSpecVal(z + start(itsSpcAxis));
         }
-        casa::Array<Float> nuSubarray = nuArray * subarray;
-        casa::Array<Float> sumarray = partialSums(nuSubarray, casa::IPosition(1, itsSpcAxis));
+        casacore::Array<Float> nuSubarray = nuArray * subarray;
+        casacore::Array<Float> sumarray = partialSums(nuSubarray, casacore::IPosition(1, itsSpcAxis));
         sumNuS(outBLC, outTRC) = sumarray.reform(sumNuS(outBLC, outTRC).shape()) * this->getSpectralIncrement();
         itsMom1mask(outBLC, outTRC) = true;
     }
@@ -501,26 +501,26 @@ void MomentMapExtractor::getMom1(const casa::Array<Float> &subarray)
 
 }
 
-void MomentMapExtractor::getMom2(const casa::Array<Float> &subarray)
+void MomentMapExtractor::getMom2(const casacore::Array<Float> &subarray)
 {
     ASKAPLOG_INFO_STR(logger, "Extracting moment-2 map");
-    itsMom2map = casa::Array<Float>(this->arrayShape(), 0.0);
+    itsMom2map = casacore::Array<Float>(this->arrayShape(), 0.0);
     uint zeroInt = 0;
-    casa::LogicalArray basemask(this->arrayShape(), true);
+    casacore::LogicalArray basemask(this->arrayShape(), true);
     if (itsInputCubePtr->hasPixelMask()) {
-        casa::LogicalArray mskslice = itsInputCubePtr->pixelMask().getSlice(itsSlicer);
-        casa::LogicalArray
-        mskTmp = (partialNTrue(mskslice, casa::IPosition(1, itsSpcAxis)) > zeroInt);
+        casacore::LogicalArray mskslice = itsInputCubePtr->pixelMask().getSlice(itsSlicer);
+        casacore::LogicalArray
+        mskTmp = (partialNTrue(mskslice, casacore::IPosition(1, itsSpcAxis)) > zeroInt);
         basemask = mskTmp.reform(this->arrayShape());
     }
-    itsMom2mask = casa::LogicalArray(this->arrayShape(), false);
-    casa::IPosition start = itsSlicer.start();
+    itsMom2mask = casacore::LogicalArray(this->arrayShape(), false);
+    casacore::IPosition start = itsSlicer.start();
 
     if (itsMom1map.size() == 0) this->getMom1(subarray);
-    casa::Array<Float> sumNu2S(itsMom2map.shape(), 0.0);
-    casa::Array<Float> sumS = itsMom0map / this->getSpectralIncrement();
+    casacore::Array<Float> sumNu2S(itsMom2map.shape(), 0.0);
+    casacore::Array<Float> sumS = itsMom0map / this->getSpectralIncrement();
     if (itsFlagUseDetection) {
-        casa::IPosition outloc(4, 0), inloc(4, 0);
+        casacore::IPosition outloc(4, 0), inloc(4, 0);
         std::vector<PixelInfo::Voxel> voxlist = itsSource->getPixelSet();
         std::vector<PixelInfo::Voxel>::iterator vox;
         for (vox = voxlist.begin(); vox != voxlist.end(); vox++) {
@@ -540,19 +540,19 @@ void MomentMapExtractor::getMom2(const casa::Array<Float> &subarray)
         }
     } else {
         // just sum each spectrum over the slicer's range.
-        casa::IPosition outBLC(itsMom2map.ndim(), 0), outTRC(itsMom2map.shape() - 1);
-        casa::IPosition shapeIn(subarray.shape());
-        casa::IPosition shapeMap(shapeIn); shapeMap(itsSpcAxis) = 1;
-        casa::Array<Float> nu2Array(shapeIn, 0.);
-        casa::Array<Float> meanNu(itsMom1map.reform(shapeMap));
+        casacore::IPosition outBLC(itsMom2map.ndim(), 0), outTRC(itsMom2map.shape() - 1);
+        casacore::IPosition shapeIn(subarray.shape());
+        casacore::IPosition shapeMap(shapeIn); shapeMap(itsSpcAxis) = 1;
+        casacore::Array<Float> nu2Array(shapeIn, 0.);
+        casacore::Array<Float> meanNu(itsMom1map.reform(shapeMap));
         for (int z = 0; z < subarray.shape()(itsSpcAxis); z++) {
-            casa::IPosition blc(subarray.ndim(), 0), trc = subarray.shape() - 1;
+            casacore::IPosition blc(subarray.ndim(), 0), trc = subarray.shape() - 1;
             blc(itsSpcAxis) = trc(itsSpcAxis) = z;
             nu2Array(blc, trc) = this->getSpecVal(z + start(itsSpcAxis));
             nu2Array(blc, trc) = (nu2Array(blc, trc) - meanNu);
         }
-        casa::Array<Float> nu2Subarray = nu2Array * nu2Array * subarray;
-        casa::Array<Float> sumarray = partialSums(nu2Subarray, casa::IPosition(1, itsSpcAxis));
+        casacore::Array<Float> nu2Subarray = nu2Array * nu2Array * subarray;
+        casacore::Array<Float> sumarray = partialSums(nu2Subarray, casacore::IPosition(1, itsSpcAxis));
         sumNu2S(outBLC, outTRC) = sumarray.reform(sumNu2S(outBLC, outTRC).shape()) * this->getSpectralIncrement();
         itsMom2mask(outBLC, outTRC) = true;
     }

@@ -68,7 +68,7 @@ void PublisherApp::receiveAndPublishLoop(boost::asio::ip::tcp::socket &socket)
     ASKAPASSERT(itsVisMsgPublisher);
     ASKAPASSERT(itsSpdMsgPublisher);
     ASKAPASSERT(itsVisCtrlPort);
-    casa::Timer timer;
+    casacore::Timer timer;
     const uint32_t N_POLS = 4;
 
     while (socket.is_open()) {
@@ -204,7 +204,7 @@ int PublisherApp::run(int argc, char* argv[])
     }
 
     //tcp::socket socket(io_service);
-    casa::Timer timer;
+    casacore::Timer timer;
     while (true) {
         boost::shared_ptr<tcp::socket> socket(new tcp::socket(io_service));
         ASKAPASSERT(socket);

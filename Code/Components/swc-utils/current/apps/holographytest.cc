@@ -64,12 +64,12 @@ using std::endl;
 using namespace askap;
 using namespace askap::accessors;
 
-const casa::uInt refAnt = 1; // the one which doesn't move
-const casa::uInt maxMappedAnt = 5;
-const casa::uInt maxMappedBeam = 9;
+const casacore::uInt refAnt = 1; // the one which doesn't move
+const casacore::uInt maxMappedAnt = 5;
+const casacore::uInt maxMappedBeam = 9;
 
 // converts antenna index into plane index (i.e. bypasses the reference antenna
-casa::uInt getAntPlaneIndex(const casa::uInt &in) {
+casacore::uInt getAntPlaneIndex(const casacore::uInt &in) {
   if (in<refAnt) {
       return in;
   }
@@ -77,29 +77,29 @@ casa::uInt getAntPlaneIndex(const casa::uInt &in) {
   return in - 1;
 }
 
-casa::Matrix<casa::Complex> processOnePoint(const IConstDataSource &ds, const int ctrl = -1) {
+casacore::Matrix<casacore::Complex> processOnePoint(const IConstDataSource &ds, const int ctrl = -1) {
   IDataSelectorPtr sel=ds.createSelector();
   if (ctrl >=0 ) {
-      //sel->chooseUserDefinedIndex("CONTROL",casa::uInt(ctrl));
-      sel->chooseUserDefinedIndex("SCAN_NUMBER",casa::uInt(ctrl));
+      //sel->chooseUserDefinedIndex("CONTROL",casacore::uInt(ctrl));
+      sel->chooseUserDefinedIndex("SCAN_NUMBER",casacore::uInt(ctrl));
   }
   sel->chooseCrossCorrelations();
   //sel->chooseFeed(0);
   IDataConverterPtr conv=ds.createConverter();  
-  conv->setFrequencyFrame(casa::MFrequency::Ref(casa::MFrequency::TOPO),"MHz");
-  conv->setEpochFrame(casa::MEpoch(casa::Quantity(55913.0,"d"),
-                      casa::MEpoch::Ref(casa::MEpoch::UTC)),"s");
-  conv->setDirectionFrame(casa::MDirection::Ref(casa::MDirection::J2000));                    
+  conv->setFrequencyFrame(casacore::MFrequency::Ref(casacore::MFrequency::TOPO),"MHz");
+  conv->setEpochFrame(casacore::MEpoch(casacore::Quantity(55913.0,"d"),
+                      casacore::MEpoch::Ref(casacore::MEpoch::UTC)),"s");
+  conv->setDirectionFrame(casacore::MDirection::Ref(casacore::MDirection::J2000));                    
 
-  casa::Matrix<casa::Complex> result(maxMappedAnt,maxMappedBeam, casa::Complex(0.,0.));
-  casa::Matrix<casa::uInt>  counts(maxMappedAnt,maxMappedBeam, 0u);
+  casacore::Matrix<casacore::Complex> result(maxMappedAnt,maxMappedBeam, casacore::Complex(0.,0.));
+  casacore::Matrix<casacore::uInt>  counts(maxMappedAnt,maxMappedBeam, 0u);
 
-  casa::Vector<double> freq;
+  casacore::Vector<double> freq;
   size_t counter = 0;
   size_t nGoodRows = 0;
   size_t nBadRows = 0;
-  casa::uInt nChan = 0;
-  casa::uInt nRow = 0;
+  casacore::uInt nChan = 0;
+  casacore::uInt nRow = 0;
   double startTime = 0;
   double stopTime = 0;
     
@@ -117,11 +117,11 @@ casa::Matrix<casa::Complex> processOnePoint(const IConstDataSource &ds, const in
        ASKAPASSERT(it->nChannel() > 1);
        
        // add new value to the buffer
-       for (casa::uInt row=0; row<nRow; ++row) {
-            casa::Vector<casa::Bool> flags = it->flag().xyPlane(0).row(row);
+       for (casacore::uInt row=0; row<nRow; ++row) {
+            casacore::Vector<casacore::Bool> flags = it->flag().xyPlane(0).row(row);
             bool flagged = false;
             bool allFlagged = true;
-            for (casa::uInt ch = 0; ch < flags.nelements(); ++ch) {
+            for (casacore::uInt ch = 0; ch < flags.nelements(); ++ch) {
                  //flagged |= flags[ch];
                  allFlagged &= flags[ch];
             }
@@ -129,14 +129,14 @@ casa::Matrix<casa::Complex> processOnePoint(const IConstDataSource &ds, const in
                 flagged = true;
             }
             
-            casa::Vector<casa::Complex> measuredRow = it->visibility().xyPlane(0).row(row);
+            casacore::Vector<casacore::Complex> measuredRow = it->visibility().xyPlane(0).row(row);
             
             
-            //casa::Complex currentAvgVis = casa::sum(measuredRow) / float(it->nChannel());
+            //casacore::Complex currentAvgVis = casacore::sum(measuredRow) / float(it->nChannel());
             ASKAPDEBUGASSERT(measuredRow.nelements() == flags.nelements());
-            casa::Complex currentAvgVis(0.,0.);
-            casa::uInt currentNChan = 0;
-            for (casa::uInt ch = 0;  ch < flags.nelements(); ++ch) {
+            casacore::Complex currentAvgVis(0.,0.);
+            casacore::uInt currentNChan = 0;
+            for (casacore::uInt ch = 0;  ch < flags.nelements(); ++ch) {
                  if (!flags[ch]) {
                      currentAvgVis += measuredRow[ch];
                      ++currentNChan;
@@ -149,7 +149,7 @@ casa::Matrix<casa::Complex> processOnePoint(const IConstDataSource &ds, const in
             }
 
             /*
-            if ((casa::abs(currentAvgVis) > 0.05) && (row % 3 == 2)) {
+            if ((casacore::abs(currentAvgVis) > 0.05) && (row % 3 == 2)) {
                 flagged = true;
             } 
             
@@ -170,16 +170,16 @@ casa::Matrix<casa::Complex> processOnePoint(const IConstDataSource &ds, const in
             } else {
 
                 ++nGoodRows;
-                const casa::uInt beam = it->feed1()[row];
+                const casacore::uInt beam = it->feed1()[row];
                 ASKAPDEBUGASSERT(beam == it->feed2()[row]);
-                casa::uInt ant = it->antenna2()[row];
+                casacore::uInt ant = it->antenna2()[row];
                 bool needConjugate = false;
                 if (ant == refAnt) {
                     ant = it->antenna1()[row];
                     needConjugate = true;
                 }
                 ASKAPASSERT(ant != refAnt);
-                const casa::uInt planeIndex = getAntPlaneIndex(ant);
+                const casacore::uInt planeIndex = getAntPlaneIndex(ant);
                 ASKAPDEBUGASSERT(planeIndex < result.nrow());
                 ASKAPDEBUGASSERT(beam < result.ncolumn());
                 if (needConjugate) {
@@ -202,8 +202,8 @@ casa::Matrix<casa::Complex> processOnePoint(const IConstDataSource &ds, const in
        stopTime = it->time() + 1; // 1s integration time is hardcoded
   }
   if (counter>1) {
-      for (casa::uInt row=0; row<result.nrow(); ++row) {
-           for (casa::uInt col=0; col<result.ncolumn(); ++col) {
+      for (casacore::uInt row=0; row<result.nrow(); ++row) {
+           for (casacore::uInt col=0; col<result.ncolumn(); ++col) {
                 if (counts(row,col) > 0) {
                     result(row,col) /= float(counts(row,col));
                 }
@@ -216,14 +216,14 @@ casa::Matrix<casa::Complex> processOnePoint(const IConstDataSource &ds, const in
   return result;
 }
 
-void process(const IConstDataSource &ds, const casa::uInt size) {
-   const double resolutionInRad = 0.5 / 180. * casa::C::pi; // in radians
+void process(const IConstDataSource &ds, const casacore::uInt size) {
+   const double resolutionInRad = 0.5 / 180. * casacore::C::pi; // in radians
    ASKAPDEBUGASSERT(size % 2 == 1);
    ASKAPDEBUGASSERT(size > 1);
    const int halfSize = (int(size) - 1) / 2;
-   //const casa::IPosition targetShape(4,int(size),int(size),maxMappedBeam,maxMappedAnt);
-   const casa::IPosition targetShape(3,int(size),int(size),maxMappedBeam*maxMappedAnt);
-   casa::Array<float> buf(targetShape,0.);
+   //const casacore::IPosition targetShape(4,int(size),int(size),maxMappedBeam,maxMappedAnt);
+   const casacore::IPosition targetShape(3,int(size),int(size),maxMappedBeam*maxMappedAnt);
+   casacore::Array<float> buf(targetShape,0.);
 
    int counter = 0;
    for (int x = -halfSize; x <= halfSize; ++x) {
@@ -234,13 +234,13 @@ void process(const IConstDataSource &ds, const casa::uInt size) {
             ++counter; // effectively a 1-based counter
 
             int planeCounter = 0;
-            casa::Matrix<casa::Complex> result = processOnePoint(ds,counter-1);
-            for (casa::uInt ant = 0; ant < result.nrow(); ++ant) {
-                 for (casa::uInt beam = 0; beam < result.ncolumn(); ++beam,++planeCounter) {
-                      //const casa::IPosition curPos(4, x + halfSize, halfSize - y * dir,int(ant),int(beam));
+            casacore::Matrix<casacore::Complex> result = processOnePoint(ds,counter-1);
+            for (casacore::uInt ant = 0; ant < result.nrow(); ++ant) {
+                 for (casacore::uInt beam = 0; beam < result.ncolumn(); ++beam,++planeCounter) {
+                      //const casacore::IPosition curPos(4, x + halfSize, halfSize - y * dir,int(ant),int(beam));
                       ASKAPDEBUGASSERT(planeCounter < targetShape(2));
-                      const casa::IPosition curPos(3, x + halfSize, halfSize - y * dir,planeCounter);
-                      buf(curPos) = casa::abs(result(ant,beam));
+                      const casacore::IPosition curPos(3, x + halfSize, halfSize - y * dir,planeCounter);
+                      buf(curPos) = casacore::abs(result(ant,beam));
                  }
             }
        }
@@ -250,16 +250,16 @@ void process(const IConstDataSource &ds, const casa::uInt size) {
    size_t nDim = buf.shape().nonDegenerate().nelements();
    ASKAPASSERT(nDim>=2);
       
-   casa::Matrix<double> xform(2,2,0.);
+   casacore::Matrix<double> xform(2,2,0.);
    xform.diagonal() = 1.;
-   casa::DirectionCoordinate dc(casa::MDirection::AZEL, casa::Projection(casa::Projection::SIN),0.,0.,
+   casacore::DirectionCoordinate dc(casacore::MDirection::AZEL, casacore::Projection(casacore::Projection::SIN),0.,0.,
          resolutionInRad, -resolutionInRad, xform, double(halfSize), double(halfSize));
          
-   casa::CoordinateSystem coords;
+   casacore::CoordinateSystem coords;
    coords.addCoordinate(dc);
       
    for (size_t dim=2; dim<nDim; ++dim) {
-        casa::Vector<casa::String> addname(1);
+        casacore::Vector<casacore::String> addname(1);
         if (dim == 2) {
             addname[0] = targetShape.nelements() == 4 ? "beam" : "";
         } else if (dim == 3) {
@@ -267,14 +267,14 @@ void process(const IConstDataSource &ds, const casa::uInt size) {
         } else {
            addname[0]="addaxis"+utility::toString<size_t>(dim-3);
         }
-        casa::Matrix<double> xform(1,1,1.);
-        casa::LinearCoordinate lc(addname, addname,
-        casa::Vector<double>(1,0.), casa::Vector<double>(1,1.),xform, 
-            casa::Vector<double>(1,0.));
+        casacore::Matrix<double> xform(1,1,1.);
+        casacore::LinearCoordinate lc(addname, addname,
+        casacore::Vector<double>(1,0.), casacore::Vector<double>(1,1.),xform, 
+            casacore::Vector<double>(1,0.));
         coords.addCoordinate(lc);
    }
-   casa::PagedImage<casa::Float> resimg(casa::TiledShape(buf.nonDegenerate().shape()), coords, "beammap.img");
-   casa::ArrayLattice<casa::Float> lattice(buf.nonDegenerate());
+   casacore::PagedImage<casacore::Float> resimg(casacore::TiledShape(buf.nonDegenerate().shape()), coords, "beammap.img");
+   casacore::ArrayLattice<casacore::Float> lattice(buf.nonDegenerate());
    resimg.copyData(lattice);
 }
    
@@ -285,7 +285,7 @@ int main(int argc, char **argv) {
 	 return -2;
      }
 
-     casa::Timer timer;
+     casacore::Timer timer;
      const std::string msName = argv[1];
 
      timer.mark();

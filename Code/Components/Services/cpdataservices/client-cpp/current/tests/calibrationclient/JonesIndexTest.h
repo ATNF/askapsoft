@@ -52,8 +52,8 @@ class JonesIndexTest : public CppUnit::TestFixture {
         }
 
         void testGetters() {
-            const casa::Short antenna = 3;
-            const casa::Short beam = 5;
+            const casacore::Short antenna = 3;
+            const casacore::Short beam = 5;
             accessors::JonesIndex index(antenna, beam);
 
             CPPUNIT_ASSERT_EQUAL(antenna, index.antenna());
@@ -61,10 +61,10 @@ class JonesIndexTest : public CppUnit::TestFixture {
         }
 
         void testOperatorEqual() {
-            const casa::Short a1 = 1;
-            const casa::Short a2 = 2;
-            const casa::Short b1 = 3;
-            const casa::Short b2 = 4;
+            const casacore::Short a1 = 1;
+            const casacore::Short a2 = 2;
+            const casacore::Short b1 = 3;
+            const casacore::Short b2 = 4;
 
             accessors::JonesIndex index1(a1, b1);
             accessors::JonesIndex index2(a2, b2);
@@ -83,10 +83,10 @@ class JonesIndexTest : public CppUnit::TestFixture {
         }
 
         void testOperatorLessThan() {
-            const casa::Short a1 = 1;
-            const casa::Short a2 = 2;
-            const casa::Short b1 = 3;
-            const casa::Short b2 = 4;
+            const casacore::Short a1 = 1;
+            const casacore::Short a2 = 2;
+            const casacore::Short b1 = 3;
+            const casacore::Short b2 = 4;
 
             accessors::JonesIndex index1(a1, b1);
             accessors::JonesIndex index2(a2, b2);

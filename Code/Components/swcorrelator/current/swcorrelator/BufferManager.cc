@@ -151,7 +151,7 @@ int BufferManager::getBufferToFill() const
 /// @note it is implied that the required locks have already been obtained
 BufferManager::BufferSet BufferManager::newBufferSet(const std::pair<int,int> &index) const
 {
-  casa::Vector<int> bufferIDs = readyBuffers(index);
+  casacore::Vector<int> bufferIDs = readyBuffers(index);
   ASKAPDEBUGASSERT(bufferIDs.nelements() == 3);
   BufferManager::BufferSet result;
   result.itsAnt1 = bufferIDs[0];
@@ -167,7 +167,7 @@ BufferManager::BufferSet BufferManager::newBufferSet(const std::pair<int,int> &i
 /// @param[in] index channel/beam pair to work with
 /// @return vector with buffer IDs, one per antenna
 /// @note it is implied that the required locks have already been obtained
-casa::Vector<int> BufferManager::readyBuffers(const std::pair<int,int> &index) const
+casacore::Vector<int> BufferManager::readyBuffers(const std::pair<int,int> &index) const
 {
   return itsReadyBuffers.xyPlane(index.second).column(index.first);
 }
@@ -188,8 +188,8 @@ BufferManager::BufferSet BufferManager::getFilledBuffers() const
   ASKAPDEBUGASSERT(itsReadyBuffers.nrow() >= 3);
   BufferManager::BufferSet result = newBufferSet(index);
   // remove buffers for the given channel/beam pair, so the next complete set should correspond to a different one
-  const casa::uInt nAntToIterate = itsDuplicate2nd ? itsReadyBuffers.nrow() - 1 : itsReadyBuffers.nrow();    
-  for (casa::uInt ant = 0; ant < nAntToIterate; ++ant) {
+  const casacore::uInt nAntToIterate = itsDuplicate2nd ? itsReadyBuffers.nrow() - 1 : itsReadyBuffers.nrow();    
+  for (casacore::uInt ant = 0; ant < nAntToIterate; ++ant) {
        const int id = itsReadyBuffers(ant, index.first, index.second);
        ASKAPDEBUGASSERT(id >= 0);
        ASKAPDEBUGASSERT(id < itsNBuf);
@@ -207,10 +207,10 @@ BufferManager::BufferSet BufferManager::getFilledBuffers() const
 /// @note The method assumes that a lock has been acquired
 bool BufferManager::findCompleteSet(std::pair<int,int> &index) const
 {
-   for (casa::uInt chan = 0; chan < itsReadyBuffers.ncolumn(); ++chan) {
-        for (casa::uInt beam = 0; beam < itsReadyBuffers.nplane(); ++beam) {
+   for (casacore::uInt chan = 0; chan < itsReadyBuffers.ncolumn(); ++chan) {
+        for (casacore::uInt beam = 0; beam < itsReadyBuffers.nplane(); ++beam) {
              bool isGood = true;
-             for (casa::uInt ant = 0; (itsDuplicate2nd ? ant + 1 : ant) < itsReadyBuffers.nrow(); ++ant) {
+             for (casacore::uInt ant = 0; (itsDuplicate2nd ? ant + 1 : ant) < itsReadyBuffers.nrow(); ++ant) {
                   if (itsReadyBuffers(ant,chan,beam) < 0) {
                       isGood = false;
                       break;
@@ -294,11 +294,11 @@ void BufferManager::releaseBuffers(const BufferSet &ids) const
 /// @details This version is expected to be used in derived classes to
 /// release a bunch of buffers in one go (under common mutex lock).
 /// @param[in] ids buffer set to release
-void BufferManager::releaseBuffers(const casa::Vector<int> &ids) const
+void BufferManager::releaseBuffers(const casacore::Vector<int> &ids) const
 {
   {
     boost::lock_guard<boost::mutex> lock(itsStatusCVMutex);  
-    for (casa::uInt i = 0; i<ids.nelements(); ++i) {
+    for (casacore::uInt i = 0; i<ids.nelements(); ++i) {
          if (ids[i] >= 0) {
              releaseOneBuffer(ids[i]);
          }

@@ -130,7 +130,7 @@ class SubimageDef {
         void defineAllSections();
 
         /// @brief Return the bottom-left-corner of a worker's subsection
-        const casa::IPosition blc(const int workerNum);
+        const casacore::IPosition blc(const int workerNum);
 
         /// @brief Return the number of subimages.
         const unsigned int numSubs() {return itsNSubX * itsNSubY * itsNSubZ;};
@@ -167,9 +167,9 @@ class SubimageDef {
         /// @brief Which worker(s) does a given location fall in?
         const std::set<int> affectedWorkers(const int x, const int y, const int z);
         const std::set<int> affectedWorkers(const float x, const float y, const float z);
-        const std::set<int> affectedWorkers(const casa::IPosition &pos);
+        const std::set<int> affectedWorkers(const casacore::IPosition &pos);
         /// @brief Which workers does a given slice overlap with?
-        const std::set<int> affectedWorkers(const casa::Slicer &slice);
+        const std::set<int> affectedWorkers(const casacore::Slicer &slice);
 
     protected:
         /// @brief Number of subdivisions in the x-direction

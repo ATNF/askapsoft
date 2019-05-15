@@ -45,16 +45,16 @@
 /// An interface module for low-level routines to solve eigenproblem or
 /// a singular value decomposition problem
 class EigenSolver {
-   casa::Matrix<casa::Complex> vec; // eigenvectors
-   casa::Vector<casa::Double> val;  // eigenvalues
-   casa::Matrix<casa::Complex> vecV; // SVD's vector V. (not V^t)
+   casacore::Matrix<casacore::Complex> vec; // eigenvectors
+   casacore::Vector<casacore::Double> val;  // eigenvalues
+   casacore::Matrix<casacore::Complex> vecV; // SVD's vector V. (not V^t)
 public:
    // solve eigenproblem and fill vec and val data members
-   void solveEigen(const casa::Matrix<casa::Complex> &in) throw(casa::AipsError);
+   void solveEigen(const casacore::Matrix<casacore::Complex> &in) throw(casacore::AipsError);
    // return results
-   const casa::Matrix<casa::Complex>& getEigenVectors() const throw();
-   const casa::Vector<casa::Double>& getEigenValues() const throw();
-   const casa::Matrix<casa::Complex>& getV() const throw();
+   const casacore::Matrix<casacore::Complex>& getEigenVectors() const throw();
+   const casacore::Vector<casacore::Double>& getEigenValues() const throw();
+   const casacore::Matrix<casacore::Complex>& getV() const throw();
 };
 
 #endif // EIGENSOLVE_H

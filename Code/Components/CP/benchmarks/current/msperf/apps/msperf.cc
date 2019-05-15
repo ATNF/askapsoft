@@ -93,8 +93,8 @@ int main(int argc, char *argv[])
 
     DataSet data(filename, subset);
 
-    casa::Timer timer;
-    casa::Timer total;
+    casacore::Timer timer;
+    casacore::Timer total;
     total.mark();
     for (int i = 0; i < integrations; ++i) {
         timer.mark();

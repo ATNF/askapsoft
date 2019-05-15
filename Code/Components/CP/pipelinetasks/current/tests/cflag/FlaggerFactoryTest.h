@@ -82,7 +82,7 @@ class FlaggerFactoryTest : public CppUnit::TestFixture {
             // NOTE: If the FlaggerFactory ever needs a "real" measurement set, then this
             // is going to break. The below constructor does not actually initialise a valid
             // measurement set.
-            casa::MeasurementSet ms;
+            casacore::MeasurementSet ms;
             CPPUNIT_ASSERT_EQUAL(5ul, FlaggerFactory::build(parset, ms).size());
         }
 
@@ -90,7 +90,7 @@ class FlaggerFactoryTest : public CppUnit::TestFixture {
             // The Stokes-V flagger will work with defaults
             LOFAR::ParameterSet parset;
             parset.add("stokesv_flagger.enable", "true");
-            casa::MeasurementSet ms;
+            casacore::MeasurementSet ms;
             CPPUNIT_ASSERT_EQUAL(1ul, FlaggerFactory::build(parset, ms).size());
         }
 
@@ -98,7 +98,7 @@ class FlaggerFactoryTest : public CppUnit::TestFixture {
             // The elevation flagger will work with defaults
             LOFAR::ParameterSet parset;
             parset.add("elevation_flagger.enable", "true");
-            casa::MeasurementSet ms;
+            casacore::MeasurementSet ms;
             CPPUNIT_ASSERT_EQUAL(1ul, FlaggerFactory::build(parset, ms).size());
         }
 
@@ -107,7 +107,7 @@ class FlaggerFactoryTest : public CppUnit::TestFixture {
             // an exception if enabled without being configured.
             LOFAR::ParameterSet parset;
             parset.add("amplitude_flagger.enable", "true");
-            casa::MeasurementSet ms;
+            casacore::MeasurementSet ms;
             CPPUNIT_ASSERT_THROW(FlaggerFactory::build(parset, ms), askap::AskapError);
 
             // Either high or low are necessary, not both
@@ -124,7 +124,7 @@ class FlaggerFactoryTest : public CppUnit::TestFixture {
             // If a rule is listed, it is expected some criteria will also be specified
             LOFAR::ParameterSet parset;
             parset.add("selection_flagger.rules", "[rule1, rule2]");
-            casa::MeasurementSet ms;
+            casacore::MeasurementSet ms;
             CPPUNIT_ASSERT_THROW(FlaggerFactory::build(parset, ms), askap::AskapError);
 
             // Configure one rule (of two specified), still expect an exception

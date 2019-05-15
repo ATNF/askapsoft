@@ -138,7 +138,7 @@ private:
            return true;
        }
        const std::vector<std::string> names = itsMetadata->antennaNames();
-       casa::uInt count = 0;
+       casacore::uInt count = 0;
        for (std::vector<std::string>::const_iterator ci = names.begin(); ci != names.end(); ++ci) {
             const TosMetadataAntenna& tma = itsMetadata->antenna(*ci);
             if (!tma.flagged() && tma.onSource()) {
@@ -158,9 +158,9 @@ private:
       std::string minName, maxName;
       for (size_t ant1 = 0; ant1 < antennas.size(); ++ant1) {
            for (size_t ant2 = ant1 + 1; ant2 < antennas.size(); ++ant2) {
-                const casa::Vector<casa::Double> bsln = antennas[ant2].position() - antennas[ant1].position();
+                const casacore::Vector<casacore::Double> bsln = antennas[ant2].position() - antennas[ant1].position();
                 ASKAPASSERT(bsln.nelements() == 3);
-                const double length = casa::sqrt(bsln[0] * bsln[0] + bsln[1]*bsln[1] + bsln[2]*bsln[2]);
+                const double length = casacore::sqrt(bsln[0] * bsln[0] + bsln[1]*bsln[1] + bsln[2]*bsln[2]);
                 const std::string key = antennas[ant1].name() + "-" + antennas[ant2].name();
                 if (minLength<0) {
                     minLength = length;
@@ -192,12 +192,12 @@ private:
       for (std::vector<std::string>::const_iterator ci=names.begin(); ci != names.end(); ++ci) {
            const TosMetadataAntenna& tma = itsMetadata->antenna(*ci);
            if (!tma.flagged() && tma.onSource()) {
-               const casa::Vector<casa::Double>& uvw = tma.uvw();
+               const casacore::Vector<casacore::Double>& uvw = tma.uvw();
                ASKAPCHECK(uvw.nelements() % 3 == 0, "Expect 3 elements per beam in uvw");
-               const casa::uInt nBeams = uvw.nelements() / 3;
+               const casacore::uInt nBeams = uvw.nelements() / 3;
                double minLength = -1, maxLength = -1;
-               for (casa::uInt beam = 0; beam < nBeams; ++beam) {
-                    const double length = casa::sqrt(uvw[beam*3]*uvw[beam*3] + uvw[beam*3+1]*uvw[beam*3+1] + uvw[beam*3+2]*uvw[beam*3+2]);
+               for (casacore::uInt beam = 0; beam < nBeams; ++beam) {
+                    const double length = casacore::sqrt(uvw[beam*3]*uvw[beam*3] + uvw[beam*3+1]*uvw[beam*3+1] + uvw[beam*3+2]*uvw[beam*3+2]);
                     if (length < minLength || minLength < 0) {
                         minLength = length;
                     }
@@ -233,21 +233,21 @@ private:
            if (tma1.flagged() || tma2.flagged() || !tma1.onSource() || !tma2.onSource()) {
                continue;
            }
-           const casa::Vector<casa::Double> bsln = tma2.uvw() - tma1.uvw();
+           const casacore::Vector<casacore::Double> bsln = tma2.uvw() - tma1.uvw();
                //ASKAPLOG_INFO_STR(logger, " uvw1: "<<tma1.uvw()<<" uvw2:"<<tma2.uvw());
            ASKAPCHECK(bsln.nelements() % 3 == 0, "Expect 3 elements per beam in uvw vector, size = "<<bsln.nelements()<<" for "<<ci->first<<" baseline");
-           const casa::uInt nBeams = bsln.nelements() / 3;
+           const casacore::uInt nBeams = bsln.nelements() / 3;
            ++count;
            size_t nGoodBeams = 0;
            double maxDiff = -1;
-           for (casa::uInt beam = 0; beam < nBeams; ++beam) {
+           for (casacore::uInt beam = 0; beam < nBeams; ++beam) {
                 double diff2_meas = 0.;
                 double diff2_exp = 0.;
-                for (casa::uInt coord = 0; coord < 3; ++coord) {
+                for (casacore::uInt coord = 0; coord < 3; ++coord) {
                      diff2_meas += bsln[beam * 3 + coord] * bsln[beam * 3 + coord];
                      diff2_exp += ci->second[coord] * ci->second[coord];
                 }
-                const double diff = casa::sqrt(diff2_meas) - casa::sqrt(diff2_exp);
+                const double diff = casacore::sqrt(diff2_meas) - casacore::sqrt(diff2_exp);
                 //ASKAPLOG_INFO_STR(logger, "Beam: "<<beam<<" bsln: "<<bsln<<" expected: "<<ci->second);
                 //ASKAPCHECK(diff < 0.001, "Difference exceeds 1mm for beam "<<beam<<" baseline "<<ci->first<<" max difference: "<<diff<<" metres");
                 if (diff < 0.001) {

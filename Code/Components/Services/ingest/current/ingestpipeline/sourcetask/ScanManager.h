@@ -54,34 +54,34 @@ class ScanManager {
         /// @throws AskapError  if the scan id parameter is less than zero and not
         ///                     equal to the SCANID_IDLE or SCANID_OBS_COMPLETE
         ///                     constants
-        void update(const casa::Int scanId);
+        void update(const casacore::Int scanId);
 
         /// @return true if the observation is complete, otherwise false. The
         ///         observation is deemed to be complete if the last scan has
         ///         finished.
-        casa::Bool observationComplete(void) const;
+        casacore::Bool observationComplete(void) const;
 
         /// @return the (zero based) scan index. If the first scan has not yet
         ///         started this will return -1.
-        casa::Int scanIndex(void) const;
+        casacore::Int scanIndex(void) const;
 
         /// This constant is the scan id value when the TOS is not executing a
         /// scan
-        static const casa::Int SCANID_IDLE = -1;
+        static const casacore::Int SCANID_IDLE = -1;
 
         /// This constant is the scan id when the TOS wants to signal the current
         /// scheduling block has completed execution
-        static const casa::Int SCANID_OBS_COMPLETE = -2;
+        static const casacore::Int SCANID_OBS_COMPLETE = -2;
 
     private:
 
         // Current (zero based) scan index, if the first scan has not yet
         // started this will be set to SCANID_IDLE
-        casa::Int itsScanIndex;
+        casacore::Int itsScanIndex;
 
         // Flag used to indicate the observation is complete, that is the
         // last scan has concluded.
-        casa::Bool itsObsComplete;
+        casacore::Bool itsObsComplete;
 };
 
 }

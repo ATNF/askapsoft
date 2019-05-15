@@ -43,7 +43,7 @@ class BaselineMap {
     public:
         BaselineMap(const LOFAR::ParameterSet& parset);
 
-        int32_t operator()(int32_t antenna1, int32_t antenna2, const casa::Stokes::StokesTypes& stokes) const;
+        int32_t operator()(int32_t antenna1, int32_t antenna2, const casacore::Stokes::StokesTypes& stokes) const;
 
     private:
 
@@ -51,7 +51,7 @@ class BaselineMap {
         {
             int32_t antenna1;
             int32_t antenna2;
-            casa::Stokes::StokesTypes stokes;
+            casacore::Stokes::StokesTypes stokes;
 
             bool operator<(const BaselineMapKey& rhs) const
             {

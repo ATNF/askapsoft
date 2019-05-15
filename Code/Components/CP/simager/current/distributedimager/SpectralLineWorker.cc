@@ -53,7 +53,7 @@
 #include <dataaccess/IDataIterator.h>
 #include <dataaccess/SharedIter.h>
 #include <dataaccess/ParsetInterface.h>
-#include <utils/PolConverter.h>
+#include <askap/scimath/utils/PolConverter.h>
 #include <Common/ParameterSet.h>
 #include <Common/Exceptions.h>
 #include <casacore/casa/OS/Timer.h>
@@ -148,7 +148,7 @@ askap::scimath::Params::ShPtr SpectralLineWorker::processWorkUnit(const Spectral
     ASKAPLOG_DEBUG_STR(logger,
                        "UVWMachine cache will store " << uvwMachineCacheSize << " machines");
     ASKAPLOG_DEBUG_STR(logger, "Tolerance on the directions is "
-                       << uvwMachineCacheTolerance / casa::C::pi * 180. * 3600. << " arcsec");
+                       << uvwMachineCacheTolerance / casacore::C::pi * 180. * 3600. << " arcsec");
 
     TableDataSource ds(ms, TableDataSource::DEFAULT, colName);
     ds.configureUVWMachineCache(uvwMachineCacheSize, uvwMachineCacheTolerance);
@@ -157,8 +157,8 @@ askap::scimath::Params::ShPtr SpectralLineWorker::processWorkUnit(const Spectral
     sel << itsParset;
     IDataConverterPtr conv = ds.createConverter();
 
-    conv->setFrequencyFrame(casa::MFrequency::Ref(casa::MFrequency::TOPO), "Hz");
-    conv->setDirectionFrame(casa::MDirection::Ref(casa::MDirection::J2000));
+    conv->setFrequencyFrame(casacore::MFrequency::Ref(casacore::MFrequency::TOPO), "Hz");
+    conv->setDirectionFrame(casacore::MDirection::Ref(casacore::MDirection::J2000));
     IDataSharedIter it = ds.createIterator(sel, conv);
 
     if (!itsParset.isDefined("Images.name")) {
@@ -187,7 +187,7 @@ SpectralLineWorker::processChannel(askap::accessors::TableDataSource& ds,
     askap::scimath::Params::ShPtr model_p(new Params());
     setupImage(model_p,channelFrequency);
 
-    casa::Timer timer;
+    casacore::Timer timer;
 
     // Setup data iterator
     IDataSelectorPtr sel = ds.createSelector();
@@ -195,8 +195,8 @@ SpectralLineWorker::processChannel(askap::accessors::TableDataSource& ds,
     sel->chooseChannels(1, localChannel);
     sel << itsParset;
     IDataConverterPtr conv = ds.createConverter();
-    conv->setFrequencyFrame(casa::MFrequency::Ref(casa::MFrequency::TOPO), "Hz");
-    conv->setDirectionFrame(casa::MDirection::Ref(casa::MDirection::J2000));
+    conv->setFrequencyFrame(casacore::MFrequency::Ref(casacore::MFrequency::TOPO), "Hz");
+    conv->setDirectionFrame(casacore::MDirection::Ref(casacore::MDirection::J2000));
     IDataSharedIter it = ds.createIterator(sel, conv);
 
     ASKAPLOG_DEBUG_STR(logger, "Calculating normal equations for channel " << globalChannel);
@@ -329,7 +329,7 @@ void SpectralLineWorker::setupImage(const askap::scimath::Params::ShPtr& params,
         for (size_t i = 0; i < stokesVec.size(); ++i) {
             stokesStr += stokesVec[i];
         }
-        const casa::Vector<casa::Stokes::StokesTypes>
+        const casacore::Vector<casacore::Stokes::StokesTypes>
             stokes = scimath::PolConverter::fromString(stokesStr);
 
         const bool ewProj = parset.getBool("ewprojection", false);
@@ -352,7 +352,7 @@ void SpectralLineWorker::setupImage(const askap::scimath::Params::ShPtr& params,
             //                            freq[0], freq[1], nchan, stokes);
         } else {
             // this is a multi-facet case
-            const int facetstep = parset.getInt32("facetstep", casa::min(shape[0], shape[1]));
+            const int facetstep = parset.getInt32("facetstep", casacore::min(shape[0], shape[1]));
             ASKAPCHECK(facetstep > 0,
                        "facetstep parameter is supposed to be positive, you have " << facetstep);
             ASKAPLOG_INFO_STR(logger, "Facet centers will be " << facetstep <<

@@ -83,36 +83,36 @@ class VisChunkTest : public CppUnit::TestFixture {
             // unfortunately, we need low level access to large cubes for performance
             // (casacore's slicers do not provide an adequate solution)
             // This test method tests assumed data distribution as this particular 
-            casa::Matrix<casa::uInt> mtr(3,5);
-            for (casa::uInt row=0; row<mtr.nrow(); ++row) {
-                 for (casa::uInt col=0; col<mtr.ncolumn(); ++col) {
+            casacore::Matrix<casacore::uInt> mtr(3,5);
+            for (casacore::uInt row=0; row<mtr.nrow(); ++row) {
+                 for (casacore::uInt col=0; col<mtr.ncolumn(); ++col) {
                       mtr(row, col) = row * 10 + col;
                  }
             }
             CPPUNIT_ASSERT(mtr.contiguousStorage());
-            casa::uInt *ptr = mtr.data();
-            for (casa::uInt row=0; row<mtr.nrow(); ++row) {
-                 for (casa::uInt col=0; col<mtr.ncolumn(); ++col) {
-                      casa::uInt index = col * mtr.nrow() + row;
+            casacore::uInt *ptr = mtr.data();
+            for (casacore::uInt row=0; row<mtr.nrow(); ++row) {
+                 for (casacore::uInt col=0; col<mtr.ncolumn(); ++col) {
+                      casacore::uInt index = col * mtr.nrow() + row;
                       CPPUNIT_ASSERT_EQUAL(mtr(row, col), *(ptr + index));
                  }
             }
             // now test similar thing for a cube
-            casa::Cube<casa::uInt> cube(3,5,7);
-            for (casa::uInt row=0; row<cube.nrow(); ++row) {
-                 for (casa::uInt col=0; col<cube.ncolumn(); ++col) {
-                      for (casa::uInt plane=0; plane<cube.nplane(); ++plane) {
+            casacore::Cube<casacore::uInt> cube(3,5,7);
+            for (casacore::uInt row=0; row<cube.nrow(); ++row) {
+                 for (casacore::uInt col=0; col<cube.ncolumn(); ++col) {
+                      for (casacore::uInt plane=0; plane<cube.nplane(); ++plane) {
                            cube(row, col, plane) = row * 100 + col * 10 + plane;
                       }
                  }
             }
             CPPUNIT_ASSERT(cube.contiguousStorage());
             CPPUNIT_ASSERT(!cube.yzPlane(0).contiguousStorage());
-            casa::uInt *ptr1 = cube.data();
-            for (casa::uInt row=0; row<cube.nrow(); ++row) {
-                 for (casa::uInt col=0; col<cube.ncolumn(); ++col) {
-                      for (casa::uInt plane=0; plane<cube.nplane(); ++plane) {
-                           casa::uInt index = (plane * cube.ncolumn() + col) * cube.nrow() + row;
+            casacore::uInt *ptr1 = cube.data();
+            for (casacore::uInt row=0; row<cube.nrow(); ++row) {
+                 for (casacore::uInt col=0; col<cube.ncolumn(); ++col) {
+                      for (casacore::uInt plane=0; plane<cube.nplane(); ++plane) {
+                           casacore::uInt index = (plane * cube.ncolumn() + col) * cube.nrow() + row;
                            CPPUNIT_ASSERT_EQUAL(cube(row, col, plane), *(ptr1 + index));
                       }
                  }
@@ -149,9 +149,9 @@ class VisChunkTest : public CppUnit::TestFixture {
             VisChunk::ShPtr chunk(new VisChunk(initialRows, initialChans, initialPols, nAntennas));
 
             // Create and assign the containers
-            casa::Cube<casa::Complex> vis(newRows, newChans, newPols);
-            casa::Cube<casa::Bool> flag(newRows, newChans, newPols);
-            casa::Vector<casa::Double> frequency(newChans);
+            casacore::Cube<casacore::Complex> vis(newRows, newChans, newPols);
+            casacore::Cube<casacore::Bool> flag(newRows, newChans, newPols);
+            casacore::Vector<casacore::Double> frequency(newChans);
             chunk->resize(vis, flag, frequency);
 
             // Verify the result

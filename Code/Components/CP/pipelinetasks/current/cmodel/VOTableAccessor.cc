@@ -76,10 +76,10 @@ VOTableAccessor::~VOTableAccessor()
 }
 
 ComponentListPtr VOTableAccessor::coneSearch(
-    const casa::Quantity& ra,
-    const casa::Quantity& dec,
-    const casa::Quantity& searchRadius,
-    const casa::Quantity& fluxLimit)
+    const casacore::Quantity& ra,
+    const casacore::Quantity& dec,
+    const casacore::Quantity& searchRadius,
+    const casacore::Quantity& fluxLimit)
 {
     ASKAPLOG_INFO_STR(logger, "Cone search - ra: " << ra.getValue("deg")
                           << " deg, dec: " << dec.getValue("deg")
@@ -97,7 +97,7 @@ ComponentListPtr VOTableAccessor::coneSearch(
     // Initialise the field descriptions
     const std::vector<VOTableField> fields = vot.getResource()[0].getTables()[0].getFields();
     std::map<VOTableAccessor::FieldEnum, size_t> posMap;
-    std::map<VOTableAccessor::FieldEnum, casa::Unit> unitMap;
+    std::map<VOTableAccessor::FieldEnum, casacore::Unit> unitMap;
     initFieldInfo(fields, posMap, unitMap);
 
     // Initially built as a list to allow efficient growth
@@ -143,7 +143,7 @@ bool VOTableAccessor::hasUCD(const askap::accessors::VOTableField& field, const 
 
 void VOTableAccessor::initFieldInfo(const std::vector<askap::accessors::VOTableField>& fields,
                                     std::map<VOTableAccessor::FieldEnum, size_t>& posMap,
-                                    std::map<VOTableAccessor::FieldEnum, casa::Unit>& unitMap)
+                                    std::map<VOTableAccessor::FieldEnum, casacore::Unit>& unitMap)
 {
     // Preconditions
     ASKAPCHECK(fields.size() != 0, "No field descriptions present");
@@ -248,24 +248,24 @@ void VOTableAccessor::initFieldInfo(const std::vector<askap::accessors::VOTableF
 }
 
 void VOTableAccessor::processRow(const std::vector<std::string>& cells,
-                                 const casa::Quantity& searchRA,
-                                 const casa::Quantity& searchDec,
-                                 const casa::Quantity& searchRadius,
-                                 const casa::Quantity& fluxLimit,
+                                 const casacore::Quantity& searchRA,
+                                 const casacore::Quantity& searchDec,
+                                 const casacore::Quantity& searchRadius,
+                                 const casacore::Quantity& fluxLimit,
                                  std::map<VOTableAccessor::FieldEnum, size_t>& posMap,
-                                 std::map<VOTableAccessor::FieldEnum, casa::Unit>& unitMap,
+                                 std::map<VOTableAccessor::FieldEnum, casacore::Unit>& unitMap,
                                  std::list<askap::cp::sms::client::Component>& list)
 {
     // Create these once to avoid the performance impact of creating them over and over.
-    static casa::Unit deg("deg");
-    static casa::Unit rad("rad");
-    static casa::Unit arcsec("arcsec");
-    static casa::Unit Jy("Jy");
+    static casacore::Unit deg("deg");
+    static casacore::Unit rad("rad");
+    static casacore::Unit arcsec("arcsec");
+    static casacore::Unit Jy("Jy");
 
-    const casa::Quantity ra(boost::lexical_cast<casa::Double>(cells[posMap[RA]]),
+    const casacore::Quantity ra(boost::lexical_cast<casacore::Double>(cells[posMap[RA]]),
                             unitMap[RA]);
 
-    const casa::Quantity dec(boost::lexical_cast<casa::Double>(cells[posMap[DEC]]),
+    const casacore::Quantity dec(boost::lexical_cast<casacore::Double>(cells[posMap[DEC]]),
                              unitMap[DEC]);
 
     // Discard if outside cone
@@ -277,7 +277,7 @@ void VOTableAccessor::processRow(const std::vector<std::string>& cells,
         return;
     }
 
-    const casa::Quantity flux(boost::lexical_cast<casa::Double>(cells[posMap[FLUX]]),
+    const casacore::Quantity flux(boost::lexical_cast<casacore::Double>(cells[posMap[FLUX]]),
                               unitMap[FLUX]);
 
     // Discard if below flux limit
@@ -287,18 +287,18 @@ void VOTableAccessor::processRow(const std::vector<std::string>& cells,
     }
     ASKAPLOG_DEBUG_STR(logger, "flux from VO table = " << flux.getValue() << " " << flux.getUnit());
 
-    casa::Quantity majorAxis(boost::lexical_cast<casa::Double>(cells[posMap[MAJOR_AXIS]]),
+    casacore::Quantity majorAxis(boost::lexical_cast<casacore::Double>(cells[posMap[MAJOR_AXIS]]),
                              unitMap[MAJOR_AXIS]);
 
-    casa::Quantity minorAxis(boost::lexical_cast<casa::Double>(cells[posMap[MINOR_AXIS]]),
+    casacore::Quantity minorAxis(boost::lexical_cast<casacore::Double>(cells[posMap[MINOR_AXIS]]),
                              unitMap[MINOR_AXIS]);
 
-    const casa::Quantity positionAngle(boost::lexical_cast<casa::Double>(cells[posMap[POSITION_ANGLE]]),
+    const casacore::Quantity positionAngle(boost::lexical_cast<casacore::Double>(cells[posMap[POSITION_ANGLE]]),
                                        unitMap[POSITION_ANGLE]);
     ASKAPLOG_DEBUG_STR(logger, "positionAngle from VO table = " << positionAngle.getValue() << " " << positionAngle.getUnit());
 
-    double spectralIndex = boost::lexical_cast<casa::Double>(cells[posMap[SPECTRAL_INDEX]]);
-    double spectralCurvature = boost::lexical_cast<casa::Double>(cells[posMap[SPECTRAL_CURVATURE]]);
+    double spectralIndex = boost::lexical_cast<casacore::Double>(cells[posMap[SPECTRAL_INDEX]]);
+    double spectralCurvature = boost::lexical_cast<casacore::Double>(cells[posMap[SPECTRAL_CURVATURE]]);
 
     // Ensure major axis is larger than minor axis
     if (majorAxis.getValue() < minorAxis.getValue()) {
@@ -307,7 +307,7 @@ void VOTableAccessor::processRow(const std::vector<std::string>& cells,
 
     // Ensure if major axis is non-zero, so is the minor axis
     if (majorAxis.getValue() > 0.0 && minorAxis.getValue() == 0.0) {
-        minorAxis = casa::Quantity(1.0e-15, arcsec);
+        minorAxis = casacore::Quantity(1.0e-15, arcsec);
     }
 
     // Build the Component object and add to the list.

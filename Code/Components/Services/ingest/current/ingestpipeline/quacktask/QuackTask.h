@@ -79,13 +79,13 @@ class QuackTask : public askap::cp::ingest::ITask {
     private:
 
         /// @brief number of cycles to flag
-        casa::uInt itsNCycles;
+        casacore::uInt itsNCycles;
 
         /// @brief number of cycles since the last scan start
-        casa::uInt itsNCyclesThisScan;
+        casacore::uInt itsNCyclesThisScan;
 
         /// @brief scan id for which the cycles are being counted
-        casa::uInt itsCountedScanNumber;
+        casacore::uInt itsCountedScanNumber;
   
         /// @brief true if it is the first chunk
         bool itsFirstChunk;

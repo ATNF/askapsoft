@@ -76,9 +76,9 @@ class CurvatureMapCreator {
         analysisutilities::SubimageDef *itsSubimageDef;
         boost::shared_ptr<Weighter> itsWeighter;
         std::string itsFilename;
-        casa::MaskedArray<float> itsArray;
-        casa::IPosition itsShape;
-        casa::IPosition itsLocation;
+        casacore::MaskedArray<float> itsArray;
+        casacore::IPosition itsShape;
+        casacore::IPosition itsLocation;
         float itsSigmaCurv;
 };
 

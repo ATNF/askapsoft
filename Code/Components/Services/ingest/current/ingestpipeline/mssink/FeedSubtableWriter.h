@@ -65,7 +65,7 @@ public:
    /// The table is only updated if the values have changed.
    /// @param[in] offsets 2 x nBeam matrix with offsets in radians for each beam
    /// @note Different phase centre for different polarisations is not supported
-   void defineOffsets(const casa::Matrix<casa::Double> &offsets);
+   void defineOffsets(const casacore::Matrix<casacore::Double> &offsets);
 
    /// @brief define offsets
    /// @details This method sets up offsets for each beam. It has to be called before the first attempt to
@@ -81,11 +81,11 @@ public:
    /// @param[in] ms reference to the measurement set
    /// @param[in] time current time centroid (seconds)
    /// @param[in] interval current interval/exposure (seconds)
-   void write(casa::MeasurementSet &ms, double time, double interval);
+   void write(casacore::MeasurementSet &ms, double time, double interval);
 
    /// @brief obtain the number of updates to FEED table so far
    /// @return the number of updates
-   inline casa::uInt updateCounter() const { return itsUpdateCounter; }
+   inline casacore::uInt updateCounter() const { return itsUpdateCounter; }
 
 protected:
    /// @brief tolerance to consider offset changed
@@ -102,21 +102,21 @@ private:
    /// @details The logic is different depending on whether we have time-dependent or time-independent subtable.
    /// This counter allows to implement transition between these two situations and provide additional cross-checks
    /// @note Zero means subtable has not been written yet
-   casa::uInt itsUpdateCounter;
+   casacore::uInt itsUpdateCounter;
 
    /// @brief start row on the last update
    /// @details this is used to modify validity time for records corresponding to the last update.
-   casa::uInt itsStartRowForLastUpdate;
+   casacore::uInt itsStartRowForLastUpdate;
 
    /// @brief start time for which the last update is valid
    /// @details The MS standard uses time centroid and interval to locate records. So we have update values each 
    /// integration. This field is used in combination with the new time for an update to recompute centroid.
    /// @note This field is important when time-depenent table is written (i.e. second update and after that).
    /// Time is UTC in seconds since 0 MJD (matching the definition of the main table time column)
-   casa::Double itsStartTimeForLastUpdate;
+   casacore::Double itsStartTimeForLastUpdate;
 
    /// @brief matrix with 2 x nBeam offsets in radians
-   casa::Matrix<casa::Double> itsOffsets;
+   casacore::Matrix<casacore::Double> itsOffsets;
 
    /// @brief flag that offsets have been changed and need to be updated
    bool itsOffsetsChanged;

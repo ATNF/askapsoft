@@ -60,7 +60,7 @@ using namespace askap::cp::pipelinetasks;
 
 vector< boost::shared_ptr<IFlagger> > SelectionFlagger::build(
         const LOFAR::ParameterSet& parset,
-        const casa::MeasurementSet& ms)
+        const casacore::MeasurementSet& ms)
 {
     vector< boost::shared_ptr<IFlagger> > flaggers;
     const string key = "selection_flagger.rules";
@@ -79,7 +79,7 @@ vector< boost::shared_ptr<IFlagger> > SelectionFlagger::build(
 }
 
 SelectionFlagger:: SelectionFlagger(const LOFAR::ParameterSet& parset,
-                                      const casa::MeasurementSet& ms)
+                                      const casacore::MeasurementSet& ms)
         : itsStats("SelectionFlagger"), itsFlagAutoCorr(false),
         itsDetailedCriteriaExists(false)
 {
@@ -145,13 +145,13 @@ FlaggingStats SelectionFlagger::stats(void) const
     return itsStats;
 }
 
-casa::Bool SelectionFlagger::processingRequired(const casa::uInt pass)
+casacore::Bool SelectionFlagger::processingRequired(const casacore::uInt pass)
 {
     return (pass==0);
 }
 
-void SelectionFlagger::processRow(casa::MSColumns& msc, const casa::uInt pass,
-                                  const casa::uInt row, const bool dryRun)
+void SelectionFlagger::processRow(casacore::MSColumns& msc, const casacore::uInt pass,
+                                  const casacore::uInt row, const bool dryRun)
 {
     const bool rowCriteriaMatches = dispatch(itsRowCriteria, msc, row);
 
@@ -169,16 +169,16 @@ void SelectionFlagger::processRow(casa::MSColumns& msc, const casa::uInt pass,
     }
 }
 
-bool SelectionFlagger::checkBaseline(casa::MSColumns& msc, const casa::uInt row)
+bool SelectionFlagger::checkBaseline(casacore::MSColumns& msc, const casacore::uInt row)
 {
-    const Matrix<casa::Int> m = itsSelection.getBaselineList();
+    const Matrix<casacore::Int> m = itsSelection.getBaselineList();
     if (m.empty()) {
         return false;
     }
     ASKAPCHECK(m.ncolumn() == 2, "Expected two columns");
 
-    const casa::Int ant1 = msc.antenna1()(row);
-    const casa::Int ant2 = msc.antenna2()(row);
+    const casacore::Int ant1 = msc.antenna1()(row);
+    const casacore::Int ant2 = msc.antenna2()(row);
     for (size_t i = 0; i < m.nrow(); ++i) {
         if ((m(i, 0) == ant1 && m(i, 1) == ant2)
                 || (m(i, 0) == ant2 && m(i, 1) == ant1)) {
@@ -189,10 +189,10 @@ bool SelectionFlagger::checkBaseline(casa::MSColumns& msc, const casa::uInt row)
     return false;
 }
 
-bool SelectionFlagger::checkField(casa::MSColumns& msc, const casa::uInt row)
+bool SelectionFlagger::checkField(casacore::MSColumns& msc, const casacore::uInt row)
 {
-    const casa::Int fieldId = msc.fieldId()(row);
-    const Vector<casa::Int> v = itsSelection.getFieldList();
+    const casacore::Int fieldId = msc.fieldId()(row);
+    const Vector<casacore::Int> v = itsSelection.getFieldList();
     for (size_t i = 0; i < v.size(); ++i) {
         if (v[i] == fieldId) {
             return true;
@@ -201,9 +201,9 @@ bool SelectionFlagger::checkField(casa::MSColumns& msc, const casa::uInt row)
     return false;
 }
 
-bool SelectionFlagger::checkTimerange(casa::MSColumns& msc, const casa::uInt row)
+bool SelectionFlagger::checkTimerange(casacore::MSColumns& msc, const casacore::uInt row)
 {
-    const Matrix<casa::Double> timeList = itsSelection.getTimeList();
+    const Matrix<casacore::Double> timeList = itsSelection.getTimeList();
     if (timeList.empty()) {
         ASKAPLOG_DEBUG_STR(logger, "Time list is EMPTY");
         return false;
@@ -211,7 +211,7 @@ bool SelectionFlagger::checkTimerange(casa::MSColumns& msc, const casa::uInt row
     ASKAPCHECK(timeList.nrow() == 2, "Expected two rows");
     ASKAPCHECK(timeList.ncolumn() == 1,
             "Only a single time range specification is supported");
-    const casa::Double t = msc.time()(row);
+    const casacore::Double t = msc.time()(row);
     if (t > timeList(0, 0) && t < timeList(1, 0)) {
         return true;
     } else {
@@ -219,10 +219,10 @@ bool SelectionFlagger::checkTimerange(casa::MSColumns& msc, const casa::uInt row
     }
 }
 
-bool SelectionFlagger::checkScan(casa::MSColumns& msc, const casa::uInt row)
+bool SelectionFlagger::checkScan(casacore::MSColumns& msc, const casacore::uInt row)
 {
-    const casa::Int scanNum = msc.scanNumber()(row);
-    const Vector<casa::Int> v = itsSelection.getScanList();
+    const casacore::Int scanNum = msc.scanNumber()(row);
+    const Vector<casacore::Int> v = itsSelection.getScanList();
     for (size_t i = 0; i < v.size(); ++i) {
         if (v[i] == scanNum) {
             return true;
@@ -231,10 +231,10 @@ bool SelectionFlagger::checkScan(casa::MSColumns& msc, const casa::uInt row)
     return false;
 }
 
-bool SelectionFlagger::checkFeed(casa::MSColumns& msc, const casa::uInt row)
+bool SelectionFlagger::checkFeed(casacore::MSColumns& msc, const casacore::uInt row)
 {
-    const casa::Int feed1 = msc.feed1()(row);
-    const casa::Int feed2 = msc.feed2()(row);
+    const casacore::Int feed1 = msc.feed1()(row);
+    const casacore::Int feed2 = msc.feed2()(row);
 
     if ((itsFeedsFlagged.find(feed1) != itsFeedsFlagged.end())
             || (itsFeedsFlagged.find(feed2) != itsFeedsFlagged.end())) {
@@ -244,17 +244,17 @@ bool SelectionFlagger::checkFeed(casa::MSColumns& msc, const casa::uInt row)
     }
 }
 
-bool SelectionFlagger::checkAutocorr(casa::MSColumns& msc, const casa::uInt row)
+bool SelectionFlagger::checkAutocorr(casacore::MSColumns& msc, const casacore::uInt row)
 {
     ASKAPDEBUGASSERT(itsFlagAutoCorr);
 
-    const casa::Int ant1 = msc.antenna1()(row);
-    const casa::Int ant2 = msc.antenna2()(row);
+    const casacore::Int ant1 = msc.antenna1()(row);
+    const casacore::Int ant2 = msc.antenna2()(row);
     return (ant1 == ant2);
 }
 
 bool SelectionFlagger::dispatch(const std::vector<SelectionCriteria>& v,
-                                 casa::MSColumns& msc, const casa::uInt row)
+                                 casacore::MSColumns& msc, const casacore::uInt row)
 {
     std::vector<SelectionCriteria>::const_iterator it;
     for (it = v.begin(); it != v.end(); ++it) {
@@ -284,37 +284,37 @@ bool SelectionFlagger::dispatch(const std::vector<SelectionCriteria>& v,
     return true;
 }
 
-void SelectionFlagger::checkDetailed(casa::MSColumns& msc, const casa::uInt row, const bool dryRun)
+void SelectionFlagger::checkDetailed(casacore::MSColumns& msc, const casacore::uInt row, const bool dryRun)
 {
-    const Matrix<casa::Int> chanList = itsSelection.getChanList();
+    const Matrix<casacore::Int> chanList = itsSelection.getChanList();
     if (chanList.empty()) {
         ASKAPLOG_DEBUG_STR(logger, "Channel flagging list is EMPTY");
         return;
     }
     ASKAPCHECK(chanList.ncolumn() == 4, "Expected four columns");
-    Matrix<casa::Bool> flags = msc.flag()(row);
+    Matrix<casacore::Bool> flags = msc.flag()(row);
 
-    const casa::ROMSDataDescColumns& ddc = msc.dataDescription();
+    const casacore::ROMSDataDescColumns& ddc = msc.dataDescription();
 
     //ASKAPLOG_DEBUG_STR(logger, "Channel flagging list size: " << chanList.nrow());
     for (size_t i = 0; i < chanList.nrow(); ++i) {
-        const casa::Int spwID = chanList(i, 0);
-        const casa::Int startCh = chanList(i, 1);
-        const casa::Int stopCh = chanList(i, 2);
-        const casa::Int step = chanList(i, 3);
+        const casacore::Int spwID = chanList(i, 0);
+        const casacore::Int startCh = chanList(i, 1);
+        const casacore::Int stopCh = chanList(i, 2);
+        const casacore::Int step = chanList(i, 3);
         //ASKAPLOG_DEBUG_STR(logger, "spwID: " << spwID
         //                       << ", startCh: " << startCh
         //                       << ", stopCh: " << stopCh
         //                       << ", step: " << step);
         ASKAPCHECK(step > 0, "Step must be greater than zero to avoid infinite loop");
-        const casa::Int dataDescId = msc.dataDescId()(row);
-        const casa::Int descSpwId = ddc.spectralWindowId()(dataDescId);
+        const casacore::Int dataDescId = msc.dataDescId()(row);
+        const casacore::Int descSpwId = ddc.spectralWindowId()(dataDescId);
         if (descSpwId != spwID) {
             continue;
         }
 
-        for (casa::Int chan = startCh; chan <= stopCh; chan += step) {
-            for (casa::uInt pol = 0; pol < flags.nrow(); ++pol) {
+        for (casacore::Int chan = startCh; chan <= stopCh; chan += step) {
+            for (casacore::uInt pol = 0; pol < flags.nrow(); ++pol) {
                 flags(pol, chan) = true;
                 itsStats.visFlagged++;
             }
@@ -326,9 +326,9 @@ void SelectionFlagger::checkDetailed(casa::MSColumns& msc, const casa::uInt row,
     }
 }
 
-void SelectionFlagger::flagRow(casa::MSColumns& msc, const casa::uInt row, const bool dryRun)
+void SelectionFlagger::flagRow(casacore::MSColumns& msc, const casacore::uInt row, const bool dryRun)
 {
-    Matrix<casa::Bool> flags = msc.flag()(row);
+    Matrix<casacore::Bool> flags = msc.flag()(row);
     flags = true;
 
     itsStats.visFlagged += flags.size();

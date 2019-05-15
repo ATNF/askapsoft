@@ -52,58 +52,58 @@ struct MPITraitsHelper {
           "Attempted a build for type without traits defined");
 };
 
-// specialisation for casa::uInt
+// specialisation for casacore::uInt
 template<>
-struct MPITraitsHelper<casa::uInt> {
+struct MPITraitsHelper<casacore::uInt> {
    static MPI_Datatype datatype() { return MPI_UNSIGNED; };
    static const int size = 1;
    
-   static bool equal(casa::uInt val1, casa::uInt val2) { return val1 == val2;}
+   static bool equal(casacore::uInt val1, casacore::uInt val2) { return val1 == val2;}
 };
 
 
-// specialisation for casa::Float
+// specialisation for casacore::Float
 template<>
-struct MPITraitsHelper<casa::Float> {
+struct MPITraitsHelper<casacore::Float> {
    static MPI_Datatype datatype() { return MPI_FLOAT; };
    static const int size = 1;
 
-   static bool equal(casa::Float val1, casa::Float val2) { return fabsf(val1 - val2) <= 1e-7 * fabsf(val1 + val2);}
+   static bool equal(casacore::Float val1, casacore::Float val2) { return fabsf(val1 - val2) <= 1e-7 * fabsf(val1 + val2);}
 };
 
-// specialisation for casa::Complex
+// specialisation for casacore::Complex
 template<>
-struct MPITraitsHelper<casa::Complex> {
+struct MPITraitsHelper<casacore::Complex> {
    static MPI_Datatype datatype() { return MPI_FLOAT; };
    static const int size = 2;
 };
 
-// specialisation for casa::Bool
+// specialisation for casacore::Bool
 template<>
-struct MPITraitsHelper<casa::Bool> {
+struct MPITraitsHelper<casacore::Bool> {
    static MPI_Datatype datatype() { return MPI_CHAR; };
    static const int size = 1;
 
-   static bool equal(casa::Bool val1, casa::Bool val2) { return val1 == val2;}
+   static bool equal(casacore::Bool val1, casacore::Bool val2) { return val1 == val2;}
 };
 
-// specialisation for casa::Double
+// specialisation for casacore::Double
 template<>
-struct MPITraitsHelper<casa::Double> {
+struct MPITraitsHelper<casacore::Double> {
    static MPI_Datatype datatype() { return MPI_DOUBLE; };
    static const int size = 1;
 
-   static bool equal(casa::Double val1, casa::Double val2) { return fabs(val1 - val2) <= 1e-13 * fabs(val1 + val2);}
+   static bool equal(casacore::Double val1, casacore::Double val2) { return fabs(val1 - val2) <= 1e-13 * fabs(val1 + val2);}
 };
 
-// specialisation for casa::RidigVector<casa::Double, 3>
+// specialisation for casacore::RidigVector<casacore::Double, 3>
 template<>
-struct MPITraitsHelper<casa::RigidVector<casa::Double, 3> > {
+struct MPITraitsHelper<casacore::RigidVector<casacore::Double, 3> > {
    static MPI_Datatype datatype() { return MPI_DOUBLE; };
    static const int size = 3;
 
    // skip comparison - we don't really need it in the cross-check code
-   static bool equal(casa::RigidVector<casa::Double, 3>, casa::RigidVector<casa::Double, 3>) { return true;}
+   static bool equal(casacore::RigidVector<casacore::Double, 3>, casacore::RigidVector<casacore::Double, 3>) { return true;}
 };
 
 // specialisation for unsigned long

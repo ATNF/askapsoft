@@ -66,7 +66,7 @@ SubComponent& SubComponent::operator= (const SubComponent& c)
     return *this;
 }
 
-SubComponent::SubComponent(const casa::Gaussian2D<casa::Double> &g)
+SubComponent::SubComponent(const casacore::Gaussian2D<casacore::Double> &g)
 {
     itsXpos = g.xCenter();
     itsYpos = g.yCenter();
@@ -81,7 +81,7 @@ bool operator< (SubComponent lhs, SubComponent rhs)
     return lhs.itsPeakFlux < rhs.itsPeakFlux;
 }
 
-casa::Gaussian2D<casa::Double> SubComponent::asGauss()
+casacore::Gaussian2D<casacore::Double> SubComponent::asGauss()
 {
     float axialRatio, axis;
     if (itsMajorAxis > 0) {
@@ -96,7 +96,7 @@ casa::Gaussian2D<casa::Double> SubComponent::asGauss()
     }
     axis = std::max(1.e-10f, axis);
     // ASKAPLOG_DEBUG_STR(logger, "component " << *this << " has axial ratio " << axialRatio);
-    casa::Gaussian2D<casa::Double> gauss(itsPeakFlux, itsXpos, itsYpos,
+    casacore::Gaussian2D<casacore::Double> gauss(itsPeakFlux, itsXpos, itsYpos,
                                          axis, axialRatio, itsPositionAngle);
     return gauss;
 

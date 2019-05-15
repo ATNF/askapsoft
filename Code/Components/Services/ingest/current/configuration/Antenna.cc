@@ -47,11 +47,11 @@ using namespace askap;
 using namespace askap::cp::ingest;
 using namespace casa;
 
-Antenna::Antenna(const casa::String& name,
-                 const casa::String& mount,
-                 const casa::Vector<casa::Double>& position,
-                 const casa::Quantity& diameter, 
-                 const casa::Quantity& delay)
+Antenna::Antenna(const casacore::String& name,
+                 const casacore::String& mount,
+                 const casacore::Vector<casacore::Double>& position,
+                 const casacore::Quantity& diameter, 
+                 const casacore::Quantity& delay)
         : itsName(name), itsMount(mount), itsPosition(position),
         itsDiameter(diameter), itsDelay(delay)
 {
@@ -63,27 +63,27 @@ Antenna::Antenna(const casa::String& name,
                "Antenna delay must conform to seconds");
 }
 
-casa::String Antenna::name(void) const
+casacore::String Antenna::name(void) const
 {
     return itsName;
 }
 
-casa::String Antenna::mount(void) const
+casacore::String Antenna::mount(void) const
 {
     return itsMount;
 }
 
-casa::Vector<casa::Double> Antenna::position(void) const
+casacore::Vector<casacore::Double> Antenna::position(void) const
 {
     return itsPosition;
 }
 
-casa::Quantity Antenna::diameter(void) const
+casacore::Quantity Antenna::diameter(void) const
 {
     return itsDiameter;
 }
 
-casa::Quantity Antenna::delay(void) const
+casacore::Quantity Antenna::delay(void) const
 {
     return itsDelay;
 }

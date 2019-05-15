@@ -77,7 +77,7 @@ void CurvatureMapCreator::initialise(duchamp::Cube &cube,
     itsSubimageDef = &subdef;
     itsWeighter = weighter;
 
-    casa::Slicer slicer = analysisutilities::subsectionToSlicer(cube.pars().section());
+    casacore::Slicer slicer = analysisutilities::subsectionToSlicer(cube.pars().section());
     analysisutilities::fixSlicer(slicer, cube.header().getWCS());
     const boost::shared_ptr<SubImage<Float> > sub =
         analysisutilities::getSubImage(cube.pars().getImageFile(), slicer);
@@ -87,7 +87,7 @@ void CurvatureMapCreator::initialise(duchamp::Cube &cube,
     sec.parse(itsShape.asStdVector());
     duchamp::Section secMaster = itsSubimageDef->section(-1);
     secMaster.parse(itsShape.asStdVector());
-    itsLocation = casa::IPosition(sec.getStartList());
+    itsLocation = casacore::IPosition(sec.getStartList());
 
     ASKAPLOG_DEBUG_STR(logger, "Initialised CurvatureMapCreator with shape=" <<
                        itsShape << " and location=" << itsLocation);
@@ -97,18 +97,18 @@ void CurvatureMapCreator::initialise(duchamp::Cube &cube,
 void CurvatureMapCreator::calculate()
 {
 
-    casa::Array<float> inputArray(itsShape, itsCube->getArray(), casa::SHARE);
+    casacore::Array<float> inputArray(itsShape, itsCube->getArray(), casacore::SHARE);
 
-    casa::IPosition kernelShape(2, 3, 3);
-    casa::Array<float> kernel(kernelShape, 1.);
-    kernel(casa::IPosition(2, 1, 1)) = -8.;
+    casacore::IPosition kernelShape(2, 3, 3);
+    casacore::Array<float> kernel(kernelShape, 1.);
+    kernel(casacore::IPosition(2, 1, 1)) = -8.;
 
     ASKAPLOG_DEBUG_STR(logger, "Defined a kernel for the curvature map calculations: " << kernel);
 
-    casa::Convolver<float> convolver(kernel, itsShape);
+    casacore::Convolver<float> convolver(kernel, itsShape);
     ASKAPLOG_DEBUG_STR(logger, "Defined a convolver");
 
-    itsArray = casa::MaskedArray<float>(inputArray, itsWeighter->cutoffMask());
+    itsArray = casacore::MaskedArray<float>(inputArray, itsWeighter->cutoffMask());
     ASKAPLOG_DEBUG_STR(logger, "About to convolve");
     convolver.linearConv(itsArray.getRWArray(), inputArray);
     ASKAPLOG_DEBUG_STR(logger, "Convolving done.");
@@ -145,14 +145,14 @@ void CurvatureMapCreator::maskBorders()
                        ", ymaxOffset=" << ymaxOffset);
     ASKAPLOG_DEBUG_STR(logger, "Starting with location=" << itsLocation <<
                        " and shape=" << itsShape);
-    casa::IPosition blc(itsLocation), trc(itsShape - 1);
+    casacore::IPosition blc(itsLocation), trc(itsShape - 1);
     blc[0] = xminOffset;
     blc[1] = yminOffset;
     trc[0] -= xmaxOffset;
     trc[1] -= ymaxOffset;
-    casa::Slicer arrSlicer(blc, trc, Slicer::endIsLast);
+    casacore::Slicer arrSlicer(blc, trc, Slicer::endIsLast);
     ASKAPLOG_DEBUG_STR(logger, "Defined a masking Slicer " << arrSlicer);
-    casa::Array<float> newArr = itsArray.getRWArray()(arrSlicer);
+    casacore::Array<float> newArr = itsArray.getRWArray()(arrSlicer);
     ASKAPLOG_DEBUG_STR(logger, "Have extracted a subarray of shape " << newArr.shape());
     itsArray.getRWArray().assign(newArr);
     itsLocation += blc;

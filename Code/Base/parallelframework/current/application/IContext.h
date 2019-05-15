@@ -126,7 +126,7 @@ public:
    /// defined by the user.
    /// @return current position of the iterator
    /// @note An exception is thrown, if no iteration has been setup
-   virtual casa::IPosition cursor() const = 0;
+   virtual casacore::IPosition cursor() const = 0;
 
    /// @brief advance iterator to the next work unit
    /// @note An exception is thrown, if no iteration has been setup

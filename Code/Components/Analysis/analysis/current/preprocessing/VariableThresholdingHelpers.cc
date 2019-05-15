@@ -43,10 +43,10 @@ namespace askap {
 
 namespace analysis {
 
-void slidingBoxStats(casa::Array<Float> &input,
-                     casa::Array<Float> &middle,
-                     casa::Array<Float> &spread,
-                     casa::IPosition &box,
+void slidingBoxStats(casacore::Array<Float> &input,
+                     casacore::Array<Float> &middle,
+                     casacore::Array<Float> &spread,
+                     casacore::IPosition &box,
                      bool useRobust)
 {
     ASKAPASSERT(input.shape() == middle.shape());
@@ -62,13 +62,13 @@ void slidingBoxStats(casa::Array<Float> &input,
     }
 }
 
-casa::Array<Float> calcSNR(casa::Array<Float> &input,
-                           casa::Array<Float> &middle,
-                           casa::Array<Float> &spread)
+casacore::Array<Float> calcSNR(casacore::Array<Float> &input,
+                           casacore::Array<Float> &middle,
+                           casacore::Array<Float> &spread)
 {
     ASKAPASSERT(input.shape() == middle.shape());
     ASKAPASSERT(input.shape() == spread.shape());
-    casa::Array<Float> snr(input.shape(), 0.);
+    casacore::Array<Float> snr(input.shape(), 0.);
     // Make sure we don't divide by the zeros around the edge of
     // madfm. Need to set those values to S/N=0.
     Array<Float>::iterator inputEnd(input.end());
@@ -83,10 +83,10 @@ casa::Array<Float> calcSNR(casa::Array<Float> &input,
     return snr;
 }
 
-void slidingBoxMaskedStats(casa::MaskedArray<Float> &input,
-                           casa::Array<Float> &middle,
-                           casa::Array<Float> &spread,
-                           casa::IPosition &box,
+void slidingBoxMaskedStats(casacore::MaskedArray<Float> &input,
+                           casacore::Array<Float> &middle,
+                           casacore::Array<Float> &spread,
+                           casacore::IPosition &box,
                            bool useRobust)
 {
     ASKAPASSERT(input.shape() == middle.shape());
@@ -102,13 +102,13 @@ void slidingBoxMaskedStats(casa::MaskedArray<Float> &input,
     }
 }
 
-casa::Array<Float> calcMaskedSNR(casa::MaskedArray<Float> &input,
-                                 casa::Array<Float> &middle,
-                                 casa::Array<Float> &spread)
+casacore::Array<Float> calcMaskedSNR(casacore::MaskedArray<Float> &input,
+                                 casacore::Array<Float> &middle,
+                                 casacore::Array<Float> &spread)
 {
     ASKAPASSERT(input.shape() == middle.shape());
     ASKAPASSERT(input.shape() == spread.shape());
-    casa::Array<Float> snr(input.shape(), 0.);
+    casacore::Array<Float> snr(input.shape(), 0.);
     // Make sure we don't divide by the zeros around the edge of
     // madfm. Need to set those values to S/N=0.
 

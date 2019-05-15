@@ -52,46 +52,46 @@ class ImageWriter {
         void copyMetadata(duchamp::Cube *cube);
 
         std::string &imagename() {return itsImageName;};
-        casa::Unit &bunit() {return itsBunit;};
-        casa::CoordinateSystem &coordsys() {return itsCoordSys;};
-        casa::IPosition &shape() {return itsShape;};
+        casacore::Unit &bunit() {return itsBunit;};
+        casacore::CoordinateSystem &coordsys() {return itsCoordSys;};
+        casacore::IPosition &shape() {return itsShape;};
 
-        void setTileshapeFromShape(casa::IPosition &shape);
+        void setTileshapeFromShape(casacore::IPosition &shape);
 
         virtual void create();
 
         void write(float *data,
-                   const casa::IPosition &shape,
+                   const casacore::IPosition &shape,
                    bool accumulate = false);
 
         void write(float *data,
-                   const casa::IPosition &shape,
-                   const casa::IPosition &loc,
+                   const casacore::IPosition &shape,
+                   const casacore::IPosition &loc,
                    bool accumulate = false);
 
-        void write(const casa::Array<casa::Float> &data,
+        void write(const casacore::Array<casacore::Float> &data,
                    bool accumulate = false);
 
-        virtual void write(const casa::Array<casa::Float> &data,
-                           const casa::IPosition &loc,
+        virtual void write(const casacore::Array<casacore::Float> &data,
+                           const casacore::IPosition &loc,
                            bool accumulate = false);
 
-    void writeMask(const casa::Array<bool> &mask,
-                   const casa::IPosition &loc);
+    void writeMask(const casacore::Array<bool> &mask,
+                   const casacore::IPosition &loc);
 
-        casa::Array<casa::Float> read(const casa::IPosition& loc,
-                                      const casa::IPosition &shape);
+        casacore::Array<casacore::Float> read(const casacore::IPosition& loc,
+                                      const casacore::IPosition &shape);
 
     protected:
             /// @brief The defining parset
         LOFAR::ParameterSet itsParset;
 
         std::string itsImageName;
-        casa::Unit itsBunit;
-        casa::IPosition itsShape;
-        casa::IPosition itsTileshape;
-        casa::CoordinateSystem itsCoordSys;
-        casa::ImageInfo itsImageInfo;
+        casacore::Unit itsBunit;
+        casacore::IPosition itsShape;
+        casacore::IPosition itsTileshape;
+        casacore::CoordinateSystem itsCoordSys;
+        casacore::ImageInfo itsImageInfo;
 };
 
 

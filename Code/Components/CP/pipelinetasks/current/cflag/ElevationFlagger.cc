@@ -57,7 +57,7 @@ using namespace askap::cp::pipelinetasks;
 
 vector< boost::shared_ptr<IFlagger> > ElevationFlagger::build(
         const LOFAR::ParameterSet& parset,
-        const casa::MeasurementSet& /*ms*/)
+        const casacore::MeasurementSet& /*ms*/)
 {
     vector< boost::shared_ptr<IFlagger> > flaggers;
     const string key = "elevation_flagger.enable";
@@ -81,16 +81,16 @@ FlaggingStats ElevationFlagger::stats(void) const
     return itsStats;
 }
 
-casa::Bool ElevationFlagger::processingRequired(const casa::uInt pass)
+casacore::Bool ElevationFlagger::processingRequired(const casacore::uInt pass)
 {
     return (pass==0);
 }
 
-void ElevationFlagger::updateElevations(casa::MSColumns& msc,
-                                         const casa::uInt row)
+void ElevationFlagger::updateElevations(casacore::MSColumns& msc,
+                                         const casacore::uInt row)
 {
     // 1: Ensure the antenna elevation array is the correct size
-    const casa::uInt nAnt= msc.antenna().nrow();
+    const casacore::uInt nAnt= msc.antenna().nrow();
     if (itsAntennaElevations.size() != nAnt) {
         itsAntennaElevations.resize(nAnt);
     }
@@ -100,15 +100,15 @@ void ElevationFlagger::updateElevations(casa::MSColumns& msc,
     msd.setAntennas(msc.antenna());
     msd.setEpoch(msc.timeMeas()(row));
 
-    const casa::ROMSFieldColumns& fieldc = msc.field();
-    const casa::Int fieldId = msc.fieldId()(row);
-    const casa::Vector<casa::MDirection> dirVec = fieldc.phaseDirMeasCol()(fieldId);
-    const casa::MDirection direction = dirVec(0);
+    const casacore::ROMSFieldColumns& fieldc = msc.field();
+    const casacore::Int fieldId = msc.fieldId()(row);
+    const casacore::Vector<casacore::MDirection> dirVec = fieldc.phaseDirMeasCol()(fieldId);
+    const casacore::MDirection direction = dirVec(0);
     msd.setFieldCenter(direction);
 
     // 3: Calculate elevations for all antennas. Calculate each antenna
     // individually in case very long baselines exist.
-    for (casa::uInt i = 0 ; i < nAnt; ++i) {
+    for (casacore::uInt i = 0 ; i < nAnt; ++i) {
         msd.setAntenna(i);
         const Vector<double> azel = msd.azel().getAngle("deg").getValue("deg");
         itsAntennaElevations(i) = Quantity(azel(1), "deg");
@@ -117,12 +117,12 @@ void ElevationFlagger::updateElevations(casa::MSColumns& msc,
     itsTimeElevCalculated = msc.time()(row);
 }
 
-void ElevationFlagger::processRow(casa::MSColumns& msc, const casa::uInt pass,
-                                  const casa::uInt row, const bool dryRun)
+void ElevationFlagger::processRow(casacore::MSColumns& msc, const casacore::uInt pass,
+                                  const casacore::uInt row, const bool dryRun)
 {
     // 1: If new timestamp then update the antenna elevations
-    const casa::Double epsilon = std::numeric_limits<casa::Double>::epsilon();
-    if (!casa::near(msc.time()(row), itsTimeElevCalculated, epsilon)) {
+    const casacore::Double epsilon = std::numeric_limits<casacore::Double>::epsilon();
+    if (!casacore::near(msc.time()(row), itsTimeElevCalculated, epsilon)) {
         updateElevations(msc, row);
     }
 
@@ -138,9 +138,9 @@ void ElevationFlagger::processRow(casa::MSColumns& msc, const casa::uInt pass,
     }
 }
 
-void ElevationFlagger::flagRow(casa::MSColumns& msc, const casa::uInt row, const bool dryRun)
+void ElevationFlagger::flagRow(casacore::MSColumns& msc, const casacore::uInt row, const bool dryRun)
 {
-    Matrix<casa::Bool> flags = msc.flag()(row);
+    Matrix<casacore::Bool> flags = msc.flag()(row);
     flags = true;
 
     itsStats.visFlagged += flags.size();

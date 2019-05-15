@@ -39,35 +39,35 @@
 
 namespace LOFAR {
 
-        // casa::MVEpoch
-        LOFAR::BlobOStream& operator<<(LOFAR::BlobOStream& os, const casa::MVEpoch& obj);
-        LOFAR::BlobIStream& operator>>(LOFAR::BlobIStream& is, casa::MVEpoch& obj);
+        // casacore::MVEpoch
+        LOFAR::BlobOStream& operator<<(LOFAR::BlobOStream& os, const casacore::MVEpoch& obj);
+        LOFAR::BlobIStream& operator>>(LOFAR::BlobIStream& is, casacore::MVEpoch& obj);
 
-        // casa::MVDirection
-        LOFAR::BlobOStream& operator<<(LOFAR::BlobOStream& os, const casa::MVDirection& obj);
-        LOFAR::BlobIStream& operator>>(LOFAR::BlobIStream& is, casa::MVDirection& obj);
+        // casacore::MVDirection
+        LOFAR::BlobOStream& operator<<(LOFAR::BlobOStream& os, const casacore::MVDirection& obj);
+        LOFAR::BlobIStream& operator>>(LOFAR::BlobIStream& is, casacore::MVDirection& obj);
 
-        // casa::MDirection
-        LOFAR::BlobOStream& operator<<(LOFAR::BlobOStream& os, const casa::MDirection& obj);
-        LOFAR::BlobIStream& operator>>(LOFAR::BlobIStream& is, casa::MDirection& obj);
+        // casacore::MDirection
+        LOFAR::BlobOStream& operator<<(LOFAR::BlobOStream& os, const casacore::MDirection& obj);
+        LOFAR::BlobIStream& operator>>(LOFAR::BlobIStream& is, casacore::MDirection& obj);
 
-        // casa::Stokes::StokesTypes
-        LOFAR::BlobOStream& operator<<(LOFAR::BlobOStream& os, const casa::Stokes::StokesTypes& obj);
-        LOFAR::BlobIStream& operator>>(LOFAR::BlobIStream& is, casa::Stokes::StokesTypes& obj);
+        // casacore::Stokes::StokesTypes
+        LOFAR::BlobOStream& operator<<(LOFAR::BlobOStream& os, const casacore::Stokes::StokesTypes& obj);
+        LOFAR::BlobIStream& operator>>(LOFAR::BlobIStream& is, casacore::Stokes::StokesTypes& obj);
 
-        // casa::RigidVector<T, n>
+        // casacore::RigidVector<T, n>
         template<class T, int n>
-        LOFAR::BlobOStream& operator<<(LOFAR::BlobOStream& os, const casa::RigidVector<T, n>& obj);
+        LOFAR::BlobOStream& operator<<(LOFAR::BlobOStream& os, const casacore::RigidVector<T, n>& obj);
         template<class T, int n>
-        LOFAR::BlobIStream& operator>>(LOFAR::BlobIStream& is, casa::RigidVector<T, n>& obj);
+        LOFAR::BlobIStream& operator>>(LOFAR::BlobIStream& is, casacore::RigidVector<T, n>& obj);
 
-        // casa::MDirection::Ref
-        LOFAR::BlobOStream& operator<<(LOFAR::BlobOStream& os, const casa::MDirection::Ref& obj);
-        LOFAR::BlobIStream& operator>>(LOFAR::BlobIStream& is, casa::MDirection::Ref& obj);
+        // casacore::MDirection::Ref
+        LOFAR::BlobOStream& operator<<(LOFAR::BlobOStream& os, const casacore::MDirection::Ref& obj);
+        LOFAR::BlobIStream& operator>>(LOFAR::BlobIStream& is, casacore::MDirection::Ref& obj);
 
-        // casa::Quantity
-        LOFAR::BlobOStream& operator<<(LOFAR::BlobOStream& os, const casa::Quantity& obj);
-        LOFAR::BlobIStream& operator>>(LOFAR::BlobIStream& is, casa::Quantity& obj);
+        // casacore::Quantity
+        LOFAR::BlobOStream& operator<<(LOFAR::BlobOStream& os, const casacore::Quantity& obj);
+        LOFAR::BlobIStream& operator>>(LOFAR::BlobIStream& is, casacore::Quantity& obj);
 
 } // end of namespace LOFAR
 

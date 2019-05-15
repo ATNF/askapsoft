@@ -80,12 +80,12 @@ class FrtSwDelays : virtual public IFrtApproach {
         /// @param[in] effLO effective LO frequency in Hz. Note, this is BETA-specific. It is probably
         /// better to derive this from chunk if necessary.
         virtual void process(const askap::cp::common::VisChunk::ShPtr& chunk,
-                             const casa::Matrix<double> &delays, const casa::Matrix<double> &rates, const double effLO);
+                             const casacore::Matrix<double> &delays, const casacore::Matrix<double> &rates, const double effLO);
 
     private:
 
         /// @brief index of an antenna used as a reference
-        casa::uInt itsRefAntIndex;
+        casacore::uInt itsRefAntIndex;
 };
 
 } // namespace ingest

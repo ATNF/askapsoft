@@ -92,7 +92,7 @@ class Configuration {
         
 
         /// @brief The name of the array. e.g. "BETA"
-        casa::String arrayName(void) const;
+        casacore::String arrayName(void) const;
 
         /// @brief A sequence of tasks configuration.
         const std::vector<TaskDesc>& tasks(void) const;
@@ -123,7 +123,7 @@ class Configuration {
         const CorrelatorMode& lookupCorrelatorMode(const std::string& modename) const;
 
         // Returns the scheduling block id for this observation
-        casa::uInt schedulingBlockID(void) const;
+        casacore::uInt schedulingBlockID(void) const;
 
         /// @brief Ice configuration for the TOS metadata topic.
         TopicConfig metadataTopic(void) const;

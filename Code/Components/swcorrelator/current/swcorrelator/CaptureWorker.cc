@@ -88,7 +88,7 @@ void CaptureWorker::operator()()
 
        if (itsStatsOnly) {
           ASKAPDEBUGASSERT(size>1);
-          casa::StatAcc<float> accRe, accIm;
+          casacore::StatAcc<float> accRe, accIm;
           // first pass - basic stats
           std::complex<float>* data = itsBufferManager->data(id);
           for (int i=0; i<size; ++i,++data) {
@@ -99,26 +99,26 @@ void CaptureWorker::operator()()
                 accIm.getRms()<<") mean=("<<accRe.getMean()<<","<<accIm.getMean()<<") min=("<<accRe.getMin()<<","<<accIm.getMin()<<
                 ") max=("<<accRe.getMax()<<","<<accIm.getMax()<<")");
           // second pass is to accumulate histogram
-          const casa::uInt nBins = 30;
+          const casacore::uInt nBins = 30;
           const float maxVal = max(accRe.getMax(),accIm.getMax());
           const float minVal = max(accRe.getMin(),accIm.getMin());
           const float binWidth = (maxVal - minVal) / nBins;
-          casa::HistAcc<float> histRe(minVal, maxVal, binWidth);
-          casa::HistAcc<float> histIm(minVal, maxVal, binWidth);
+          casacore::HistAcc<float> histRe(minVal, maxVal, binWidth);
+          casacore::HistAcc<float> histIm(minVal, maxVal, binWidth);
           data = itsBufferManager->data(id);
           for (int i=0; i<size; ++i,++data) {
                histRe.put(real(*data));
                histIm.put(imag(*data));
           }
           // get and store results
-          casa::Block<casa::uInt> binsRe, binsIm;
-          casa::Block<float> valsRe, valsIm;
-          const casa::uInt nbinsRe = histRe.getHistogram(binsRe, valsRe);
-          const casa::uInt nbinsIm = histIm.getHistogram(binsIm, valsIm);
+          casacore::Block<casacore::uInt> binsRe, binsIm;
+          casacore::Block<float> valsRe, valsIm;
+          const casacore::uInt nbinsRe = histRe.getHistogram(binsRe, valsRe);
+          const casacore::uInt nbinsIm = histIm.getHistogram(binsIm, valsIm);
           ASKAPASSERT(nbinsRe == nbinsIm);
           ASKAPDEBUGASSERT(binsRe.nelements() + 2 == nbinsRe);
           std::ofstream os(fname.c_str());
-          for (casa::uInt bin = 0; bin < binsRe.nelements(); ++bin) {
+          for (casacore::uInt bin = 0; bin < binsRe.nelements(); ++bin) {
                os<<bin<<" "<<valsRe[bin]<<" "<<valsIm[bin]<<" "<<binsRe[bin]<<" "<<binsIm[bin]<<std::endl;
           }
           // dump time series. It's not a very tidy way to use static data members, but it is the 

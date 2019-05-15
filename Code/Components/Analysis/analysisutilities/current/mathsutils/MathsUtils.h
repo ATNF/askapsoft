@@ -150,7 +150,7 @@ const float chisqProb(const float ndof, const float chisq);
 /// @return A vector containing (in order), the major & minor
 /// axes, and the position angle (in radians).
 const std::vector<Double>
-deconvolveGaussian(const casa::Gaussian2D<Double> &measured, duchamp::Beam beam);
+deconvolveGaussian(const casacore::Gaussian2D<Double> &measured, duchamp::Beam beam);
 
 /// @brief Return the Gaussian after deconvolution with the given beam
 /// @details Deconvolution of a Gaussian shape, assuming it was
@@ -164,7 +164,7 @@ deconvolveGaussian(const casa::Gaussian2D<Double> &measured, duchamp::Beam beam)
 /// and the position angle (in radians), followed by the error on
 /// those three parameters
 const std::vector<Double>
-deconvolveGaussian(const casa::Gaussian2D<Double> &measured, casa::Vector<Double> &errors, duchamp::Beam beam);
+deconvolveGaussian(const casacore::Gaussian2D<Double> &measured, casacore::Vector<Double> &errors, duchamp::Beam beam);
 
 /// @brief Fit a quadratic analytically to three points.
 /// @details Directly calculates the parabola of the form y = Ax^2 +

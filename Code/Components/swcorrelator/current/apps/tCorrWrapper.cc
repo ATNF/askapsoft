@@ -50,7 +50,7 @@ int main(int argc, const char** argv)
     askap::askapparallel::AskapParallel comms(argc, argv);
     
     try {
-       casa::Timer timer;
+       casacore::Timer timer;
        timer.mark();
                    
        askap::swcorrelator::CorrRunner runner;

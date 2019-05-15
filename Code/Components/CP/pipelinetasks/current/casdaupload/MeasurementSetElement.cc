@@ -107,12 +107,12 @@ xercesc::DOMElement* MeasurementSetElement::toXmlElement(xercesc::DOMDocument& d
     return e;
 }
 
-casa::MEpoch MeasurementSetElement::getObsStart(void) const
+casacore::MEpoch MeasurementSetElement::getObsStart(void) const
 {
     return itsObsStart;
 }
 
-casa::MEpoch MeasurementSetElement::getObsEnd(void) const
+casacore::MEpoch MeasurementSetElement::getObsEnd(void) const
 {
     return itsObsEnd;
 }
@@ -121,13 +121,13 @@ void MeasurementSetElement::extractData()
 {
     ASKAPLOG_INFO_STR(logger, "Extracting metadata from measurement set: "
                       << itsFilepath);
-    casa::MeasurementSet ms(itsFilepath.string(), casa::Table::Old);
+    casacore::MeasurementSet ms(itsFilepath.string(), casacore::Table::Old);
     ROMSColumns msc(ms);
 
     // Extract observation start and stop time
-    const casa::Int obsId = msc.observationId()(0);
+    const casacore::Int obsId = msc.observationId()(0);
     const ROMSObservationColumns& obsc = msc.observation();
-    const casa::Vector<casa::MEpoch> timeRange = obsc.timeRangeMeas()(obsId);
+    const casacore::Vector<casacore::MEpoch> timeRange = obsc.timeRangeMeas()(obsId);
     itsObsStart = timeRange(0);
     itsObsEnd = timeRange(1);
 
@@ -137,37 +137,37 @@ void MeasurementSetElement::extractData()
     const ROMSSpWindowColumns& spwc = msc.spectralWindow();
 
     // Iterate over all rows, creating a ScanElement for each scan
-    casa::Int lastScanId = -1;
-    casa::uInt row = 0;
+    casacore::Int lastScanId = -1;
+    casacore::uInt row = 0;
     while (row < msc.nrow()) {
-        const casa::Int scanNum = msc.scanNumber()(row);
+        const casacore::Int scanNum = msc.scanNumber()(row);
         if (scanNum > lastScanId) {
             lastScanId = scanNum;
             // 1: Collect scan metadata that is expected to remain constant for the whole scan
-            const casa::MEpoch startTime = msc.timeMeas()(row);
+            const casacore::MEpoch startTime = msc.timeMeas()(row);
 
             // Field
-            const casa::Int fieldId = msc.fieldId()(row);
-            const casa::Vector<MDirection> dirVec = fieldc.phaseDirMeasCol()(fieldId);
+            const casacore::Int fieldId = msc.fieldId()(row);
+            const casacore::Vector<MDirection> dirVec = fieldc.phaseDirMeasCol()(fieldId);
             const MDirection fieldDirection = dirVec(0);
             const std::string fieldName = fieldc.name()(fieldId);
 
             // Polarisations
-            const casa::Int dataDescId = msc.dataDescId()(row);
-            const casa::uInt descPolId = ddc.polarizationId()(dataDescId);
-            const casa::Vector<casa::Int> stokesTypesInt = polc.corrType()(descPolId);
+            const casacore::Int dataDescId = msc.dataDescId()(row);
+            const casacore::uInt descPolId = ddc.polarizationId()(dataDescId);
+            const casacore::Vector<casacore::Int> stokesTypesInt = polc.corrType()(descPolId);
 
             // Spectral window
-            const casa::uInt descSpwId = ddc.spectralWindowId()(dataDescId);
-            const casa::Vector<casa::Double> frequencies = spwc.chanFreq()(descSpwId);
-            const casa::Int nChan = frequencies.size();
-            casa::Double centreFreq = 0.0;
+            const casacore::uInt descSpwId = ddc.spectralWindowId()(dataDescId);
+            const casacore::Vector<casacore::Double> frequencies = spwc.chanFreq()(descSpwId);
+            const casacore::Int nChan = frequencies.size();
+            casacore::Double centreFreq = 0.0;
             if (nChan % 2 == 0) {
                 centreFreq = (frequencies(nChan / 2) + frequencies((nChan / 2) + 1)) / 2.0;
             } else {
                 centreFreq = frequencies(nChan / 2);
             }
-            const casa::Vector<double> chanWidth = spwc.chanWidth()(descSpwId);
+            const casacore::Vector<double> chanWidth = spwc.chanWidth()(descSpwId);
 
             // 2: Find the final timestamp for this scan
             while (row < msc.nrow() && msc.scanNumber()(row) == scanNum) {

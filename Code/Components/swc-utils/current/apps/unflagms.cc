@@ -58,11 +58,11 @@ using namespace askap;
 void process(const std::string &fname) 
 {
   ASKAPLOG_INFO_STR(logger,  "Unflagging all data for "<<fname);
-  casa::Table ms(fname, casa::Table::Update);
+  casacore::Table ms(fname, casacore::Table::Update);
   
-  casa::ArrayColumn<casa::Bool> flagCol(ms, "FLAG");
-  casa::ScalarColumn<casa::Int> ant1(ms, "ANTENNA1");
-  casa::ScalarColumn<casa::Int> ant2(ms, "ANTENNA2");
+  casacore::ArrayColumn<casacore::Bool> flagCol(ms, "FLAG");
+  casacore::ScalarColumn<casacore::Int> ant1(ms, "ANTENNA1");
+  casacore::ScalarColumn<casacore::Int> ant2(ms, "ANTENNA2");
 
   /*
   // to load channel list from a file
@@ -82,14 +82,14 @@ void process(const std::string &fname)
   
   ASKAPLOG_INFO_STR(logger,"Total number of rows in the measurement set: "<<ms.nrow());
 
-  for (casa::uInt row = 0; row<ms.nrow(); ++row) {
+  for (casacore::uInt row = 0; row<ms.nrow(); ++row) {
        /*    
        if ((ant1.get(row) != 1) && (ant2.get(row) != 2)) {
        //if ((ant1.get(row) != 0) || (ant2.get(row) != 1)) {
            continue;
        }
        */
-       casa::Array<casa::Bool> buf;
+       casacore::Array<casacore::Bool> buf;
        flagCol.get(row,buf);
 
        // to unflag
@@ -117,7 +117,7 @@ void process(const std::string &fname)
        /*
        // to flag channels based on a file
        for (size_t i = 0; i<channels.size(); ++i) {
-            casa::Matrix<casa::Bool> thisRow(buf);
+            casacore::Matrix<casacore::Bool> thisRow(buf);
             // order reversed w.r.t. the accessor
             ASKAPASSERT(channels[i] < int(thisRow.ncolumn()));
             thisRow.column(channels[i]).set(true);
@@ -138,7 +138,7 @@ int main(int argc, const char** argv)
     askap::askapparallel::AskapParallel comms(argc, argv);
     
     try {
-       casa::Timer timer;
+       casacore::Timer timer;
        timer.mark();
        
        cmdlineparser::Parser parser; // a command line parser

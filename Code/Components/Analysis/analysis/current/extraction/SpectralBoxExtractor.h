@@ -70,7 +70,7 @@ class SpectralBoxExtractor : public SourceDataExtractor {
         void writeImage();
 
     /// Return a vector list of frequency values that match the spectrum array. 
-    casa::Array<Float> frequencies();
+    casacore::Array<Float> frequencies();
     /// Return the frequency units from the spectrum array.
     std::string freqUnit();
 

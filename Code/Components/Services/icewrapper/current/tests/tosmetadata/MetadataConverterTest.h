@@ -68,18 +68,18 @@ class MetadataConverterTest : public CppUnit::TestFixture {
     public:
         void setUp() {
             // Test values (TosMetadata)
-            const casa::uInt nAntenna = 6;
-            const casa::uLong timestamp = 1234567890;
+            const casacore::uInt nAntenna = 6;
+            const casacore::uLong timestamp = 1234567890;
 
             // Test values (TosMetadataAntenna)
             const MDirection testDir(Quantity(20, "deg"),
                                      Quantity(-10, "deg"),
                                      MDirection::Ref(MDirection::J2000));
-            const casa::Int scanId = 0;
-            const casa::Quantity polAngle(120.1, "deg");
-            const casa::Bool onSource = true;
-            const casa::Bool flagged = false;
-            const casa::Quantity centreFreq(1400.0, "MHz");
+            const casacore::Int scanId = 0;
+            const casacore::Quantity polAngle(120.1, "deg");
+            const casacore::Bool onSource = true;
+            const casacore::Bool flagged = false;
+            const casacore::Quantity centreFreq(1400.0, "MHz");
             const std::string targetName("1934-638");
             const std::string corrMode("Standard");
 
@@ -110,10 +110,10 @@ class MetadataConverterTest : public CppUnit::TestFixture {
             itsSource->corrMode(corrMode);
 
             // Beam offsets
-            itsSource->beamOffsets(casa::Matrix<casa::Double>(2u, 36u, 1.));
+            itsSource->beamOffsets(casacore::Matrix<casacore::Double>(2u, 36u, 1.));
 
             // Antennas
-            for (casa::uInt i = 0; i < nAntenna; ++i) {
+            for (casacore::uInt i = 0; i < nAntenna; ++i) {
                 const std::string name = "ak" + utility::toString(i);
                 TosMetadataAntenna ant(name);
                 ant.actualRaDec(testDir);
@@ -121,7 +121,7 @@ class MetadataConverterTest : public CppUnit::TestFixture {
                 ant.actualPolAngle(polAngle);
                 ant.onSource(onSource);
                 ant.flagged(flagged);
-                ant.uvw(casa::Vector<casa::Double>(36*3, double(i)/10.));
+                ant.uvw(casacore::Vector<casacore::Double>(36*3, double(i)/10.));
 
                 itsSource->addAntenna(ant);
             }
@@ -194,8 +194,8 @@ class MetadataConverterTest : public CppUnit::TestFixture {
             verifyDir(itsSource->phaseDirection(), itsResult->phaseDirection());
             CPPUNIT_ASSERT_EQUAL(itsSource->corrMode(), itsResult->corrMode());
             CPPUNIT_ASSERT_EQUAL(itsSource->beamOffsets().shape(), itsResult->beamOffsets().shape());
-            for (casa::uInt beam = 0; beam < itsSource->beamOffsets().ncolumn(); ++beam) {
-                 for (casa::uInt coord = 0; coord < itsSource->beamOffsets().nrow(); ++coord) {
+            for (casacore::uInt beam = 0; beam < itsSource->beamOffsets().ncolumn(); ++beam) {
+                 for (casacore::uInt coord = 0; coord < itsSource->beamOffsets().nrow(); ++coord) {
                       CPPUNIT_ASSERT_DOUBLES_EQUAL(itsSource->beamOffsets()(coord, beam), itsResult->beamOffsets()(coord, beam), 1e-15);
                  }
             }
@@ -203,7 +203,7 @@ class MetadataConverterTest : public CppUnit::TestFixture {
 
         void testOptionalBeamOffsets() {
             CPPUNIT_ASSERT(itsSource);
-            itsSource->beamOffsets(casa::Matrix<casa::Double>());
+            itsSource->beamOffsets(casacore::Matrix<casacore::Double>());
             MetadataConverter converter;
             TimeTaggedTypedValueMap intermediate(converter.convert(*itsSource));
             TypedValueMapConstMapper mapper(intermediate.data);
@@ -244,12 +244,12 @@ class MetadataConverterTest : public CppUnit::TestFixture {
             CPPUNIT_ASSERT_EQUAL(srcAnt.onSource(), resultAnt.onSource());
             CPPUNIT_ASSERT_EQUAL(srcAnt.flagged(), resultAnt.flagged());
             CPPUNIT_ASSERT_EQUAL(srcAnt.uvw().nelements(), resultAnt.uvw().nelements());
-            for (casa::uInt i=0; i<srcAnt.uvw().nelements(); ++i) {
+            for (casacore::uInt i=0; i<srcAnt.uvw().nelements(); ++i) {
                  CPPUNIT_ASSERT_DOUBLES_EQUAL(srcAnt.uvw()[i], resultAnt.uvw()[i],1e-6);
             }
         }
 
-        void verifyDir(const casa::MDirection& d1, const casa::MDirection& d2) {
+        void verifyDir(const casacore::MDirection& d1, const casacore::MDirection& d2) {
             CPPUNIT_ASSERT_EQUAL(d1.getAngle().getValue()(0), d2.getAngle().getValue()(0));
             CPPUNIT_ASSERT_EQUAL(d1.getAngle().getValue()(1), d2.getAngle().getValue()(1));
             CPPUNIT_ASSERT(d1.getRef().getType() == d2.getRef().getType());

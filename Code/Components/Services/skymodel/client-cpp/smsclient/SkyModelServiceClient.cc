@@ -77,10 +77,10 @@ SkyModelServiceClient::~SkyModelServiceClient()
 }
 
 ComponentListPtr SkyModelServiceClient::coneSearch(
-    const casa::Quantity& ra,
-    const casa::Quantity& dec,
-    const casa::Quantity& searchRadius,
-    const casa::Quantity& fluxLimit)
+    const casacore::Quantity& ra,
+    const casacore::Quantity& dec,
+    const casacore::Quantity& searchRadius,
+    const casacore::Quantity& fluxLimit)
 {
     ASKAPCHECK(ra.isConform("deg"), "ra must conform to degrees");
     ASKAPCHECK(dec.isConform("deg"), "dec must conform to degrees");
@@ -131,17 +131,17 @@ ComponentListPtr SkyModelServiceClient::transformData(
             // integer id
             it->id,
             //rightAscension
-            casa::Quantity(it->ra, "deg"),
+            casacore::Quantity(it->ra, "deg"),
             //declination
-            casa::Quantity(it->dec, "deg"),
+            casacore::Quantity(it->dec, "deg"),
             //positionAngleDeconvolved
-            casa::Quantity(it->posAngDeconv, "deg"),
+            casacore::Quantity(it->posAngDeconv, "deg"),
             //majorAxis
-            casa::Quantity(it->majAxisDeconv, "arcsec"),
+            casacore::Quantity(it->majAxisDeconv, "arcsec"),
             //minorAxis
-            casa::Quantity(it->minAxisDeconv, "arcsec"),
+            casacore::Quantity(it->minAxisDeconv, "arcsec"),
             //i1400
-            casa::Quantity(it->fluxInt, "mJy"),
+            casacore::Quantity(it->fluxInt, "mJy"),
             //spectralIndex
             it->spectralIndex,
             //spectralCurvature

@@ -118,13 +118,13 @@ struct wcsprm *parsetToWCS(const LOFAR::ParameterSet& theParset,
 /// we just evaluate the Gaussian at the pixel location.
 // bool addGaussian(std::vector<float>array,
 //                  std::vector<unsigned int> axes,
-//                  casa::Gaussian2D<casa::Double> gauss,
+//                  casacore::Gaussian2D<casacore::Double> gauss,
 //                  FluxGenerator &fluxG,
 //                  bool integrate,
 //                  bool verbose);
 bool addGaussian(boost::shared_ptr<float[]>array,
                  std::vector<unsigned int> axes,
-                 casa::Gaussian2D<casa::Double> gauss,
+                 casacore::Gaussian2D<casacore::Double> gauss,
                  FluxGenerator &fluxG,
                  bool integrate,
                  bool verbose);
@@ -148,12 +148,12 @@ bool addGaussian(boost::shared_ptr<float[]>array,
 /// fluxes at each channel.
 // void add1DGaussian(std::vector<float>array,
 //                    std::vector<unsigned int> axes,
-//                    casa::Gaussian2D<casa::Double> gauss,
+//                    casacore::Gaussian2D<casacore::Double> gauss,
 //                    FluxGenerator &fluxGen,
 //                    bool verbose);
 void add1DGaussian(boost::shared_ptr<float[]>array,
                    std::vector<unsigned int> axes,
-                   casa::Gaussian2D<casa::Double> gauss,
+                   casacore::Gaussian2D<casacore::Double> gauss,
                    FluxGenerator &fluxGen,
                    bool verbose);
 
@@ -195,7 +195,7 @@ bool addPointSource(boost::shared_ptr<float[]>array,
 /// @param axes The shape of the flux array
 /// @param gauss The 2D Gaussian component to be added
 /// @return True if the component would be added to any pixels in the array. False if not.
-bool doAddGaussian(std::vector<unsigned int> axes, casa::Gaussian2D<casa::Double> gauss);
+bool doAddGaussian(std::vector<unsigned int> axes, casacore::Gaussian2D<casacore::Double> gauss);
 
 /// @details Tests whether a given point-source would be added to an
 /// array of dimensions given by the axes parameter.

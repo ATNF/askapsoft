@@ -233,7 +233,7 @@ int FitTT::taylor_fdf3(const gsl_vector * x, void *data, gsl_vector * f, gsl_mat
     return GSL_SUCCESS;
 }
 
-void FitTT::fit(casa::Array<float> &x, casa::Array<float> &y)
+void FitTT::fit(casacore::Array<float> &x, casacore::Array<float> &y)
 {
     ASKAPASSERT(x.size() == y.size());
     size_t ndata = x.size();
@@ -247,7 +247,7 @@ void FitTT::fit(casa::Array<float> &x, casa::Array<float> &y)
 
 }
 
-void FitTT::fit(casa::Array<float> &x, casa::Array<float> &y, casa::Array<float> &w)
+void FitTT::fit(casacore::Array<float> &x, casacore::Array<float> &y, casacore::Array<float> &w)
 {
     ASKAPASSERT(x.size() == y.size());
     ASKAPASSERT(x.size() == w.size());

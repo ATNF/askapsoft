@@ -119,12 +119,12 @@ void CubeMaker::initialise()
 /// systems.
 void CubeMaker::getReferenceData()
 {
-    const casa::PagedImage<float> refImage(itsInputNames[0]);
+    const casacore::PagedImage<float> refImage(itsInputNames[0]);
     itsRefShape = refImage.shape();
     itsRefCoordinates = refImage.coordinates();
     itsRefUnits = refImage.units();
 
-    const casa::PagedImage<float> secondImage(itsInputNames[1]);
+    const casacore::PagedImage<float> secondImage(itsInputNames[1]);
     itsSecondCoordinates = secondImage.coordinates();
 }
 
@@ -134,18 +134,18 @@ void CubeMaker::getReferenceData()
 /// using the reference shape and the number of channels in the input file list.
 void CubeMaker::createCube()
 {
-    casa::CoordinateSystem newCsys = CubeMakerHelperFunctions::makeCoordinates(
+    casacore::CoordinateSystem newCsys = CubeMakerHelperFunctions::makeCoordinates(
             itsRefCoordinates, itsSecondCoordinates, itsRefShape);
 
     if (itsRestFrequency > 0.) setRestFreq(newCsys);
 
-    const casa::IPosition cubeShape(4, itsRefShape(0), itsRefShape(1), itsRefShape(2), itsNumChan);
+    const casacore::IPosition cubeShape(4, itsRefShape(0), itsRefShape(1), itsRefShape(2), itsNumChan);
     const double size = static_cast<double>(cubeShape.product()) * sizeof(float);
     ASKAPLOG_INFO_STR(logger, "Creating image cube " << itsCubeName
                       << "  of size approximately " << std::setprecision(2)
                       << (size / 1024.0 / 1024.0 / 1024.0) << "GB. This may take a few minutes.");
 
-    itsCube.reset(new casa::PagedImage<float>(casa::TiledShape(cubeShape), newCsys, itsCubeName));
+    itsCube.reset(new casacore::PagedImage<float>(casacore::TiledShape(cubeShape), newCsys, itsCubeName));
 }
 
 /// @details
@@ -154,12 +154,12 @@ void CubeMaker::createCube()
 ///
 /// @param csys  The coordinate system to which the
 ///              rest frequency is to be added.
-void CubeMaker::setRestFreq(casa::CoordinateSystem& csys)
+void CubeMaker::setRestFreq(casacore::CoordinateSystem& csys)
 {
 
     CubeMakerHelperFunctions::assertValidCoordinates(csys);
-    const int whichSpectral = csys.findCoordinate(casa::Coordinate::SPECTRAL);
-    casa::SpectralCoordinate speccoord = csys.spectralCoordinate(whichSpectral);
+    const int whichSpectral = csys.findCoordinate(casacore::Coordinate::SPECTRAL);
+    casacore::SpectralCoordinate speccoord = csys.spectralCoordinate(whichSpectral);
 
     if (!speccoord.setRestFrequency(itsRestFrequency)) {
         ASKAPLOG_ERROR_STR(logger, "Could not set the rest frequency to " << itsRestFrequency);
@@ -178,7 +178,7 @@ void CubeMaker::setImageInfo()
 {
     if (itsCube.get()) {
         itsCube->setUnits(itsRefUnits);
-        casa::PagedImage<float> midImage(itsInputNames[itsBeamImageNum]);
+        casacore::PagedImage<float> midImage(itsInputNames[itsBeamImageNum]);
         itsCube->setImageInfo(midImage.imageInfo());
     }
 }
@@ -214,7 +214,7 @@ bool CubeMaker::writeSlice(size_t i)
         }
 
         ASKAPLOG_INFO_STR(logger, "Adding slice from image " << itsInputNames[i]);
-        casa::PagedImage<float> img(itsInputNames[i]);
+        casacore::PagedImage<float> img(itsInputNames[i]);
 
         // Ensure shape is the same
         if (img.shape() != itsRefShape) {
@@ -236,8 +236,8 @@ bool CubeMaker::writeSlice(size_t i)
             return false;
         }
 
-        casa::Array<float> arr = img.get();
-        casa::IPosition where(4, 0, 0, 0, i);
+        casacore::Array<float> arr = img.get();
+        casacore::IPosition where(4, 0, 0, 0, i);
         itsCube->putSlice(arr, where);
         return true;
 
@@ -256,8 +256,8 @@ bool CubeMaker::writeSlice(size_t i)
 void CubeMaker::recordBeams()
 {
     if (itsBeamLog != "") {
-	const casa::PagedImage<float> firstimg(itsInputNames[0]);
-	const casa::Vector<casa::Quantum<casa::Double> > firstbeam = firstimg.imageInfo().restoringBeam().toVector();
+	const casacore::PagedImage<float> firstimg(itsInputNames[0]);
+	const casacore::Vector<casacore::Quantum<casacore::Double> > firstbeam = firstimg.imageInfo().restoringBeam().toVector();
 
         if (firstbeam.size() == 0) {
             ASKAPLOG_WARN_STR(logger, "The first input image " << itsInputNames[0]

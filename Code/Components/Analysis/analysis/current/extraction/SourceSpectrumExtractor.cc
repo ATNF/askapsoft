@@ -112,9 +112,9 @@ void SourceSpectrumExtractor::setBeamScale()
                     itsOutputUnits.setName(inunit.substr(0,inunit.size()-5));
                 }
     
-                std::map<unsigned int, casa::Vector<Quantum<Double> > > beamvec;
+                std::map<unsigned int, casacore::Vector<Quantum<Double> > > beamvec;
 
-                casa::Vector<Quantum<Double> >
+                casacore::Vector<Quantum<Double> >
                 inputBeam = itsInputCubePtr->imageInfo().restoringBeam().toVector();
 
                 ASKAPLOG_DEBUG_STR(logger, "Setting beam scaling factor. BeamLog=" <<
@@ -134,8 +134,8 @@ void SourceSpectrumExtractor::setBeamScale()
                     if (itsBeamLog.find("%p") != std::string::npos) {
                         // the beam log has a "%p" string, meaning
                         // polarisation substitution is possible
-                        casa::Stokes stokes;
-                        casa::String stokesname(stokes.name(itsCurrentStokes));
+                        casacore::Stokes stokes;
+                        casacore::String stokesname(stokes.name(itsCurrentStokes));
                         stokesname.downcase();
                         ASKAPLOG_DEBUG_STR(logger, "Input beam log: replacing \"%p\" with " <<
                                            stokesname.c_str() << " in " << beamlogfile);
@@ -158,8 +158,8 @@ void SourceSpectrumExtractor::setBeamScale()
 
                     for (size_t i = 0; i < beamvec.size(); i++) {
 
-                        int dirCoNum = itsInputCoords.findCoordinate(casa::Coordinate::DIRECTION);
-                        casa::DirectionCoordinate
+                        int dirCoNum = itsInputCoords.findCoordinate(casacore::Coordinate::DIRECTION);
+                        casacore::DirectionCoordinate
                         dirCoo = itsInputCoords.directionCoordinate(dirCoNum);
                         double fwhmMajPix = beamvec[i][0].getValue(dirCoo.worldAxisUnits()[0]) /
                                             fabs(dirCoo.increment()[0]);
@@ -231,7 +231,7 @@ void SourceSpectrumExtractor::extract()
                           << " from image \"" << itsInputCube << "\".");
         this->defineSlicer();
         if (this->openInput()) {
-            casa::Stokes stk;
+            casacore::Stokes stk;
             ASKAPLOG_INFO_STR(logger, "Extracting spectrum from " << itsInputCube <<
                               " with shape " << itsInputCubePtr->shape() <<
                               " for source ID " << itsSourceID <<
@@ -242,18 +242,18 @@ void SourceSpectrumExtractor::extract()
             sub(new SubImage<Float>(*itsInputCubePtr, itsSlicer));
 
             ASKAPASSERT(sub->size() > 0);
-            const casa::MaskedArray<Float> msub(sub->get(), sub->getMask());
-            casa::Array<Float> subarray(sub->shape());
+            const casacore::MaskedArray<Float> msub(sub->get(), sub->getMask());
+            casacore::Array<Float> subarray(sub->shape());
             subarray = msub;
 
-            casa::IPosition outBLC(itsArray.ndim(), 0), outTRC(itsArray.shape() - 1);
+            casacore::IPosition outBLC(itsArray.ndim(), 0), outTRC(itsArray.shape() - 1);
             if (itsStkAxis > -1) {
                 // If there is a Stokes axis in the input file
                 outBLC(itsStkAxis) = outTRC(itsStkAxis) = stokes;
             }
 
             if (!itsFlagUseDetection) {
-                casa::Array<Float> sumarray = partialSums(subarray, IPosition(2, 0, 1));
+                casacore::Array<Float> sumarray = partialSums(subarray, IPosition(2, 0, 1));
                 itsArray(outBLC, outTRC) = sumarray.reform(itsArray(outBLC, outTRC).shape());
 
             } else {
@@ -264,13 +264,13 @@ void SourceSpectrumExtractor::extract()
                 IPosition shape = itsInputCubePtr->shape();
 
                 PixelInfo::Object2D spatmap = itsSource->getSpatialMap();
-                casa::IPosition blc(shape.size(), 0);
-                casa::IPosition trc(shape.size(), 0);
-                casa::IPosition inc(shape.size(), 1);
+                casacore::IPosition blc(shape.size(), 0);
+                casacore::IPosition trc(shape.size(), 0);
+                casacore::IPosition inc(shape.size(), 1);
 
                 trc(itsSpcAxis) = shape[itsSpcAxis] - 1;
                 if (itsStkAxis > -1) {
-                    casa::Stokes stk;
+                    casacore::Stokes stk;
                     blc(itsStkAxis) = trc(itsStkAxis) =
                                           itsInputCoords.stokesPixelNumber(stk.name(itsCurrentStokes));
                 }
@@ -280,7 +280,7 @@ void SourceSpectrumExtractor::extract()
                         if (spatmap.isInObject(x, y)) {
                             blc(itsLngAxis) = trc(itsLngAxis) = x - itsSource->getXmin();
                             blc(itsLatAxis) = trc(itsLatAxis) = y - itsSource->getYmin();
-                            casa::Array<Float> spec = subarray(blc, trc, inc);
+                            casacore::Array<Float> spec = subarray(blc, trc, inc);
                             spec = spec.reform(itsArray(outBLC, outTRC).shape());
                             itsArray(outBLC, outTRC) = itsArray(outBLC, outTRC) + spec;
                         }
@@ -299,8 +299,8 @@ void SourceSpectrumExtractor::extract()
         if (itsBeamScaleFactor[itsCurrentStokes].size() == 1) {
             itsArray /= itsBeamScaleFactor[itsCurrentStokes][0];
         } else {
-            casa::IPosition start(itsArray.ndim(), 0);
-            casa::IPosition end = itsArray.shape() - 1;
+            casacore::IPosition start(itsArray.ndim(), 0);
+            casacore::IPosition end = itsArray.shape() - 1;
             start(itsLngAxis) = start(itsLatAxis) = 0;
             for (int z = 0; z < itsArray.shape()(itsSpcAxis); z++) {
                 start(itsSpcAxis) = end(itsSpcAxis) = z;

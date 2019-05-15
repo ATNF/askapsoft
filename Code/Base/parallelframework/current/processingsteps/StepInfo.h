@@ -61,7 +61,7 @@ struct StepInfo {
    /// @param[in] step shared pointer to the processing step object
    /// @param[in] id step ID (determines the rank assignment details)
    /// @param[in] shape shape of the iteration domain 
-   StepInfo(const boost::shared_ptr<IProcessingStep> &step, const StepID &id, const casa::IPosition & shape = casa::IPosition());
+   StepInfo(const boost::shared_ptr<IProcessingStep> &step, const StepID &id, const casacore::IPosition & shape = casacore::IPosition());
    
    /// @brief const access to step id object
    /// @return const reference to StepID object corresponding to this processing step
@@ -74,12 +74,12 @@ struct StepInfo {
    /// @brief const access to the shape of interation domain
    /// @return const reference to the shape of iteration domain setup for this processing step
    /// @note empty IPosition object means no iteration
-   const casa::IPosition& shape() const;
+   const casacore::IPosition& shape() const;
       
    /// @brief non-const access to the shape of interation domain
    /// @return non-const reference to the shape of iteration domain setup for this processing step
    /// @note empty IPosition object means no iteration
-   casa::IPosition& shape();
+   casacore::IPosition& shape();
    
    /// @brief const access to the shared pointer of the processing step
    /// @return const reference to the shared pointer to the processing step object
@@ -94,7 +94,7 @@ private:
    StepID itsID;
       
    /// @brief iteration domain, empty vector means no iteration required
-   casa::IPosition itsShape;
+   casacore::IPosition itsShape;
       
    /// @brief shared pointer to the object representing this processing step
    boost::shared_ptr<IProcessingStep> itsStep;      

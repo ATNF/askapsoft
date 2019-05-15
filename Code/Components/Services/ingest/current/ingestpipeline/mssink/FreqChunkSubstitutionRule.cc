@@ -69,8 +69,8 @@ void FreqChunkSubstitutionRule::verifyChunk(const boost::shared_ptr<common::VisC
    if (inUse()) {
        ASKAPASSERT(chunk);
        ASKAPASSERT(chunk->frequency().nelements() > 0);
-       const casa::Double curFreq = chunk->frequency()[0];
-       ASKAPCHECK(casa::near(itsFreq, curFreq, 1e-6), 
+       const casacore::Double curFreq = chunk->frequency()[0];
+       ASKAPCHECK(casacore::near(itsFreq, curFreq, 1e-6), 
                  "Frequency axis appears to have changed, this is incompatible with the frequency chunk substitution rule");
    }
 }
@@ -117,7 +117,7 @@ void FreqChunkSubstitutionRule::initialise(const boost::shared_ptr<common::VisCh
             ASKAPDEBUGASSERT(*ci < static_cast<int>(individualFreqs.size()));
             ASKAPCHECK(!std::isnan(curFreq), "Frequency axis contains NaNs! This is not expected");
             // Using 1 Hz frequency tolerance
-            if (casa::abs(curFreq - individualFreqs[*ci]) > 1.) {
+            if (casacore::abs(curFreq - individualFreqs[*ci]) > 1.) {
                 curFreq = individualFreqs[*ci]; 
                 ++freqChunkId;
             }

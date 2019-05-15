@@ -57,7 +57,7 @@ int rank, wsize;
 
 #define INFLUXDB_LOG(func,tag) {\
   { \
-    casa::Timer work; \
+    casacore::Timer work; \
     work.mark(); \
     func; \
     std::chrono::nanoseconds ns = std::chrono::duration_cast< std::chrono::nanoseconds >(std::chrono::system_clock::now().time_since_epoch()); \
@@ -66,7 +66,7 @@ int rank, wsize;
 }
 #define TIME_FUNC(func,tag) { \
     { \
-        casa::Timer work; \
+        casacore::Timer work; \
         work.mark(); \
         func; \
         std::cout << "#" << tag << ":" << work.real() << std::endl; \
@@ -130,7 +130,7 @@ void doWrite(FILE *fptr,size_t towrite,size_t write_block,char *buffptr) {
 void doWorkRoot(void *buffer, size_t buffsize, float *workTime,FILE *fptr) {
 
 
-    casa::Timer work;
+    casacore::Timer work;
 
 
     int rtn=0;
@@ -281,8 +281,8 @@ int main(int argc, char *argv[])
     logfile.open(oss.str().c_str(), std::ios::out | std::ios::trunc);
 
 
-    casa::Timer timer;
-    casa::Timer total;
+    casacore::Timer timer;
+    casacore::Timer total;
     total.mark();
     if (rank == 0) {
         std::cout << "#Gathering and Writing " << integrations << " integrations of " << intTime << " seconds " << std::endl;

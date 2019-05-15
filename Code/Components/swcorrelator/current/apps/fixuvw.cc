@@ -58,23 +58,23 @@ ASKAP_LOGGER(logger, ".fixuvw");
 using namespace askap;
 //using namespace askap::swcorrelator;
 
-casa::MDirection getDirection(const casa::Table &ms)
+casacore::MDirection getDirection(const casacore::Table &ms)
 {
-   casa::Table fieldSubtable(ms.keywordSet().asTable("FIELD"));
+   casacore::Table fieldSubtable(ms.keywordSet().asTable("FIELD"));
    ASKAPCHECK(fieldSubtable.nrow() == 1, "FIELD subtable is supposed to have just one row");
-   casa::ROScalarMeasColumn<casa::MDirection> dir(fieldSubtable, "PHASE_DIR");
-   casa::MDirection result;
+   casacore::ROScalarMeasColumn<casacore::MDirection> dir(fieldSubtable, "PHASE_DIR");
+   casacore::MDirection result;
    dir.get(0, result);
    return result;
 }
 
-casa::Matrix<double> readAntennaPositions(const casa::Table &ms)
+casacore::Matrix<double> readAntennaPositions(const casacore::Table &ms)
 {
-   casa::Table antSubtable(ms.keywordSet().asTable("ANTENNA"));
-   casa::ROArrayColumn<double> pos(antSubtable, "POSITION");
-   casa::Matrix<double> result(antSubtable.nrow(), 3);
+   casacore::Table antSubtable(ms.keywordSet().asTable("ANTENNA"));
+   casacore::ROArrayColumn<double> pos(antSubtable, "POSITION");
+   casacore::Matrix<double> result(antSubtable.nrow(), 3);
    ASKAPASSERT(result.nrow() > 0);
-   for (casa::uInt i = 0; i<result.nrow(); ++i) {
+   for (casacore::uInt i = 0; i<result.nrow(); ++i) {
         result.row(i) = pos(i);
    }
    return result;
@@ -83,38 +83,38 @@ casa::Matrix<double> readAntennaPositions(const casa::Table &ms)
 void process(const std::string &fname) 
 {
   ASKAPLOG_INFO_STR(logger,  "Recalculate uvw's (old data will be replaced) for "<<fname);
-  casa::Table ms(fname, casa::Table::Update);
+  casacore::Table ms(fname, casacore::Table::Update);
   ASKAPCHECK(ms.keywordSet().asTable("FEED").nrow() == ms.keywordSet().asTable("ANTENNA").nrow(), "Only single on axis beam is currently supported");
-  casa::MDirection phaseCntr = getDirection(ms);
-  casa::Matrix<double> layout = readAntennaPositions(ms);
+  casacore::MDirection phaseCntr = getDirection(ms);
+  casacore::Matrix<double> layout = readAntennaPositions(ms);
   
-  casa::ROScalarMeasColumn<casa::MEpoch> epochCol(ms,"TIME_CENTROID");
-  //casa::ROArrayColumn<double> uvwCol(ms, "UVW");
-  casa::ArrayColumn<double> uvwCol(ms, "UVW");
-  casa::ROScalarColumn<int> ant1Col(ms, "ANTENNA1");
-  casa::ROScalarColumn<int> ant2Col(ms, "ANTENNA2");
+  casacore::ROScalarMeasColumn<casacore::MEpoch> epochCol(ms,"TIME_CENTROID");
+  //casacore::ROArrayColumn<double> uvwCol(ms, "UVW");
+  casacore::ArrayColumn<double> uvwCol(ms, "UVW");
+  casacore::ROScalarColumn<int> ant1Col(ms, "ANTENNA1");
+  casacore::ROScalarColumn<int> ant2Col(ms, "ANTENNA2");
   
-  for (casa::uInt row = 0; row<ms.nrow(); ++row) {
-       casa::MEpoch epoch;
+  for (casacore::uInt row = 0; row<ms.nrow(); ++row) {
+       casacore::MEpoch epoch;
        epochCol.get(row, epoch);
        const int antenna1 = ant1Col(row);
        const int antenna2 = ant2Col(row);       
        
        const double ra = phaseCntr.getAngle().getValue()(0);
        const double dec = phaseCntr.getAngle().getValue()(1);
-       const double gmstInDays = casa::MEpoch::Convert(epoch,casa::MEpoch::Ref(casa::MEpoch::GMST1))().get("d").getValue("d");
-       const double gmst = (gmstInDays - casa::Int(gmstInDays)) * casa::C::_2pi; // in radians
+       const double gmstInDays = casacore::MEpoch::Convert(epoch,casacore::MEpoch::Ref(casacore::MEpoch::GMST1))().get("d").getValue("d");
+       const double gmst = (gmstInDays - casacore::Int(gmstInDays)) * casacore::C::_2pi; // in radians
   
        const double H0 = gmst - ra, sH0 = sin(H0), cH0 = cos(H0), sd = sin(dec), cd = cos(dec);
        // quick and dirty calculation without taking aberration and other fine effects into account
        // it should be fine for the sort of baselines we have with BETA3
-       casa::Matrix<double> trans(3, 3, 0.);
+       casacore::Matrix<double> trans(3, 3, 0.);
        trans(0, 0) = -sH0; trans(0, 1) = -cH0;
        trans(1, 0) = sd * cH0; trans(1, 1) = -sd * sH0; trans(1, 2) = -cd;
        trans(2, 0) = -cd * cH0; trans(2, 1) = cd * sH0; trans(2, 2) = -sd;
-       const casa::Matrix<double> antUVW = casa::product(trans,casa::transpose(layout));
-       casa::Vector<double> newUVW(3,0.);
-       for (casa::uInt dim = 0; dim < newUVW.nelements(); ++dim) {
+       const casacore::Matrix<double> antUVW = casacore::product(trans,casacore::transpose(layout));
+       casacore::Vector<double> newUVW(3,0.);
+       for (casacore::uInt dim = 0; dim < newUVW.nelements(); ++dim) {
             newUVW[dim]= antUVW(dim, antenna2) - antUVW(dim,antenna1);
        }
        std::cout<<row<<" "<<newUVW<<" "<<uvwCol(row)<<" "<<newUVW - uvwCol(row)<<" "<<antenna1<<" "<<antenna2<<std::endl;
@@ -130,7 +130,7 @@ int main(int argc, const char** argv)
     askap::askapparallel::AskapParallel comms(argc, argv);
     
     try {
-       casa::Timer timer;
+       casacore::Timer timer;
        timer.mark();
        
        cmdlineparser::Parser parser; // a command line parser

@@ -60,12 +60,12 @@ using std::endl;
 using namespace askap;
 using namespace askap::accessors;
 
-casa::Matrix<casa::Complex> flagOutliers(const casa::Matrix<casa::Complex> &in) {
+casacore::Matrix<casacore::Complex> flagOutliers(const casacore::Matrix<casacore::Complex> &in) {
   //return in;
-  casa::Matrix<casa::Complex> result(in);
-  for (casa::uInt row=0;row<result.nrow(); ++row) {
-       for (casa::uInt col=0; col<result.ncolumn(); ++col) {
-            if (casa::abs(result(row,col))>2e6) {
+  casacore::Matrix<casacore::Complex> result(in);
+  for (casacore::uInt row=0;row<result.nrow(); ++row) {
+       for (casacore::uInt col=0; col<result.ncolumn(); ++col) {
+            if (casacore::abs(result(row,col))>2e6) {
                 result(row,col) = 0.;
             }
        }
@@ -80,29 +80,29 @@ void process(const IConstDataSource &ds) {
   sel->chooseCrossCorrelations();
   //sel->chooseAutoCorrelations();
   IDataConverterPtr conv=ds.createConverter();  
-  conv->setFrequencyFrame(casa::MFrequency::Ref(casa::MFrequency::TOPO),"MHz");
-  conv->setEpochFrame(casa::MEpoch(casa::Quantity(55913.0,"d"),
-                      casa::MEpoch::Ref(casa::MEpoch::UTC)),"s");
-  conv->setDirectionFrame(casa::MDirection::Ref(casa::MDirection::J2000));
+  conv->setFrequencyFrame(casacore::MFrequency::Ref(casacore::MFrequency::TOPO),"MHz");
+  conv->setEpochFrame(casacore::MEpoch(casacore::Quantity(55913.0,"d"),
+                      casacore::MEpoch::Ref(casacore::MEpoch::UTC)),"s");
+  conv->setDirectionFrame(casacore::MDirection::Ref(casacore::MDirection::J2000));
   
-  casa::uInt cycle = 0;
+  casacore::uInt cycle = 0;
   
   std::ofstream os("chranges.dat");
-  std::vector<casa::uInt> starts;
-  std::vector<casa::uInt> stops;
+  std::vector<casacore::uInt> starts;
+  std::vector<casacore::uInt> stops;
                       
-  casa::Vector<double> freq;
+  casacore::Vector<double> freq;
   size_t counter = 0;
   size_t nGoodRows = 0;
   size_t nBadRows = 0;
-  casa::uInt nChan = 0;
-  casa::uInt nRow = 0;
+  casacore::uInt nChan = 0;
+  casacore::uInt nRow = 0;
   double startTime = 0;
   double stopTime = 0;
   
-  casa::Vector<casa::uInt> ant1ids, ant2ids;
+  casacore::Vector<casacore::uInt> ant1ids, ant2ids;
   
-  casa::uInt prevCycle = 0;  
+  casacore::uInt prevCycle = 0;  
   for (IConstDataSharedIter it=ds.createConstIterator(sel,conv);it!=it.end();++it) {
        ++cycle;
                 
@@ -114,7 +114,7 @@ void process(const IConstDataSource &ds) {
            ant2ids = it->antenna2();
            startTime = it->time();
            std::cout<<"Baseline order is as follows: "<<std::endl;
-           for (casa::uInt row = 0; row<nRow; ++row) {
+           for (casacore::uInt row = 0; row<nRow; ++row) {
                 std::cout<<"baseline (1-based) = "<<row+1<<" is "<<ant1ids[row]<<" - "<<ant2ids[row]<<std::endl; 
            }           
        } else { 
@@ -132,27 +132,27 @@ void process(const IConstDataSource &ds) {
        ASKAPASSERT(it->nPol() >= 1);
        ASKAPASSERT(it->nChannel() > 1);
        // check that the products come in consistent way across the interations
-       for (casa::uInt row = 0; row<nRow; ++row) {
+       for (casacore::uInt row = 0; row<nRow; ++row) {
             ASKAPCHECK(it->antenna1()[row] == ant1ids[row], "Inconsistent antenna 1 ids at row = "<<row);
             ASKAPCHECK(it->antenna2()[row] == ant2ids[row], "Inconsistent antenna 2 ids at row = "<<row);             
        }
        
-       for (casa::uInt row=0; row<nRow; ++row) {  
-            casa::Vector<casa::Bool> flags = it->flag().xyPlane(0).row(row);
+       for (casacore::uInt row=0; row<nRow; ++row) {  
+            casacore::Vector<casacore::Bool> flags = it->flag().xyPlane(0).row(row);
             bool flagged = false;
-            for (casa::uInt ch = 0; ch < flags.nelements(); ++ch) {
+            for (casacore::uInt ch = 0; ch < flags.nelements(); ++ch) {
                  flagged |= flags[ch];
             }            
             
-            casa::Matrix<casa::Complex> allChan = flagOutliers(it->visibility().xyPlane(0));
-            casa::Vector<casa::Complex> measuredRow = allChan.row(row);
+            casacore::Matrix<casacore::Complex> allChan = flagOutliers(it->visibility().xyPlane(0));
+            casacore::Vector<casacore::Complex> measuredRow = allChan.row(row);
             
             
             // flagging based on the amplitude (to remove extreme outliers)
-            //casa::Complex currentAvgVis = casa::sum(measuredRow) / float(it->nChannel());
+            //casacore::Complex currentAvgVis = casacore::sum(measuredRow) / float(it->nChannel());
             
             /*
-            if ((casa::abs(currentAvgVis) > 0.5) && (row % 3 == 2)) {
+            if ((casacore::abs(currentAvgVis) > 0.5) && (row % 3 == 2)) {
                 flagged = true;
             } 
             */
@@ -167,7 +167,7 @@ void process(const IConstDataSource &ds) {
             /*
             // uncomment to store the actual amplitude time-series
             if ((counter>1) && (row % 3 == 0)) {
-                os2<<counter<<" "<<(it->time() - startTime)/60.<<" "<<casa::abs(currentAvgVis)<<std::endl;
+                os2<<counter<<" "<<(it->time() - startTime)/60.<<" "<<casacore::abs(currentAvgVis)<<std::endl;
             }
             */
             //
@@ -179,25 +179,25 @@ void process(const IConstDataSource &ds) {
                 if ((ant1ids[row] != 0) || (ant2ids[row] != 1)) {
                     continue;
                 }
-                std::vector<casa::uInt> newStarts;
-                std::vector<casa::uInt> newStops;
+                std::vector<casacore::uInt> newStarts;
+                std::vector<casacore::uInt> newStops;
                 int prevCh = -1;
                 ASKAPDEBUGASSERT(measuredRow.nelements()>1);
-                for (casa::uInt ch=0; ch<measuredRow.nelements(); ++ch) {
-                   if (casa::abs(measuredRow[ch])>1e5) {
+                for (casacore::uInt ch=0; ch<measuredRow.nelements(); ++ch) {
+                   if (casacore::abs(measuredRow[ch])>1e5) {
                        if (prevCh == -1) {
                            prevCh = int(ch);
                        }
                    } else {
                        if (prevCh != -1) {
-                           newStarts.push_back(casa::uInt(prevCh));
+                           newStarts.push_back(casacore::uInt(prevCh));
                            newStops.push_back(ch-1);
                            prevCh = -1;
                        }
                    }
                 }
                 if (prevCh != -1) {
-                    newStarts.push_back(casa::uInt(prevCh));
+                    newStarts.push_back(casacore::uInt(prevCh));
                     newStops.push_back(measuredRow.nelements()-1);
                 }
                 bool rangesChanged = ((newStarts.size() != starts.size()) || (newStops.size() != stops.size()));
@@ -256,7 +256,7 @@ int main(int argc, char **argv) {
          return -2;
      }
 
-     casa::Timer timer;
+     casacore::Timer timer;
      const std::string msName = argv[argc - 1];
      
      timer.mark();

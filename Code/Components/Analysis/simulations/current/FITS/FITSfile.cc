@@ -238,12 +238,12 @@ FITSfile::FITSfile(const LOFAR::ParameterSet& parset, bool allocateMemory):
     itsWriteFullImage = parset.getBool("writeFullImage", true);
     itsCreateTaylorTerms = parset.getBool("createTaylorTerms", false);
     itsMaxTaylorTerm = parset.getInt16("maxTaylorTerm", 2);
-    itsTTmaps = std::vector<casa::Array<Float> >(itsMaxTaylorTerm + 1);
+    itsTTmaps = std::vector<casacore::Array<Float> >(itsMaxTaylorTerm + 1);
     itsTTlogevery = parset.getInt32("TTlogevery", 10);
     ASKAPLOG_DEBUG_STR(logger, "createTaylorTerms=" << itsCreateTaylorTerms <<
                        ", maxTaylorTerm=" << itsMaxTaylorTerm);
 
-    itsBunit = casa::Unit(parset.getString("bunit", "Jy/beam"));
+    itsBunit = casacore::Unit(parset.getString("bunit", "Jy/beam"));
     itsSourceList = parset.getString("sourcelist", "");
     std::ifstream file;
     file.open(itsSourceList.c_str(), std::ifstream::in);
@@ -290,7 +290,7 @@ FITSfile::FITSfile(const LOFAR::ParameterSet& parset, bool allocateMemory):
 
     itsPosType = parset.getString("posType", "dms");
     itsMinMinorAxis = parset.getFloat("minMinorAxis", 0.);
-    itsPAunits = casa::Unit(parset.getString("PAunits", "rad"));
+    itsPAunits = casacore::Unit(parset.getString("PAunits", "rad"));
     if (itsPAunits != "rad" && itsPAunits != "deg") {
         ASKAPLOG_WARN_STR(logger, "Input parameter PAunits needs to be " <<
                           "*either* 'rad' *or* 'deg'. Setting to rad.");
@@ -309,8 +309,8 @@ FITSfile::FITSfile(const LOFAR::ParameterSet& parset, bool allocateMemory):
         itsFlagIntegrateGaussians = false;
     }
 
-    itsAxisUnits = casa::Unit(parset.getString("axisUnits", "arcsec"));
-    itsSourceFluxUnits = casa::Unit(parset.getString("sourceFluxUnits", ""));
+    itsAxisUnits = casacore::Unit(parset.getString("axisUnits", "arcsec"));
+    itsSourceFluxUnits = casacore::Unit(parset.getString("sourceFluxUnits", ""));
 
     if (itsSourceFluxUnits != "") {
         char *base = (char *)itsBunit.getName().c_str();
@@ -589,7 +589,7 @@ void FITSfile::processSources()
         ASKAPLOG_DEBUG_STR(logger, "Defining flux generator with " << fluxGen.nChan() <<
                            " channels and " << fluxGen.nStokes() << " Stokes parameters");
 
-        casa::Gaussian2D<casa::Double> gauss;
+        casacore::Gaussian2D<casacore::Double> gauss;
         analysisutilities::Disc disc;
         const double arcsecToPixel = 3600. * sqrt(fabs(itsWCS->cdelt[0] * itsWCS->cdelt[1]));
 
@@ -619,18 +619,18 @@ void FITSfile::processSources()
                 src = itsModelFactory.read(line);
 
                 // convert fluxes to correct units according to the image BUNIT keyword
-                casa::Quantity flux0(src->fluxZero(), itsSourceFluxUnits);
+                casacore::Quantity flux0(src->fluxZero(), itsSourceFluxUnits);
                 src->setFluxZero(flux0.getValue(itsBunit));
-                casa::Quantity maj(src->maj(), itsAxisUnits);
+                casacore::Quantity maj(src->maj(), itsAxisUnits);
                 src->setMaj(maj.getValue("arcsec") / arcsecToPixel);
-                casa::Quantity min;
+                casacore::Quantity min;
                 if (src->maj() > 0 && !(src->min() > itsMinMinorAxis)) {
-                    min = casa::Quantity(itsMinMinorAxis, itsAxisUnits);
+                    min = casacore::Quantity(itsMinMinorAxis, itsAxisUnits);
                 } else {
-                    min = casa::Quantity(src->min(), itsAxisUnits);
+                    min = casacore::Quantity(src->min(), itsAxisUnits);
                 }
                 src->setMin(min.getValue("arcsec") / arcsecToPixel);
-                casa::Quantity pa(src->pa(), itsPAunits);
+                casacore::Quantity pa(src->pa(), itsPAunits);
 
                 // convert sky position to pixels
                 if (itsPosType == "dms") {
@@ -923,7 +923,7 @@ void FITSfile::convolveWithBeam()
         // const size_t xlen = itsAxes[0];
         // const size_t ylen = itsAxes[1];
         // for (int term=0; term<itsMaxTaylorTerm;term++) {
-        //     casa::IPosition outpos(itsDim, 0);
+        //     casacore::IPosition outpos(itsDim, 0);
         //     for (size_t y = 0; y < ylen; y++) {
         //         outpos[1] = y;
         //         for (size_t x = 0; x < xlen; x++) {
@@ -1202,8 +1202,8 @@ void FITSfile::writeCASAimage(bool createFile, bool saveData, bool useOffset)
     if (itsCasaOutput) {
 
         std::string newName = casafy(itsFileName);
-        casa::IPosition shape(itsDim);
-        casa::IPosition ttshape;
+        casacore::IPosition shape(itsDim);
+        casacore::IPosition ttshape;
         int nstokes = this->getNumStokes();
 
         for (uint i = 0; i < itsDim; i++) shape(i) = itsAxes[i];
@@ -1212,20 +1212,20 @@ void FITSfile::writeCASAimage(bool createFile, bool saveData, bool useOffset)
 
             ASKAPLOG_DEBUG_STR(logger, "Dimension of stokes axis = " << nstokes <<
                                ", databaseOrigin = " << itsDatabaseOrigin);
-            casa::IPosition tileshape(shape.size(), 1);
+            casacore::IPosition tileshape(shape.size(), 1);
             tileshape(itsWCS->lng) = std::min(128L, shape(itsWCS->lng));
             tileshape(itsWCS->lat) = std::min(128L, shape(itsWCS->lat));
             if (itsWCS->spec >= 0) {
                 tileshape(itsWCS->spec) = std::min(16L, shape(itsWCS->spec));
             }
 
-            casa::CoordinateSystem csys = analysisutilities::wcsToCASAcoord(itsWCS, nstokes);
-            casa::ImageInfo ii;
+            casacore::CoordinateSystem csys = analysisutilities::wcsToCASAcoord(itsWCS, nstokes);
+            casacore::ImageInfo ii;
 
             if (itsHaveBeam) {
-                ii.setRestoringBeam(casa::Quantity(itsBeamInfo[0], "deg"),
-                                    casa::Quantity(itsBeamInfo[1], "deg"),
-                                    casa::Quantity(itsBeamInfo[2], "deg"));
+                ii.setRestoringBeam(casacore::Quantity(itsBeamInfo[0], "deg"),
+                                    casacore::Quantity(itsBeamInfo[1], "deg"),
+                                    casacore::Quantity(itsBeamInfo[2], "deg"));
             }
 
             if (itsWriteFullImage) {
@@ -1233,7 +1233,7 @@ void FITSfile::writeCASAimage(bool createFile, bool saveData, bool useOffset)
                 ASKAPLOG_INFO_STR(logger, "Creating a new CASA image " << newName <<
                                   " with the shape " << shape <<
                                   " and tileshape " << tileshape);
-                casa::PagedImage<float> img(casa::TiledShape(shape, tileshape), csys, newName);
+                casacore::PagedImage<float> img(casacore::TiledShape(shape, tileshape), csys, newName);
 
                 img.setUnits(itsBunit);
                 if (itsHaveBeam) {
@@ -1261,7 +1261,7 @@ void FITSfile::writeCASAimage(bool createFile, bool saveData, bool useOffset)
 
             if (itsNumPix > 0) {
 
-                casa::IPosition location(itsDim, 0);
+                casacore::IPosition location(itsDim, 0);
                 if (useOffset) {
                     for (uint i = 0; i < itsDim; i++) {
                         location(i) = itsSourceSection.getStart(i);
@@ -1270,27 +1270,27 @@ void FITSfile::writeCASAimage(bool createFile, bool saveData, bool useOffset)
 
                 if (itsWriteFullImage) {
 
-                    casa::PagedImage<float> img(newName);
+                    casacore::PagedImage<float> img(newName);
 
                     if (itsFlagWriteByChannel) {
                         shape(itsWCS->spec) = 1;
                         for (size_t z = 0; z < itsAxes[itsWCS->spec]; z++) {
                             size_t spatsize = itsAxes[itsWCS->lat] *
                                               itsAxes[itsWCS->lng];
-                            // Array<Float> arr(shape, itsArray.data() + z * spatsize, casa::SHARE);
-                            Array<Float> arr(shape, itsArray.get() + nstokes * z * spatsize, casa::SHARE);
+                            // Array<Float> arr(shape, itsArray.data() + z * spatsize, casacore::SHARE);
+                            Array<Float> arr(shape, itsArray.get() + nstokes * z * spatsize, casacore::SHARE);
                             img.putSlice(arr, location);
                             location(itsWCS->spec)++;
 
                         }
                     } else {
-                        // make the casa::Array, sharing the memory
+                        // make the casacore::Array, sharing the memory
                         // storage so there is minimal additional
                         // impact
-                        // Array<Float> arr(shape, itsArray.data(), casa::SHARE);
-                        Array<Float> arr(shape, itsArray.get(), casa::SHARE);
+                        // Array<Float> arr(shape, itsArray.data(), casacore::SHARE);
+                        Array<Float> arr(shape, itsArray.get(), casacore::SHARE);
 
-                        casa::IPosition location(itsDim, 0);
+                        casacore::IPosition location(itsDim, 0);
 
                         if (useOffset) {
                             for (uint i = 0; i < itsDim; i++) {
@@ -1340,11 +1340,11 @@ double FITSfile::minFreq()
 
 
 void FITSfile::createTaylorTermImages(std::string nameBase,
-                                      casa::CoordinateSystem csys,
-                                      casa::IPosition shape,
-                                      casa::IPosition tileshape,
-                                      casa::Unit bunit,
-                                      casa::ImageInfo iinfo)
+                                      casacore::CoordinateSystem csys,
+                                      casacore::IPosition shape,
+                                      casacore::IPosition tileshape,
+                                      casacore::Unit bunit,
+                                      casacore::ImageInfo iinfo)
 {
 
 
@@ -1353,7 +1353,7 @@ void FITSfile::createTaylorTermImages(std::string nameBase,
         std::stringstream outname;
         outname << nameBase << ".taylor." << t;
 
-        casa::PagedImage<float> outimg(casa::TiledShape(shape, tileshape), csys, outname.str());
+        casacore::PagedImage<float> outimg(casacore::TiledShape(shape, tileshape), csys, outname.str());
 
         outimg.setUnits(bunit);
         outimg.setImageInfo(iinfo);
@@ -1444,13 +1444,13 @@ void FITSfile::defineTaylorTerms()
                               maxterm);
         }
 
-        casa::IPosition shape(itsDim);
+        casacore::IPosition shape(itsDim);
         for (uint i = 0; i < itsDim; i++) {
             shape(i) = itsAxes[i];
         }
         shape(spec) = 1;
         for (size_t i = 0; i <= itsMaxTaylorTerm; i++) {
-            itsTTmaps[i] = casa::Array<float>(shape, 0.);
+            itsTTmaps[i] = casacore::Array<float>(shape, 0.);
         }
         const size_t ndata = itsAxes[itsWCS->spec];
 
@@ -1466,7 +1466,7 @@ void FITSfile::defineTaylorTerms()
         const size_t xlen = itsAxes[itsWCS->lng];
         const size_t ylen = itsAxes[itsWCS->lat];
         const size_t stlen = getNumStokes();
-        casa::IPosition outpos(shape.size(), 0);
+        casacore::IPosition outpos(shape.size(), 0);
         for (size_t y = 0; y < ylen; y++) {
             outpos[1] = y;
 
@@ -1512,13 +1512,13 @@ void FITSfile::defineTaylorTerms()
     }
 }
 
-void FITSfile::writeTaylorTermImages(std::string nameBase, casa::IPosition location)
+void FITSfile::writeTaylorTermImages(std::string nameBase, casacore::IPosition location)
 {
 
     for (size_t t = 0; t <= itsMaxTaylorTerm; t++) {
         std::stringstream outname;
         outname << nameBase << ".taylor." << t;
-        casa::PagedImage<float> outimg(outname.str());
+        casacore::PagedImage<float> outimg(outname.str());
         outimg.putSlice(itsTTmaps[t], location);
     }
 

@@ -159,7 +159,7 @@ public:
    /// @details This version is expected to be used in derived classes to
    /// release a bunch of buffers in one go (under common mutex lock).
    /// @param[in] ids buffer set to release
-   void releaseBuffers(const casa::Vector<int> &ids) const;  
+   void releaseBuffers(const casacore::Vector<int> &ids) const;  
    
    /// @brief notify that the buffer is ready for correlation
    /// @details This method notifies the manager that the data buffer
@@ -235,7 +235,7 @@ protected:
    /// @param[in] index channel/beam pair to work with
    /// @return vector with buffer IDs, one per antenna
    /// @note it is implied that the required locks have already been obtained
-   casa::Vector<int> readyBuffers(const std::pair<int,int> &index) const;
+   casacore::Vector<int> readyBuffers(const std::pair<int,int> &index) const;
     
    
 private:
@@ -257,7 +257,7 @@ private:
    /// @details To optimise the look up operation we store IDs for those buffers 
    /// which are ready for correlation into this cube (dimensions are antennas, channels and beams).
    /// All non-negative values stored in this cube correspond to IDs of buffers in the BUF_READY state
-   mutable casa::Cube<int> itsReadyBuffers; 
+   mutable casacore::Cube<int> itsReadyBuffers; 
    
    /// @brief header preprocessor
    /// @details If it is set, the header will be passed through this object to allow 

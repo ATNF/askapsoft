@@ -77,13 +77,13 @@ CatalogueMatcher::CatalogueMatcher(const LOFAR::ParameterSet& parset)
 
     itsMatchFile = parset.getString("matchFile", "matches.txt");
     itsMissFile = parset.getString("missFile", "misses.txt");
-    itsPositionUnits = casa::Unit(parset.getString("positionUnits", "deg"));
+    itsPositionUnits = casacore::Unit(parset.getString("positionUnits", "deg"));
     if (!parset.isDefined("epsilon")) {
         ASKAPTHROW(AskapError, "The epsilon parameter must be provided.");
     }
     std::string epsilonString = parset.getString("epsilon");
-    casa::Quantity q;
-    casa::Quantity::read(q, epsilonString);
+    casacore::Quantity q;
+    casacore::Quantity::read(q, epsilonString);
     itsEpsilon = q.getValue(itsPositionUnits);
     itsEpsilonUnits = q.getUnit();
     this->convertEpsilon();
@@ -104,14 +104,14 @@ void CatalogueMatcher::convertEpsilon()
         const boost::shared_ptr<ImageInterface<Float> > imagePtr =
             analysisutilities::openImage(itsReferenceImage);
 
-        int dirCooNum = imagePtr->coordinates().findCoordinate(casa::Coordinate::DIRECTION);
-        casa::DirectionCoordinate dirCoo = imagePtr->coordinates().directionCoordinate(dirCooNum);
+        int dirCooNum = imagePtr->coordinates().findCoordinate(casacore::Coordinate::DIRECTION);
+        casacore::DirectionCoordinate dirCoo = imagePtr->coordinates().directionCoordinate(dirCooNum);
 
         ASKAPLOG_DEBUG_STR(logger, "Converting epsilon from " << itsEpsilon <<
                            " " << itsPositionUnits.getName());
         ASKAPASSERT(dirCoo.worldAxisUnits()[0] == dirCoo.worldAxisUnits()[1]);
 
-        casa::Quantity eps(itsEpsilon, itsPositionUnits);
+        casacore::Quantity eps(itsEpsilon, itsPositionUnits);
         double epsInWorldUnits = eps.getValue(dirCoo.worldAxisUnits()[0]);
         double pixScale = sqrt(fabs(dirCoo.increment()[0] *  dirCoo.increment()[1]));
         itsEpsilon = epsInWorldUnits / pixScale;
@@ -267,11 +267,11 @@ void CatalogueMatcher::findOffsets()
 
     std::stringstream ss;
     ss << "Offsets between the two are dx = "
-       << casa::Quantity(itsMeanDx, itsPositionUnits).getValue(itsEpsilonUnits)
-       << " +- " << casa::Quantity(rmsDx, itsPositionUnits).getValue(itsEpsilonUnits)
+       << casacore::Quantity(itsMeanDx, itsPositionUnits).getValue(itsEpsilonUnits)
+       << " +- " << casacore::Quantity(rmsDx, itsPositionUnits).getValue(itsEpsilonUnits)
        << " dy = "
-       << casa::Quantity(itsMeanDy, itsPositionUnits).getValue(itsEpsilonUnits)
-       << " +- " << casa::Quantity(rmsDy, itsPositionUnits).getValue(itsEpsilonUnits);
+       << casacore::Quantity(itsMeanDy, itsPositionUnits).getValue(itsEpsilonUnits)
+       << " +- " << casacore::Quantity(rmsDy, itsPositionUnits).getValue(itsEpsilonUnits);
     ASKAPLOG_INFO_STR(logger, ss.str());
 }
 
@@ -395,7 +395,7 @@ void CatalogueMatcher::outputMatches()
             if (ct++ < itsNumInitialMatches) matchType = '1';
             else matchType = '2';
 
-            casa::Quantity sep(match->first.sep(match->second), itsPositionUnits);
+            casacore::Quantity sep(match->first.sep(match->second), itsPositionUnits);
 
             fout << std::setw(3) << matchType << " "
                  << std::setw(width) << match->first.ID() << " "

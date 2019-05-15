@@ -83,7 +83,7 @@ CalTask::CalTask(const LOFAR::ParameterSet& parset,
             const std::string port = subset.getString("locator_port");
             const std::string serviceName = subset.getString("service_name",
                     "CalibrationDataService");
-            const casa::Int interval = subset.getInt32("update_interval", 5);
+            const casacore::Int interval = subset.getInt32("update_interval", 5);
             ASKAPLOG_DEBUG_STR(logger, "Calibration solution source is dataservice: "
                     << host << ":" << port << ":" << serviceName);
             itsSolutionAccessor.reset(new DataserviceAccessor(host, port, serviceName, interval));
@@ -106,13 +106,13 @@ CalTask::~CalTask()
 void CalTask::process(VisChunk::ShPtr& chunk)
 {
     ASKAPDEBUGASSERT(chunk);
-    const casa::Vector<casa::Stokes::StokesTypes> &stokes = chunk->stokes();
+    const casacore::Vector<casacore::Stokes::StokesTypes> &stokes = chunk->stokes();
     ASKAPCHECK(scimath::PolConverter::isLinear(stokes), "Calibration task requires Linear polarisation!");
     ASKAPDEBUGASSERT(stokes.nelements() > 0);
     // form indices to account for possibility of incomplete polarisation vectors
-    casa::Vector<casa::uInt> polIndices(stokes.nelements());
+    casacore::Vector<casacore::uInt> polIndices(stokes.nelements());
 
-    for (casa::uInt pol = 0; pol < polIndices.nelements(); ++pol) {
+    for (casacore::uInt pol = 0; pol < polIndices.nelements(); ++pol) {
         ASKAPCHECK(scimath::PolConverter::isValid(stokes[pol]), "Unrecognised polarisation type " << stokes[pol] << " is found");
         polIndices[pol] = scimath::PolConverter::getIndex(stokes[pol]);
         ASKAPDEBUGASSERT(polIndices[pol] < 4);
@@ -121,33 +121,33 @@ void CalTask::process(VisChunk::ShPtr& chunk)
 
     //
 
-    casa::Matrix<casa::Complex> matr(4, 4);
-    casa::Matrix<casa::Complex> reciprocal;
-    casa::Vector<casa::Complex> calibratedVector(polIndices.nelements());
+    casacore::Matrix<casacore::Complex> matr(4, 4);
+    casacore::Matrix<casacore::Complex> reciprocal;
+    casacore::Vector<casacore::Complex> calibratedVector(polIndices.nelements());
 
-    for (casa::uInt row = 0; row < chunk->nRow(); ++row) {
+    for (casacore::uInt row = 0; row < chunk->nRow(); ++row) {
         fillMuellerMatrix(matr, chunk->antenna1()[row], chunk->antenna2()[row],
                           chunk->beam1()[row], chunk->beam2()[row]);
-        casa::Complex det = 0.;
-        casa::invertSymPosDef(reciprocal, det, matr);
+        casacore::Complex det = 0.;
+        casacore::invertSymPosDef(reciprocal, det, matr);
         const float tolerance = 1e-5;
 
-        if (casa::abs(det) < tolerance)  {
+        if (casacore::abs(det) < tolerance)  {
             // throw an exception for now, but will probably do an intelligent flagging in the future
-            ASKAPTHROW(AskapError, "Unable to apply gains, determinate too close to 0. D=" << casa::abs(det));
+            ASKAPTHROW(AskapError, "Unable to apply gains, determinate too close to 0. D=" << casacore::abs(det));
         }
 
-        casa::Matrix<casa::Complex> thisRow = chunk->visibility().yzPlane(row);
+        casacore::Matrix<casacore::Complex> thisRow = chunk->visibility().yzPlane(row);
 
         // current gains are not frequency-dependent. Same matrix can be applied to all channels
-        for (casa::uInt chan = 0; chan < chunk->nChannel(); ++chan) {
+        for (casacore::uInt chan = 0; chan < chunk->nChannel(); ++chan) {
             ASKAPDEBUGASSERT(chan < thisRow.nrow());
-            casa::Vector<casa::Complex> polVector = thisRow.row(chan);
+            casacore::Vector<casacore::Complex> polVector = thisRow.row(chan);
             ASKAPDEBUGASSERT(polVector.nelements() == polIndices.nelements());
             calibratedVector.set(0.);
 
-            for (casa::uInt pol1 = 0; pol1 < polIndices.nelements(); ++pol1) {
-                for (casa::uInt pol2 = 0; pol2 < polIndices.nelements(); ++pol2) {
+            for (casacore::uInt pol1 = 0; pol1 < polIndices.nelements(); ++pol1) {
+                for (casacore::uInt pol2 = 0; pol2 < polIndices.nelements(); ++pol2) {
                     calibratedVector[pol1] += reciprocal(polIndices[pol1], polIndices[pol2]) * polVector[pol2];
                 }
             }
@@ -161,10 +161,10 @@ void CalTask::process(VisChunk::ShPtr& chunk)
 /// @param[in] ant 0-based antenna id
 /// @param[in] beam 0-based beam id
 /// @param[in] pol Either 0 for XX or 1 for YY
-casa::Complex CalTask::getGain(casa::uInt ant, casa::uInt beam, casa::uInt pol) const
+casacore::Complex CalTask::getGain(casacore::uInt ant, casacore::uInt beam, casacore::uInt pol) const
 {
-    casa::Bool valid = false;
-    casa::Complex value;
+    casacore::Bool valid = false;
+    casacore::Complex value;
 
     if (pol == 0) {
         value = itsSolutionAccessor->getGain(ant, beam, ISolutionAccessor::XX, valid);
@@ -195,15 +195,15 @@ casa::Complex CalTask::getGain(casa::uInt ant, casa::uInt beam, casa::uInt pol) 
 /// @param[in] ant2 second antenna id (0-based)
 /// @param[in] beam1 beam id at the first antenna (0-based)
 /// @param[in] beam2 beam id at the second antenna (0-based)
-void CalTask::fillMuellerMatrix(casa::Matrix<casa::Complex> &matr, casa::uInt ant1,
-                                casa::uInt ant2, casa::uInt beam1, casa::uInt beam2) const
+void CalTask::fillMuellerMatrix(casacore::Matrix<casacore::Complex> &matr, casacore::uInt ant1,
+                                casacore::uInt ant2, casacore::uInt beam1, casacore::uInt beam2) const
 {
     ASKAPDEBUGASSERT((matr.nrow() == 4) && (matr.ncolumn() == 4));
     matr.set(0.);
 
     // without cross-pols Mueller matrix is just diagonal
-    for (casa::uInt pol1 = 0, cnt = 0; pol1 < 2; ++pol1) {
-        for (casa::uInt pol2 = 0; pol2 < 2; ++pol2, ++cnt) {
+    for (casacore::uInt pol1 = 0, cnt = 0; pol1 < 2; ++pol1) {
+        for (casacore::uInt pol2 = 0; pol2 < 2; ++pol2, ++cnt) {
             ASKAPDEBUGASSERT(cnt < 4);
             matr(cnt, cnt) = getGain(ant1, beam1, pol1) * conj(getGain(ant2, beam2, pol2));
         }

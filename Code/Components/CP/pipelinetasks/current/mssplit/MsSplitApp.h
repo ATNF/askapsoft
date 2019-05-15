@@ -62,23 +62,23 @@ class MsSplitApp : public askap::Application {
 
     private:
 
-        static boost::shared_ptr<casa::MeasurementSet> create(
-            const std::string& filename, const casa::Bool addSigmaSpec,
-            casa::uInt bucketSize, casa::uInt tileNcorr, casa::uInt tileNchan, casa::uInt nRow);
+        static boost::shared_ptr<casacore::MeasurementSet> create(
+            const std::string& filename, const casacore::Bool addSigmaSpec,
+            casacore::uInt bucketSize, casacore::uInt tileNcorr, casacore::uInt tileNchan, casacore::uInt nRow);
 
-        static void copyAntenna(const casa::MeasurementSet& source, casa::MeasurementSet& dest);
+        static void copyAntenna(const casacore::MeasurementSet& source, casacore::MeasurementSet& dest);
 
-        static void copyDataDescription(const casa::MeasurementSet& source, casa::MeasurementSet& dest);
+        static void copyDataDescription(const casacore::MeasurementSet& source, casacore::MeasurementSet& dest);
 
-        static void copyFeed(const casa::MeasurementSet& source, casa::MeasurementSet& dest);
+        static void copyFeed(const casacore::MeasurementSet& source, casacore::MeasurementSet& dest);
 
-        static void copyField(const casa::MeasurementSet& source, casa::MeasurementSet& dest);
+        static void copyField(const casacore::MeasurementSet& source, casacore::MeasurementSet& dest);
 
-        static void copyObservation(const casa::MeasurementSet& source, casa::MeasurementSet& dest);
+        static void copyObservation(const casacore::MeasurementSet& source, casacore::MeasurementSet& dest);
 
-        void copyPointing(const casa::MeasurementSet& source, casa::MeasurementSet& dest);
+        void copyPointing(const casacore::MeasurementSet& source, casacore::MeasurementSet& dest);
 
-        static void copyPolarization(const casa::MeasurementSet& source, casa::MeasurementSet& dest);
+        static void copyPolarization(const casacore::MeasurementSet& source, casacore::MeasurementSet& dest);
 
         /// @brief add non-standard column to POINTING table
         /// @details We use 3 non-standard columns to capture
@@ -89,28 +89,28 @@ class MsSplitApp : public askap::Application {
         /// @param[in] srcPointing source MS POINTING table
         /// @param[in] destPointing destination MS POINTING table
         static void addNonStandardPointingColumn(const std::string &name,
-                                                 const casa::MSPointing &srcPointing,
-                                                 casa::MSPointing &destPointing,
-                                                 casa::ROScalarColumn<casa::Float> &src,
-                                                 casa::ScalarColumn<casa::Float> &dest);
+                                                 const casacore::MSPointing &srcPointing,
+                                                 casacore::MSPointing &destPointing,
+                                                 casacore::ROScalarColumn<casacore::Float> &src,
+                                                 casacore::ScalarColumn<casacore::Float> &dest);
 
         /// @throws AskapError  if all rows in the main table don't refer to the
         ///                     same spectral window
         /// @return the spectral window id refered to by all rows in the main table,
         ///         or -1 if the main table how no rows;
-        static casa::Int findSpectralWindowId(const casa::MeasurementSet& ms);
+        static casacore::Int findSpectralWindowId(const casacore::MeasurementSet& ms);
 
         /// Writes a new row to the spectral window table of the destination measurement
         /// set which the correct information describing the output spectral window.
-        static void splitSpectralWindow(const casa::MeasurementSet& source,
-                                 casa::MeasurementSet& dest,
+        static void splitSpectralWindow(const casacore::MeasurementSet& source,
+                                 casacore::MeasurementSet& dest,
                                  const uint32_t startChan,
                                  const uint32_t endChan,
                                  const uint32_t width,
-                                 const casa::Int spwId);
+                                 const casacore::Int spwId);
 
-        void splitMainTable(const casa::MeasurementSet& source,
-                            casa::MeasurementSet& dest,
+        void splitMainTable(const casacore::MeasurementSet& source,
+                            casacore::MeasurementSet& dest,
                             const uint32_t startChan,
                             const uint32_t endChan,
                             const uint32_t width,
@@ -118,7 +118,7 @@ class MsSplitApp : public askap::Application {
 
         // Get the tileshape of the largest data tile (if 3D)
         // Returns IPosition(3,0,0,0) if untiled or not 3D
-        casa::IPosition getDataTileShape(const casa::MeasurementSet& ms);
+        casacore::IPosition getDataTileShape(const casacore::MeasurementSet& ms);
 
         int split(const std::string& invis, const std::string& outvis,
                   const uint32_t startChan,
@@ -154,8 +154,8 @@ class MsSplitApp : public askap::Application {
         // internal map with row-ranges, limit the number in each range to
         // the specified maximum.
         // Return the total number of output rows
-        casa::uInt getRowsToKeep(const casa::MeasurementSet& ms,
-            const casa::uInt maxSimultaneousRows);
+        casacore::uInt getRowsToKeep(const casacore::MeasurementSet& ms,
+            const casacore::uInt maxSimultaneousRows);
 
         /// Set of beam IDs to include in the new measurement set, or empty
         /// if all beams are to be included

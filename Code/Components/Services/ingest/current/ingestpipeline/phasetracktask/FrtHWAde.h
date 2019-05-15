@@ -79,7 +79,7 @@ class FrtHWAde : virtual public IFrtApproach {
         /// @param[in] effLO effective LO frequency in Hz
         /// @note this interface stems from BETA, in particular effLO doesn't fit well with ADE
         virtual void process(const askap::cp::common::VisChunk::ShPtr& chunk,
-                             const casa::Matrix<double> &delays, const casa::Matrix<double> &rates, const double effLO);
+                             const casacore::Matrix<double> &delays, const casacore::Matrix<double> &rates, const double effLO);
 
     private:
         /// @brief communicator with the python part executing OSL scripts
@@ -94,13 +94,13 @@ class FrtHWAde : virtual public IFrtApproach {
         int itsFRPhaseRateTolerance;
 
         /// @brief index of an antenna used as a reference
-        casa::uInt itsRefAntIndex;
+        casacore::uInt itsRefAntIndex;
 
         /// @brief buffer for times, used for debugging only
         std::vector<double> itsTm;
 
         /// @brief previous scan number, used for debugging only
-        casa::uInt itsPrevScanId;
+        casacore::uInt itsPrevScanId;
 
         /// @brief phase accumulator to get phases per antenna accumulated since the last FR update
         std::vector<double> itsPhases;

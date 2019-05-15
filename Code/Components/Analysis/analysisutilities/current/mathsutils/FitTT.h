@@ -68,7 +68,7 @@ class FitTT {
         /// be the flux values. No weights array is provided, so weights
         /// are implicitly set to 1.  Front end to fit(size_t ndata,
         /// double *xdata, double *ydata, double *weights).
-        void fit(casa::Array<float> &x, casa::Array<float> &y);
+        void fit(casacore::Array<float> &x, casacore::Array<float> &y);
 
         /// @brief Fit to provided arrays, with associated weights array.
         /// @details For spectral-index fitting, x should be the
@@ -76,7 +76,7 @@ class FitTT {
         /// the flux values, and w the weights on the flux values
         /// (ie. noise). Front end to fit(size_t ndata, double *xdata,
         /// double *ydata, double *weights).
-        void fit(casa::Array<float> &x, casa::Array<float> &y, casa::Array<float> &w);
+        void fit(casacore::Array<float> &x, casacore::Array<float> &y, casacore::Array<float> &w);
 
         /// @brief Fit to provided arrays - main function that does the fitting.
         /// @details For spectral-index fitting, xdata should be the

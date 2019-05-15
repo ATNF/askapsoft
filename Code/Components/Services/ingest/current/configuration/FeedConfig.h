@@ -50,8 +50,8 @@ class FeedConfig {
         ///                     offset in X and the second the offset in Y.
         ///
         /// @param[in] pols    Polarisations, size if nFeeds.
-        FeedConfig(const casa::Matrix<casa::Quantity>& offsets,
-                   const casa::Vector<casa::String>& pols);
+        FeedConfig(const casacore::Matrix<casacore::Quantity>& offsets,
+                   const casacore::Vector<casacore::String>& pols);
 
         /// @brief copy constructor
         /// @details It is necessary to have copy constructor due to reference semantics of 
@@ -67,27 +67,27 @@ class FeedConfig {
 
         /// @brief Number of reciever elements. This may be for example two for
         /// a single pixel feed, or 36 for a PAF with 36 synthetic beams.
-        casa::uInt nFeeds(void) const;
+        casacore::uInt nFeeds(void) const;
 
         /// @brief The X-offset of the feed given by "i".
-        casa::Quantity offsetX(casa::uInt i) const;
+        casacore::Quantity offsetX(casacore::uInt i) const;
 
         /// @brief The Y-offset of the feed given by "i".
-        casa::Quantity offsetY(casa::uInt i) const;
+        casacore::Quantity offsetY(casacore::uInt i) const;
 
         /// @brief The polarisation of the feed given by "i".
-        casa::String pol(casa::uInt i) const;
+        casacore::String pol(casacore::uInt i) const;
 
         /// @brief Obtain X and Y offsets for all beams
         /// @details This is a helper method to extract all offsets at once in the 
         /// format of the VisChunk buffer (i.e. 2 x nBeam matrix with offsets in radians).
         /// It is not clear whether this method is going to be useful long term
         /// @param[in] buffer the matrix to fill. It is resized, if necessary.
-        void fillMatrix(casa::Matrix<casa::Double> &buffer) const;
+        void fillMatrix(casacore::Matrix<casacore::Double> &buffer) const;
 
     private:
-        casa::Matrix<casa::Quantity> itsOffsets;
-        casa::Vector<casa::String> itsPols;
+        casacore::Matrix<casacore::Quantity> itsOffsets;
+        casacore::Vector<casacore::String> itsPols;
 };
 
 }

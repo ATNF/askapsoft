@@ -65,7 +65,7 @@ class StokesVFlagger : public IFlagger {
         /// zero or more instances of itself, depending on the configuration.
         static vector< boost::shared_ptr<IFlagger> > build(
                 const LOFAR::ParameterSet& parset,
-                const casa::MeasurementSet& ms);
+                const casacore::MeasurementSet& ms);
 
         /// @brief Constructor
         StokesVFlagger(float threshold, bool robustStatistics,
@@ -74,19 +74,19 @@ class StokesVFlagger : public IFlagger {
                        bool quickRobust);
 
         /// @see IFlagger::processRow()
-        virtual void processRow(casa::MSColumns& msc, const casa::uInt pass,
-                                const casa::uInt row, const bool dryRun);
+        virtual void processRow(casacore::MSColumns& msc, const casacore::uInt pass,
+                                const casacore::uInt row, const bool dryRun);
 
         /// @see IFlagger::processRows()
-        virtual void processRows(casa::MSColumns& msc, const casa::uInt pass,
-                                 const casa::uInt row, const casa::uInt nrow,
+        virtual void processRows(casacore::MSColumns& msc, const casacore::uInt pass,
+                                 const casacore::uInt row, const casacore::uInt nrow,
                                  const bool dryRun);
 
         /// @see IFlagger::stats()
         virtual FlaggingStats stats(void) const;
 
         /// @see IFlagger::stats()
-        virtual casa::Bool processingRequired(const casa::uInt pass);
+        virtual casacore::Bool processingRequired(const casacore::uInt pass);
 
     private:
 
@@ -103,8 +103,8 @@ class StokesVFlagger : public IFlagger {
         /// @return a reference to n instance of a stokes converter that will
         ///         convert to Stokes-V given the input products described by
         ///         the polc and polId parameters.
-        casa::StokesConverter& getStokesConverter(const casa::ROMSPolarizationColumns& polc,
-                const casa::Int polId);
+        casacore::StokesConverter& getStokesConverter(const casacore::ROMSPolarizationColumns& polc,
+                const casacore::Int polId);
 
         // Flagging statistics
         FlaggingStats itsStats;
@@ -118,44 +118,44 @@ class StokesVFlagger : public IFlagger {
         // Generate averaged spectra and search these for peaks to flag
         bool itsIntegrateSpectra;
         // Flagging threshold
-        casa::Float itsSpectraThreshold;
+        casacore::Float itsSpectraThreshold;
 
         // Generate averaged time series and search these for peaks to flag
         bool itsIntegrateTimes;
         // Flagging threshold
-        casa::Float itsTimesThreshold;
+        casacore::Float itsTimesThreshold;
 
         // When integrating, used to limit flag generation to a single call to
         // "processRow"
         bool itsAverageFlagsAreReady;
 
         // StokesConverter cache
-        std::map<casa::Int, casa::StokesConverter> itsConverterCache;
+        std::map<casacore::Int, casacore::StokesConverter> itsConverterCache;
 
         // Calculate the median, the interquartile range, the min and the max
         // of a simple array without masking
-        casa::Vector<casa::Float> getRobustStats(casa::Vector<casa::Float> amplitudes);
+        casacore::Vector<casacore::Float> getRobustStats(casacore::Vector<casacore::Float> amplitudes);
 
         // Calculate the median, the interquartile range, the min and the max
         // of a masked array
-        casa::Vector<casa::Float>getRobustStats(casa::MaskedArray<casa::Float> maskedAmplitudes);
+        casacore::Vector<casacore::Float>getRobustStats(casacore::MaskedArray<casacore::Float> maskedAmplitudes);
 
         // Generate a key for a given row and polarisation
-        rowKey getRowKey(const casa::MSColumns& msc, const casa::uInt row);
+        rowKey getRowKey(const casacore::MSColumns& msc, const casacore::uInt row);
 
         // Maps of accumulation vectors for averaging spectra and generating flags
-        std::map<rowKey, casa::Vector<casa::Double> > itsAveSpectra;
-        std::map<rowKey, casa::Vector<casa::Bool> > itsMaskSpectra;
-        std::map<rowKey, casa::Vector<casa::Int> > itsCountSpectra;
+        std::map<rowKey, casacore::Vector<casacore::Double> > itsAveSpectra;
+        std::map<rowKey, casacore::Vector<casacore::Bool> > itsMaskSpectra;
+        std::map<rowKey, casacore::Vector<casacore::Int> > itsCountSpectra;
 
         // Maps of accumulation vectors for averaging time series and generating flags
-        std::map<rowKey, casa::Vector<casa::Float> > itsAveTimes;
-        std::map<rowKey, casa::Vector<casa::Bool> > itsMaskTimes;
-        std::map<rowKey, casa::Int> itsCountTimes;
+        std::map<rowKey, casacore::Vector<casacore::Float> > itsAveTimes;
+        std::map<rowKey, casacore::Vector<casacore::Bool> > itsMaskTimes;
+        std::map<rowKey, casacore::Int> itsCountTimes;
 
         // Functions to handle accumulation vectors and indices
-        void updateTimeVectors(const rowKey &key, const casa::uInt pass);
-        void initSpectrumVectors(const rowKey &key, const casa::IPosition &shape);
+        void updateTimeVectors(const rowKey &key, const casacore::uInt pass);
+        void initSpectrumVectors(const rowKey &key, const casacore::IPosition &shape);
 
         // Set flags based on integrated quantities
         void setFlagsFromIntegrations(void);

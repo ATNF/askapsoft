@@ -61,25 +61,25 @@ class TypedValueMapMapper : public TypedValueMapConstMapper {
         /// @brief Destructor
         virtual ~TypedValueMapMapper() {};
         
-        void setInt(const std::string& key, const casa::Int& val);
-        void setLong(const std::string& key, const casa::Long& val);
-        void setString(const std::string& key, const casa::String& val);
-        void setBool(const std::string& key, const casa::Bool& val);
-        void setFloat(const std::string& key, const casa::Float& val);
-        void setDouble(const std::string& key, const casa::Double& val);
-        void setFloatComplex(const std::string& key, const casa::Complex& val);
-        void setDoubleComplex(const std::string& key, const casa::DComplex& val);
-        void setDirection(const std::string& key, const casa::MDirection& val);
+        void setInt(const std::string& key, const casacore::Int& val);
+        void setLong(const std::string& key, const casacore::Long& val);
+        void setString(const std::string& key, const casacore::String& val);
+        void setBool(const std::string& key, const casacore::Bool& val);
+        void setFloat(const std::string& key, const casacore::Float& val);
+        void setDouble(const std::string& key, const casacore::Double& val);
+        void setFloatComplex(const std::string& key, const casacore::Complex& val);
+        void setDoubleComplex(const std::string& key, const casacore::DComplex& val);
+        void setDirection(const std::string& key, const casacore::MDirection& val);
 
-        void setIntSeq(const std::string& key, const std::vector<casa::Int>& val);
-        void setLongSeq(const std::string& key, const std::vector<casa::Long>& val);
-        void setStringSeq(const std::string& key, const std::vector<casa::String>& val);
-        void setBoolSeq(const std::string& key, const std::vector<casa::Bool>& val);
-        void setFloatSeq(const std::string& key, const std::vector<casa::Float>& val);
-        void setDoubleSeq(const std::string& key, const std::vector<casa::Double>& val);
-        void setFloatComplexSeq(const std::string& key, const std::vector<casa::Complex>& val);
-        void setDoubleComplexSeq(const std::string& key, const std::vector<casa::DComplex>& val);
-        void setDirectionSeq(const std::string& key, const std::vector<casa::MDirection>& val);
+        void setIntSeq(const std::string& key, const std::vector<casacore::Int>& val);
+        void setLongSeq(const std::string& key, const std::vector<casacore::Long>& val);
+        void setStringSeq(const std::string& key, const std::vector<casacore::String>& val);
+        void setBoolSeq(const std::string& key, const std::vector<casacore::Bool>& val);
+        void setFloatSeq(const std::string& key, const std::vector<casacore::Float>& val);
+        void setDoubleSeq(const std::string& key, const std::vector<casacore::Double>& val);
+        void setFloatComplexSeq(const std::string& key, const std::vector<casacore::Complex>& val);
+        void setDoubleComplexSeq(const std::string& key, const std::vector<casacore::DComplex>& val);
+        void setDirectionSeq(const std::string& key, const std::vector<casacore::MDirection>& val);
 
     private:
         /// @brief Add or modify the value of element identified by "key".
@@ -92,9 +92,9 @@ class TypedValueMapMapper : public TypedValueMapConstMapper {
         template <class T, askap::interfaces::TypedValueType TVType, class TVClass>
         void set(const std::string& key, const T& val);
 
-        /// @brief Convert a casa::MDirection to a TypedValue (Slice) direction
+        /// @brief Convert a casacore::MDirection to a TypedValue (Slice) direction
         /// type.
-        askap::interfaces::Direction convertDirection(const casa::MDirection& dir) const;
+        askap::interfaces::Direction convertDirection(const casacore::MDirection& dir) const;
 
         /// @brief The TypedValueMap this mapper maps from/to.
         askap::interfaces::TypedValueMap& itsMap;

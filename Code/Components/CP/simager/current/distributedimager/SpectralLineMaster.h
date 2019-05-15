@@ -56,8 +56,8 @@ class SpectralLineMaster {
     private:
 
         struct MSInfo {
-            casa::uInt nChan;
-            std::vector<casa::Quantity> freqs;
+            casacore::uInt nChan;
+            std::vector<casacore::Quantity> freqs;
         };
 
         /// @brief Utility function to get dataset names from parset.
@@ -107,7 +107,7 @@ class SpectralLineMaster {
         // No support for copy constructor
         SpectralLineMaster(const SpectralLineMaster& src);
 
-        std::map<unsigned int, casa::Vector<casa::Quantum<double> > > itsBeamList;
+        std::map<unsigned int, casacore::Vector<casacore::Quantum<double> > > itsBeamList;
 
         void recordBeam(const askap::scimath::Axes &axes, const unsigned int globalChannel);
         void recordBeamFailure(const unsigned int globalChannel);

@@ -32,7 +32,7 @@
 #include <askap/askap/AskapError.h>
 #include <casacore/casa/OS/File.h>
 #include <inttypes.h>
-#include <utils/PolConverter.h>
+#include <askap/scimath/utils/PolConverter.h>
 
 
 namespace askap {
@@ -47,8 +47,8 @@ namespace swcorrelator {
 /// everything would go out of sync and reading would fail.
 /// @param[in] name file name
 /// @param[in] nchan number of spectral channels
-SwinReader::SwinReader(const std::string &name, const casa::uInt nchan) :
-    itsFileName(name), itsUVW(3,0.), itsVisibility(nchan, casa::Complex(0.,0.)),
+SwinReader::SwinReader(const std::string &name, const casacore::uInt nchan) :
+    itsFileName(name), itsUVW(3,0.), itsVisibility(nchan, casacore::Complex(0.,0.)),
     itsFreqID(0)
 {
   // this would start the read and create a stream
@@ -64,8 +64,8 @@ SwinReader::SwinReader(const std::string &name, const casa::uInt nchan) :
 /// the constructor creates a reader in the detached state. A call to assign
 /// is required before reading can happen.
 /// @param[in] nchan number of spectral channels
-SwinReader::SwinReader(const casa::uInt nchan) : itsUVW(3,0.), 
-    itsVisibility(nchan, casa::Complex(0.,0.)), itsFreqID(0)
+SwinReader::SwinReader(const casacore::uInt nchan) : itsUVW(3,0.), 
+    itsVisibility(nchan, casacore::Complex(0.,0.)), itsFreqID(0)
 {
 }
 
@@ -76,7 +76,7 @@ void SwinReader::rewind()
   // close the current stream, if it has been opened
   itsStream.reset();
   ASKAPCHECK(itsFileName!="", "Empty file name has been given");    
-  ASKAPCHECK(casa::File(itsFileName).exists(), "File "<<itsFileName<<" does not exist!");  
+  ASKAPCHECK(casacore::File(itsFileName).exists(), "File "<<itsFileName<<" does not exist!");  
   itsStream.reset(new std::ifstream(itsFileName.c_str()));
   readSyncWord();
   if (itsStream) {
@@ -113,12 +113,12 @@ void SwinReader::next()
 {
   readHeader();
   if (hasMore()) {
-      for (casa::uInt chan = 0; chan<itsVisibility.nelements(); ++chan) {
+      for (casacore::uInt chan = 0; chan<itsVisibility.nelements(); ++chan) {
            float re = 0., im = 0.;
            itsStream->read((char*) &re, sizeof(float));
            itsStream->read((char*) &im, sizeof(float));
            ASKAPCHECK(*itsStream, "Error while reading the stream, channel="<<chan);
-           itsVisibility[chan] = casa::Complex(re,im);
+           itsVisibility[chan] = casacore::Complex(re,im);
       }
   }
   readSyncWord();
@@ -126,7 +126,7 @@ void SwinReader::next()
    
 /// @brief obtain current UVW
 /// @return vector with uvw
-casa::Vector<double> SwinReader::uvw() const
+casacore::Vector<double> SwinReader::uvw() const
 { 
   return itsUVW;
 }
@@ -134,14 +134,14 @@ casa::Vector<double> SwinReader::uvw() const
 /// @brief obtain visibility vector
 /// @details Number of elements is the number of spectral channels.
 /// @return visibility vector corresponding to the current record 
-casa::Vector<casa::Complex> SwinReader::visibility() const
+casacore::Vector<casacore::Complex> SwinReader::visibility() const
 {
   return itsVisibility;
 }
    
 /// @brief get current polarisation
 /// @details stokes descriptor corresponding to the current polarisation
-casa::Stokes::StokesTypes SwinReader::stokes() const
+casacore::Stokes::StokesTypes SwinReader::stokes() const
 {
   return itsStokes;
 }
@@ -149,14 +149,14 @@ casa::Stokes::StokesTypes SwinReader::stokes() const
 /// @brief pair of antennas corresponding to the current baseline
 /// @details antenna IDs are zero-based.
 /// @return pair of antenna IDs
-std::pair<casa::uInt, casa::uInt> SwinReader::baseline() const
+std::pair<casacore::uInt, casacore::uInt> SwinReader::baseline() const
 {
   return itsBaseline;
 }
 
 /// @brief get frequency ID of the current record
 /// @return frequency ID
-casa::uInt SwinReader::freqID() const
+casacore::uInt SwinReader::freqID() const
 {
   return itsFreqID;
 }
@@ -164,7 +164,7 @@ casa::uInt SwinReader::freqID() const
 
 /// @brief time corresponding to the current baseline
 /// @return epoch measure
-casa::MEpoch SwinReader::epoch() const
+casacore::MEpoch SwinReader::epoch() const
 {
   /*
    // for debugging
@@ -220,25 +220,25 @@ void SwinReader::readHeader()
    const int ant2 = intBuf % 256 - 1;
    ASKAPCHECK((ant1 < 256) && (ant1 >=0), "Illegal 1st antenna ID: "<<ant1+1<<" baseline index "<<intBuf);
    ASKAPCHECK((ant2 < 256) && (ant2 >=0), "Illegal 2nd antenna ID: "<<ant2+1<<" baseline index "<<intBuf);
-   itsBaseline.first = casa::uInt(ant1);
-   itsBaseline.second = casa::uInt(ant2);
+   itsBaseline.first = casacore::uInt(ant1);
+   itsBaseline.second = casacore::uInt(ant2);
    // mjd
    itsStream->read((char*)&intBuf, 4);
    double doubleBuf;
    // seconds
    itsStream->read((char*)&doubleBuf, 8);
-   itsEpoch = casa::MEpoch(casa::MVEpoch(double(intBuf), doubleBuf / 86400.), casa::MEpoch::Ref(casa::MEpoch::UTC));
+   itsEpoch = casacore::MEpoch(casacore::MVEpoch(double(intBuf), doubleBuf / 86400.), casacore::MEpoch::Ref(casacore::MEpoch::UTC));
    // this will read config, source and freq indices, which we ignore for the moment
    itsStream->read((char*)&intBuf, 4);
    itsStream->read((char*)&intBuf, 4);
    itsStream->read((char*)&intBuf, 4);
    ASKAPCHECK(intBuf >= 0, "Negative frequency ID is not allowed, you have "<<intBuf);
-   itsFreqID = casa::uInt(intBuf);
+   itsFreqID = casacore::uInt(intBuf);
    // stokes descriptor
    char polBuf[3];
    polBuf[2] = 0;
    itsStream->read(polBuf, 2);
-   const casa::Vector<casa::Stokes::StokesTypes> stokesBuf = 
+   const casacore::Vector<casacore::Stokes::StokesTypes> stokesBuf = 
            scimath::PolConverter::fromString(polBuf);
    ASKAPCHECK(stokesBuf.nelements() == 1, "Expected only one element in the stokes vector, you have "<<stokesBuf.nelements());
    itsStokes = stokesBuf[0];

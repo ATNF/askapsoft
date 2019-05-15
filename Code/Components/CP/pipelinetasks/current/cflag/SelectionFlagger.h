@@ -68,23 +68,23 @@ class SelectionFlagger : public IFlagger {
         ///                     in the parset for a listed rule.
         static vector< boost::shared_ptr<IFlagger> > build(
                 const LOFAR::ParameterSet& parset,
-                const casa::MeasurementSet& ms);
+                const casacore::MeasurementSet& ms);
 
         /// @brief Constructor
         /// @throw AskapError   If no selection criteria is specified
         ///                     in the parset for a listed rule.
         SelectionFlagger(const LOFAR::ParameterSet& parset,
-                          const casa::MeasurementSet& ms);
+                          const casacore::MeasurementSet& ms);
 
         /// @see IFlagger::processRow()
-        virtual void processRow(casa::MSColumns& msc, const casa::uInt pass,
-                                const casa::uInt row, const bool dryRun);
+        virtual void processRow(casacore::MSColumns& msc, const casacore::uInt pass,
+                                const casacore::uInt row, const bool dryRun);
 
         /// @see IFlagger::stats()
         virtual FlaggingStats stats(void) const;
 
         /// @see IFlagger::stats()
-        virtual casa::Bool processingRequired(const casa::uInt pass);
+        virtual casacore::Bool processingRequired(const casacore::uInt pass);
 
     private:
         enum SelectionCriteria {
@@ -96,27 +96,27 @@ class SelectionFlagger : public IFlagger {
             AUTOCORR
         };
 
-        bool checkBaseline(casa::MSColumns& msc, const casa::uInt row);
-        bool checkField(casa::MSColumns& msc, const casa::uInt row);
-        bool checkTimerange(casa::MSColumns& msc, const casa::uInt row);
-        bool checkScan(casa::MSColumns& msc, const casa::uInt row);
-        bool checkFeed(casa::MSColumns& msc, const casa::uInt row);
-        bool checkAutocorr(casa::MSColumns& msc, const casa::uInt row);
+        bool checkBaseline(casacore::MSColumns& msc, const casacore::uInt row);
+        bool checkField(casacore::MSColumns& msc, const casacore::uInt row);
+        bool checkTimerange(casacore::MSColumns& msc, const casacore::uInt row);
+        bool checkScan(casacore::MSColumns& msc, const casacore::uInt row);
+        bool checkFeed(casacore::MSColumns& msc, const casacore::uInt row);
+        bool checkAutocorr(casacore::MSColumns& msc, const casacore::uInt row);
 
         bool dispatch(const std::vector<SelectionCriteria>& v,
-                      casa::MSColumns& msc, const casa::uInt row);
+                      casacore::MSColumns& msc, const casacore::uInt row);
 
-        void checkDetailed(casa::MSColumns& msc, const casa::uInt row,
+        void checkDetailed(casacore::MSColumns& msc, const casacore::uInt row,
                            const bool dryRun);
 
         // Sets the row flag to true, and also sets the flag true for each visibility
-        void flagRow(casa::MSColumns& msc, const casa::uInt row, const bool dryRun);
+        void flagRow(casacore::MSColumns& msc, const casacore::uInt row, const bool dryRun);
 
         // Flagging statistics
         FlaggingStats itsStats;
 
         // The bulk of the parsing of selection criteria is delegated to this class
-        casa::MSSelection itsSelection;
+        casacore::MSSelection itsSelection;
 
         // True of auto-correlations should be flagged.
         bool itsFlagAutoCorr;

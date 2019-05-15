@@ -88,15 +88,15 @@ private:
   // time
   double itsStartTime;
   // buffer
-  casa::Cube<casa::Complex> itsBuffer;
+  casacore::Cube<casacore::Complex> itsBuffer;
   // antenna 1 indices
-  casa::Vector<casa::uInt> itsAnt1IDs;
+  casacore::Vector<casacore::uInt> itsAnt1IDs;
   // antenna 2 indices
-  casa::Vector<casa::uInt> itsAnt2IDs;
+  casacore::Vector<casacore::uInt> itsAnt2IDs;
   // beam 1 indices
-  casa::Vector<casa::uInt> itsBeam1IDs;
+  casacore::Vector<casacore::uInt> itsBeam1IDs;
   // beam 2 indices
-  casa::Vector<casa::uInt> itsBeam2IDs;
+  casacore::Vector<casacore::uInt> itsBeam2IDs;
      
 };
 
@@ -106,8 +106,8 @@ void DataLogger::setupMonitor(const IConstDataAccessor &acc)
   parset.add("monitors","simple");
   itsMonitors.reset(new swcorrelator::DataMonitors(parset));
   
-  const casa::uInt maxAntID = casa::max(casa::max(acc.antenna1()),casa::max(acc.antenna2()));
-  const casa::uInt maxBeamID = casa::max(casa::max(acc.feed1()),casa::max(acc.feed2()));
+  const casacore::uInt maxAntID = casacore::max(casacore::max(acc.antenna1()),casacore::max(acc.antenna2()));
+  const casacore::uInt maxBeamID = casacore::max(casacore::max(acc.feed1()),casacore::max(acc.feed2()));
   const int nBeam = int(maxBeamID)+1;
   
   itsMonitors->initialise(int(maxAntID)+1, nBeam, acc.nChannel());  
@@ -138,7 +138,7 @@ void DataLogger::publish() {
        
        cp->init(uint64_t(itsStartTime));
        
-       for (casa::uInt row=0; row<itsBuffer.nrow(); ++row) {
+       for (casacore::uInt row=0; row<itsBuffer.nrow(); ++row) {
             ASKAPCHECK(itsBeam1IDs[row] == itsBeam2IDs[row], "Cross-beam correlations are not supported");
             if (int(itsBeam1IDs[row]) != beam) {
                 continue;
@@ -167,10 +167,10 @@ void DataLogger::process(const IConstDataSource &ds) {
   //sel->chooseFeed(1);
   sel->chooseCrossCorrelations();
   IDataConverterPtr conv=ds.createConverter();  
-  conv->setFrequencyFrame(casa::MFrequency::Ref(casa::MFrequency::TOPO),"MHz");
-  conv->setEpochFrame(casa::MEpoch(casa::Quantity(0.,"d"),
-                      casa::MEpoch::Ref(casa::MEpoch::TAI)),"us");
-  conv->setDirectionFrame(casa::MDirection::Ref(casa::MDirection::J2000));                    
+  conv->setFrequencyFrame(casacore::MFrequency::Ref(casacore::MFrequency::TOPO),"MHz");
+  conv->setEpochFrame(casacore::MEpoch(casacore::Quantity(0.,"d"),
+                      casacore::MEpoch::Ref(casacore::MEpoch::TAI)),"us");
+  conv->setDirectionFrame(casacore::MDirection::Ref(casacore::MDirection::J2000));                    
   size_t counter = 0;
       
   for (IConstDataSharedIter it=ds.createConstIterator(sel,conv);it!=it.end();++it) {  
@@ -179,7 +179,7 @@ void DataLogger::process(const IConstDataSource &ds) {
        }
        if (itsBuffer.nelements() == 0) {
            itsBuffer.resize(it->nRow(),it->nChannel(),it->nPol());
-           itsBuffer.set(casa::Complex(0.,0.));
+           itsBuffer.set(casacore::Complex(0.,0.));
            itsStartTime = it->time();
            itsAnt1IDs = it->antenna1().copy();
            itsAnt2IDs = it->antenna2().copy();
@@ -193,7 +193,7 @@ void DataLogger::process(const IConstDataSource &ds) {
            ASKAPDEBUGASSERT(itsAnt2IDs.nelements() == it->nRow());
            ASKAPDEBUGASSERT(itsBeam1IDs.nelements() == it->nRow());
            ASKAPDEBUGASSERT(itsBeam2IDs.nelements() == it->nRow());
-           for (casa::uInt row = 0; row<it->nRow(); ++row) {
+           for (casacore::uInt row = 0; row<it->nRow(); ++row) {
                 ASKAPCHECK(itsAnt1IDs[row] == it->antenna1()[row], "Mismatch of antenna 1 index for row "<<row<<
                            " - got "<<it->antenna1()[row]<<" expected "<<itsAnt1IDs[row]);
                 ASKAPCHECK(itsAnt2IDs[row] == it->antenna2()[row], "Mismatch of antenna 2 index for row "<<row<<
@@ -217,7 +217,7 @@ void DataLogger::process(const IConstDataSource &ds) {
            // publish buffer
            publish();
            //
-           itsBuffer.set(casa::Complex(0.,0.));
+           itsBuffer.set(casacore::Complex(0.,0.));
            counter = 0;
        }
        //cout<<"time: "<<it->time()<<endl;
@@ -237,7 +237,7 @@ int main(int argc, char **argv) {
 	 return -2;
      }
 
-     casa::Timer timer;
+     casacore::Timer timer;
 
      timer.mark();
      TableDataSource ds(argv[1],TableDataSource::MEMORY_BUFFERS);     

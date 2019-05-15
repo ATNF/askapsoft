@@ -66,11 +66,11 @@ class IceMapperTest : public CppUnit::TestFixture {
             // Build the source object
             askap::cp::caldataservice::GainSolution sol(theirTimestamp);
 
-            casa::Float val = 1.0;
-            for (casa::Short antenna = 1; antenna <= theirNAntenna; ++antenna) {
-                for (casa::Short beam = 1; beam <= theirNBeam; ++beam) {
-                    JonesJTerm jterm(casa::Complex(val, val), true,
-                            casa::Complex(0.0, 0.0), false);
+            casacore::Float val = 1.0;
+            for (casacore::Short antenna = 1; antenna <= theirNAntenna; ++antenna) {
+                for (casacore::Short beam = 1; beam <= theirNBeam; ++beam) {
+                    JonesJTerm jterm(casacore::Complex(val, val), true,
+                            casacore::Complex(0.0, 0.0), false);
                     sol.map()[JonesIndex(antenna, beam)] = jterm;
                     val += 0.1;
                 }
@@ -83,8 +83,8 @@ class IceMapperTest : public CppUnit::TestFixture {
             CPPUNIT_ASSERT_EQUAL(static_cast<long>(theirTimestamp), static_cast<long>(ice_sol.timestamp));
             CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(theirNAntenna * theirNBeam), ice_sol.solutionMap.size());
             val = 1.0;
-            for (casa::Short antenna = 1; antenna <= theirNAntenna; ++antenna) {
-                for (casa::Short beam = 1; beam <= theirNBeam; ++beam) {
+            for (casacore::Short antenna = 1; antenna <= theirNAntenna; ++antenna) {
+                for (casacore::Short beam = 1; beam <= theirNBeam; ++beam) {
                     askap::interfaces::calparams::JonesIndex jindex;
                     jindex.antennaID = antenna;
                     jindex.beamID = beam;
@@ -134,9 +134,9 @@ class IceMapperTest : public CppUnit::TestFixture {
             askap::interfaces::calparams::TimeTaggedGainSolution ice_sol;
             ice_sol.timestamp = theirTimestamp;
 
-            casa::Float val = 1.0;
-            for (casa::Short antenna = 1; antenna <= theirNAntenna; ++antenna) {
-                for (casa::Short beam = 1; beam <= theirNBeam; ++beam) {
+            casacore::Float val = 1.0;
+            for (casacore::Short antenna = 1; antenna <= theirNAntenna; ++antenna) {
+                for (casacore::Short beam = 1; beam <= theirNBeam; ++beam) {
                     askap::interfaces::calparams::JonesJTerm jterm;
 
                     askap::interfaces::FloatComplex g1;
@@ -165,13 +165,13 @@ class IceMapperTest : public CppUnit::TestFixture {
             CPPUNIT_ASSERT_EQUAL(theirTimestamp, sol.timestamp());
             CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(theirNAntenna * theirNBeam), sol.map().size());
             val = 1.0;
-            for (casa::Short antenna = 1; antenna <= theirNAntenna; ++antenna) {
-                for (casa::Short beam = 1; beam <= theirNBeam; ++beam) {
+            for (casacore::Short antenna = 1; antenna <= theirNAntenna; ++antenna) {
+                for (casacore::Short beam = 1; beam <= theirNBeam; ++beam) {
                     JonesJTerm actual = sol.map().find(JonesIndex(antenna, beam))->second;
 
                     CPPUNIT_ASSERT_EQUAL(true, actual.g1IsValid());
                     CPPUNIT_ASSERT_EQUAL(false, actual.g2IsValid());
-                    compare(casa::Complex(val, val), actual.g1());
+                    compare(casacore::Complex(val, val), actual.g1());
                     val += 0.1;
                 }
             }
@@ -207,7 +207,7 @@ class IceMapperTest : public CppUnit::TestFixture {
 
     private:
 
-        void compare(const casa::Complex& expected, const casa::Complex& actual)
+        void compare(const casacore::Complex& expected, const casacore::Complex& actual)
         {
             const double tolerance = 0.000001;
             CPPUNIT_ASSERT_DOUBLES_EQUAL(expected.real(), actual.real(), tolerance);
@@ -222,14 +222,14 @@ class IceMapperTest : public CppUnit::TestFixture {
             CPPUNIT_ASSERT_DOUBLES_EQUAL(expected.imag, actual.imag, tolerance);
         }
 
-        static const casa::Long theirTimestamp;
-        static const casa::Short theirNAntenna;
-        static const casa::Short theirNBeam;
+        static const casacore::Long theirTimestamp;
+        static const casacore::Short theirNAntenna;
+        static const casacore::Short theirNBeam;
 };
 
-const casa::Long IceMapperTest::theirTimestamp = 1234567890;
-const casa::Short IceMapperTest::theirNAntenna = 36;
-const casa::Short IceMapperTest::theirNBeam = 32;
+const casacore::Long IceMapperTest::theirTimestamp = 1234567890;
+const casacore::Short IceMapperTest::theirNAntenna = 36;
+const casacore::Short IceMapperTest::theirNBeam = 32;
 
 }   // End namespace caldataservice
 }   // End namespace cp

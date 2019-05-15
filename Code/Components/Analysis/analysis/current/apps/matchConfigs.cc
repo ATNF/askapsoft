@@ -57,8 +57,8 @@ int main(int argc, const char** argv)
 
     try {
         // Ensure that CASA log messages are captured
-        casa::LogSinkInterface* globalSink = new Log4cxxLogSink();
-        casa::LogSink::globalSink(globalSink);
+        casacore::LogSinkInterface* globalSink = new Log4cxxLogSink();
+        casacore::LogSink::globalSink(globalSink);
 
         std::string guptaFile, deboerFile;
 

@@ -94,7 +94,7 @@ int main(int argc, char *argv[])
     try {
 
         std::string image = "", basename = "", pol = "XX YY";
-        casa::Unit units = "MHz";
+        casacore::Unit units = "MHz";
         int binning = 1, ch, prec = 3, group = 0;
         while ((ch = getopt(argc, argv, "i:n:b:p:u:P:g:h")) != -1) {
             switch (ch) {
@@ -111,7 +111,7 @@ int main(int argc, char *argv[])
                     pol = std::string(optarg);
                     break;
                 case 'u':
-                    units = casa::String(optarg);
+                    units = casacore::String(optarg);
                     break;
                 case 'P':
                     prec = atoi(optarg);
@@ -131,13 +131,13 @@ int main(int argc, char *argv[])
 
         const boost::shared_ptr<ImageInterface<Float> >
         imagePtr = askap::analysisutilities::openImage(image);
-        Int index = imagePtr->coordinates().findCoordinate(casa::Coordinate::SPECTRAL);
+        Int index = imagePtr->coordinates().findCoordinate(casacore::Coordinate::SPECTRAL);
         Int axis = imagePtr->coordinates().worldAxes(index)[0];
 
         IPosition shape = imagePtr->shape().nonDegenerate();
         SpectralCoordinate specCoo = imagePtr->coordinates().spectralCoordinate(index);
 
-        casa::Vector<casa::Double> inc = specCoo.increment();
+        casacore::Vector<casacore::Double> inc = specCoo.increment();
         MFrequency increment(Quantity(inc[0], specCoo.worldAxisUnits()[0]));
 
         std::cout << "spws.names = [";

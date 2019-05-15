@@ -70,7 +70,7 @@ IngestPipeline::IngestPipeline(const LOFAR::ParameterSet& parset,
 
    /// test and debugging cases use less than 12 ranks/48 MHz of bandwidth - inhibit checks
    if (ntasks > 12) {
-       const double mjd = casa::Time().modifiedJulianDay();
+       const double mjd = casacore::Time().modifiedJulianDay();
        ASKAPCHECK(measuresValid(mjd), "Measures table is invalid for the current date mjd = "<<mjd);
        ASKAPCHECK(measuresValid(mjd+1.), "Measures table becomes invalid in less than one day - please update, mjd = "<<mjd);
    }
@@ -142,7 +142,7 @@ void IngestPipeline::ingest(void)
     }
 
     // 6) Process correlator integrations, one at a time
-    casa::Timer timer;
+    casacore::Timer timer;
     while (itsRunning)  {
         try {
             timer.mark();
@@ -172,7 +172,7 @@ void IngestPipeline::ingest(void)
 
 bool IngestPipeline::ingestOne(void)
 {
-    casa::Timer timer;
+    casacore::Timer timer;
     //ASKAPLOG_DEBUG_STR(logger, "Waiting for data");
     timer.mark();
     // all ranks are active up front

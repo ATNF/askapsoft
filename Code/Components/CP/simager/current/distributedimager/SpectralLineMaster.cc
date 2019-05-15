@@ -89,10 +89,10 @@ void SpectralLineMaster::run(void)
 
     // Get info from each measurement set so we know how many channels, what channels, etc.
     isMSGroupInfo = MSGroupInfo(ms);
-    const casa::uInt nChan = isMSGroupInfo.getTotalNumChannels();
+    const casacore::uInt nChan = isMSGroupInfo.getTotalNumChannels();
     ASKAPCHECK(nChan > 0, "# of channels is zero");
-    const casa::Quantity f0 = isMSGroupInfo.getFirstFreq();
-    const casa::Quantity freqinc = isMSGroupInfo.getFreqInc();
+    const casacore::Quantity f0 = isMSGroupInfo.getFirstFreq();
+    const casacore::Quantity freqinc = isMSGroupInfo.getFreqInc();
 
     // Define reference channel for giving restoring beam
     std::string reference = itsParset.getString("restore.beamReference", "mid");
@@ -276,33 +276,33 @@ void SpectralLineMaster::handleImageParams(askap::scimath::Params::ShPtr params,
 
     // Write image
     {
-        const casa::Array<double> imagePixels(params->value("model.slice"));
-        casa::Array<float> floatImagePixels(imagePixels.shape());
-        casa::convertArray<float, double>(floatImagePixels, imagePixels);
+        const casacore::Array<double> imagePixels(params->value("model.slice"));
+        casacore::Array<float> floatImagePixels(imagePixels.shape());
+        casacore::convertArray<float, double>(floatImagePixels, imagePixels);
         itsImageCube->writeSlice(floatImagePixels, chan);
     }
 
     // Write PSF
     {
-        const casa::Array<double> imagePixels(params->value("psf.slice"));
-        casa::Array<float> floatImagePixels(imagePixels.shape());
-        casa::convertArray<float, double>(floatImagePixels, imagePixels);
+        const casacore::Array<double> imagePixels(params->value("psf.slice"));
+        casacore::Array<float> floatImagePixels(imagePixels.shape());
+        casacore::convertArray<float, double>(floatImagePixels, imagePixels);
         itsPSFCube->writeSlice(floatImagePixels, chan);
     }
 
     // Write residual
     {
-        const casa::Array<double> imagePixels(params->value("residual.slice"));
-        casa::Array<float> floatImagePixels(imagePixels.shape());
-        casa::convertArray<float, double>(floatImagePixels, imagePixels);
+        const casacore::Array<double> imagePixels(params->value("residual.slice"));
+        casacore::Array<float> floatImagePixels(imagePixels.shape());
+        casacore::convertArray<float, double>(floatImagePixels, imagePixels);
         itsResidualCube->writeSlice(floatImagePixels, chan);
     }
 
     // Write weights
     {
-        const casa::Array<double> imagePixels(params->value("weights.slice"));
-        casa::Array<float> floatImagePixels(imagePixels.shape());
-        casa::convertArray<float, double>(floatImagePixels, imagePixels);
+        const casacore::Array<double> imagePixels(params->value("weights.slice"));
+        casacore::Array<float> floatImagePixels(imagePixels.shape());
+        casacore::convertArray<float, double>(floatImagePixels, imagePixels);
         itsWeightsCube->writeSlice(floatImagePixels, chan);
     }
 
@@ -312,18 +312,18 @@ void SpectralLineMaster::handleImageParams(askap::scimath::Params::ShPtr params,
         if (itsDoingPreconditioning) {
             // Write preconditioned PSF image
             {
-                const casa::Array<double> imagePixels(params->value("psf.image.slice"));
-                casa::Array<float> floatImagePixels(imagePixels.shape());
-                casa::convertArray<float, double>(floatImagePixels, imagePixels);
+                const casacore::Array<double> imagePixels(params->value("psf.image.slice"));
+                casacore::Array<float> floatImagePixels(imagePixels.shape());
+                casacore::convertArray<float, double>(floatImagePixels, imagePixels);
                 itsPSFimageCube->writeSlice(floatImagePixels, chan);
             }
         }
 
         // Write Restored image
         {
-            const casa::Array<double> imagePixels(params->value("image.slice"));
-            casa::Array<float> floatImagePixels(imagePixels.shape());
-            casa::convertArray<float, double>(floatImagePixels, imagePixels);
+            const casacore::Array<double> imagePixels(params->value("image.slice"));
+            casacore::Array<float> floatImagePixels(imagePixels.shape());
+            casacore::convertArray<float, double>(floatImagePixels, imagePixels);
             itsRestoredCube->writeSlice(floatImagePixels, chan);
         }
     }
@@ -345,10 +345,10 @@ void SpectralLineMaster::recordBeam(const askap::scimath::Axes &axes,
                           axes.end("MAJMIN") * 180. / M_PI * 3600. << ", " <<
                           axes.start("PA") * 180. / M_PI);
 
-        casa::Vector<casa::Quantum<double> > beamVec(3, 0.);
-        beamVec[0] = casa::Quantum<double>(axes.start("MAJMIN"), "rad");
-        beamVec[1] = casa::Quantum<double>(axes.end("MAJMIN"), "rad");
-        beamVec[2] = casa::Quantum<double>(axes.start("PA"), "rad");
+        casacore::Vector<casacore::Quantum<double> > beamVec(3, 0.);
+        beamVec[0] = casacore::Quantum<double>(axes.start("MAJMIN"), "rad");
+        beamVec[1] = casacore::Quantum<double>(axes.end("MAJMIN"), "rad");
+        beamVec[2] = casacore::Quantum<double>(axes.start("PA"), "rad");
 
         itsBeamList[globalChannel] = beamVec;
 
@@ -359,7 +359,7 @@ void SpectralLineMaster::recordBeam(const askap::scimath::Axes &axes,
 void SpectralLineMaster::recordBeamFailure(const unsigned int globalChannel)
 {
 
-    casa::Vector<casa::Quantum<double> > beamVec(3, 0.);
+    casacore::Vector<casacore::Quantum<double> > beamVec(3, 0.);
     itsBeamList[globalChannel] = beamVec;
     if (globalChannel == itsBeamReferenceChannel) {
         ASKAPLOG_WARN_STR(logger, "Beam reference channel " << itsBeamReferenceChannel

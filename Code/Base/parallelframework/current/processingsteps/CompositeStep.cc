@@ -100,7 +100,7 @@ void CompositeStep::createCommunicator(const std::string &name, const std::vecto
 /// steps via communicators. For multi-rank steps "local" communicator is created automatically.
 StepIDProxy CompositeStep::addSubStep(const boost::shared_ptr<IProcessingStep> &substep, int nRanks, int count)
 {
-  return addSubStep(substep, casa::IPosition(), nRanks, count);
+  return addSubStep(substep, casacore::IPosition(), nRanks, count);
 }
   
 
@@ -118,7 +118,7 @@ StepIDProxy CompositeStep::addSubStep(const boost::shared_ptr<IProcessingStep> &
 /// @return proxy object for the given processing step or steps. This is used to setup connections between 
 /// steps via communicators. For multi-rank steps "local" communicator is created automatically.
 StepIDProxy CompositeStep::addSubStep(const boost::shared_ptr<IProcessingStep> &substep, 
-            const casa::IPosition &shape, int nRanks, int count)
+            const casacore::IPosition &shape, int nRanks, int count)
 {
   size_t lastIndex = itsSteps.size();
   const StepID id = reserveRankSpace(nRanks, count);

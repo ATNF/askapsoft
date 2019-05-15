@@ -45,10 +45,10 @@ using namespace askap;
 using namespace askap::scimath;
 using namespace askap::swcorrelator;
 
-void storeArray(const std::string &name, const casa::Vector<casa::Complex> &buf) {
+void storeArray(const std::string &name, const casacore::Vector<casacore::Complex> &buf) {
   ofstream os(name.c_str());
   for (int i=0; i<int(buf.nelements()); ++i) {
-     os<<i<<" "<<real(buf[i])<<" "<<imag(buf[i])<<" "<<abs(buf[i])<<" "<<arg(buf[i])/casa::C::pi*180<<std::endl;
+     os<<i<<" "<<real(buf[i])<<" "<<imag(buf[i])<<" "<<abs(buf[i])<<" "<<arg(buf[i])/casacore::C::pi*180<<std::endl;
   }
 }
 
@@ -57,7 +57,7 @@ void storeArray(const std::string &name, const casa::Vector<casa::Complex> &buf)
 int main(int argc, const char** argv)
 {
     try {
-       casa::Timer timer;
+       casacore::Timer timer;
        timer.mark();
 
        ASKAPCHECK(argc>=3, "Usage: "<<argv[0]<<" file1.dat file2.dat");
@@ -74,7 +74,7 @@ int main(int argc, const char** argv)
        timer.mark();
 
        //std::ofstream os("result.dat");
-       casa::Vector<casa::Complex> outBuf(nLags,0.);
+       casacore::Vector<casacore::Complex> outBuf(nLags,0.);
        int logStep = nLags / 100;
        if (logStep == 0) {   
            logStep = 1;

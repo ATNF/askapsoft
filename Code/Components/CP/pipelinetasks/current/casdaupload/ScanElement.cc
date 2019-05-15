@@ -52,14 +52,14 @@ using askap::accessors::XercescUtils;
 using askap::accessors::XercescString;
 
 ScanElement::ScanElement(const int id,
-                         const casa::MEpoch& scanstart,
-                         const casa::MEpoch& scanend,
-                         const casa::MDirection& fieldcentre,
+                         const casacore::MEpoch& scanstart,
+                         const casacore::MEpoch& scanend,
+                         const casacore::MDirection& fieldcentre,
                          const std::string& fieldname,
-                         const casa::Vector<casa::Int> polarisations,
+                         const casacore::Vector<casacore::Int> polarisations,
                          const int numchan,
-                         const casa::Quantity& centrefreq,
-                         const casa::Quantity& channelwidth)
+                         const casacore::Quantity& centrefreq,
+                         const casacore::Quantity& channelwidth)
     : itsId(id),
       itsScanStart(scanstart),
       itsScanEnd(scanend),

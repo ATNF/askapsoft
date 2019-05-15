@@ -39,21 +39,21 @@
 
 namespace LOFAR {
 
-        LOFAR::BlobOStream& operator<<(LOFAR::BlobOStream& os, const casa::MVEpoch& obj)
+        LOFAR::BlobOStream& operator<<(LOFAR::BlobOStream& os, const casacore::MVEpoch& obj)
         {
             os << obj.get();
             return os;
         }
 
-        LOFAR::BlobIStream& operator>>(LOFAR::BlobIStream& is, casa::MVEpoch& obj)
+        LOFAR::BlobIStream& operator>>(LOFAR::BlobIStream& is, casacore::MVEpoch& obj)
         {
-            casa::Double time;
+            casacore::Double time;
             is >> time;
-            obj = casa::MVEpoch(time);
+            obj = casacore::MVEpoch(time);
             return is;
         }
 
-        LOFAR::BlobOStream& operator<<(LOFAR::BlobOStream& os, const casa::MDirection& obj)
+        LOFAR::BlobOStream& operator<<(LOFAR::BlobOStream& os, const casacore::MDirection& obj)
         {
             os << obj.getAngle().getValue()(0);
             os << obj.getAngle().getValue()(1);
@@ -62,55 +62,55 @@ namespace LOFAR {
             return os;
         }
 
-        LOFAR::BlobIStream& operator>>(LOFAR::BlobIStream& is, casa::MDirection& obj)
+        LOFAR::BlobIStream& operator>>(LOFAR::BlobIStream& is, casacore::MDirection& obj)
         {
-            casa::Double coord1;
-            casa::Double coord2;
-            casa::String ref;
-            casa::String unit;
+            casacore::Double coord1;
+            casacore::Double coord2;
+            casacore::String ref;
+            casacore::String unit;
             is >> coord1;
             is >> coord2;
             is >> unit;
             is >> ref;
-            casa::MDirection dir(casa::Quantity(coord1, unit),
-                                 casa::Quantity(coord2, unit));
+            casacore::MDirection dir(casacore::Quantity(coord1, unit),
+                                 casacore::Quantity(coord2, unit));
             dir.setRefString(ref);
             obj = dir;
             return is;
         }
 
-        LOFAR::BlobOStream& operator<<(LOFAR::BlobOStream& os, const casa::MVDirection& obj)
+        LOFAR::BlobOStream& operator<<(LOFAR::BlobOStream& os, const casacore::MVDirection& obj)
         {
             os << obj.getLong() << obj.getLat();
             return os;
         }
 
-        LOFAR::BlobIStream& operator>>(LOFAR::BlobIStream& is, casa::MVDirection& obj)
+        LOFAR::BlobIStream& operator>>(LOFAR::BlobIStream& is, casacore::MVDirection& obj)
         {
             double longitude, latitude;
             is >> longitude >> latitude;
-            casa::MVDirection md(longitude, latitude);
+            casacore::MVDirection md(longitude, latitude);
             obj = md;
             return is;
         }
 
-        LOFAR::BlobOStream& operator<<(LOFAR::BlobOStream& os, const casa::Stokes::StokesTypes& obj)
+        LOFAR::BlobOStream& operator<<(LOFAR::BlobOStream& os, const casacore::Stokes::StokesTypes& obj)
         {
             os << static_cast<int>(obj);
             return os;
         }
 
-        LOFAR::BlobIStream& operator>>(LOFAR::BlobIStream& is, casa::Stokes::StokesTypes& obj)
+        LOFAR::BlobIStream& operator>>(LOFAR::BlobIStream& is, casacore::Stokes::StokesTypes& obj)
         {
             int stokes;
             is >> stokes;
-            obj = static_cast<casa::Stokes::StokesTypes>(stokes);
+            obj = static_cast<casacore::Stokes::StokesTypes>(stokes);
 
             return is;
         }
 
         template<class T, int n>
-        LOFAR::BlobOStream& operator<<(LOFAR::BlobOStream& os, const casa::RigidVector<T, n>& obj)
+        LOFAR::BlobOStream& operator<<(LOFAR::BlobOStream& os, const casacore::RigidVector<T, n>& obj)
         {
             for (int i = 0; i < n; ++i) {
             os << obj(i);
@@ -119,7 +119,7 @@ namespace LOFAR {
         }
 
         template<class T, int n>
-        LOFAR::BlobIStream& operator>>(LOFAR::BlobIStream& is, casa::RigidVector<T, n>& obj)
+        LOFAR::BlobIStream& operator>>(LOFAR::BlobIStream& is, casacore::RigidVector<T, n>& obj)
         {
             for (int i = 0; i < n; ++i) {
                 is >> obj(i);
@@ -127,34 +127,34 @@ namespace LOFAR {
             return is;
         }
 
-        LOFAR::BlobOStream& operator<<(LOFAR::BlobOStream& os, const casa::MDirection::Ref& obj)
+        LOFAR::BlobOStream& operator<<(LOFAR::BlobOStream& os, const casacore::MDirection::Ref& obj)
         {
             os << obj.getType();
             return os;
         }
 
-        LOFAR::BlobIStream& operator>>(LOFAR::BlobIStream& is, casa::MDirection::Ref& obj)
+        LOFAR::BlobIStream& operator>>(LOFAR::BlobIStream& is, casacore::MDirection::Ref& obj)
         {
-            casa::uInt type;
+            casacore::uInt type;
             is >> type;
-            casa::MDirection::Ref ref(type);
+            casacore::MDirection::Ref ref(type);
             obj = ref;
             return is;
         }
 
-        // casa::Quantity
-        LOFAR::BlobOStream& operator<<(LOFAR::BlobOStream& os, const casa::Quantity& obj)
+        // casacore::Quantity
+        LOFAR::BlobOStream& operator<<(LOFAR::BlobOStream& os, const casacore::Quantity& obj)
         {
             os << obj.getValue()<< obj.getFullUnit().getName();
             return os;
         }
 
-        LOFAR::BlobIStream& operator>>(LOFAR::BlobIStream& is, casa::Quantity& obj)
+        LOFAR::BlobIStream& operator>>(LOFAR::BlobIStream& is, casacore::Quantity& obj)
         {
             double value;
-            casa::String unit;
+            casacore::String unit;
             is >> value >> unit;
-            obj = casa::Quantity(value, unit);
+            obj = casacore::Quantity(value, unit);
             return is;
         }
 

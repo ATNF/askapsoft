@@ -29,16 +29,16 @@
 
 /// An auxiliary class to write annotation table from the supplied data
 class SkyCatalogTabWriter {
-  casa::uInt ncomp;  // current number of components
+  casacore::uInt ncomp;  // current number of components
                      // (to be able to add a correct name)
-  casa::Table tab;
+  casacore::Table tab;
 public:
-     SkyCatalogTabWriter(const casa::String &fname) throw(casa::AipsError);
+     SkyCatalogTabWriter(const casacore::String &fname) throw(casacore::AipsError);
      // lng, lat - longitude and latitude in degrees,
      // flux - flux density in Jy
      // type - e.g. J2000
      // label - annotation (default is a sequence number)          
-     void addComponent(casa::Double lng, casa::Double lat,
-                       casa::Double flux = 1., const casa::String &type = "J2000",
-		       const casa::String &label = "") throw(casa::AipsError);
+     void addComponent(casacore::Double lng, casacore::Double lat,
+                       casacore::Double flux = 1., const casacore::String &type = "J2000",
+		       const casacore::String &label = "") throw(casacore::AipsError);
 };

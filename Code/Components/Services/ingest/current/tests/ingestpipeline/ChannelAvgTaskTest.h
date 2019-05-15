@@ -145,7 +145,7 @@ class ChannelAvgTaskTest : public CppUnit::TestFixture {
             chunk->actualPolAngle() = 0.0;
 
             // Determine how many channels will exist after averaging
-            casa::uInt nChanNew = nChan / channelAveraging;
+            casacore::uInt nChanNew = nChan / channelAveraging;
 
             // To support the "invalid configuration test"
             if (nChan % channelAveraging != 0) {
@@ -155,8 +155,8 @@ class ChannelAvgTaskTest : public CppUnit::TestFixture {
             // Add the VisChunk is built (below) keep track of the sums
             // in these vectors so they can later be used to determine
             // the averages.
-            casa::Vector<casa::Complex> visSum(nChanNew, 0.0);
-            casa::Vector<double> freqSum(nChanNew, 0.0);
+            casacore::Vector<casacore::Complex> visSum(nChanNew, 0.0);
+            casacore::Vector<double> freqSum(nChanNew, 0.0);
 
             // Add visibilities and unset flag
             // also keep track of the sums of visibilities and frequencies
@@ -169,7 +169,7 @@ class ChannelAvgTaskTest : public CppUnit::TestFixture {
                     newIdx++;
                 }
 
-                casa::Complex val(static_cast<float>(chan + 1),
+                casacore::Complex val(static_cast<float>(chan + 1),
                                   static_cast<float>(chan + 2));
                 chunk->visibility()(row, chan, pol) = val;
                 visSum(newIdx) += val;

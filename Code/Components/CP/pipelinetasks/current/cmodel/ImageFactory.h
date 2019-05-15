@@ -46,23 +46,23 @@ namespace pipelinetasks {
 
 class ImageFactory {
     public:
-        static casa::TempImage<casa::Float> createTempImage(const LOFAR::ParameterSet& parset);
+        static casacore::TempImage<casacore::Float> createTempImage(const LOFAR::ParameterSet& parset);
 
-        static casa::PagedImage<casa::Float> createPagedImage(const LOFAR::ParameterSet& parset,
+        static casacore::PagedImage<casacore::Float> createPagedImage(const LOFAR::ParameterSet& parset,
                 const std::string& filename);
 
     private:
         // Create a coordinate system
         // @note The image parameters are read from the parset
-        static casa::CoordinateSystem createCoordinateSystem(casa::uInt nx, casa::uInt ny,
+        static casacore::CoordinateSystem createCoordinateSystem(casacore::uInt nx, casacore::uInt ny,
                 const LOFAR::ParameterSet& parset);
 
         // Convert a std::vector of strings (either I, Q, U or V) to a vector of
-        // integers mapping to casa::Stokes types
-        static casa::Vector<casa::Int> parseStokes(const std::vector<std::string>& input);
+        // integers mapping to casacore::Stokes types
+        static casacore::Vector<casacore::Int> parseStokes(const std::vector<std::string>& input);
 
         // Given a coordinate system instance, return the number of stokes parameters
-        static casa::uInt getNumStokes(const casa::CoordinateSystem& coordsys);
+        static casacore::uInt getNumStokes(const casacore::CoordinateSystem& coordsys);
 };
 
 }

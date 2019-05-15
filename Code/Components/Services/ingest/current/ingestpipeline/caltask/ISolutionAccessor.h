@@ -71,10 +71,10 @@ class ISolutionAccessor {
         ///                     gain exists, or false, usually in the case where
         ///                     a gain for the requested antenna/beam/pol does not
         ///                     exist.
-        virtual casa::Complex getGain(casa::uInt ant,
-                                      casa::uInt beam,
+        virtual casacore::Complex getGain(casacore::uInt ant,
+                                      casacore::uInt beam,
                                       ISolutionAccessor::Pol pol,
-                                      casa::Bool& valid) const = 0;
+                                      casacore::Bool& valid) const = 0;
 
         /// Returns the D-Terms (leakages) given the antenna number, beam number.
         /// Returns either d12 (Leakage from feed 1 into feed 2) or d21 (Leakage
@@ -89,10 +89,10 @@ class ISolutionAccessor {
         ///                     leakage exists, or false, usually in the case where
         ///                     a leakage for the requested antenna/beam/pol does not
         ///                     exist.
-        virtual casa::Complex getLeakage(casa::uInt ant,
-                                         casa::uInt beam,
+        virtual casacore::Complex getLeakage(casacore::uInt ant,
+                                         casacore::uInt beam,
                                          ISolutionAccessor::LeakageTerm term,
-                                         casa::Bool& valid) const = 0;
+                                         casacore::Bool& valid) const = 0;
 
         /// Returns the bandpass given the antenna number, beam number, channel
         /// number and polarisation.
@@ -107,11 +107,11 @@ class ISolutionAccessor {
         ///                     bandpass exists, or false, usually in the case where
         ///                     a bandpass for the requested antenna/beam/pol does not
         ///                     exist.
-        virtual casa::Complex getBandpass(casa::uInt ant,
-                                          casa::uInt beam,
-                                          casa::uInt chan,
+        virtual casacore::Complex getBandpass(casacore::uInt ant,
+                                          casacore::uInt beam,
+                                          casacore::uInt chan,
                                           ISolutionAccessor::Pol pol,
-                                          casa::Bool& valid) const = 0;
+                                          casacore::Bool& valid) const = 0;
 
         /// Shared pointer definition
         typedef boost::shared_ptr<ISolutionAccessor> ShPtr;

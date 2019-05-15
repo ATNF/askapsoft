@@ -48,12 +48,12 @@ class SlidingMathTest : public CppUnit::TestFixture {
         CPPUNIT_TEST_SUITE_END();
 
     private:
-        casa::Array<Float> inputArr;
-        casa::Array<Float> checkBoxMeanArr;
-        casa::Array<Float> checkBoxMedianArr;
-        casa::Array<Float> checkBoxStddevArr;
-        casa::Array<Float> checkBoxMadfmArr;
-        casa::IPosition shape;
+        casacore::Array<Float> inputArr;
+        casacore::Array<Float> checkBoxMeanArr;
+        casacore::Array<Float> checkBoxMedianArr;
+        casacore::Array<Float> checkBoxStddevArr;
+        casacore::Array<Float> checkBoxMadfmArr;
+        casacore::IPosition shape;
     public:
 
         void setUp()
@@ -69,7 +69,7 @@ class SlidingMathTest : public CppUnit::TestFixture {
                                      49, 50, 51, 52, 53, 54, 55, 56,
                                      57, 58, 59, 60, 61, 62, 63, 64
                                    };
-            shape = casa::IPosition(2, dim, dim);
+            shape = casacore::IPosition(2, dim, dim);
             inputArr.takeStorage(shape, input);
             float checkBoxMean[arrsize] = {0, 0, 0, 0, 0, 0, 0, 0,
                                            0, 10, 11, 12, 13, 14, 15, 0,
@@ -102,26 +102,26 @@ class SlidingMathTest : public CppUnit::TestFixture {
 
         void testBoxMean()
         {
-            casa::IPosition box(2, boxWidth, boxWidth);
-            casa::Array<Float> middle(shape, 0.);
-            casa::Array<Float> spread(shape, 0.);
+            casacore::IPosition box(2, boxWidth, boxWidth);
+            casacore::Array<Float> middle(shape, 0.);
+            casacore::Array<Float> spread(shape, 0.);
             size_t dimMin = 0;
             size_t dimMax = dim;
             /* size_t dimMin=boxWidth; */
             /* size_t dimMax=dim-boxWidth; */
-            casa::Array<Float> localInput(inputArr);
+            casacore::Array<Float> localInput(inputArr);
             ASKAPLOG_DEBUG_STR(logger, "Sliding math test - mean");
             slidingBoxStats(localInput, middle, spread, box, false);
             for (size_t y = dimMin; y < dimMax; y++) {
                 for (size_t x = dimMin; x < dimMax; x++) {
-                    casa::IPosition pos(2, x, y);
+                    casacore::IPosition pos(2, x, y);
                     CPPUNIT_ASSERT(fabs(middle(pos) - checkBoxMeanArr(pos)) < 1.e-5);
                 }
             }
             ASKAPLOG_DEBUG_STR(logger, "Confirming input unchanged");
             for (size_t y = dimMin; y < dimMax; y++) {
                 for (size_t x = dimMin; x < dimMax; x++) {
-                    casa::IPosition pos(2, x, y);
+                    casacore::IPosition pos(2, x, y);
                     CPPUNIT_ASSERT(fabs(inputArr(pos) - localInput(pos)) < 1.e-5);
                 }
             }
@@ -129,28 +129,28 @@ class SlidingMathTest : public CppUnit::TestFixture {
 
         void testBoxStddev()
         {
-            casa::IPosition box(2, boxWidth, boxWidth);
-            casa::Array<Float> middle(shape, 0.);
-            casa::Array<Float> spread(shape, 0.);
+            casacore::IPosition box(2, boxWidth, boxWidth);
+            casacore::Array<Float> middle(shape, 0.);
+            casacore::Array<Float> spread(shape, 0.);
             size_t dimMin = 0;
             size_t dimMax = dim;
             /* size_t dimMin=boxWidth; */
             /* size_t dimMax=dim-boxWidth; */
-            casa::Array<Float> localInput(inputArr);
+            casacore::Array<Float> localInput(inputArr);
             ASKAPLOG_DEBUG_STR(logger, "Sliding math test - stddev");
             slidingBoxStats(localInput, middle, spread, box, false);
             ASKAPLOG_DEBUG_STR(logger, "Calculated stddev follows: " << spread);
             ASKAPLOG_DEBUG_STR(logger, "Should be: " << checkBoxStddevArr);
             for (size_t y = dimMin; y < dimMax; y++) {
                 for (size_t x = dimMin; x < dimMax; x++) {
-                    casa::IPosition pos(2, x, y);
+                    casacore::IPosition pos(2, x, y);
                     CPPUNIT_ASSERT(fabs(middle(pos) - checkBoxMeanArr(pos)) < 1.e-5);
                 }
             }
             ASKAPLOG_DEBUG_STR(logger, "Confirming input unchanged");
             for (size_t y = dimMin; y < dimMax; y++) {
                 for (size_t x = dimMin; x < dimMax; x++) {
-                    casa::IPosition pos(2, x, y);
+                    casacore::IPosition pos(2, x, y);
                     CPPUNIT_ASSERT(fabs(inputArr(pos) - localInput(pos)) < 1.e-5);
                 }
             }
@@ -158,26 +158,26 @@ class SlidingMathTest : public CppUnit::TestFixture {
 
         void testBoxMedian()
         {
-            casa::IPosition box(2, boxWidth, boxWidth);
-            casa::Array<Float> middle(shape, 0.);
-            casa::Array<Float> spread(shape, 0.);
+            casacore::IPosition box(2, boxWidth, boxWidth);
+            casacore::Array<Float> middle(shape, 0.);
+            casacore::Array<Float> spread(shape, 0.);
             size_t dimMin = 0;
             size_t dimMax = dim;
             ASKAPLOG_DEBUG_STR(logger, "Sliding math test - median");
-            casa::Array<Float> localInput(inputArr);
+            casacore::Array<Float> localInput(inputArr);
             slidingBoxStats(localInput, middle, spread, box, true);
             ASKAPLOG_DEBUG_STR(logger, "Calculated median follows: " << middle);
             ASKAPLOG_DEBUG_STR(logger, "Should be: " << checkBoxMedianArr);
             for (size_t y = dimMin; y < dimMax; y++) {
                 for (size_t x = dimMin; x < dimMax; x++) {
-                    casa::IPosition pos(2, x, y);
+                    casacore::IPosition pos(2, x, y);
                     CPPUNIT_ASSERT(fabs(middle(pos) - checkBoxMedianArr(pos)) < 1.e-5);
                 }
             }
             ASKAPLOG_DEBUG_STR(logger, "Confirming input unchanged");
             for (size_t y = dimMin; y < dimMax; y++) {
                 for (size_t x = dimMin; x < dimMax; x++) {
-                    casa::IPosition pos(2, x, y);
+                    casacore::IPosition pos(2, x, y);
                     CPPUNIT_ASSERT(fabs(inputArr(pos) - localInput(pos)) < 1.e-5);
                 }
             }
@@ -186,26 +186,26 @@ class SlidingMathTest : public CppUnit::TestFixture {
 
         void testBoxMadfm()
         {
-            casa::IPosition box(2, boxWidth, boxWidth);
-            casa::Array<Float> middle(shape, 0.);
-            casa::Array<Float> spread(shape, 0.);
+            casacore::IPosition box(2, boxWidth, boxWidth);
+            casacore::Array<Float> middle(shape, 0.);
+            casacore::Array<Float> spread(shape, 0.);
             size_t dimMin = 0;
             size_t dimMax = dim;
             ASKAPLOG_DEBUG_STR(logger, "Sliding math test - median");
-            casa::Array<Float> localInput(inputArr);
+            casacore::Array<Float> localInput(inputArr);
             slidingBoxStats(localInput, middle, spread, box, true);
             ASKAPLOG_DEBUG_STR(logger, "Calculated madfm follows: " << spread);
             ASKAPLOG_DEBUG_STR(logger, "Should be: " << checkBoxMadfmArr);
             for (size_t y = dimMin; y < dimMax; y++) {
                 for (size_t x = dimMin; x < dimMax; x++) {
-                    casa::IPosition pos(2, x, y);
+                    casacore::IPosition pos(2, x, y);
                     CPPUNIT_ASSERT(fabs(spread(pos) - checkBoxMadfmArr(pos)) < 1.e-5);
                 }
             }
             ASKAPLOG_DEBUG_STR(logger, "Confirming input unchanged");
             for (size_t y = dimMin; y < dimMax; y++) {
                 for (size_t x = dimMin; x < dimMax; x++) {
-                    casa::IPosition pos(2, x, y);
+                    casacore::IPosition pos(2, x, y);
                     CPPUNIT_ASSERT(fabs(inputArr(pos) - localInput(pos)) < 1.e-5);
                 }
             }

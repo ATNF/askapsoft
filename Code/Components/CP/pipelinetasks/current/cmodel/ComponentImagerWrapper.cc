@@ -67,7 +67,7 @@ ComponentImagerWrapper::ComponentImagerWrapper(const LOFAR::ParameterSet& parset
 }
 
 void ComponentImagerWrapper::projectComponents(const std::vector<askap::cp::sms::client::Component>& components,
-        casa::ImageInterface<casa::Float>& image,
+        casacore::ImageInterface<casacore::Float>& image,
         const unsigned int term)
 {
     askap::components::AskapComponentImager::project(image,
@@ -75,9 +75,9 @@ void ComponentImagerWrapper::projectComponents(const std::vector<askap::cp::sms:
             term);
 }
 
-casa::ComponentList ComponentImagerWrapper::translateComponentList(const std::vector<askap::cp::sms::client::Component>& components)
+casacore::ComponentList ComponentImagerWrapper::translateComponentList(const std::vector<askap::cp::sms::client::Component>& components)
 {
-    casa::ComponentList list;
+    casacore::ComponentList list;
     
     // Obtain the GSM reference frequency
     const MFrequency refFreq = MFrequency(asQuantity(itsParset.getString("gsm.ref_freq"), "Hz"));
@@ -88,14 +88,14 @@ casa::ComponentList ComponentImagerWrapper::translateComponentList(const std::ve
 
         // Build either a GaussianShape or PointShape
         const MDirection dir(c.rightAscension(), c.declination(), MDirection::J2000);
-        const Flux<casa::Double> flux(c.i1400().getValue("Jy"), 0.0, 0.0, 0.0);
+        const Flux<casacore::Double> flux(c.i1400().getValue("Jy"), 0.0, 0.0, 0.0);
 
-        boost::scoped_ptr<casa::SpectralModel> spectrum;
+        boost::scoped_ptr<casacore::SpectralModel> spectrum;
         const double dblEpsilon = std::numeric_limits<double>::epsilon();
         if (abs(c.spectralIndex()) > dblEpsilon) {
-            spectrum.reset(new casa::SpectralIndex(refFreq, c.spectralIndex()));
+            spectrum.reset(new casacore::SpectralIndex(refFreq, c.spectralIndex()));
         } else {
-            spectrum.reset(new casa::ConstantSpectrum);
+            spectrum.reset(new casacore::ConstantSpectrum);
         }
 
         // Is gaussian or point shape?

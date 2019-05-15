@@ -79,10 +79,10 @@ int main(int argc, const char** argv)
     askap::askapparallel::AskapParallel comms(argc, argv);
     try {
         // Ensure that CASA log messages are captured
-        casa::LogSinkInterface* globalSink = new Log4cxxLogSink();
-        casa::LogSink::globalSink(globalSink);
+        casacore::LogSinkInterface* globalSink = new Log4cxxLogSink();
+        casacore::LogSink::globalSink(globalSink);
 
-        casa::Timer timer;
+        casacore::Timer timer;
         timer.mark();
         std::string parsetFile(getInputs("-inputs", "continuumAnalysis.in", argc, argv));
         LOFAR::ParameterSet parset(parsetFile);

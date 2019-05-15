@@ -36,7 +36,7 @@ ASKAP_LOGGER(logger, "");
 #include <dataaccess/SharedIter.h>
 #include <dataaccess/TableManager.h>
 #include <dataaccess/IDataConverterImpl.h>
-#include <utils/PolConverter.h>
+#include <askap/scimath/utils/PolConverter.h>
 
 
 #include <casacore/measures/Measures/MFrequency.h>
@@ -155,32 +155,32 @@ std::vector<double> DelaySolverApp::getCurrentDelays(const LOFAR::ParameterSet &
 
 void DelaySolverApp::process(const IConstDataSource &ds, const std::vector<double>& currentDelays) {
   IDataSelectorPtr sel=ds.createSelector();
-  casa::uInt beam = config().getUint("beam",0);
+  casacore::uInt beam = config().getUint("beam",0);
   sel->chooseFeed(beam);
   sel->chooseCrossCorrelations();
   const int scan = config().getInt32("scan",-1);
   if (scan >= 0) {
       ASKAPLOG_INFO_STR(logger, "Process only scan "<<scan);
-      sel->chooseUserDefinedIndex("SCAN_NUMBER",casa::uInt(scan));
+      sel->chooseUserDefinedIndex("SCAN_NUMBER",casacore::uInt(scan));
   }
  
   IDataConverterPtr conv=ds.createConverter();  
-  conv->setFrequencyFrame(casa::MFrequency::Ref(casa::MFrequency::TOPO),"Hz");
-  conv->setEpochFrame(casa::MEpoch(casa::Quantity(55913.0,"d"),
-                      casa::MEpoch::Ref(casa::MEpoch::UTC)),"s");
-  conv->setDirectionFrame(casa::MDirection::Ref(casa::MDirection::J2000));                    
+  conv->setFrequencyFrame(casacore::MFrequency::Ref(casacore::MFrequency::TOPO),"Hz");
+  conv->setEpochFrame(casacore::MEpoch(casacore::Quantity(55913.0,"d"),
+                      casacore::MEpoch::Ref(casacore::MEpoch::UTC)),"s");
+  conv->setDirectionFrame(casacore::MDirection::Ref(casacore::MDirection::J2000));                    
  
   const double targetRes = config().getDouble("resolution",1e6);
   const std::string stokesStr = config().getString("stokes","XX");
-  const casa::Vector<casa::Stokes::StokesTypes> stokesVector = scimath::PolConverter::fromString(stokesStr);
+  const casacore::Vector<casacore::Stokes::StokesTypes> stokesVector = scimath::PolConverter::fromString(stokesStr);
   ASKAPCHECK(stokesVector.nelements() == 1, "Exactly one stokes parameter should be defined, you have "<<stokesStr);
   const double ampCutoff = config().getDouble("cutoff",-1.);
-  const casa::uInt refAnt = config().getUint("refant",1);
+  const casacore::uInt refAnt = config().getUint("refant",1);
   const bool exclude13 = config().getBool("exclude13", false);
   utils::DelaySolverImpl solver(targetRes, stokesVector[0], ampCutoff, refAnt);
   if (exclude13) {
-      solver.excludeBaselines(casa::Vector<std::pair<casa::uInt,casa::uInt> >(1,std::pair<casa::uInt,
-             casa::uInt>(1,2)));
+      solver.excludeBaselines(casacore::Vector<std::pair<casacore::uInt,casacore::uInt> >(1,std::pair<casacore::uInt,
+             casacore::uInt>(1,2)));
   }
   
   const bool estimateViaLags = config().getBool("uselags", false);
@@ -195,7 +195,7 @@ void DelaySolverApp::process(const IConstDataSource &ds, const std::vector<doubl
            solver.process(*it);  
       }
       // solve via FFT
-      const casa::Vector<double> delayApprox = solver.solve(true);
+      const casacore::Vector<double> delayApprox = solver.solve(true);
       // use FFT-based estimate as an approximation before averaging
       solver.setApproximateDelays(delayApprox);
       solver.init();
@@ -208,12 +208,12 @@ void DelaySolverApp::process(const IConstDataSource &ds, const std::vector<doubl
   
   // corrections have the opposite sign from determined delays, hence the minus
   // the units in the fcm are in ns
-  casa::Vector<double> delays = -solver.solve(false) * 1e9;
+  casacore::Vector<double> delays = -solver.solve(false) * 1e9;
   ASKAPLOG_INFO_STR(logger, "Corrections (ns): "<<std::setprecision(9)<<delays);
   if (currentDelays.size() > 0) {
       ASKAPLOG_INFO_STR(logger, "Old delays (ns): "<< std::setprecision(9) << currentDelays);
       ASKAPCHECK(currentDelays.size() == delays.nelements(), "Number of antennas differ in fixeddelays (or antXX.delay) parameters and in the dataset");
-      for (casa::uInt ant = 0; ant < delays.nelements(); ++ant) {
+      for (casacore::uInt ant = 0; ant < delays.nelements(); ++ant) {
            delays[ant] += currentDelays[ant];
       }
       ASKAPLOG_INFO_STR(logger, "New delays (ns): "<< std::setprecision(9)<<delays);
@@ -227,7 +227,7 @@ void DelaySolverApp::process(const IConstDataSource &ds, const std::vector<doubl
           } else {
               ASKAPCHECK(itsAntennaNames.size() == delays.size(), 
                     "Number of antennas defined in the ingest parset is different from the number of antennas delays are solved for");
-              for (casa::uInt ant = 0; ant < delays.nelements(); ++ant) {
+              for (casacore::uInt ant = 0; ant < delays.nelements(); ++ant) {
                    os << "common.antenna."<<itsAntennaNames[ant]<<".delay = " << std::setprecision(9)<<delays[ant] << "ns"<<std::endl;
                    ASKAPLOG_INFO_STR(logger, "      "<<std::setw(5)<<itsAntennaNames[ant]<< " (index "<<ant<<") ->  "<<std::setprecision(9)<<delays[ant]<<" ns");
               }
@@ -242,7 +242,7 @@ void DelaySolverApp::process(const IConstDataSource &ds, const std::vector<doubl
 int DelaySolverApp::run(int, char **) {
   try {
 
-     casa::Timer timer;
+     casacore::Timer timer;
      std::string msName = parameterExists("ms") ? parameter("ms") : "";
      const std::string sbID = parameterExists("sb") ? parameter("sb") : "";
 
@@ -258,20 +258,20 @@ int DelaySolverApp::run(int, char **) {
          // scheduling block ID is specified, the file name will be taken from SB
          ASKAPCHECK(msName == "", "When the scheduling block ID is specified, the file name is taken from that SB. "
                     "Remove the -f command line parameter or ms keyword in the parset to continue.");
-         casa::Path path2sb(config().getString("sbpath","./"));
+         casacore::Path path2sb(config().getString("sbpath","./"));
          path2sb.append(sbID);
-         const casa::Directory sbDir(path2sb);
+         const casacore::Directory sbDir(path2sb);
          // do not follow symlinks, non-recursive
-         const casa::Vector<casa::String> dirContent = sbDir.find(casa::Regex::fromPattern("*.ms"),casa::False, casa::False);
+         const casacore::Vector<casacore::String> dirContent = sbDir.find(casacore::Regex::fromPattern("*.ms"),casacore::False, casacore::False);
          ASKAPCHECK(dirContent.nelements() > 0, "Unable to find a measurement set file in "<<sbDir.path().absoluteName());
          int fileIndex = -1;
          if (dirContent.nelements() != 1) {
              ASKAPLOG_INFO_STR(logger, "Multiple MSs are found in "<<sbDir.path().absoluteName()<<" - assume one file per beam and index == beam");
-             casa::uInt beam = config().getUint("beam",0);
-             for (casa::uInt i = 0; i<dirContent.nelements(); ++i) {
-                  const casa::String nameTemplate = "_"+utility::toString<casa::uInt>(beam)+".ms";
+             casacore::uInt beam = config().getUint("beam",0);
+             for (casacore::uInt i = 0; i<dirContent.nelements(); ++i) {
+                  const casacore::String nameTemplate = "_"+utility::toString<casacore::uInt>(beam)+".ms";
                   const size_t pos = dirContent[i].rfind(nameTemplate);
-                  if ((pos != casa::String::npos) && (pos + nameTemplate.size() == dirContent[i].size())) {
+                  if ((pos != casacore::String::npos) && (pos + nameTemplate.size() == dirContent[i].size())) {
                       ASKAPCHECK(fileIndex == -1, "Multiple measurement sets matching beam = "<<beam<<" are present in "<<sbDir.path().absoluteName());
                       ASKAPLOG_INFO_STR(logger, "Using "<<dirContent[i]);
                       fileIndex = static_cast<int>(i);
@@ -283,11 +283,11 @@ int DelaySolverApp::run(int, char **) {
          }
              
          ASKAPASSERT((fileIndex >= 0) && (fileIndex < static_cast<int>(dirContent.nelements())));
-         casa::Path path2ms(path2sb);
+         casacore::Path path2ms(path2sb);
          path2ms.append(dirContent[fileIndex]);
          msName = path2ms.absoluteName();
          // fixed delays will be taken from cpingest.in in the SB directory
-         casa::Path path2cpingest(path2sb);
+         casacore::Path path2cpingest(path2sb);
          path2cpingest.append("cpingest.in");
          ASKAPLOG_INFO_STR(logger, "Ingest parset: "<<path2cpingest.absoluteName());
          const LOFAR::ParameterSet ingestParset(path2cpingest.absoluteName());

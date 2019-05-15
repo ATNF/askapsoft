@@ -174,23 +174,23 @@ class MergedSourceTest : public CppUnit::TestFixture,
             // measurement set specification used integration midpoint in
             // seconds.
             const double midpoint = bat2epoch(3500000ul).getValue().getTime().getValue("s");
-            const casa::Quantity chunkMidpoint = chunk->time().getTime();
+            const casacore::Quantity chunkMidpoint = chunk->time().getTime();
             CPPUNIT_ASSERT_DOUBLES_EQUAL(midpoint, chunkMidpoint.getValue("s"), 1.0E-10);
 
             // Ensure other metadata is as expected
             CPPUNIT_ASSERT_EQUAL(nChannelsForTest(), chunk->nChannel());
             CPPUNIT_ASSERT_EQUAL(nCorr, chunk->nPol());
-            const casa::uInt nAntennas = config.antennas().size();
-            const casa::uInt nBaselines = nAntennas * (nAntennas + 1) / 2;
+            const casacore::uInt nAntennas = config.antennas().size();
+            const casacore::uInt nBaselines = nAntennas * (nAntennas + 1) / 2;
             const uint32_t nBeam = config.feed().nFeeds();
             CPPUNIT_ASSERT_EQUAL(nBaselines * nBeam, chunk->nRow());
 
             // Check stokes
             CPPUNIT_ASSERT(chunk->nPol() >= 4);
-            CPPUNIT_ASSERT(chunk->stokes()(0) == casa::Stokes::XX);
-            CPPUNIT_ASSERT(chunk->stokes()(1) == casa::Stokes::XY);
-            CPPUNIT_ASSERT(chunk->stokes()(2) == casa::Stokes::YX);
-            CPPUNIT_ASSERT(chunk->stokes()(3) == casa::Stokes::YY);
+            CPPUNIT_ASSERT(chunk->stokes()(0) == casacore::Stokes::XX);
+            CPPUNIT_ASSERT(chunk->stokes()(1) == casacore::Stokes::XY);
+            CPPUNIT_ASSERT(chunk->stokes()(2) == casacore::Stokes::YX);
+            CPPUNIT_ASSERT(chunk->stokes()(3) == casacore::Stokes::YY);
 
             // Ensure the visibilities that were supplied (most were not)
             // are not flagged, and that the rest are flagged
@@ -264,7 +264,7 @@ class MergedSourceTest : public CppUnit::TestFixture,
             // want to get hardware channel 11 (accessor channel 55) to map to 1 GHz exactly
             // config helper sets up the full ASKAP band without inversion
             // start is 8208 fine channels lower, channel 55 is 1 GHz:
-            metadata.centreFreq(casa::Quantity(1000. + double(8208 - 55) / 54, "MHz"));
+            metadata.centreFreq(casacore::Quantity(1000. + double(8208 - 55) / 54, "MHz"));
 
             // antenna_names
             for (uint32_t i = 0; i < config.antennas().size(); ++i) {
@@ -276,11 +276,11 @@ class MergedSourceTest : public CppUnit::TestFixture,
                 // uvws implying that antenna is not on the ground. So passing a large constant
                 // as we once had no longer works. The easiest way to solve the problem without doing
                 // full simulation is to pass antenna position as uvw for all beams.
-                casa::Vector<casa::Double> dummyUVW(36*3,0.);
-                const casa::Vector<casa::Double> antPos = config.antennas()[i].position();
+                casacore::Vector<casacore::Double> dummyUVW(36*3,0.);
+                const casacore::Vector<casacore::Double> antPos = config.antennas()[i].position();
                 CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(3u), antPos.nelements());
                 CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(0u), dummyUVW.nelements() % 3u);
-                for (casa::uInt item = 0; item < dummyUVW.nelements(); ++item) {
+                for (casacore::uInt item = 0; item < dummyUVW.nelements(); ++item) {
                      dummyUVW[item] = antPos[item % 3] + (i == 0 ? uvwOffset : 0.);
                 }
                 ant.uvw(dummyUVW);

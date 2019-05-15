@@ -89,7 +89,7 @@ class NoMetadataSource : public ISource,
         void syncrhoniseLastTimestamp();
 
         /// Initialises an "empty" VisChunk (inside the converter)
-        askap::cp::common::VisChunk::ShPtr createVisChunk(const casa::uLong timestamp);
+        askap::cp::common::VisChunk::ShPtr createVisChunk(const casacore::uLong timestamp);
 
         /// Handled the receipt of signals to "interrupt" the process
         void signalHandler(const boost::system::error_code& error,
@@ -111,13 +111,13 @@ class NoMetadataSource : public ISource,
         boost::asio::signal_set itsSignals;
 
         /// @brief Centre frequency
-        const casa::Quantity itsCentreFreq;
+        const casacore::Quantity itsCentreFreq;
 
         /// @brief Target/field/source name
         const std::string itsTargetName;
 
         /// @brief Target direction
-        const casa::MDirection itsTargetDirection;
+        const casacore::MDirection itsTargetDirection;
 
         /// @brief Correlator Mode
         CorrelatorMode itsCorrelatorMode;
@@ -127,7 +127,7 @@ class NoMetadataSource : public ISource,
 
         /// @brief The last timestamp processed. This is stored to avoid the situation
         /// where we may produce two consecutive VisChunks with the same timestamp
-        casa::uLong itsLastTimestamp;
+        casacore::uLong itsLastTimestamp;
 
         /// @brief visibility converter
         VisConverter<VisDatagram> itsVisConverter;

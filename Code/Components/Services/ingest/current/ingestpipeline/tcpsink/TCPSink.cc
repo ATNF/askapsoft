@@ -88,7 +88,7 @@ void TCPSink::process(VisChunk::ShPtr& chunk)
     // temportary hack for commissoning - only proceed if work with beam 0, if it is a single beam file
     ASKAPASSERT(chunk);
     
-    std::set<casa::uInt> beamSet(chunk->beam1().begin(), chunk->beam1().end());
+    std::set<casacore::uInt> beamSet(chunk->beam1().begin(), chunk->beam1().end());
     if (beamSet.size() == 1) {
         if (*beamSet.begin() != 0) {
             ASKAPLOG_DEBUG_STR(logger, "Intentionally skipping beam "<<*beamSet.begin()<<" single beam data");
@@ -139,7 +139,7 @@ void TCPSink::pushBack(const T src, std::vector<uint8_t>& dest)
 }
 
 template <typename T>
-void TCPSink::pushBackArray(const casa::Array<T>& src, std::vector<uint8_t>& dest)
+void TCPSink::pushBackArray(const casacore::Array<T>& src, std::vector<uint8_t>& dest)
 {
     const size_t idx = dest.size(); // Must be before resize
     const size_t nbytes = src.size() * sizeof(T);
@@ -173,7 +173,7 @@ void TCPSink::serialiseVisChunk(const askap::cp::common::VisChunk& chunk, std::v
 
     // Stokes - Map from casa:StokesTypes to 0=XX, 1=XY, 2=YX, 3=YY
     vector<uint32_t> stokesvec;
-    const casa::Vector<casa::Stokes::StokesTypes>& casaStokes = chunk.stokes();
+    const casacore::Vector<casacore::Stokes::StokesTypes>& casaStokes = chunk.stokes();
     for (size_t i = 0; i < casaStokes.size(); ++i) {
         stokesvec.push_back(mapStokes(casaStokes[i]));
     }
@@ -184,7 +184,7 @@ void TCPSink::serialiseVisChunk(const askap::cp::common::VisChunk& chunk, std::v
 
     // Treat bool more specifically because there is no guarantee how they are
     // represented in memory
-    const casa::Bool* data = chunk.flag().data();
+    const casacore::Bool* data = chunk.flag().data();
     vector<uint8_t> flagvec(chunk.flag().size(), 0);
     for (size_t i = 0; i < flagvec.size(); ++i) {
         if (data[i]) flagvec[i] = 1;
@@ -255,7 +255,7 @@ bool TCPSink::connect(void)
     return true;
 }
 
-uint32_t TCPSink::mapStokes(casa::Stokes::StokesTypes type)
+uint32_t TCPSink::mapStokes(casacore::Stokes::StokesTypes type)
 {
     switch (type) {
         case Stokes::XX: return 0;

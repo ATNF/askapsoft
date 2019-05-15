@@ -63,10 +63,10 @@ class RMSynthesis {
         /// lambda-squared value. It then performs RM Synthesis,
         /// creating the FDF and RMSF arrays. Also calls the fitRMSF
         /// function to obtain the FWHM of the main RMSF lobe.
-        void calculate(const casa::Vector<float> &lsq,
-                       const casa::Vector<float> &q,
-                       const casa::Vector<float> &u,
-                       const casa::Vector<float> &noise);
+        void calculate(const casacore::Vector<float> &lsq,
+                       const casacore::Vector<float> &q,
+                       const casacore::Vector<float> &u,
+                       const casacore::Vector<float> &noise);
 
         /// Fit to the RM Spread Function. Find extent of peak of RMSF
         /// by starting at peak and finding where slope changes -
@@ -89,13 +89,13 @@ class RMSynthesis {
         const float phiZero() {return itsPhiZero;};
 
         /// @brief Returns the Faraday Dispersion Function vector
-        const casa::Vector<casa::Complex> &fdf() {return itsFaradayDF;};
+        const casacore::Vector<casacore::Complex> &fdf() {return itsFaradayDF;};
         /// @brief Returns the Faraday Depth vector
-        const casa::Vector<float> &phi() {return itsPhi;};
+        const casacore::Vector<float> &phi() {return itsPhi;};
         /// @brief Returns the Rotation Measure Spread function
-        const casa::Vector<casa::Complex> &rmsf() {return itsRMSF;};
+        const casacore::Vector<casacore::Complex> &rmsf() {return itsRMSF;};
         /// @brief Returns the Faraday Depth vector that goes with the RMSF
-        const casa::Vector<float> &phi_rmsf() {return itsPhiForRMSF;};
+        const casacore::Vector<float> &phi_rmsf() {return itsPhiForRMSF;};
         /// @brief Return the (fitted) width of the RMSF
         const float rmsf_width() {return itsRMSFwidth;};
         /// @brief Return the reference lambda-squared value (obtained
@@ -103,11 +103,11 @@ class RMSynthesis {
         const float refLambdaSq() {return itsRefLambdaSquared;};
 
         /// @brief Returns the lambda-squared array used in the RM Synthesis
-        casa::Vector<float> lambdaSquared() {return itsLamSq;};
+        casacore::Vector<float> lambdaSquared() {return itsLamSq;};
         /// @brief Returns the input fractional polarisation spectrum (a complex vector p = q + i u)
-        casa::Vector<casa::Complex> fracPolSpectrum() {return itsFracPolSpectrum;};
+        casacore::Vector<casacore::Complex> fracPolSpectrum() {return itsFracPolSpectrum;};
         /// @brief Define the Stokes I model spectrum by providing a vector
-        void setImodel(casa::Vector<float> model) {itsImodel.setModel(model);};
+        void setImodel(casacore::Vector<float> model) {itsImodel.setModel(model);};
         /// @brief Reference to the StokesImodel object defining the Stokes I model spectrum and fitted coefficients
         StokesImodel &imodel() {return itsImodel;};
 
@@ -127,18 +127,18 @@ class RMSynthesis {
         void defineVectors();
 
         /// @brief Vector of weights assigned to each channel
-        casa::Vector<float>         itsWeights;
+        casacore::Vector<float>         itsWeights;
         /// @brief Type of weighting used: either "variance" (default) or "uniform"
         std::string                 itsWeightType;
 
         /// @brief The input complex fractional polarisation spectrum p=q+iu
-        casa::Vector<casa::Complex> itsFracPolSpectrum;
+        casacore::Vector<casacore::Complex> itsFracPolSpectrum;
 
         /// @brief Normalisation constant that depends on the weights
         float                       itsNormalisation;
 
         /// @brief Vector of lambda-squared values for each channel [m2]
-        casa::Vector<float>         itsLamSq;
+        casacore::Vector<float>         itsLamSq;
         /// @brief Variance of the lambda-square values
         float                       itsLambdaSquaredVariance;
 
@@ -149,10 +149,10 @@ class RMSynthesis {
         /// @brief Centre RM of the Faraday depth vector [rad/m2]
         float                       itsPhiZero;
         /// @brief Faraday depth vector [rad/m2]
-        casa::Vector<float>         itsPhi;
+        casacore::Vector<float>         itsPhi;
 
         /// @brief Faraday Dispersion Function
-        casa::Vector<casa::Complex> itsFaradayDF;
+        casacore::Vector<casacore::Complex> itsFaradayDF;
 
         /// @brief The average of the provided noise spectrum, scaled by sqrt(num_freq_chan)
         float                       itsFDFnoise;
@@ -161,9 +161,9 @@ class RMSynthesis {
         StokesImodel                itsImodel;
 
         /// @brief Double-length Faraday depth vector, used to calculate the RMSF [rad/m2]
-        casa::Vector<float>         itsPhiForRMSF;
+        casacore::Vector<float>         itsPhiForRMSF;
         /// @brief Rotation Measure Spread Function (RMSF)
-        casa::Vector<casa::Complex> itsRMSF;
+        casacore::Vector<casacore::Complex> itsRMSF;
 
         /// @brief Fitted width of the RMSF [rad/m2]
         float                       itsRMSFwidth;

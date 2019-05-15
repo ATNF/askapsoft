@@ -65,7 +65,7 @@ class SubComponent {
         /// @brief Copy function
         SubComponent& operator= (const SubComponent& c);
     /// @brief Constructor from Gaussian2D
-    SubComponent(const casa::Gaussian2D<casa::Double> &g);
+    SubComponent(const casacore::Gaussian2D<casacore::Double> &g);
 
         /// @brief Returns the x-pixel centre location
         double x() {return itsXpos;};
@@ -81,7 +81,7 @@ class SubComponent {
         double pa() {return itsPositionAngle;};
 
         /// @brief Returns the component as a Gaussian2D object
-        casa::Gaussian2D<casa::Double> asGauss();
+        casacore::Gaussian2D<casacore::Double> asGauss();
 
         /// @brief Set the x-pixel centre location
         void setX(double d) {itsXpos = d;};

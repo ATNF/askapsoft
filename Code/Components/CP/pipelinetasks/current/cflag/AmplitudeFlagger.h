@@ -61,7 +61,7 @@ class AmplitudeFlagger : public IFlagger {
         ///                     in the parset.
         static vector< boost::shared_ptr<IFlagger> > build(
                 const LOFAR::ParameterSet& parset,
-                const casa::MeasurementSet& ms);
+                const casacore::MeasurementSet& ms);
 
         /// @brief Constructor
         /// @throw AskapError   If an upper or lower threshold is not specified
@@ -69,19 +69,19 @@ class AmplitudeFlagger : public IFlagger {
         AmplitudeFlagger(const LOFAR::ParameterSet& parset);
 
         /// @see IFlagger::processRow()
-        virtual void processRow(casa::MSColumns& msc, const casa::uInt pass,
-                                const casa::uInt row, const bool dryRun);
+        virtual void processRow(casacore::MSColumns& msc, const casacore::uInt pass,
+                                const casacore::uInt row, const bool dryRun);
 
         /// @see IFlagger::processRows()
-        virtual void processRows(casa::MSColumns& msc, const casa::uInt pass,
-                                 const casa::uInt row, const casa::uInt nrow,
+        virtual void processRows(casacore::MSColumns& msc, const casacore::uInt pass,
+                                 const casacore::uInt row, const casacore::uInt nrow,
                                  const bool dryRun);
 
         /// @see IFlagger::stats()
         virtual FlaggingStats stats(void) const;
 
         /// @see IFlagger::stats()
-        virtual casa::Bool processingRequired(const casa::uInt pass);
+        virtual casacore::Bool processingRequired(const casacore::uInt pass);
 
     private:
         // load and log relevant parset parameters
@@ -91,8 +91,8 @@ class AmplitudeFlagger : public IFlagger {
         /// Returns a vector of stokes types for a given row in the main table
         /// of the measurement set. This will have the same dimension and
         /// ordering as the data/flag matrices.
-        casa::Vector<casa::Int> getStokesType(casa::MSColumns& msc,
-                                              const casa::uInt row);
+        casacore::Vector<casacore::Int> getStokesType(casacore::MSColumns& msc,
+                                              const casacore::uInt row);
 
         // Flagging statistics
         FlaggingStats itsStats;
@@ -102,24 +102,24 @@ class AmplitudeFlagger : public IFlagger {
         // True if lower amplitude limit has been set, otherwise false
         bool itsHasLowLimit;
         // The upper amplitude limit
-        casa::Float itsHighLimit;
+        casacore::Float itsHighLimit;
         // The lower amplitude limit
-        casa::Float itsLowLimit;
+        casacore::Float itsLowLimit;
 
         // Automatically set either of these limits that are unset
         bool itsAutoThresholds;
         // sigma multiplier used to set cutoffs
-        casa::Float itsThresholdFactor;
+        casacore::Float itsThresholdFactor;
 
         // Generate averaged spectra and search these for peaks to flag
         bool itsIntegrateSpectra;
         // sigma multiplier used to set cutoffs
-        casa::Float itsSpectraFactor;
+        casacore::Float itsSpectraFactor;
 
         // Generate averaged time series and search these for peaks to flag
         bool itsIntegrateTimes;
         // sigma multiplier used to set cutoffs
-        casa::Float itsTimesFactor;
+        casacore::Float itsTimesFactor;
 
         // When integrating, do not separate spectra based on baseline, etc.
         bool itsAveAll;
@@ -134,30 +134,30 @@ class AmplitudeFlagger : public IFlagger {
 
         // The set of correlation products for which these flagging rules should
         // be applied. An empty list means apply to all correlation products.
-        std::set<casa::Stokes::StokesTypes> itsStokes;
+        std::set<casacore::Stokes::StokesTypes> itsStokes;
 
         // Maps of accumulation vectors for averaging spectra and generating flags
-        std::map<rowKey, casa::Vector<casa::Double> > itsAveSpectra;
-        std::map<rowKey, casa::Vector<casa::Bool> > itsMaskSpectra;
-        std::map<rowKey, casa::Vector<casa::Int> > itsCountSpectra;
+        std::map<rowKey, casacore::Vector<casacore::Double> > itsAveSpectra;
+        std::map<rowKey, casacore::Vector<casacore::Bool> > itsMaskSpectra;
+        std::map<rowKey, casacore::Vector<casacore::Int> > itsCountSpectra;
 
         // Maps of accumulation vectors for averaging time series and generating flags
-        std::map<rowKey, casa::Vector<casa::Float> > itsAveTimes;
-        std::map<rowKey, casa::Vector<casa::Bool> > itsMaskTimes;
-        std::map<rowKey, casa::Int> itsCountTimes;
+        std::map<rowKey, casacore::Vector<casacore::Float> > itsAveTimes;
+        std::map<rowKey, casacore::Vector<casacore::Bool> > itsMaskTimes;
+        std::map<rowKey, casacore::Int> itsCountTimes;
 
         // Generate a key for a given row and polarisation
-        rowKey getRowKey(casa::MSColumns& msc, const casa::uInt row,
-            const casa::uInt corr);
+        rowKey getRowKey(casacore::MSColumns& msc, const casacore::uInt row,
+            const casacore::uInt corr);
 
         // Functions to handle accumulation vectors and indices
-        void updateTimeVectors(const rowKey &key, const casa::uInt pass);
-        void initSpectrumVectors(const rowKey &key, const casa::IPosition &shape);
+        void updateTimeVectors(const rowKey &key, const casacore::uInt pass);
+        void initSpectrumVectors(const rowKey &key, const casacore::IPosition &shape);
 
         // Calculate the median, the interquartile range, the min and the max
         // of a masked array
-        casa::Vector<casa::Float>
-            getRobustStats(casa::MaskedArray<casa::Float> maskedAmplitudes);
+        casacore::Vector<casacore::Float>
+            getRobustStats(casacore::MaskedArray<casacore::Float> maskedAmplitudes);
 
         // Set flags based on integrated quantities
         void setFlagsFromIntegrations(void);

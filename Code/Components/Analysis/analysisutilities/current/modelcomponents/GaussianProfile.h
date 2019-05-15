@@ -102,7 +102,7 @@ class GaussianProfile : public Spectrum {
         friend std::ostream& operator<< (std::ostream& theStream, const GaussianProfile &prof);
 
     protected:
-        casa::Gaussian1D<double> itsGaussian;
+        casacore::Gaussian1D<double> itsGaussian;
         AXISTYPE itsAxisType;
         double itsRestFreq;
         /// @brief The minimum frequency affected by the source

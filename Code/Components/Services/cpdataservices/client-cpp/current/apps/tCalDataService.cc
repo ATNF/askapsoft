@@ -87,16 +87,16 @@ class Stopwatch {
         clock_t m_start;
 };
 
-void addGainSolution(CalibrationDataServiceClient& svc, const casa::Long id,
-        const casa::Double timestamp,
-        const casa::Short nAntenna, const casa::Short nBeam)
+void addGainSolution(CalibrationDataServiceClient& svc, const casacore::Long id,
+        const casacore::Double timestamp,
+        const casacore::Short nAntenna, const casacore::Short nBeam)
 {
     GainSolution sol(timestamp);
     // Create a map entry for each antenna/beam combination
-    for (casa::Short antenna = 1; antenna <= nAntenna; ++antenna) {
-        for (casa::Short beam = 1; beam <= nBeam; ++beam) {
-            JonesJTerm jterm(casa::Complex(1.0, 1.0), true,
-                    casa::Complex(1.0, 1.0), true);
+    for (casacore::Short antenna = 1; antenna <= nAntenna; ++antenna) {
+        for (casacore::Short beam = 1; beam <= nBeam; ++beam) {
+            JonesJTerm jterm(casacore::Complex(1.0, 1.0), true,
+                    casacore::Complex(1.0, 1.0), true);
             sol.map()[askap::accessors::JonesIndex(antenna, beam)] = jterm;
         }
     }
@@ -104,32 +104,32 @@ void addGainSolution(CalibrationDataServiceClient& svc, const casa::Long id,
     svc.addGainSolution(id,sol);
 }
 
-void addLeakageSolution(CalibrationDataServiceClient& svc, const casa::Long id,
-        const casa::Double timestamp,
-        const casa::Short nAntenna, const casa::Short nBeam)
+void addLeakageSolution(CalibrationDataServiceClient& svc, const casacore::Long id,
+        const casacore::Double timestamp,
+        const casacore::Short nAntenna, const casacore::Short nBeam)
 {
     LeakageSolution sol(timestamp);
     // Create a map entry for each antenna/beam combination
-    for (casa::Short antenna = 1; antenna <= nAntenna; ++antenna) {
-        for (casa::Short beam = 1; beam <= nBeam; ++beam) {
+    for (casacore::Short antenna = 1; antenna <= nAntenna; ++antenna) {
+        for (casacore::Short beam = 1; beam <= nBeam; ++beam) {
             sol.map()[askap::accessors::JonesIndex(antenna, beam)] = askap::accessors::JonesDTerm(
-                    casa::Complex(1.0, 1.0), casa::Complex(1.0, 1.0));
+                    casacore::Complex(1.0, 1.0), casacore::Complex(1.0, 1.0));
         }
     }
 
     svc.addLeakageSolution(id,sol);
 }
 
-void addBandpassSolution(CalibrationDataServiceClient& svc, const casa::Long id,
-        const casa::Double timestamp,
-        const casa::Short nAntenna, const casa::Short nBeam, const casa::Int nChan)
+void addBandpassSolution(CalibrationDataServiceClient& svc, const casacore::Long id,
+        const casacore::Double timestamp,
+        const casacore::Short nAntenna, const casacore::Short nBeam, const casacore::Int nChan)
 {
     BandpassSolution sol(timestamp);
     // Create a map entry for each antenna/beam combination
-    for (casa::Short antenna = 1; antenna <= nAntenna; ++antenna) {
-        for (casa::Short beam = 1; beam <= nBeam; ++beam) {
-            JonesJTerm jterm(casa::Complex(1.0, 1.0), true,
-                    casa::Complex(1.0, 1.0), true);
+    for (casacore::Short antenna = 1; antenna <= nAntenna; ++antenna) {
+        for (casacore::Short beam = 1; beam <= nBeam; ++beam) {
+            JonesJTerm jterm(casacore::Complex(1.0, 1.0), true,
+                    casacore::Complex(1.0, 1.0), true);
             std::vector<askap::accessors::JonesJTerm> jterms(nChan, jterm);
             sol.map()[askap::accessors::JonesIndex(antenna, beam)] = jterms;
         }
@@ -157,17 +157,17 @@ int main(int argc, char *argv[])
     const string locatorHost = parset.getString("ice.locator.host");
     const string locatorPort = parset.getString("ice.locator.port");
     const string serviceName = parset.getString("calibrationdataservice.name");
-    const casa::Short nAntenna = parset.getInt16("test.nantenna");
-    const casa::Short nBeam = parset.getInt16("test.nbeam");
-    const casa::Int nChan = parset.getInt32("test.nchannel");
+    const casacore::Short nAntenna = parset.getInt16("test.nantenna");
+    const casacore::Short nBeam = parset.getInt16("test.nbeam");
+    const casacore::Int nChan = parset.getInt32("test.nchannel");
 
     CalibrationDataServiceClient svc(locatorHost, locatorPort, serviceName);
 
-    const casa::Double timestamp = 55790.1;
+    const casacore::Double timestamp = 55790.1;
 
     Stopwatch sw;
     sw.start();
-    casa::Long newID = svc.newSolutionID();
+    casacore::Long newID = svc.newSolutionID();
     double time = sw.stop();
     std::cout << "Time to get new solution ID: " << time << std::endl;
 

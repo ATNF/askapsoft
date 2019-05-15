@@ -89,7 +89,7 @@ NoMetadataSource::NoMetadataSource(const LOFAR::ParameterSet& params,
 
     // additional check that the table has been updated less then one month ago
     if (config.receiverId() == 0) {
-        casa::Time now;
+        casacore::Time now;
         if (now.modifiedJulianDay() - measVersion.first > 30.) {
             ASKAPLOG_WARN_STR(logger, "Measures table is more than one month old. Consider updating!");
         }
@@ -143,7 +143,7 @@ VisChunk::ShPtr NoMetadataSource::next(void)
            }
     }
     // This is the BAT timestamp for the current integration being processed
-    const casa::uLong currentTimestamp = itsVis->timestamp;
+    const casacore::uLong currentTimestamp = itsVis->timestamp;
 
     if (nIgnoredOldDatagrams > 0) {
         ASKAPLOG_DEBUG_STR(logger, "Catching up to time: "<<bat2epoch(currentTimestamp)<<
@@ -158,8 +158,8 @@ VisChunk::ShPtr NoMetadataSource::next(void)
     VisChunk::ShPtr chunk = createVisChunk(currentTimestamp);
 
     // Determine how many VisDatagrams are expected for a single integration
-    const casa::uInt interval = itsCorrelatorMode.interval();
-    const casa::uInt timeout = interval * 2;
+    const casacore::uInt interval = itsCorrelatorMode.interval();
+    const casacore::uInt timeout = interval * 2;
 
     // Read VisDatagrams and add them to the VisChunk. If itsVisSrc->next()
     // returns a null pointer this indicates the timeout has been reached.
@@ -216,7 +216,7 @@ VisChunk::ShPtr NoMetadataSource::next(void)
     return chunk;
 }
 
-VisChunk::ShPtr NoMetadataSource::createVisChunk(const casa::uLong timestamp)
+VisChunk::ShPtr NoMetadataSource::createVisChunk(const casacore::uLong timestamp)
 {
     itsVisConverter.initVisChunk(timestamp, itsCorrelatorMode);
     VisChunk::ShPtr chunk = itsVisConverter.visChunk();
@@ -250,11 +250,11 @@ VisChunk::ShPtr NoMetadataSource::createVisChunk(const casa::uLong timestamp)
 
 
     // Populate the per-antenna vectors
-    const casa::uInt nAntenna = itsVisConverter.config().antennas().size();
+    const casacore::uInt nAntenna = itsVisConverter.config().antennas().size();
     ASKAPDEBUGASSERT(nAntenna == chunk->targetPointingCentre().size());
     ASKAPDEBUGASSERT(nAntenna == chunk->actualPointingCentre().size());
     ASKAPDEBUGASSERT(nAntenna == chunk->actualPolAngle().size());
-    for (casa::uInt i = 0; i < nAntenna; ++i) {
+    for (casacore::uInt i = 0; i < nAntenna; ++i) {
         chunk->targetPointingCentre()[i] = itsTargetDirection;
         chunk->actualPointingCentre()[i] = itsTargetDirection;
         chunk->actualPolAngle()[i] = 0.0;

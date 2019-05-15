@@ -54,7 +54,7 @@ class TosMetadataAntenna {
         /// used to size the internal arrays, matrices and cubes.
         ///
         /// @param[in] name the name of the antenna.
-        TosMetadataAntenna(const casa::String& name);
+        TosMetadataAntenna(const casacore::String& name);
 
         /// @brief Copy constructor
         /// @param[in] other input object
@@ -67,97 +67,97 @@ class TosMetadataAntenna {
     
         /// @brief Get the name of the antenna.
         /// @return the name of the antenna.
-        casa::String name(void) const;
+        casacore::String name(void) const;
 
         /// @brief Get the actual coordinates for the dish pointing
         /// @return the actual coordinates for the dish pointing
-        casa::MDirection actualRaDec(void) const;
+        casacore::MDirection actualRaDec(void) const;
 
         /// @brief Set the actual coordinates for the dish pointing
         /// @param[in] val the actual coordinates for the dish pointing
-        void actualRaDec(const casa::MDirection& val);
+        void actualRaDec(const casacore::MDirection& val);
 
         /// @brief Get the actual coordinates for the dish pointing
         /// @return the actual coordinates for the dish pointing
-        casa::MDirection actualAzEl(void) const;
+        casacore::MDirection actualAzEl(void) const;
 
         /// @brief Set the actual coordinates for the dish pointing
         /// @param[in] val the actual coordinates for the dish pointing
-        void actualAzEl(const casa::MDirection& val);
+        void actualAzEl(const casacore::MDirection& val);
 
         /// @brief Get the polarisation axis angle.
         /// @return the polarisation axis angle
-        casa::Quantity actualPolAngle(void) const;
+        casacore::Quantity actualPolAngle(void) const;
 
         /// @brief Set the polarisation axis angle.
         /// @param[in] q    the polarisation axis angle
-        void actualPolAngle(const casa::Quantity& q);
+        void actualPolAngle(const casacore::Quantity& q);
 
         /// @brief Get the value of the onSource flag.
         ///
         /// @return True if antenna was within tolerance thresholds of the
         /// target trajectory throughout the entire integration cycle. If
         /// this is false then all data from this antenna should be flagged.
-        casa::Bool onSource(void) const;
+        casacore::Bool onSource(void) const;
 
         /// @brief Set the value of the onSource flag.
         ///
         /// @param[in] val the value of the on source flag. True if antenna
         /// was within tolerance thresholds of the target trajectory throughout
         /// the entire integration cycle.
-        void onSource(const casa::Bool& val);
+        void onSource(const casacore::Bool& val);
 
         /// @brief Get the value of the general (misc error) flag.
         ///
         /// @return true if hardware monitoring reveals a problem
         /// (eg. LO out of lock) that means all data from this antenna
         /// should be flagged.
-        casa::Bool flagged(void) const;
+        casacore::Bool flagged(void) const;
 
         /// @brief Set the value of the general (misc error) flag.
         /// @param[in] val the value of the hardware error flag. Use true to
         /// indicate a hardware error, otherwise false.
-        void flagged(const casa::Bool& val);
+        void flagged(const casacore::Bool& val);
 
         /// @brief Get the values of the UVW vector
         /// @return vector with UVWs, 3 values for each beam
-        const casa::Vector<casa::Double>& uvw() const;
+        const casacore::Vector<casacore::Double>& uvw() const;
 
         /// @brief Set the values of the UVW vector
         /// @param[in] val the vector with UVWs
         /// @note It is expected that we get 3 values per beam. An exception is thrown if the number of
         /// elements is not divisable by 3.
-        void uvw(const casa::Vector<casa::Double> &uvw);
+        void uvw(const casacore::Vector<casacore::Double> &uvw);
 
     private:
 
         /// The name of the antenna
-        casa::String itsName;
+        casacore::String itsName;
 
         /// The actual RA/DEC 
-        casa::MDirection itsActualRaDec;
+        casacore::MDirection itsActualRaDec;
 
         /// The actual AZ/EL 
-        casa::MDirection itsActualAzEl;
+        casacore::MDirection itsActualAzEl;
 
         /// The polarisation axis angle.
-        casa::Quantity itsPolAngle;
+        casacore::Quantity itsPolAngle;
 
         /// True if antenna was within tolerance thresholds of the target
         /// trajectory throughout the entire integration cycle. If this is
         /// false then all data from this antenna should be flagged.
-        casa::Bool itsOnSource;
+        casacore::Bool itsOnSource;
 
         /// True if hardware monitoring reveals a problem (eg. LO out of lock)
         /// that means all data from this antenna should be flagged. If this
         /// is true, other metadata for this antenna may be invalid.
-        casa::Bool itsFlagged;
+        casacore::Bool itsFlagged;
 
         /// Vector with uvw's w.r.t. some reference
         /// We distribute per-antenna, per-beam uvw in metadata to cut down the
         /// the message size. The actual uvw's are per-baseline, per-beam and can
         /// be calculated by differencing appropriate antenna pairs.
-        casa::Vector<casa::Double> itsUVW;
+        casacore::Vector<casacore::Double> itsUVW;
 };
 
 }

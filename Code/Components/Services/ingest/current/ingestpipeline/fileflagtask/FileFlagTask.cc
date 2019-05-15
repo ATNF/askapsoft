@@ -67,7 +67,7 @@ FileFlagTask::FileFlagTask(const LOFAR::ParameterSet& parset, const Configuratio
         ASKAPLOG_INFO_STR(logger, "Caching flagging rule for baseline " <<
                           itsBaselineMap.idToAntenna1(int32_t(i)) << " - " <<
                           itsBaselineMap.idToAntenna2(int32_t(i)) <<
-                          ", polarisation " << casa::Stokes::name(itsBaselineMap.idToStokes(i))
+                          ", polarisation " << casacore::Stokes::name(itsBaselineMap.idToStokes(i))
                           << " from file " << fileNames[i]);
         itsChannelsToFlag[i].reserve(500);
         std::ifstream is(fileNames[i].c_str());
@@ -103,34 +103,34 @@ void FileFlagTask::process(askap::cp::common::VisChunk::ShPtr& chunk)
     ASKAPDEBUGASSERT(chunk);
     //
     ASKAPCHECK(chunk->nPol() == 4, "Support only chunks with 4 polarisation products");
-    const casa::Vector<casa::Stokes::StokesTypes>& stokes = chunk->stokes();
+    const casacore::Vector<casacore::Stokes::StokesTypes>& stokes = chunk->stokes();
     ASKAPDEBUGASSERT(stokes.nelements() == 4);
-    ASKAPCHECK(stokes[0] == casa::Stokes::XX, "The first polarisation product of the chunk is supposed to be XX");
-    ASKAPCHECK(stokes[1] == casa::Stokes::XY, "The second polarisation product of the chunk is supposed to be XY");
-    ASKAPCHECK(stokes[2] == casa::Stokes::YX, "The third polarisation product of the chunk is supposed to be YX");
-    ASKAPCHECK(stokes[3] == casa::Stokes::YY, "The last polarisation product of the chunk is supposed to be YY");
+    ASKAPCHECK(stokes[0] == casacore::Stokes::XX, "The first polarisation product of the chunk is supposed to be XX");
+    ASKAPCHECK(stokes[1] == casacore::Stokes::XY, "The second polarisation product of the chunk is supposed to be XY");
+    ASKAPCHECK(stokes[2] == casacore::Stokes::YX, "The third polarisation product of the chunk is supposed to be YX");
+    ASKAPCHECK(stokes[3] == casacore::Stokes::YY, "The last polarisation product of the chunk is supposed to be YY");
 
-    const casa::Vector<casa::uInt>& antenna1 = chunk->antenna1();
-    const casa::Vector<casa::uInt>& antenna2 = chunk->antenna2();
-    const casa::Vector<casa::uInt>& beam1 = chunk->beam1();
+    const casacore::Vector<casacore::uInt>& antenna1 = chunk->antenna1();
+    const casacore::Vector<casacore::uInt>& antenna2 = chunk->antenna2();
+    const casacore::Vector<casacore::uInt>& beam1 = chunk->beam1();
     ASKAPDEBUGASSERT(antenna1.nelements() == chunk->nRow());
     ASKAPDEBUGASSERT(antenna2.nelements() == chunk->nRow());
     ASKAPDEBUGASSERT(beam1.nelements() == chunk->nRow());
 
-    casa::uInt nMatch = 0;
-    for (casa::uInt row = 0; row < chunk->nRow(); ++row) {
-        const casa::uInt beam = beam1[row];
+    casacore::uInt nMatch = 0;
+    for (casacore::uInt row = 0; row < chunk->nRow(); ++row) {
+        const casacore::uInt beam = beam1[row];
 
-        casa::Matrix<casa::Complex> thisRow  = chunk->visibility().yzPlane(row);
-        casa::Matrix<casa::Bool> thisFlagRow  = chunk->flag().yzPlane(row);
+        casacore::Matrix<casacore::Complex> thisRow  = chunk->visibility().yzPlane(row);
+        casacore::Matrix<casacore::Bool> thisFlagRow  = chunk->flag().yzPlane(row);
         ASKAPDEBUGASSERT(thisRow.ncolumn() == 4);
 
-        for (casa::uInt pol = 0; pol < chunk->nPol(); ++pol) {
-            const casa::Int id = itsBaselineMap.getID(antenna1[row], antenna2[row], stokes[pol]);
+        for (casacore::uInt pol = 0; pol < chunk->nPol(); ++pol) {
+            const casacore::Int id = itsBaselineMap.getID(antenna1[row], antenna2[row], stokes[pol]);
             if (id > -1) {
-                casa::Vector<casa::Complex> thisPol = thisRow.column(pol);
-                casa::Vector<casa::Bool> thisFlagPol = thisFlagRow.column(pol);
-                processRow(thisPol, thisFlagPol, static_cast<const casa::uInt>(id), beam);
+                casacore::Vector<casacore::Complex> thisPol = thisRow.column(pol);
+                casacore::Vector<casacore::Bool> thisFlagPol = thisFlagRow.column(pol);
+                processRow(thisPol, thisFlagPol, static_cast<const casacore::uInt>(id), beam);
                 ++nMatch;
             }
         }
@@ -147,8 +147,8 @@ void FileFlagTask::process(askap::cp::common::VisChunk::ShPtr& chunk)
 /// @param[in,out] flag flag spectrum for the given baseline/pol index to work with
 /// @param[in] baseline baseline ID
 /// For future use: param[in] beam beam ID
-void FileFlagTask::processRow(casa::Vector<casa::Complex> &vis, casa::Vector<casa::Bool> &flag,
-                                 const casa::uInt baseline, const casa::uInt)
+void FileFlagTask::processRow(casacore::Vector<casacore::Complex> &vis, casacore::Vector<casacore::Bool> &flag,
+                                 const casacore::uInt baseline, const casacore::uInt)
 {
     ASKAPDEBUGASSERT(baseline < itsChannelsToFlag.size());
     ASKAPDEBUGASSERT(vis.nelements() == flag.nelements());
@@ -158,6 +158,6 @@ void FileFlagTask::processRow(casa::Vector<casa::Complex> &vis, casa::Vector<cas
                    << " during flagging which exceeds the total number of channels "
                    << vis.nelements());
         vis[*ci] = 0.;
-        flag[*ci] = casa::True;
+        flag[*ci] = casacore::True;
     }
 }

@@ -115,23 +115,23 @@ class NoMetadataSourceTest : public CppUnit::TestFixture,
 
             // Ensure the timestamp represents the integration midpoint.
             const double midpoint = bat2epoch(3500000ul).getValue().getTime().getValue("s");
-            const casa::Quantity chunkMidpoint = chunk->time().getTime();
+            const casacore::Quantity chunkMidpoint = chunk->time().getTime();
             CPPUNIT_ASSERT_DOUBLES_EQUAL(midpoint, chunkMidpoint.getValue("s"), 1.0E-10);
 
             // Ensure other metadata is as expected
             CPPUNIT_ASSERT_EQUAL(nChannelsForTest(), chunk->nChannel());
             CPPUNIT_ASSERT_EQUAL(nCorr, chunk->nPol());
-            const casa::uInt nAntennas = config.antennas().size();
-            const casa::uInt nBaselines = nAntennas * (nAntennas + 1) / 2;
+            const casacore::uInt nAntennas = config.antennas().size();
+            const casacore::uInt nBaselines = nAntennas * (nAntennas + 1) / 2;
             const uint32_t nBeam = config.feed().nFeeds();
             CPPUNIT_ASSERT_EQUAL(nBaselines * nBeam, chunk->nRow());
 
             // Check stokes
             CPPUNIT_ASSERT(chunk->nPol() >= 4);
-            CPPUNIT_ASSERT(chunk->stokes()(0) == casa::Stokes::XX);
-            CPPUNIT_ASSERT(chunk->stokes()(1) == casa::Stokes::XY);
-            CPPUNIT_ASSERT(chunk->stokes()(2) == casa::Stokes::YX);
-            CPPUNIT_ASSERT(chunk->stokes()(3) == casa::Stokes::YY);
+            CPPUNIT_ASSERT(chunk->stokes()(0) == casacore::Stokes::XX);
+            CPPUNIT_ASSERT(chunk->stokes()(1) == casacore::Stokes::XY);
+            CPPUNIT_ASSERT(chunk->stokes()(2) == casacore::Stokes::YX);
+            CPPUNIT_ASSERT(chunk->stokes()(3) == casacore::Stokes::YY);
 
             // Ensure the visibilities that were supplied (most were not)
             // are not flagged, and that the rest are flagged

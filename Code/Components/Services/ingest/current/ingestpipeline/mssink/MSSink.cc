@@ -131,7 +131,7 @@ bool MSSink::isAlwaysActive() const
 
 void MSSink::process(VisChunk::ShPtr& chunk)
 {
-    casa::Timer timer;
+    casacore::Timer timer;
     timer.mark();
     if (!itsMs) {
         // this is delayed initialisation in the parallel mode
@@ -179,7 +179,7 @@ void MSSink::process(VisChunk::ShPtr& chunk)
     ASKAPDEBUGASSERT(chunk);
 
     // Handle the details for when a new scan starts
-    if (itsPreviousScanIndex != static_cast<casa::Int>(chunk->scan())) {
+    if (itsPreviousScanIndex != static_cast<casacore::Int>(chunk->scan())) {
         itsFieldRow = findOrAddField(chunk);
         itsDataDescRow = findOrAddDataDesc(chunk);
         itsPreviousScanIndex = chunk->scan();
@@ -204,8 +204,8 @@ void MSSink::process(VisChunk::ShPtr& chunk)
     submitMonitoringPoints(chunk);
 
     MSColumns msc(*itsMs);
-    const casa::uInt baseRow = msc.nrow();
-    const casa::uInt newRows = chunk->nRow();
+    const casacore::uInt baseRow = msc.nrow();
+    const casacore::uInt newRows = chunk->nRow();
     ASKAPLOG_DEBUG_STR(logger, "  MSSink - before adding new rows, timer="<<timer.real()<<" rank "<<itsConfig.rank()<<" stream "<<itsStreamNumber);
     itsMs->addRow(newRows);
 
@@ -225,16 +225,16 @@ void MSSink::process(VisChunk::ShPtr& chunk)
     msc.observationId().put(baseRow, 0);
     msc.stateId().put(baseRow, -1);
 
-    for (casa::uInt i = 0; i < newRows; ++i) {
-        const casa::uInt row = i + baseRow;
+    for (casacore::uInt i = 0; i < newRows; ++i) {
+        const casacore::uInt row = i + baseRow;
         msc.antenna1().put(row, chunk->antenna1()(i));
         msc.antenna2().put(row, chunk->antenna2()(i));
         msc.feed1().put(row, chunk->beam1()(i));
         msc.feed2().put(row, chunk->beam2()(i));
         msc.uvw().put(row, chunk->uvw()(i).vector());
 
-        msc.data().put(row, casa::transpose(chunk->visibility().yzPlane(i)));
-        msc.flag().put(row, casa::transpose(chunk->flag().yzPlane(i)));
+        msc.data().put(row, casacore::transpose(chunk->visibility().yzPlane(i)));
+        msc.flag().put(row, casacore::transpose(chunk->flag().yzPlane(i)));
         msc.flagRow().put(row, False);
 
         // TODO: Need to get this data from somewhere
@@ -251,13 +251,13 @@ void MSSink::process(VisChunk::ShPtr& chunk)
     // otherwise just update the end time.
 
     MSObservationColumns& obsc = msc.observation();
-    casa::Vector<casa::Double> timeRange = obsc.timeRange()(0);
+    casacore::Vector<casacore::Double> timeRange = obsc.timeRange()(0);
     if (timeRange(0) == 0) {
-        const casa::Double Tstart = chunkMidpoint - chunkInterval * 0.5;
+        const casacore::Double Tstart = chunkMidpoint - chunkInterval * 0.5;
         timeRange(0) = Tstart;
     }
 
-    const casa::Double Tend = chunkMidpoint + 0.5 * chunkInterval;
+    const casacore::Double Tend = chunkMidpoint + 0.5 * chunkInterval;
     timeRange(1) = Tend;
     obsc.timeRange().put(0, timeRange);
 
@@ -358,9 +358,9 @@ int MSSink::countActiveRanks(const bool isActive) const
 void MSSink::create(void)
 {
     // Get configuration first to ensure all parameters are present
-    casa::uInt bucketSize = itsParset.getUint32("stman.bucketsize", 128 * 1024);
-    casa::uInt tileNcorr = itsParset.getUint32("stman.tilencorr", 4);
-    casa::uInt tileNchan = itsParset.getUint32("stman.tilenchan", 1);
+    casacore::uInt bucketSize = itsParset.getUint32("stman.bucketsize", 128 * 1024);
+    casacore::uInt tileNcorr = itsParset.getUint32("stman.tilencorr", 4);
+    casacore::uInt tileNchan = itsParset.getUint32("stman.tilenchan", 1);
 
     if (bucketSize < 8192) {
         bucketSize = 8192;
@@ -443,7 +443,7 @@ void MSSink::create(void)
 
     // Set Epoch Reference to UTC
     MSColumns msc(*itsMs);
-    msc.setEpochRef(casa::MEpoch::UTC);
+    msc.setEpochRef(casacore::MEpoch::UTC);
 }
 
 /// @brief add non-standard column to POINTING table
@@ -457,7 +457,7 @@ void MSSink::addNonStandardPointingColumn(const std::string &name,
 {
    ASKAPASSERT(itsMs);
    MSPointing& pointing = itsMs->pointing();
-   casa::ScalarColumnDesc<casa::Float> colDesc(name, description);
+   casacore::ScalarColumnDesc<casacore::Float> colDesc(name, description);
    colDesc.rwKeywordSet().define("unit","deg");
    pointing.addColumn(colDesc);
 }
@@ -467,7 +467,7 @@ void MSSink::initAntennas(void)
     const std::vector<Antenna> antennas = itsConfig.antennas();
     std::vector<Antenna>::const_iterator it;
     for (it = antennas.begin(); it != antennas.end(); ++it) {
-        casa::Int id = addAntenna(itsConfig.arrayName(),
+        casacore::Int id = addAntenna(itsConfig.arrayName(),
                 it->position(),
                 it->name(),
                 it->mount(),
@@ -485,8 +485,8 @@ void MSSink::initObs(void)
     addObs("ASKAP", "", 0, 0);
 }
 
-casa::Int MSSink::addObs(const casa::String& telescope,
-        const casa::String& observer,
+casacore::Int MSSink::addObs(const casacore::String& telescope,
+        const casacore::String& observer,
         const double obsStartTime,
         const double obsEndTime)
 {
@@ -514,27 +514,27 @@ void MSSink::addPointingRows(const VisChunk& chunk)
 
     MSColumns msc(*itsMs);
     MSPointingColumns& pointingc = msc.pointing();
-    casa::ScalarColumn<casa::Float> polAngleCol(itsMs->pointing(), "POLANGLE");
-    casa::ScalarColumn<casa::Float> azimuthCol(itsMs->pointing(), "AZIMUTH");
-    casa::ScalarColumn<casa::Float> elevationCol(itsMs->pointing(), "ELEVATION");
+    casacore::ScalarColumn<casacore::Float> polAngleCol(itsMs->pointing(), "POLANGLE");
+    casacore::ScalarColumn<casacore::Float> azimuthCol(itsMs->pointing(), "AZIMUTH");
+    casacore::ScalarColumn<casacore::Float> elevationCol(itsMs->pointing(), "ELEVATION");
 
     uInt row = pointingc.nrow();
 
     // Initialise if this is the first cycle. All standard direction-type columns are
     // always in J2000.
     if (row == 0) {
-        pointingc.setDirectionRef(casa::MDirection::J2000);
-       // pointingc.setDirectionRef(casa::MDirection::castType(
+        pointingc.setDirectionRef(casacore::MDirection::J2000);
+       // pointingc.setDirectionRef(casacore::MDirection::castType(
          //           chunk.actualPointingCentre()(0).getRef().getType()));
     }
 
-    const casa::uInt nAntenna = chunk.nAntenna();
+    const casacore::uInt nAntenna = chunk.nAntenna();
     itsMs->pointing().addRow(nAntenna);
 
     const double t = chunk.time().getTime().getValue("s");
     const double interval = chunk.interval();
 
-    for (casa::uInt i = 0; i < nAntenna; ++i) {
+    for (casacore::uInt i = 0; i < nAntenna; ++i) {
         pointingc.antennaId().put(row, i);
         pointingc.time().put(row, t);
         pointingc.interval().put(row, interval);
@@ -563,9 +563,9 @@ void MSSink::addPointingRows(const VisChunk& chunk)
     }
 }
 
-casa::Int MSSink::addField(const casa::String& fieldName,
-        const casa::MDirection& fieldDirection,
-        const casa::String& calCode)
+casacore::Int MSSink::addField(const casacore::String& fieldName,
+        const casacore::MDirection& fieldDirection,
+        const casacore::String& calCode)
 {
     MSColumns msc(*itsMs);
     MSFieldColumns& fieldc = msc.field();
@@ -592,11 +592,11 @@ casa::Int MSSink::addField(const casa::String& fieldName,
     return row;
 }
 
-casa::Int MSSink::addAntenna(const casa::String& station,
-        const casa::Vector<double>& antXYZ,
-        const casa::String& name,
-        const casa::String& mount,
-        const casa::Double& dishDiameter)
+casacore::Int MSSink::addAntenna(const casacore::String& station,
+        const casacore::Vector<double>& antXYZ,
+        const casacore::String& name,
+        const casacore::String& mount,
+        const casacore::Double& dishDiameter)
 {
     // Pre-conditions
     ASKAPCHECK(antXYZ.size() == 3, "Antenna position vector must contain 3 elements");
@@ -623,7 +623,7 @@ casa::Int MSSink::addAntenna(const casa::String& station,
     return row;
 }
 
-casa::Int MSSink::addDataDesc(const casa::Int spwId, const casa::Int polId)
+casacore::Int MSSink::addDataDesc(const casacore::Int spwId, const casacore::Int polId)
 {
     // 1: Add new row and determine its offset
     MSColumns msc(*itsMs);
@@ -642,10 +642,10 @@ casa::Int MSSink::addDataDesc(const casa::Int spwId, const casa::Int polId)
 /// @note The implementation of method isSpectralWindowRowEqual() is tightly
 /// coupled to the implementation of this method. If this method is changed
 /// it is likely isSpectralWindowRowEqual() should be too.
-casa::Int MSSink::addSpectralWindow(const casa::String& spwName,
+casacore::Int MSSink::addSpectralWindow(const casacore::String& spwName,
             const int nChan,
-            const casa::Quantity& startFreq,
-            const casa::Quantity& freqInc)
+            const casacore::Quantity& startFreq,
+            const casacore::Quantity& freqInc)
 {
     MSColumns msc(*itsMs);
     MSSpWindowColumns& spwc = msc.spectralWindow();
@@ -687,7 +687,7 @@ casa::Int MSSink::addSpectralWindow(const casa::String& spwName,
 /// @note The implementation of method isPolarisationRowEqual() is tightly
 /// coupled to the implementation of this method. If this method is changed
 /// it is likely isPolarisationRowEqual() should be too.
-casa::Int MSSink::addPolarisation(const casa::Vector<casa::Stokes::StokesTypes>& stokesTypes)
+casacore::Int MSSink::addPolarisation(const casacore::Vector<casacore::Stokes::StokesTypes>& stokesTypes)
 {
     const Int nCorr = stokesTypes.size();
 
@@ -704,7 +704,7 @@ casa::Int MSSink::addPolarisation(const casa::Vector<casa::Stokes::StokesTypes>&
     Matrix<Int> corrProduct(uInt(2), uInt(nCorr));
     Fallible<Int> fi;
 
-    casa::Vector<casa::Int> stokesTypesInt(nCorr);
+    casacore::Vector<casacore::Int> stokesTypesInt(nCorr);
     for (Int i = 0; i < nCorr; i++) {
         fi = Stokes::receptor1(stokesTypes(i));
         corrProduct(0, i) = (fi.isValid() ? fi.value() : 0);
@@ -719,11 +719,11 @@ casa::Int MSSink::addPolarisation(const casa::Vector<casa::Stokes::StokesTypes>&
     return row;
 }
 
-casa::Int MSSink::findOrAddField(const askap::cp::common::VisChunk::ShPtr chunk)
+casacore::Int MSSink::findOrAddField(const askap::cp::common::VisChunk::ShPtr chunk)
 {
-    const casa::String fieldName = chunk->targetName();
-    const casa::MDirection fieldDirection = chunk->phaseCentre()[0];
-    const casa::String& calCode = "";
+    const casacore::String fieldName = chunk->targetName();
+    const casacore::MDirection fieldDirection = chunk->phaseCentre()[0];
+    const casacore::String& calCode = "";
 
     MSColumns msc(*itsMs);
     ROMSFieldColumns& fieldc = msc.field();
@@ -741,10 +741,10 @@ casa::Int MSSink::findOrAddField(const askap::cp::common::VisChunk::ShPtr chunk)
     return addField(fieldName, fieldDirection, calCode);
 }
 
-casa::Int MSSink::findOrAddDataDesc(askap::cp::common::VisChunk::ShPtr chunk)
+casacore::Int MSSink::findOrAddDataDesc(askap::cp::common::VisChunk::ShPtr chunk)
 {
-   casa::Int spwId;
-   casa::Int polId;
+   casacore::Int spwId;
+   casacore::Int polId;
 
    // 1: Try to find a data description that matches the scan
    MSColumns msc(*itsMs);
@@ -785,11 +785,11 @@ casa::Int MSSink::findOrAddDataDesc(askap::cp::common::VisChunk::ShPtr chunk)
 
    // 4: Create the missing entry and a data desc
    if (spwId == -1) {
-       const casa::String spWindowName("NO_NAME"); // TODO: Add name
+       const casacore::String spWindowName("NO_NAME"); // TODO: Add name
        spwId = addSpectralWindow(spWindowName,
                chunk->nChannel(),
-               casa::Quantity(chunk->frequency()(0), "Hz"),
-               casa::Quantity(chunk->channelWidth(), "Hz"));
+               casacore::Quantity(chunk->frequency()(0), "Hz"),
+               casacore::Quantity(chunk->channelWidth(), "Hz"));
    }
    if (polId == -1) {
        polId = addPolarisation(chunk->stokes());
@@ -809,24 +809,24 @@ casa::Int MSSink::findOrAddDataDesc(askap::cp::common::VisChunk::ShPtr chunk)
 //
 // @return true if the two are effectivly equal, otherwise false.
 bool MSSink::isSpectralWindowRowEqual(askap::cp::common::VisChunk::ShPtr chunk,
-        const casa::uInt row) const
+        const casacore::uInt row) const
 {
     MSColumns msc(*itsMs);
     ROMSSpWindowColumns& spwc = msc.spectralWindow();
     ASKAPCHECK(row < spwc.nrow(), "Row index out of bounds");
 
-    if (spwc.numChan()(row) != static_cast<casa::Int>(chunk->nChannel())) {
+    if (spwc.numChan()(row) != static_cast<casacore::Int>(chunk->nChannel())) {
         return false;
     }
     if (spwc.flagRow()(row) != false) {
         return false;
     }
-    const casa::Vector<double> freqs = spwc.chanFreq()(row);
+    const casacore::Vector<double> freqs = spwc.chanFreq()(row);
     const double dblEpsilon = std::numeric_limits<double>::epsilon();
     if (fabs(freqs(0) - chunk->frequency()(0)) > dblEpsilon) {
         return false;
     }
-    const casa::Vector<double> bandwidth = spwc.chanWidth()(row);
+    const casacore::Vector<double> bandwidth = spwc.chanWidth()(row);
     if (fabs(bandwidth(0) - chunk->channelWidth()) > dblEpsilon) {
         return false;
     }
@@ -845,20 +845,20 @@ bool MSSink::isSpectralWindowRowEqual(askap::cp::common::VisChunk::ShPtr chunk,
 //
 // @return true if the two are effectivly equal, otherwise false.
 bool MSSink::isPolarisationRowEqual(askap::cp::common::VisChunk::ShPtr chunk,
-        const casa::uInt row) const
+        const casacore::uInt row) const
 {
     MSColumns msc(*itsMs);
     ROMSPolarizationColumns& polc = msc.polarization();
     ASKAPCHECK(row < polc.nrow(), "Row index out of bounds");
 
-    if (polc.numCorr()(row) != static_cast<casa::Int>(chunk->stokes().size())) {
+    if (polc.numCorr()(row) != static_cast<casacore::Int>(chunk->stokes().size())) {
         return false;
     }
     if (polc.flagRow()(row) != false) {
         return false;
     }
-    casa::Vector<casa::Int> stokesTypesInt = polc.corrType()(row);
-    for (casa::uInt i = 0; i < stokesTypesInt.size(); ++i) {
+    casacore::Vector<casacore::Int> stokesTypesInt = polc.corrType()(row);
+    for (casacore::uInt i = 0; i < stokesTypesInt.size(); ++i) {
         if (stokesTypesInt(i) != chunk->stokes()(i)) {
             return false;
         }
@@ -872,8 +872,8 @@ void MSSink::submitMonitoringPoints(askap::cp::common::VisChunk::ShPtr chunk)
     ASKAPDEBUGASSERT(chunk);
     // Calculate flagged visibility counts
     int32_t flagCount = 0;
-    const casa::Cube<casa::Bool>& flags = chunk->flag();
-    for (Array<casa::Bool>::const_contiter it = flags.cbegin();
+    const casacore::Cube<casacore::Bool>& flags = chunk->flag();
+    for (Array<casacore::Bool>::const_contiter it = flags.cbegin();
             it != flags.cend(); ++it) {
         if (*it) ++flagCount;
     }
@@ -931,7 +931,7 @@ float MSSink::dataVolumeInMB(askap::cp::common::VisChunk::ShPtr& chunk)
     return nDataInMB;
 }
 
-bool MSSink::equal(const casa::MDirection &dir1, const casa::MDirection &dir2)
+bool MSSink::equal(const casacore::MDirection &dir1, const casacore::MDirection &dir2)
 {
     if (dir1.getRef().getType() != dir2.getRef().getType()) {
         return false;

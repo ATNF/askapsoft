@@ -97,8 +97,8 @@ class TestHelperFunctions {
 
             // Visibilities and Flag
             const size_t N_ROW = N_BASELINE * N_BEAM;
-            casa::Cube< std::complex<float> > vis(N_ROW, N_CHAN, N_POL);
-            casa::Cube<uint8_t> flag(N_ROW, N_CHAN, N_POL);
+            casacore::Cube< std::complex<float> > vis(N_ROW, N_CHAN, N_POL);
+            casacore::Cube<uint8_t> flag(N_ROW, N_CHAN, N_POL);
 
             for (size_t row = 0; row < N_ROW; ++row) {
                 for (size_t chan = 0; chan < N_CHAN; ++chan) {

@@ -126,7 +126,7 @@ class BufferedTask : public askap::cp::ingest::ITask {
         /// @brief maximum waiting time in seconds for the child task to complete
         /// @details If not complete in time, and the buffer is full - either
         /// exception is raised or the new data chunk is skipped
-        casa::uInt itsMaxWait;
+        casacore::uInt itsMaxWait;
 
         /// @brief service thread
         boost::shared_ptr<boost::thread> itsThread;

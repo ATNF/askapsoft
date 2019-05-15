@@ -66,7 +66,7 @@ int main(int argc, const char** argv)
     askap::askapparallel::AskapParallel comms(argc, argv);
     
     try {
-       casa::Timer timer;
+       casacore::Timer timer;
        timer.mark();
        
        cmdlineparser::Parser parser; // a command line parser
@@ -92,10 +92,10 @@ int main(int argc, const char** argv)
                CorrProducts cp(msSink.nChan(),beam);
                for (std::vector<std::string>::const_iterator ci = names.begin(); ci!=names.end(); ++ci) {
                     ASKAPLOG_INFO_STR(logger,  "Processing "<<*ci<<" as beam "<<beam<<" (zero-based) data");
-                    casa::uInt counter = 0, ignoreCounter = 0;
-                    std::set<casa::uInt> autoCorrWarningGiven;
+                    casacore::uInt counter = 0, ignoreCounter = 0;
+                    std::set<casacore::uInt> autoCorrWarningGiven;
                     for (reader.assign(*ci); reader.hasMore(); reader.next(), ++counter) {
-                         const std::pair<casa::uInt, casa::uInt> baseline = reader.baseline();
+                         const std::pair<casacore::uInt, casacore::uInt> baseline = reader.baseline();
                          if (baseline.first == baseline.second) {
                              if (autoCorrWarningGiven.find(baseline.first) == autoCorrWarningGiven.end()) {
                                  ASKAPLOG_WARN_STR(logger, "Ignoring autocorrelation for antenna "<<baseline.first);
@@ -106,16 +106,16 @@ int main(int argc, const char** argv)
                          }                    
                      
                          msSink.setDataDescID(reader.freqID());
-                         const casa::MVEpoch epochTAI= casa::MEpoch::Convert(reader.epoch(), 
-                               casa::MEpoch::Ref(casa::MEpoch::TAI))().getValue();
+                         const casacore::MVEpoch epochTAI= casacore::MEpoch::Convert(reader.epoch(), 
+                               casacore::MEpoch::Ref(casacore::MEpoch::TAI))().getValue();
                          const uint64_t microsecondsPerDay = 86400000000ull;
                          const uint64_t startOfDayBAT = uint64_t(epochTAI.getDay()*microsecondsPerDay);
                          cp.itsBAT = startOfDayBAT + uint64_t(epochTAI.getDayFraction()*microsecondsPerDay);
-                         ASKAPDEBUGASSERT(cp.itsUVW.shape() == casa::IPosition(2,3,3));
-                         ASKAPDEBUGASSERT(cp.itsVisibility.shape() == casa::IPosition(2,3,int(msSink.nChan())));
-                         ASKAPDEBUGASSERT(cp.itsFlag.shape() == casa::IPosition(2,3,int(msSink.nChan())));
+                         ASKAPDEBUGASSERT(cp.itsUVW.shape() == casacore::IPosition(2,3,3));
+                         ASKAPDEBUGASSERT(cp.itsVisibility.shape() == casacore::IPosition(2,3,int(msSink.nChan())));
+                         ASKAPDEBUGASSERT(cp.itsFlag.shape() == casacore::IPosition(2,3,int(msSink.nChan())));
                          cp.itsFlag.set(true);
-                         cp.itsVisibility.set(casa::Complex(0.,0.));
+                         cp.itsVisibility.set(casacore::Complex(0.,0.));
                          cp.itsUVW.set(0.);
                          int baselineID = FillerMSSink::baselineIndex(baseline.first, baseline.second);
                          if (baselineID>=0) {
@@ -127,7 +127,7 @@ int main(int argc, const char** argv)
                              ASKAPCHECK(baselineID >= 0, "Unable to find matching baseline index for ant1="<<
                                         baseline.first<<" and ant2="<<baseline.second);
                              ASKAPDEBUGASSERT(baselineID < 3);
-                             cp.itsVisibility.row(baselineID) = casa::conj(reader.visibility());
+                             cp.itsVisibility.row(baselineID) = casacore::conj(reader.visibility());
                              cp.itsUVW.row(baselineID) = -1. * reader.uvw();                                       
                          }                         
                          cp.itsUVWValid = true;

@@ -89,7 +89,7 @@ uint32_t VisConverter<VisDatagramADE>::mapChannel(uint32_t channelId)
 /// integration is processed.
 /// @param[in] timestamp BAT corresponding to this new chunk
 /// @param[in] corrMode correlator mode parameters (determines shape, etc)
-void VisConverter<VisDatagramADE>::initVisChunk(const casa::uLong timestamp, 
+void VisConverter<VisDatagramADE>::initVisChunk(const casacore::uLong timestamp, 
                const CorrelatorMode &corrMode)
 {
    itsReceivedDatagrams.clear();
@@ -101,12 +101,12 @@ void VisConverter<VisDatagramADE>::initVisChunk(const casa::uLong timestamp,
        itsNDuplicates = 0u;
    }
    VisConverterBase::initVisChunk(timestamp, corrMode);
-   const casa::uInt nChannels = channelManager().localNChannels(config().receiverId());
+   const casacore::uInt nChannels = channelManager().localNChannels(config().receiverId());
 
    ASKAPCHECK(nChannels % 216 == 0, "Bandwidth should be multiple of 4-MHz");
     
    // by default, we have 4 data slices
-   const casa::uInt datagramsExpected = itsNSlices * nBeamsToReceive() * nChannels;
+   const casacore::uInt datagramsExpected = itsNSlices * nBeamsToReceive() * nChannels;
    setNumberOfExpectedDatagrams(datagramsExpected);
 
    // initialise map cache - note it implies some specifics about hardware/interfaces
@@ -115,7 +115,7 @@ void VisConverter<VisDatagramADE>::initVisChunk(const casa::uLong timestamp,
    // note 2. We could've done this only once. Leave re-initialisation for every vis-chunk as in principle the mapping
    // can change from chunk to chunk (although we're not doing it at the moment). However, checking for a change in chunk
    // details is probably as expensive as rebuilding the cache.
-   std::vector<boost::optional<std::pair<casa::uInt, casa::uInt> > >::iterator it = itsCachedMap.begin(); 
+   std::vector<boost::optional<std::pair<casacore::uInt, casacore::uInt> > >::iterator it = itsCachedMap.begin(); 
    for (uint32_t beam = 0; beam < 36u; ++beam) {
         for (uint32_t product = 0; product < 2628u; ++product, ++it) {
              ASKAPDEBUGASSERT(it != itsCachedMap.end());
@@ -278,8 +278,8 @@ void VisConverter<VisDatagramADE>::add(const VisDatagramADE &vis)
    // channel id to physical channel mapping is dependent on hardware configuration
    // it is not clear yet what modes we want to expose to end user via parset
    // for now have some mapping hard-coded
-   //const casa::uInt channel = vis.channel;
-   const casa::uInt channel = mapChannel(vis.channel - 1);
+   //const casacore::uInt channel = vis.channel;
+   const casacore::uInt channel = mapChannel(vis.channel - 1);
 
    ASKAPASSERT(channel < chunk->nChannel())
    //
@@ -298,10 +298,10 @@ void VisConverter<VisDatagramADE>::add(const VisDatagramADE &vis)
 
    ASKAPDEBUGASSERT(itsCachedMap.size() >= 2628u * 36u);
    // offset iterator at the time of creation to the start of the relevant section
-   std::vector<boost::optional<std::pair<casa::uInt, casa::uInt> > >::const_iterator cachedMapIt = itsCachedMap.begin() + (vis.beamid - 1u) * 2628u + (vis.baseline1 - 1u);
+   std::vector<boost::optional<std::pair<casacore::uInt, casacore::uInt> > >::const_iterator cachedMapIt = itsCachedMap.begin() + (vis.beamid - 1u) * 2628u + (vis.baseline1 - 1u);
 
-   casa::Cube<casa::Bool>& flag = chunk->flag();
-   casa::Cube<casa::Complex>& visibility = chunk->visibility();
+   casacore::Cube<casacore::Bool>& flag = chunk->flag();
+   casacore::Cube<casacore::Complex>& visibility = chunk->visibility();
 
    bool atLeastOneUseful = false;
    for (uint32_t product = vis.baseline1, item = 0; product <= vis.baseline2; ++product, ++item, ++cachedMapIt) {
@@ -333,9 +333,9 @@ void VisConverter<VisDatagramADE>::add(const VisDatagramADE &vis)
 
 
         // map correlator product to the row and polarisation index
-        //const boost::optional<std::pair<casa::uInt, casa::uInt> > mp = 
+        //const boost::optional<std::pair<casacore::uInt, casacore::uInt> > mp = 
         //     mapCorrProduct(product, vis.beamid);
-        const boost::optional<std::pair<casa::uInt, casa::uInt> > mp = *cachedMapIt;
+        const boost::optional<std::pair<casacore::uInt, casacore::uInt> > mp = *cachedMapIt;
         
         
         if (!mp) {
@@ -343,17 +343,17 @@ void VisConverter<VisDatagramADE>::add(const VisDatagramADE &vis)
         }
         
 
-        const casa::uInt row = mp->first;
-        const casa::uInt polidx = mp->second;
+        const casacore::uInt row = mp->first;
+        const casacore::uInt polidx = mp->second;
 
         ASKAPDEBUGASSERT(row < chunk->nRow());
         ASKAPDEBUGASSERT(polidx < chunk->nPol());
 
         atLeastOneUseful = true;
-        const casa::Complex sample(vis.vis[item].real, vis.vis[item].imag);
+        const casacore::Complex sample(vis.vis[item].real, vis.vis[item].imag);
 
-        const casa::uInt antenna1 = chunk->antenna1()(row);
-        const casa::uInt antenna2 = chunk->antenna2()(row);
+        const casacore::uInt antenna1 = chunk->antenna1()(row);
+        const casacore::uInt antenna2 = chunk->antenna2()(row);
         const bool rowIsValid = isAntennaGood(antenna1) && isAntennaGood(antenna2);
         const bool isAutoCorr = antenna1 == antenna2;
 
@@ -401,9 +401,9 @@ void VisConverter<VisDatagramADE>::add(const VisDatagramADE &vis)
         }
 
         // temporary - debugging frequency mapping/values received from the ioc
-        //visibility.yzPlane(row).row(channel).set(casa::Complex(vis.freq,0.));
-        //visibility.yzPlane(row).row(channel).set(casa::Complex(vis.freq - chunk->frequency()[channel]/1e6,0.));
-        //visibility.yzPlane(row).row(channel).set(casa::Complex(antenna1 + 10.*config().rank(),0.));
+        //visibility.yzPlane(row).row(channel).set(casacore::Complex(vis.freq,0.));
+        //visibility.yzPlane(row).row(channel).set(casacore::Complex(vis.freq - chunk->frequency()[channel]/1e6,0.));
+        //visibility.yzPlane(row).row(channel).set(casacore::Complex(antenna1 + 10.*config().rank(),0.));
         //
    }
 

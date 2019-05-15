@@ -92,75 +92,75 @@ std::vector<std::string> CubeMakerHelperFunctions::expandPattern(const std::stri
 }
 
 bool CubeMakerHelperFunctions::compatibleCoordinates(
-                           const casa::CoordinateSystem& c1,
-                           const casa::CoordinateSystem& c2)
+                           const casacore::CoordinateSystem& c1,
+                           const casacore::CoordinateSystem& c2)
 {
     return ((c1.nCoordinates() == c2.nCoordinates())
             && c1.type() == c2.type()
             && c1.nPixelAxes() == c2.nPixelAxes()
             && c1.nWorldAxes() == c2.nWorldAxes()
-            && c1.findCoordinate(casa::Coordinate::SPECTRAL) == c2.findCoordinate(casa::Coordinate::SPECTRAL)
-            && c1.findCoordinate(casa::Coordinate::STOKES) == c2.findCoordinate(casa::Coordinate::STOKES)
-            && c1.findCoordinate(casa::Coordinate::DIRECTION) == c2.findCoordinate(casa::Coordinate::DIRECTION));
+            && c1.findCoordinate(casacore::Coordinate::SPECTRAL) == c2.findCoordinate(casacore::Coordinate::SPECTRAL)
+            && c1.findCoordinate(casacore::Coordinate::STOKES) == c2.findCoordinate(casacore::Coordinate::STOKES)
+            && c1.findCoordinate(casacore::Coordinate::DIRECTION) == c2.findCoordinate(casacore::Coordinate::DIRECTION));
 }
 
-void CubeMakerHelperFunctions::assertValidCoordinates(const casa::CoordinateSystem& csys)
+void CubeMakerHelperFunctions::assertValidCoordinates(const casacore::CoordinateSystem& csys)
 {
-    const int whichSpectral = csys.findCoordinate(casa::Coordinate::SPECTRAL);
+    const int whichSpectral = csys.findCoordinate(casacore::Coordinate::SPECTRAL);
     ASKAPCHECK(whichSpectral > -1,
                "No spectral coordinate present in the coordinate system of the first image.");
 
-    const casa::Vector<casa::Int> axesSpectral = csys.pixelAxes(whichSpectral);
+    const casacore::Vector<casacore::Int> axesSpectral = csys.pixelAxes(whichSpectral);
     ASKAPCHECK(axesSpectral.nelements() == 1, "Spectral axis " << whichSpectral
                << " is expected to correspond to just one pixel axes, you have "
                << axesSpectral);
 }
 
-double CubeMakerHelperFunctions::getChanFreq(const casa::CoordinateSystem& csys)
+double CubeMakerHelperFunctions::getChanFreq(const casacore::CoordinateSystem& csys)
 {
     assertValidCoordinates(csys);
-    const int whichSpectral = csys.findCoordinate(casa::Coordinate::SPECTRAL);
-    const casa::Vector<casa::Int> axesSpectral = csys.pixelAxes(whichSpectral);
+    const int whichSpectral = csys.findCoordinate(casacore::Coordinate::SPECTRAL);
+    const casacore::Vector<casacore::Int> axesSpectral = csys.pixelAxes(whichSpectral);
 
-    casa::SpectralCoordinate freq(csys.spectralCoordinate(whichSpectral));
+    casacore::SpectralCoordinate freq(csys.spectralCoordinate(whichSpectral));
     double chanFreq;
     freq.toWorld(chanFreq, 0.0);
     return chanFreq;
 }
 
 double CubeMakerHelperFunctions::getFreqIncrement(
-                        const casa::CoordinateSystem& c1,
-                        const casa::CoordinateSystem& c2)
+                        const casacore::CoordinateSystem& c1,
+                        const casacore::CoordinateSystem& c2)
 {
     return getChanFreq(c2) - getChanFreq(c1);
 }
 
-casa::CoordinateSystem CubeMakerHelperFunctions::makeCoordinates(
-                                       const casa::CoordinateSystem& c1,
-                                       const casa::CoordinateSystem& c2,
-                                       const casa::IPosition& refShape)
+casacore::CoordinateSystem CubeMakerHelperFunctions::makeCoordinates(
+                                       const casacore::CoordinateSystem& c1,
+                                       const casacore::CoordinateSystem& c2,
+                                       const casacore::IPosition& refShape)
 {
     assertValidCoordinates(c1);
     assertValidCoordinates(c2);
-    const int whichSpectral = c1.findCoordinate(casa::Coordinate::SPECTRAL);
+    const int whichSpectral = c1.findCoordinate(casacore::Coordinate::SPECTRAL);
 
-    const casa::Vector<casa::Int> axesSpectral = c1.pixelAxes(whichSpectral);
-    ASKAPASSERT(casa::uInt(axesSpectral[0]) < refShape.nelements());
+    const casacore::Vector<casacore::Int> axesSpectral = c1.pixelAxes(whichSpectral);
+    ASKAPASSERT(casacore::uInt(axesSpectral[0]) < refShape.nelements());
 
     // Copy and update the spectral coordinate
-    casa::SpectralCoordinate freq(c1.spectralCoordinate(whichSpectral));
-    freq.setReferencePixel(casa::Vector<double>(1, 0.0));
-    freq.setReferenceValue(casa::Vector<double>(1, getChanFreq(c1)));
+    casacore::SpectralCoordinate freq(c1.spectralCoordinate(whichSpectral));
+    freq.setReferencePixel(casacore::Vector<double>(1, 0.0));
+    freq.setReferenceValue(casacore::Vector<double>(1, getChanFreq(c1)));
     const double freqdelt = getFreqIncrement(c1, c2);
     if (freqdelt < std::numeric_limits<double>::epsilon()) {
         ASKAPLOG_ERROR_STR(logger, "Frequency increment is zero - Spectral coordinate will be invalid");
     }
-    freq.setIncrement(casa::Vector<double>(1, freqdelt));
+    freq.setIncrement(casacore::Vector<double>(1, freqdelt));
 
     // Build the coordinate system
-    casa::CoordinateSystem csys;
-    for (casa::uInt axis = 0; axis < c1.nCoordinates(); ++axis) {
-        if (c1.type(axis) != casa::Coordinate::SPECTRAL) {
+    casacore::CoordinateSystem csys;
+    for (casacore::uInt axis = 0; axis < c1.nCoordinates(); ++axis) {
+        if (c1.type(axis) != casacore::Coordinate::SPECTRAL) {
             csys.addCoordinate(c1.coordinate(axis));
         } else {
             csys.addCoordinate(freq);

@@ -43,7 +43,7 @@
 using namespace askap;
 using namespace askap::components;
 
-SpectralIndex::SpectralIndex(const casa::MFrequency& refFreq, double index)
+SpectralIndex::SpectralIndex(const casacore::MFrequency& refFreq, double index)
     : itsReferenceFreq(refFreq), itsSpectralIndex(index)
 {
     ASKAPCHECK(refFreq.get("Hz").getValue() > 0.0,
@@ -55,7 +55,7 @@ ComponentType::SpectralShape SpectralIndex::type(void) const
     return ComponentType::SPECTRAL_INDEX;
 }
 
-double SpectralIndex::sample(const casa::MFrequency& centerFrequency) const
+double SpectralIndex::sample(const casacore::MFrequency& centerFrequency) const
 {
     ASKAPCHECK(centerFrequency.type() == itsReferenceFreq.type(),
             "User frequency and reference frequency have differing frames");
@@ -65,7 +65,7 @@ double SpectralIndex::sample(const casa::MFrequency& centerFrequency) const
             itsSpectralIndex);
 }
 
-const casa::MFrequency& SpectralIndex::getRefFreq(void) const
+const casacore::MFrequency& SpectralIndex::getRefFreq(void) const
 {
     return itsReferenceFreq;
 }

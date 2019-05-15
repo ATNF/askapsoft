@@ -85,7 +85,7 @@ TosSimulator::TosSimulator(const std::string& dataset,
 		itsMS.reset ();
 	}
     else {
-		itsMS.reset(new casa::MeasurementSet(dataset, casa::Table::Old));
+		itsMS.reset(new casacore::MeasurementSet(dataset, casacore::Table::Old));
 	}
     itsPort.reset(new askap::cp::icewrapper::MetadataOutputPort(locatorHost,
                 locatorPort, topicManager, topic));
@@ -108,29 +108,29 @@ bool TosSimulator::sendNext(void)
     ROMSColumns msc(*itsMS);
 
     // Get a reference to the columns of interest
-    const casa::ROMSAntennaColumns& antc = msc.antenna();
-    //const casa::ROMSFeedColumns& feedc = msc.feed();
-    const casa::ROMSFieldColumns& fieldc = msc.field();
-    const casa::ROMSSpWindowColumns& spwc = msc.spectralWindow();
-    const casa::ROMSDataDescColumns& ddc = msc.dataDescription();
-    //const casa::ROMSPolarizationColumns& polc = msc.polarization();
-    //const casa::ROMSPointingColumns& pointingc = msc.pointing();
+    const casacore::ROMSAntennaColumns& antc = msc.antenna();
+    //const casacore::ROMSFeedColumns& feedc = msc.feed();
+    const casacore::ROMSFieldColumns& fieldc = msc.field();
+    const casacore::ROMSSpWindowColumns& spwc = msc.spectralWindow();
+    const casacore::ROMSDataDescColumns& ddc = msc.dataDescription();
+    //const casacore::ROMSPolarizationColumns& polc = msc.polarization();
+    //const casacore::ROMSPointingColumns& pointingc = msc.pointing();
 
     // Define some useful variables
-    const casa::Int dataDescId = msc.dataDescId()(itsCurrentRow);
-    //const casa::uInt descPolId = ddc.polarizationId()(dataDescId);
-    const casa::uInt descSpwId = ddc.spectralWindowId()(dataDescId);
-    const casa::uInt nRow = msc.nrow(); // In the whole table, not just for this integration
-    //const casa::uInt nCorr = polc.numCorr()(descPolId);
-    const casa::uInt nAntennaMS = antc.nrow();
-    const casa::ROArrayColumn<casa::Double>& antPosColumn = antc.position();
+    const casacore::Int dataDescId = msc.dataDescId()(itsCurrentRow);
+    //const casacore::uInt descPolId = ddc.polarizationId()(dataDescId);
+    const casacore::uInt descSpwId = ddc.spectralWindowId()(dataDescId);
+    const casacore::uInt nRow = msc.nrow(); // In the whole table, not just for this integration
+    //const casacore::uInt nCorr = polc.numCorr()(descPolId);
+    const casacore::uInt nAntennaMS = antc.nrow();
+    const casacore::ROArrayColumn<casacore::Double>& antPosColumn = antc.position();
 
 	cout << "The antenna count in measurement set is " << nAntennaMS << 
 			", requested in parset is " << itsNAntenna << endl;
 
     // Record the timestamp for the current integration that is
     // being processed
-    casa::Double currentIntegration = msc.time()(itsCurrentRow);
+    casacore::Double currentIntegration = msc.time()(itsCurrentRow);
     ASKAPLOG_DEBUG_STR(logger, "Processing integration with timestamp "
             << msc.timeMeas()(itsCurrentRow));
 
@@ -152,10 +152,10 @@ bool TosSimulator::sendNext(void)
         
     // precision of a single double may not be enough in general, but should be fine for 
     // this emulator (ideally need to represent time as two doubles)
-    const casa::MEpoch epoch(casa::MVEpoch(casa::Quantity(currentIntegration,"s")), 
-    		casa::MEpoch::Ref(casa::MEpoch::UTC));
-    const casa::MVEpoch epochTAI = casa::MEpoch::Convert(epoch,
-    		casa::MEpoch::Ref(casa::MEpoch::TAI))().getValue();
+    const casacore::MEpoch epoch(casacore::MVEpoch(casacore::Quantity(currentIntegration,"s")), 
+    		casacore::MEpoch::Ref(casacore::MEpoch::UTC));
+    const casacore::MVEpoch epochTAI = casacore::MEpoch::Convert(epoch,
+    		casacore::MEpoch::Ref(casacore::MEpoch::TAI))().getValue();
     const uint64_t microsecondsPerDay = 86400000000ull;
     const uint64_t startOfDayBAT = uint64_t(epochTAI.getDay()*microsecondsPerDay);
     const long Tint = static_cast<long>(msc.interval()(itsCurrentRow) * 1000 * 1000);
@@ -169,8 +169,8 @@ bool TosSimulator::sendNext(void)
     metadata.flagged(false);
 	
     // Calculate and set the centre frequency
-    const casa::Vector<casa::Double> frequencies = spwc.chanFreq()(descSpwId);
-    casa::Double centreFreq = 0.0;
+    const casacore::Vector<casacore::Double> frequencies = spwc.chanFreq()(descSpwId);
+    casacore::Double centreFreq = 0.0;
 
 #ifdef CARDFREQ
     // Each card contains 4 (coarse) channels: (0, 1, 2, 3).
@@ -178,7 +178,7 @@ bool TosSimulator::sendNext(void)
     centreFreq = frequencies[2];
     //centreFreq = (frequencies[0] + frequencies[3]) * 0.5;
 #else
-    const casa::uInt nChan = frequencies.size();
+    const casacore::uInt nChan = frequencies.size();
     if (nChan % 2 == 0) {
         centreFreq = (frequencies(nChan / 2) + frequencies((nChan / 2) + 1) ) / 2.0;
     } else {
@@ -186,7 +186,7 @@ bool TosSimulator::sendNext(void)
     }
 #endif
 
-    metadata.centreFreq(casa::Quantity(centreFreq, "Hz"));
+    metadata.centreFreq(casacore::Quantity(centreFreq, "Hz"));
 
 #ifdef VERBOSE
     cout << "TOSSim: centre frequency of 4 coarse channels: " << 
@@ -195,19 +195,19 @@ bool TosSimulator::sendNext(void)
 
 #ifdef TEST
     cout << "channel count: " << nChan << endl;
-    for (casa::uInt i = 0; i < nChan; ++i) {
+    for (casacore::uInt i = 0; i < nChan; ++i) {
         cout << i << ": " << frequencies[i] << endl;
     }
     cout << "centre frequency: " << centreFreq << endl;
 #endif
 
     // Target Name
-    const casa::Int fieldId = msc.fieldId()(itsCurrentRow);
+    const casacore::Int fieldId = msc.fieldId()(itsCurrentRow);
     metadata.targetName(fieldc.name()(fieldId));
 
     // Target Direction
-    const casa::Vector<casa::MDirection> dirVec = fieldc.phaseDirMeasCol()(fieldId);
-    const casa::MDirection direction = dirVec(0);
+    const casacore::Vector<casacore::MDirection> dirVec = fieldc.phaseDirMeasCol()(fieldId);
+    const casacore::MDirection direction = dirVec(0);
     metadata.targetDirection(direction);
 
     // Phase Centre
@@ -230,7 +230,7 @@ bool TosSimulator::sendNext(void)
 	std::string name;
 
 #ifdef RENAME_ANTENNA
-    for (casa::uInt i = 0; i < itsNAntenna; ++i) {
+    for (casacore::uInt i = 0; i < itsNAntenna; ++i) {
 		stringstream ss;
 		ss << i+1;
 		if (i < 9) {
@@ -240,12 +240,12 @@ bool TosSimulator::sendNext(void)
 			name = "ak" + ss.str();
 		}
 #else
-    //for (casa::uInt i = 0; i < nAntennaMS; ++i) {
+    //for (casacore::uInt i = 0; i < nAntennaMS; ++i) {
         //name = antc.name().getColumn()(i);
 #endif
 
         int indexIntoMS = -1;
-        for (casa::uInt testAnt = 0; testAnt < nAntennaMS; ++testAnt) {
+        for (casacore::uInt testAnt = 0; testAnt < nAntennaMS; ++testAnt) {
              if (name == std::string(antc.name().getColumn()(testAnt))) {
                  indexIntoMS = static_cast<int>(testAnt);
                  break;
@@ -294,17 +294,17 @@ bool TosSimulator::sendNext(void)
         // this hack wouldn't work in all circumstances. Some serious re-design effort would be required
         // to fix this properly.
         if (indexIntoMS >= 0) {
-           const casa::Vector<casa::Double> antPos = antPosColumn(indexIntoMS);
+           const casacore::Vector<casacore::Double> antPos = antPosColumn(indexIntoMS);
            ASKAPASSERT(antPos.nelements() == 3u);
-           casa::Vector<casa::Double> dummyUVW(36*3,0.);
-           for (casa::uInt elem = 0; elem < dummyUVW.nelements(); ++elem) {
+           casacore::Vector<casacore::Double> dummyUVW(36*3,0.);
+           for (casacore::uInt elem = 0; elem < dummyUVW.nelements(); ++elem) {
                 dummyUVW[elem] = antPos[elem % 3];
            }
            antMetadata.uvw(dummyUVW);
         } else {
            // can't do much except sending some non-zero number - if this case is triggered ingest is
            // unlikely to work. Proper simulation of uvw is needed for undefined antennas.
-           antMetadata.uvw(casa::Vector<casa::Double>(36*3,1e6));
+           antMetadata.uvw(casacore::Vector<casacore::Double>(36*3,1e6));
         }
 
         metadata.addAntenna(antMetadata);

@@ -80,8 +80,8 @@ SubThresholder::~SubThresholder()
 // }
 
 void SubThresholder::define(RadioSource &src,
-                            casa::Matrix<casa::Double> pos,
-                            casa::Vector<casa::Double> &array)
+                            casacore::Matrix<casacore::Double> pos,
+                            casacore::Vector<casacore::Double> &array)
 {
     this->saveArray(src, pos, array);
     this->define(src);
@@ -89,8 +89,8 @@ void SubThresholder::define(RadioSource &src,
 
 
 void SubThresholder::saveArray(RadioSource &src,
-                               casa::Matrix<casa::Double> pos,
-                               casa::Vector<casa::Double> &f)
+                               casacore::Matrix<casacore::Double> pos,
+                               casacore::Vector<casacore::Double> &f)
 {
     int xmin = src.boxXmin();
     int ymin = src.boxYmin();

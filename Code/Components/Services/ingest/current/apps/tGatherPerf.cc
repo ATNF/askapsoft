@@ -57,9 +57,9 @@ ASKAP_LOGGER(logger, "tGatherPref");
 class GatherTestApp : public askap::cp::common::ParallelCPApplication
 {
 public:
-   void testGather(const std::vector<float> &data, casa::uInt count) {
+   void testGather(const std::vector<float> &data, casacore::uInt count) {
       boost::shared_array<float> dataRecvBuf(new float[data.size() * numProcs()]);
-      for (casa::uInt i = 0; i < count; ++i) {
+      for (casacore::uInt i = 0; i < count; ++i) {
            const int response = MPI_Gather(const_cast<float*>(data.data()), data.size(), MPI_FLOAT, dataRecvBuf.get(), data.size(), MPI_FLOAT, 0, MPI_COMM_WORLD);
            ASKAPCHECK(response == MPI_SUCCESS, "Error gathering visibilities, response from MPI_Gather = "<<response);
       }
@@ -79,7 +79,7 @@ public:
       std::vector<float> data(size * 2, 1.1);
 
 
-      casa::Timer timer;
+      casacore::Timer timer;
       float processingTime = 0.;
       float maxProcessingTime = 0.;
       size_t actualCount = 0;

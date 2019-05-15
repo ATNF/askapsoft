@@ -116,13 +116,13 @@ bool PointCatalogue::read()
         return false;
     } else {
         std::string line;
-        casa::DirectionCoordinate dirCoo;
+        casacore::DirectionCoordinate dirCoo;
         int ndim = 0;
         if (itsReferenceImage != "") {
             const boost::shared_ptr<ImageInterface<Float> > imagePtr =
                 analysisutilities::openImage(itsReferenceImage);
 
-            int dirCooNum = imagePtr->coordinates().findCoordinate(casa::Coordinate::DIRECTION);
+            int dirCooNum = imagePtr->coordinates().findCoordinate(casacore::Coordinate::DIRECTION);
             dirCoo = imagePtr->coordinates().directionCoordinate(dirCooNum);
 
             ndim = imagePtr->ndim();
@@ -148,8 +148,8 @@ bool PointCatalogue::read()
                     itsFullPointList.push_back(newpoint);
                 }
                 if (itsFullPointList.size() > listSize && itsReferenceImage != "") {
-                    casa::Vector<double> pix(ndim, 0), world(ndim, 0);
-                    casa::Quantity ra(spec->raD(), "deg"), dec(spec->decD(), "deg");
+                    casacore::Vector<double> pix(ndim, 0), world(ndim, 0);
+                    casacore::Quantity ra(spec->raD(), "deg"), dec(spec->decD(), "deg");
                     world[0] = ra.getValue(dirCoo.worldAxisUnits()[0]);
                     world[1] = dec.getValue(dirCoo.worldAxisUnits()[1]);
                     dirCoo.toPixel(pix, world);

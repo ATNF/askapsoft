@@ -71,32 +71,32 @@ class TosMetadata {
 
         /// @brief Return the number of antennas.
         /// @return the number of antennas.
-        casa::uInt nAntenna(void) const;
+        casacore::uInt nAntenna(void) const;
 
         /// @brief Return the integration cycle start time.
         ///
         /// @return the integration cycle start time. This is an
         ///     absolute time expressed as microseconds since MJD=0.
-        casa::uLong time(void) const;
+        casacore::uLong time(void) const;
 
         /// @brief Get the Scan ID. Valid values are:
-        casa::Int scanId(void) const;
+        casacore::Int scanId(void) const;
 
         /// @brief Get the FLAG which indicates the entire integration should
         /// be flagged.
-        casa::Bool flagged(void) const;
+        casacore::Bool flagged(void) const;
 
         /// @return the centre frequency
-        casa::Quantity centreFreq(void) const;
+        casacore::Quantity centreFreq(void) const;
 
         /// @return a string describing the target
         std::string targetName(void) const;
 
         /// @return the target dish pointing direction
-        casa::MDirection targetDirection(void) const;
+        casacore::MDirection targetDirection(void) const;
 
         /// @return the phase centre
-        casa::MDirection phaseDirection(void) const;
+        casacore::MDirection phaseDirection(void) const;
 
         /// @return the correlator mode
         std::string corrMode(void) const;
@@ -106,7 +106,7 @@ class TosMetadata {
         /// for all antennas. Also in some special modes we set these offsets to zero
         /// regardless of the actual beam pointings. Values are in radians (although this
         /// class doesn't rely on particular units and passes whatever value was set.
-        const casa::Matrix<casa::Double>& beamOffsets() const;
+        const casacore::Matrix<casacore::Double>& beamOffsets() const;
 
         /////////////////////
         // Setters
@@ -115,35 +115,35 @@ class TosMetadata {
         /// @brief Set the integration cycle start time.
         /// @param[in] time the integration cycle start time. This is
         ///     an absolute time expressed as microseconds since MJD=0.
-        void time(const casa::uLong time);
+        void time(const casacore::uLong time);
 
         /// @brief Set the Scan ID. Valid values are:
         /// * -1 - Which indicates no observation is executing
         /// * > 0 - The scan ID.
-        void scanId(const casa::Int id);
+        void scanId(const casacore::Int id);
 
         /// @brief Set the FLAG which indicates the entire integration should
         /// be flagged.
-        void flagged(const casa::Bool flag);
+        void flagged(const casacore::Bool flag);
 
         /// @brief Set the centre frequency
-        void centreFreq(const casa::Quantity& freq);
+        void centreFreq(const casacore::Quantity& freq);
 
         /// @brief Set the target name. (i.e. a string describing the target)
         void targetName(const std::string& name);
 
         /// @brief Set the target dish pointing direction
-        void targetDirection(const casa::MDirection& dir);
+        void targetDirection(const casacore::MDirection& dir);
 
         /// @brief Set the phase centre
-        void phaseDirection(const casa::MDirection& dir);
+        void phaseDirection(const casacore::MDirection& dir);
 
         /// @brief Set the correlator mode
         void corrMode(const std::string& mode);
 
         /// @brief Set beam offsets
         /// @param[in] offsets 2xnBeam beam offsets matrix 
-        void beamOffsets(const casa::Matrix<casa::Double> &offsets);
+        void beamOffsets(const casacore::Matrix<casacore::Double> &offsets);
         
 
         /////////////////////////
@@ -175,32 +175,32 @@ class TosMetadata {
     private:
 
         // Integration cycle start time.
-        casa::uLong itsTime;
+        casacore::uLong itsTime;
 
         // Scan ID
-        casa::Int itsScanId;
+        casacore::Int itsScanId;
 
         // Indicates this integration (as indicated by the timestamp) should be flagged
         // in its entirety
-        casa::Bool itsFlagged;
+        casacore::Bool itsFlagged;
 
         // The centre frequency
-        casa::Quantity itsCentreFreq;
+        casacore::Quantity itsCentreFreq;
 
         // Target name
         std::string itsTargetName;
 
         // The target dish pointing direction
-        casa::MDirection itsTargetDirection;
+        casacore::MDirection itsTargetDirection;
 
         // The phase centre
-        casa::MDirection itsPhaseDirection;
+        casacore::MDirection itsPhaseDirection;
 
         // The correlator mode
         std::string itsCorrMode;
 
         // Beam offsets (2xnBeam matrix)
-        casa::Matrix<casa::Double> itsBeamOffsets;
+        casacore::Matrix<casacore::Double> itsBeamOffsets;
 
         // Map of antenna names to TosMetadataAntenna objects.
         std::map<std::string, TosMetadataAntenna> itsAntennas;

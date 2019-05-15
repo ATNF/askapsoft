@@ -105,13 +105,13 @@ void BaselineMap::defaultMapADE(uint32_t nAnt)
    itsSize = 0;
    for (int32_t ant2 = 0; ant2 < static_cast<int32_t>(nAnt); ++ant2) {
         for (int32_t ant1 = 0; ant1 < ant2; ++ant1) {
-             add(++itsSize, ant1, ant2, casa::Stokes::XX);
-             add(++itsSize, ant1, ant2, casa::Stokes::YX);
+             add(++itsSize, ant1, ant2, casacore::Stokes::XX);
+             add(++itsSize, ant1, ant2, casacore::Stokes::YX);
         }
-        add(++itsSize, ant2, ant2, casa::Stokes::XX);
+        add(++itsSize, ant2, ant2, casacore::Stokes::XX);
         for (int32_t ant1 = 0; ant1 <= ant2; ++ant1) {
-             add(++itsSize, ant1, ant2, casa::Stokes::XY);
-             add(++itsSize, ant1, ant2, casa::Stokes::YY);
+             add(++itsSize, ant1, ant2, casacore::Stokes::XY);
+             add(++itsSize, ant1, ant2, casacore::Stokes::YY);
         }
    }
    // itsSize should be set to the number of products here
@@ -122,7 +122,7 @@ void BaselineMap::defaultMapADE(uint32_t nAnt)
 /// @param[in] ant1 first antenna index
 /// @param[in] ant2 second antenna index
 /// @param[in] pol stokes parameter
-void BaselineMap::add(int32_t id, int32_t ant1, int32_t ant2, casa::Stokes::StokesTypes pol)
+void BaselineMap::add(int32_t id, int32_t ant1, int32_t ant2, casacore::Stokes::StokesTypes pol)
 {
    ASKAPCHECK(ant1 >= 0, "Antenna 1 index is supposed to be non-negative");
    ASKAPCHECK(ant2 >= 0, "Antenna 2 index is supposed to be non-negative");
@@ -167,7 +167,7 @@ int32_t BaselineMap::idToAntenna2(const int32_t id) const
     return itsCachedProduct ? (*itsCachedProduct)->second.get<1>() : -1;
 }
 
-casa::Stokes::StokesTypes BaselineMap::idToStokes(const int32_t id) const
+casacore::Stokes::StokesTypes BaselineMap::idToStokes(const int32_t id) const
 {
     syncProductCache(id);
     return itsCachedProduct ? (*itsCachedProduct)->second.get<2>() : Stokes::Undefined;
@@ -201,7 +201,7 @@ int32_t BaselineMap::maxID() const
 /// @param[in] pol polarisation product
 /// @return the index of the selected baseline/polarisation
 /// @note an exception is thrown if there is no match
-int32_t BaselineMap::getID(const int32_t ant1, const int32_t ant2, const casa::Stokes::StokesTypes pol) const
+int32_t BaselineMap::getID(const int32_t ant1, const int32_t ant2, const casacore::Stokes::StokesTypes pol) const
 {
   const ProductDesc product(ant1, ant2, pol);
   for (std::map<int32_t, ProductDesc>::const_iterator ci = itsMap.begin(); ci!=itsMap.end(); ++ci) {

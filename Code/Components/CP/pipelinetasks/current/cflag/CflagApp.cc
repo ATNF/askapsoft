@@ -68,7 +68,7 @@ int CflagApp::run(int argc, char* argv[])
     // Open the measurement set
     const std::string dataset = subset.getString("dataset");
     ASKAPLOG_INFO_STR(logger, "Opening Measurement Set: " << dataset);
-    casa::MeasurementSet ms(dataset, casa::Table::Update);
+    casacore::MeasurementSet ms(dataset, casacore::Table::Update);
     MSColumns msc(ms);
     IPosition tileShape(3,0,0,0);
 
@@ -115,21 +115,21 @@ int CflagApp::run(int argc, char* argv[])
     }
 
     // Iterate over each row in the main table
-    const casa::uInt nRows = msc.nrow();
+    const casacore::uInt nRows = msc.nrow();
     std::vector< boost::shared_ptr<IFlagger> >::iterator it;
     unsigned long rowsAlreadyFlagged = 0;
-    casa::Bool passRequired = casa::True;
-    casa::uInt pass = 0;
-    casa::uInt step = 1;
+    casacore::Bool passRequired = casacore::True;
+    casacore::uInt pass = 0;
+    casacore::uInt step = 1;
     if (tileShape(2) > 1) step = tileShape(2);
     while (passRequired) {
         if (step > 1) {
             // Read data in whole tiles
-            for (casa::uInt i = 0; i < nRows; i+=step) {
-                casa::uInt rowsToProcess = min(step, nRows - i);
+            for (casacore::uInt i = 0; i < nRows; i+=step) {
+                casacore::uInt rowsToProcess = min(step, nRows - i);
                 // count flagged rows
-                casa::uInt flagged = 0;
-                for (casa::uInt j = i; j < i+rowsToProcess ; j++) {
+                casacore::uInt flagged = 0;
+                for (casacore::uInt j = i; j < i+rowsToProcess ; j++) {
                     if (msc.flagRow()(j)) flagged++;
                 }
                 rowsAlreadyFlagged += flagged;
@@ -145,7 +145,7 @@ int CflagApp::run(int argc, char* argv[])
             }
 
         } else{
-            for (casa::uInt i = 0; i < nRows; ++i) {
+            for (casacore::uInt i = 0; i < nRows; ++i) {
                 if (!msc.flagRow()(i)) {
                     // Invoke each flagger for this row, but only while the row isn't flagged
                     for (it = flaggers.begin(); it != flaggers.end(); ++it) {
@@ -162,10 +162,10 @@ int CflagApp::run(int argc, char* argv[])
             }
         }
         pass++;
-        passRequired = casa::False;
+        passRequired = casacore::False;
         for (it = flaggers.begin(); it != flaggers.end(); ++it) {
             if ((*it)->processingRequired(pass)) {
-                passRequired = casa::True;
+                passRequired = casacore::True;
             }
         }
     }

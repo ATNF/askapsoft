@@ -309,12 +309,12 @@ std::vector<askap::cp::sms::client::Component> MPIBasicComms::receiveComponents(
         receive(&payload, sizeof(double) * nDoubles, source, itsComponentTag);
 
         components.push_back(askap::cp::sms::client::Component(id,
-                    casa::Quantity(payload[0], "deg"),
-                    casa::Quantity(payload[1], "deg"),
-                    casa::Quantity(payload[2], "rad"),
-                    casa::Quantity(payload[3], "arcsec"),
-                    casa::Quantity(payload[4], "arcsec"),
-                    casa::Quantity(payload[5], "Jy"),
+                    casacore::Quantity(payload[0], "deg"),
+                    casacore::Quantity(payload[1], "deg"),
+                    casacore::Quantity(payload[2], "rad"),
+                    casacore::Quantity(payload[3], "arcsec"),
+                    casacore::Quantity(payload[4], "arcsec"),
+                    casacore::Quantity(payload[5], "Jy"),
                     payload[6],
                     payload[7])); 
     }
@@ -322,11 +322,11 @@ std::vector<askap::cp::sms::client::Component> MPIBasicComms::receiveComponents(
     return components;
 }
 
-void MPIBasicComms::sumImages(casa::ImageInterface<casa::Float>& image, int root)
+void MPIBasicComms::sumImages(casacore::ImageInterface<casacore::Float>& image, int root)
 {
-    casa::Array<casa::Float> src = image.get();
+    casacore::Array<casacore::Float> src = image.get();
     if (getId() == 0) {
-        casa::Array<casa::Float> dest = image.get();
+        casacore::Array<casacore::Float> dest = image.get();
         MPI_Reduce(src.data(), dest.data(), src.size(), MPI_FLOAT, MPI_SUM, root, itsCommunicator);
         image.put(dest);
     } else {

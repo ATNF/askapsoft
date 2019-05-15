@@ -43,24 +43,24 @@ using namespace askap::analysis;
 ASKAP_LOGGER(logger, "tMedianSmooth.log");
 
 void findSNR(float *input, float *output, float *outmed, float *outmadfm,
-             float *outdiff, float *outin, casa::IPosition shape,
-             casa::IPosition box, size_t loc, bool isSpatial,
+             float *outdiff, float *outin, casacore::IPosition shape,
+             casacore::IPosition box, size_t loc, bool isSpatial,
              size_t spatSize, size_t specSize)
 {
-    casa::Vector<Float> base(shape, input, casa::COPY);
+    casacore::Vector<Float> base(shape, input, casacore::COPY);
     ASKAPLOG_DEBUG_STR(logger, "Base: " << base);
-    casa::Vector<Float> medians = slidingArrayMath(casa::Vector<Float>(shape, input), box,
+    casacore::Vector<Float> medians = slidingArrayMath(casacore::Vector<Float>(shape, input), box,
                                   MedianFunc<Float>());
     ASKAPLOG_DEBUG_STR(logger, "Median: " << medians);
     ASKAPLOG_DEBUG_STR(logger, "Base: " << base);
 
-    casa::Vector<Float>
+    casacore::Vector<Float>
     madfm = slidingArrayMath(base, box, MadfmFunc<Float>()) / Statistics::correctionFactor;
 
-    casa::Vector<Float> mean = slidingArrayMath(base, box, MeanFunc<Float>());
-    casa::Vector<Float> stddev = slidingArrayMath(base, box, StddevFunc<Float>());
-    casa::Vector<Float> sum = slidingArrayMath(base, box, SumFunc<Float>());
-    casa::Vector<Float> snr = (base - medians);
+    casacore::Vector<Float> mean = slidingArrayMath(base, box, MeanFunc<Float>());
+    casacore::Vector<Float> stddev = slidingArrayMath(base, box, StddevFunc<Float>());
+    casacore::Vector<Float> sum = slidingArrayMath(base, box, SumFunc<Float>());
+    casacore::Vector<Float> snr = (base - medians);
     ASKAPLOG_DEBUG_STR(logger, "shape=" << shape << ", box=" << box);
     ASKAPLOG_DEBUG_STR(logger, "Base: " << base);
     ASKAPLOG_DEBUG_STR(logger, "Median: " << medians);
@@ -127,14 +127,14 @@ int main(int argc, const char *argv[])
         float input[specsize];
         for (size_t i = 0; i < specsize; i++) input[i] = i % 5 + (i / 5) * 0.01;
 
-        casa::IPosition box(1, width);
-        casa::IPosition shape(1, specsize);
+        casacore::IPosition box(1, width);
+        casacore::IPosition shape(1, specsize);
 
-        casa::Array<Float> inputAsArray(shape, input);
-        ASKAPLOG_DEBUG_STR(logger, "Input as a casa::Array: " << inputAsArray);
+        casacore::Array<Float> inputAsArray(shape, input);
+        ASKAPLOG_DEBUG_STR(logger, "Input as a casacore::Array: " << inputAsArray);
 
-        casa::Vector<Float> inputAsVector(shape, input);
-        ASKAPLOG_DEBUG_STR(logger, "Input as a casa::Vector: " << inputAsVector);
+        casacore::Vector<Float> inputAsVector(shape, input);
+        ASKAPLOG_DEBUG_STR(logger, "Input as a casacore::Vector: " << inputAsVector);
 
 
         float *snrAll = new float[specsize];

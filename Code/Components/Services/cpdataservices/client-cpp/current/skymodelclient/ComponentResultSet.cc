@@ -154,12 +154,12 @@ void ComponentResultSet::Iterator::fillBuffer(void)
     for (size_t i = 0; i < resultset.size(); ++i) {
         askap::interfaces::skymodelservice::Component* c = &resultset[i]; 
         boost::shared_ptr<Component> component(new Component(c->id,
-                    casa::Quantity(c->rightAscension, "deg"),
-                    casa::Quantity(c->declination, "deg"),
-                    casa::Quantity(c->positionAngle, "rad"),
-                    casa::Quantity(c->majorAxis, "arcsec"),
-                    casa::Quantity(c->minorAxis, "arcsec"),
-                    casa::Quantity(c->i1400, "Jy"),
+                    casacore::Quantity(c->rightAscension, "deg"),
+                    casacore::Quantity(c->declination, "deg"),
+                    casacore::Quantity(c->positionAngle, "rad"),
+                    casacore::Quantity(c->majorAxis, "arcsec"),
+                    casacore::Quantity(c->minorAxis, "arcsec"),
+                    casacore::Quantity(c->i1400, "Jy"),
                     c->spectralIndex,
                     c->spectralCurvature));
         itsComponentBuffer.push_back(component);

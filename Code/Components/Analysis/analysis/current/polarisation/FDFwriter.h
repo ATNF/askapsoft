@@ -94,9 +94,9 @@ class FDFwriter {
         casacore::CoordinateSystem itsCoordSysForRMSF;
 
         /// @brief Array containing the FDF - reshaped to suit the output image
-        casa::Array<casa::Complex> itsFDF;
+        casacore::Array<casacore::Complex> itsFDF;
         /// @brief Array containing the RMSF - reshaped to suit the output image
-        casa::Array<casa::Complex> itsRMSF;
+        casacore::Array<casacore::Complex> itsRMSF;
 
 };
 

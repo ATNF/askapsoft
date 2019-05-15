@@ -64,12 +64,12 @@ AskapComponentParsetWriter::AskapComponentParsetWriter(LOFAR::ParameterSet &pars
     this->CatalogueWriter::setup(cube);
     if (parset.isDefined("referenceDirection")) {
         std::vector<std::string> refDir = parset.getStringVector("referenceDirection");
-        casa::Quantity q;
-        casa::Quantity::read(q, refDir[0]);
-        itsRefRA = q.getValue(casa::Unit("deg"));
+        casacore::Quantity q;
+        casacore::Quantity::read(q, refDir[0]);
+        itsRefRA = q.getValue(casacore::Unit("deg"));
         ASKAPLOG_DEBUG_STR(logger, "Ref RA = " << refDir[0] << " converting to " << itsRefRA << " deg");
-        casa::Quantity::read(q, refDir[1]);
-        itsRefDec = q.getValue(casa::Unit("deg"));
+        casacore::Quantity::read(q, refDir[1]);
+        itsRefDec = q.getValue(casacore::Unit("deg"));
         ASKAPLOG_DEBUG_STR(logger, "Ref Dec = " << refDir[1] << " converting to " << itsRefDec << " deg");
     } else {
         itsRefRA =  itsHead->getWCS()->crval[0];
@@ -130,7 +130,7 @@ void AskapComponentParsetWriter::writeEntries()
         // First iterate over all components, storing them in a multimap indexed by their flux.
         std::vector<sourcefitting::RadioSource>::iterator src;
         for (src = itsSourceList->begin(); src < itsSourceList->end(); src++) {
-            std::vector<casa::Gaussian2D<Double> > fitset = src->gaussFitSet(itsFitType);
+            std::vector<casacore::Gaussian2D<Double> > fitset = src->gaussFitSet(itsFitType);
             for (size_t i = 0; i < fitset.size(); i++) {
                 cmpnt.defineComponent(&*src, i, itsFitType);
                 componentList.insert(std::pair<float, ParsetComponent>(cmpnt.flux(), cmpnt));

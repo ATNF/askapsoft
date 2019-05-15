@@ -51,10 +51,10 @@ SimpleMonitorTask::SimpleMonitorTask(const LOFAR::ParameterSet& parset,
     ASKAPLOG_DEBUG_STR(logger, "Constructor");
     ASKAPCHECK(itsBaselineMap.size() == static_cast<size_t>(itsBaselineMap.maxID() + 1),
                "Only contiguous baseline/polarisation IDs are supported by the monitor task for simplicity");
-    casa::uInt nBeam = parset.getUint32("nbeam");
+    casacore::uInt nBeam = parset.getUint32("nbeam");
     itsVisBuffer.resize(itsBaselineMap.size(), nBeam);
     itsDelayBuffer.resize(itsBaselineMap.size(), nBeam);
-    itsVisBuffer.set(casa::Complex(0., 0.));
+    itsVisBuffer.set(casacore::Complex(0., 0.));
     itsDelayBuffer.set(0.);
     itsFileName += "visplot_" + utility::toString(itsRank) + ".dat";
     ASKAPLOG_INFO_STR(logger, "Average visibilities and delays for " << itsBaselineMap.size()
@@ -85,21 +85,21 @@ void SimpleMonitorTask::process(askap::cp::common::VisChunk::ShPtr& chunk)
             // process the buffer
             publishBuffer();
             // start a new cycle
-            itsVisBuffer.set(casa::Complex(0., 0.));
+            itsVisBuffer.set(casacore::Complex(0., 0.));
             itsDelayBuffer.set(0.);
         }
         itsCurrentTime = cTime;
     }
     //
     ASKAPCHECK(chunk->nPol() == 4, "Support only chunks with 4 polarisation products");
-    const casa::Vector<casa::Stokes::StokesTypes>& stokes = chunk->stokes();
+    const casacore::Vector<casacore::Stokes::StokesTypes>& stokes = chunk->stokes();
     ASKAPDEBUGASSERT(stokes.nelements() == 4);
-    ASKAPCHECK(stokes[0] == casa::Stokes::XX, "The first polarisation product of the chunk is supposed to be XX");
-    ASKAPCHECK(stokes[3] == casa::Stokes::YY, "The last polarisation product of the chunk is supposed to be YY");
+    ASKAPCHECK(stokes[0] == casacore::Stokes::XX, "The first polarisation product of the chunk is supposed to be XX");
+    ASKAPCHECK(stokes[3] == casacore::Stokes::YY, "The last polarisation product of the chunk is supposed to be YY");
 
-    const casa::Vector<casa::uInt>& antenna1 = chunk->antenna1();
-    const casa::Vector<casa::uInt>& antenna2 = chunk->antenna2();
-    const casa::Vector<casa::uInt>& beam1 = chunk->beam1();
+    const casacore::Vector<casacore::uInt>& antenna1 = chunk->antenna1();
+    const casacore::Vector<casacore::uInt>& antenna2 = chunk->antenna2();
+    const casacore::Vector<casacore::uInt>& beam1 = chunk->beam1();
     ASKAPDEBUGASSERT(antenna1.nelements() == chunk->nRow());
     ASKAPDEBUGASSERT(antenna2.nelements() == chunk->nRow());
     ASKAPDEBUGASSERT(beam1.nelements() == chunk->nRow());
@@ -115,23 +115,23 @@ void SimpleMonitorTask::process(askap::cp::common::VisChunk::ShPtr& chunk)
                           << " has insufficient number of spectral channels for a delay solution");
     }
 
-    casa::uInt nMatch = 0;
-    for (casa::uInt row = 0; row < chunk->nRow(); ++row) {
-        const casa::uInt beam = beam1[row];
+    casacore::uInt nMatch = 0;
+    for (casacore::uInt row = 0; row < chunk->nRow(); ++row) {
+        const casacore::uInt beam = beam1[row];
         if (beam < itsVisBuffer.ncolumn()) {
-            casa::Matrix<casa::Complex> thisRow  = chunk->visibility().yzPlane(row);
-            casa::Matrix<casa::Bool> thisFlagRow  = chunk->flag().yzPlane(row);
+            casacore::Matrix<casacore::Complex> thisRow  = chunk->visibility().yzPlane(row);
+            casacore::Matrix<casacore::Bool> thisFlagRow  = chunk->flag().yzPlane(row);
             ASKAPDEBUGASSERT(thisRow.ncolumn() == 4);
             // we'd probably be better off with a forward lookup as number of baselines to monitor is
             // expected to be much less than the total number of baselines. Might change it in the future
-            const casa::Int idXX = itsBaselineMap.getID(antenna1[row], antenna2[row], casa::Stokes::XX);
+            const casacore::Int idXX = itsBaselineMap.getID(antenna1[row], antenna2[row], casacore::Stokes::XX);
             if (idXX > -1) {
-                processRow(thisRow.column(0), thisFlagRow.column(0), static_cast<const casa::uInt>(idXX), beam);
+                processRow(thisRow.column(0), thisFlagRow.column(0), static_cast<const casacore::uInt>(idXX), beam);
                 ++nMatch;
             }
-            const casa::Int idYY = itsBaselineMap.getID(antenna1[row], antenna2[row], casa::Stokes::YY);
+            const casacore::Int idYY = itsBaselineMap.getID(antenna1[row], antenna2[row], casacore::Stokes::YY);
             if (idYY > -1) {
-                processRow(thisRow.column(3), thisFlagRow.column(3), static_cast<const casa::uInt>(idYY), beam);
+                processRow(thisRow.column(3), thisFlagRow.column(3), static_cast<const casacore::uInt>(idYY), beam);
                 ++nMatch;
             }
         }
@@ -148,21 +148,21 @@ void SimpleMonitorTask::process(askap::cp::common::VisChunk::ShPtr& chunk)
 /// @param[in] flag flag spectrum for the given baseline/pol index to work with
 /// @param[in] baseline baseline ID
 /// @param[in] beam beam ID
-void SimpleMonitorTask::processRow(const casa::Vector<casa::Complex> &vis,
-                                   const casa::Vector<casa::Bool> &flag,
-                                   const casa::uInt baseline,
-                                   const casa::uInt beam)
+void SimpleMonitorTask::processRow(const casacore::Vector<casacore::Complex> &vis,
+                                   const casacore::Vector<casacore::Bool> &flag,
+                                   const casacore::uInt baseline,
+                                   const casacore::uInt beam)
 {
     ASKAPDEBUGASSERT(beam < itsDelayBuffer.ncolumn());
     bool hasData = false;
     // average visibilities in frequency
     if (vis.nelements() > 0) {
-        //const casa::Complex avgVis = vis[150];
-        //const casa::Complex avgVis = casa::sum(vis) / float(vis.nelements());
-        casa::Complex avgVis(0., 0.);
+        //const casacore::Complex avgVis = vis[150];
+        //const casacore::Complex avgVis = casacore::sum(vis) / float(vis.nelements());
+        casacore::Complex avgVis(0., 0.);
         ASKAPDEBUGASSERT(vis.nelements() == flag.nelements());
-        casa::uInt count = 0;
-        for (casa::uInt chan = 0; chan < vis.nelements(); ++chan) {
+        casacore::uInt count = 0;
+        for (casacore::uInt chan = 0; chan < vis.nelements(); ++chan) {
             if (!flag[chan]) {
                 avgVis += vis[chan];
                 ++count;
@@ -187,9 +187,9 @@ void SimpleMonitorTask::processRow(const casa::Vector<casa::Complex> &vis,
         ASKAPDEBUGASSERT(itsFileName.find("_0") != std::string::npos);
         const std::string fname = "spectra" + utility::toString(baseline) + ".dat";
         std::ofstream os(fname.c_str());
-        for (casa::uInt ch = 0; ch < vis.nelements(); ++ch) {
+        for (casacore::uInt ch = 0; ch < vis.nelements(); ++ch) {
             if (!flag[ch]) {
-                os << ch << " " << abs(vis[ch]) << " " << arg(vis[ch]) * 180. / casa::C::pi << std::endl;
+                os << ch << " " << abs(vis[ch]) << " " << arg(vis[ch]) * 180. / casacore::C::pi << std::endl;
             }
         }
     }
@@ -208,9 +208,9 @@ void SimpleMonitorTask::publishBuffer()
     }
     // time is in minutes
     itsOStream << double(itsCurrentTime - itsStartTime) << " ";
-    for (casa::uInt beam = 0; beam < itsVisBuffer.ncolumn(); ++beam) {
-        for (casa::uInt baseline = 0; baseline < itsVisBuffer.nrow(); ++baseline) {
-            itsOStream << abs(itsVisBuffer(baseline, beam)) << " " << arg(itsVisBuffer(baseline, beam)) / casa::C::pi * 180.0
+    for (casacore::uInt beam = 0; beam < itsVisBuffer.ncolumn(); ++beam) {
+        for (casacore::uInt baseline = 0; baseline < itsVisBuffer.nrow(); ++baseline) {
+            itsOStream << abs(itsVisBuffer(baseline, beam)) << " " << arg(itsVisBuffer(baseline, beam)) / casacore::C::pi * 180.0
                        << " " << itsDelayBuffer(baseline, beam) * 1e9 << " ";
         }
     }

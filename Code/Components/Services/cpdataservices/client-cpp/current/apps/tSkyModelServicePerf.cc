@@ -112,9 +112,9 @@ void populate(SkyModelServiceClient& svc, const uint32_t count)
     svc.addComponents(components);
 }
 
-size_t coneSearch(SkyModelServiceClient& svc, const casa::Quantity& ra,
-        const casa::Quantity& dec, const casa::Quantity& searchRadius,
-        const casa::Quantity& fluxLimit)
+size_t coneSearch(SkyModelServiceClient& svc, const casacore::Quantity& ra,
+        const casacore::Quantity& dec, const casacore::Quantity& searchRadius,
+        const casacore::Quantity& fluxLimit)
 {
     ComponentResultSet results = svc.coneSearch(ra, dec, searchRadius, fluxLimit);
 
@@ -161,10 +161,10 @@ int main(int argc, char *argv[])
     double coneTotal = 0.0;
 
     // Cone search parameters
-    const casa::Quantity ra(0.0, "deg");
-    const casa::Quantity dec(0.0, "deg");
-    const casa::Quantity searchRadius(180, "deg");
-    const casa::Quantity fluxLimit(1, "uJy");
+    const casacore::Quantity ra(0.0, "deg");
+    const casacore::Quantity dec(0.0, "deg");
+    const casacore::Quantity searchRadius(180, "deg");
+    const casacore::Quantity fluxLimit(1, "uJy");
 
     Stopwatch sw;
     for (uint32_t i = 0; i < nBatches; ++i) {

@@ -64,7 +64,7 @@ static ParameterSet getParameterSet(int argc, char *argv[])
 }
 void doWorkRoot(void *buffer, size_t buffsize, float *workTime,FILE *fptr) {
 
-    casa::Timer work;
+    casacore::Timer work;
     int rtn=0;
     work.mark();
     size_t towrite=buffsize;
@@ -156,8 +156,8 @@ int main(int argc, char *argv[])
        rcounts[i] = nElements;
     }
 
-    casa::Timer timer;
-    casa::Timer total;
+    casacore::Timer timer;
+    casacore::Timer total;
     total.mark();
     if (rank == 0) {
         std::cout << "Gathering and Writing " << integrations << " integrations of " << intTime << " seconds " << std::endl;

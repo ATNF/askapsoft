@@ -1393,8 +1393,8 @@ duchamp::OUTCOME DuchampParallel::getCASA(DATATYPE typeOfData, bool useSubimageI
 
         ASKAPLOG_INFO_STR(logger, "Reading data from image " << itsCube.pars().getImageFile());
 
-        casa::Array<Float> subarray(sub->shape());
-        const casa::MaskedArray<Float> msub(sub->get(), sub->getMask());
+        casacore::Array<Float> subarray(sub->shape());
+        const casacore::MaskedArray<Float> msub(sub->get(), sub->getMask());
         float minval = 0.;
         if (msub.nelementsValid() > 0) {
             minval = min(msub) - 10.;

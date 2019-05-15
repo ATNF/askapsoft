@@ -69,7 +69,7 @@ public:
    /// integration is processed.
    /// @param[in] timestamp BAT corresponding to this new chunk
    /// @param[in] corrMode correlator mode parameters (determines shape, etc)
-   void initVisChunk(const casa::uLong timestamp, const CorrelatorMode &corrMode);
+   void initVisChunk(const casacore::uLong timestamp, const CorrelatorMode &corrMode);
 
    /// @brief main method add datagram to the current chunk
    /// @details This method processes one datagram and adds it to 
@@ -111,7 +111,7 @@ private:
    uint32_t itsNDuplicates;
 
    /// @brief cached map of correlator products per beam. The array is flattened for easy access, beamId is the slowest varying axis.
-   std::vector<boost::optional<std::pair<casa::uInt, casa::uInt> > > itsCachedMap;
+   std::vector<boost::optional<std::pair<casacore::uInt, casacore::uInt> > > itsCachedMap;
 };
 
 } // namespace ingest

@@ -39,14 +39,14 @@ using namespace askap::cp::sms::client;
 
 Component::Component(
 	const ComponentId id,
-        const casa::Quantity& rightAscension,
-        const casa::Quantity& declination,
-        const casa::Quantity& positionAngle,
-        const casa::Quantity& majorAxis,
-        const casa::Quantity& minorAxis,
-        const casa::Quantity& i1400,
-        const casa::Double& spectralIndex,
-        const casa::Double& spectralCurvature)
+        const casacore::Quantity& rightAscension,
+        const casacore::Quantity& declination,
+        const casacore::Quantity& positionAngle,
+        const casacore::Quantity& majorAxis,
+        const casacore::Quantity& minorAxis,
+        const casacore::Quantity& i1400,
+        const casacore::Double& spectralIndex,
+        const casacore::Double& spectralCurvature)
     : 
     itsId(id),
     itsRightAscension(rightAscension),
@@ -71,42 +71,42 @@ ComponentId Component::id() const
     return itsId;
 }
 
-casa::Quantity Component::rightAscension() const
+casacore::Quantity Component::rightAscension() const
 {
     return itsRightAscension;
 }
 
-casa::Quantity Component::declination() const
+casacore::Quantity Component::declination() const
 {
     return itsDeclination;
 }
 
-casa::Quantity Component::positionAngle() const
+casacore::Quantity Component::positionAngle() const
 {
     return itsPositionAngle;
 }
 
-casa::Quantity Component::majorAxis() const
+casacore::Quantity Component::majorAxis() const
 {
     return itsMajorAxis;
 }
 
-casa::Quantity Component::minorAxis() const
+casacore::Quantity Component::minorAxis() const
 {
     return itsMinorAxis;
 }
 
-casa::Quantity Component::i1400() const
+casacore::Quantity Component::i1400() const
 {
     return itsI1400;
 }
 
-casa::Double Component::spectralIndex() const
+casacore::Double Component::spectralIndex() const
 {
     return itsSpectralIndex;
 }
 
-casa::Double Component::spectralCurvature() const
+casacore::Double Component::spectralCurvature() const
 {
     return itsSpectralCurvature;
 }

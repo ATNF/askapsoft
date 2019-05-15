@@ -70,27 +70,27 @@ void ShadowFlagTask::process(askap::cp::common::VisChunk::ShPtr& chunk)
 {
    ASKAPDEBUGASSERT(chunk);
    if (itsNumberOfBeams < 0) {
-       std::set<casa::uInt> beamIDs(chunk->beam1().begin(),chunk->beam1().end());
+       std::set<casacore::uInt> beamIDs(chunk->beam1().begin(),chunk->beam1().end());
        itsNumberOfBeams = static_cast<int>(beamIDs.size());
        ASKAPCHECK(itsNumberOfBeams > 0, "Data chunk received on the first iteration seems to be empty");
    }
    // first build a set of shadowed antennas
-   std::set<casa::uInt> shadowedAntennasThisCycle;
-   casa::Vector<casa::RigidVector<casa::Double, 3> > &uvw = chunk->uvw();
-   for (casa::uInt row = 0; row < chunk->nRow(); ++row) {
+   std::set<casacore::uInt> shadowedAntennasThisCycle;
+   casacore::Vector<casacore::RigidVector<casacore::Double, 3> > &uvw = chunk->uvw();
+   for (casacore::uInt row = 0; row < chunk->nRow(); ++row) {
         if (chunk->antenna1()[row] != chunk->antenna2()[row]) {
-            const casa::RigidVector<casa::Double, 3> thisRowUVW = uvw[row];
+            const casacore::RigidVector<casacore::Double, 3> thisRowUVW = uvw[row];
             const double projectedSeparation = sqrt(thisRowUVW(0)*thisRowUVW(0) + thisRowUVW(1)*thisRowUVW(1));
             const double baselineLength = sqrt(thisRowUVW(2) * thisRowUVW(2) + projectedSeparation * projectedSeparation);
             if (baselineLength < 1e-6) {
                 // this is the feature of TOS-calculated uvw that they're zero for completely flagged baselines
                 // check that this baseline is indeed flagged. Note, autocorrelations are already excluded by the if-statement above
                 bool oneUnflagged = false;
-                casa::Matrix<casa::Bool> thisRowFlags = chunk->flag().yzPlane(row);
+                casacore::Matrix<casacore::Bool> thisRowFlags = chunk->flag().yzPlane(row);
                 // it may be faster to do it via flattened array as we don't care
                 // which element is where, but for now leave the code more readable
-                for (casa::uInt chan = 0; chan < thisRowFlags.nrow(); ++chan) {
-                     for (casa::uInt pol = 0; pol < thisRowFlags.ncolumn(); ++pol) {
+                for (casacore::uInt chan = 0; chan < thisRowFlags.nrow(); ++chan) {
+                     for (casacore::uInt pol = 0; pol < thisRowFlags.ncolumn(); ++pol) {
                           if (!thisRowFlags(chan,pol)) {
                               oneUnflagged = true;
                               break;
@@ -115,7 +115,7 @@ void ShadowFlagTask::process(askap::cp::common::VisChunk::ShPtr& chunk)
    }
    const bool logAtHigherPriority = (itsNumberOfBeams > 1) || (chunk->nRow() > 0 ? chunk->beam1()[0] == 0 : false);
    // now, check on changes in the list of flagged antennas for reporting
-   for (std::set<casa::uInt>::const_iterator ci = shadowedAntennasThisCycle.begin(); 
+   for (std::set<casacore::uInt>::const_iterator ci = shadowedAntennasThisCycle.begin(); 
                       ci != shadowedAntennasThisCycle.end(); ++ci) {
         if (itsShadowedAntennas.find(*ci) == itsShadowedAntennas.end()) {
             ASKAPDEBUGASSERT(*ci < itsAntennaNames.size());
@@ -129,7 +129,7 @@ void ShadowFlagTask::process(askap::cp::common::VisChunk::ShPtr& chunk)
         }
    }
 
-   for (std::set<casa::uInt>::const_iterator ci = itsShadowedAntennas.begin(); 
+   for (std::set<casacore::uInt>::const_iterator ci = itsShadowedAntennas.begin(); 
                       ci != itsShadowedAntennas.end(); ++ci) {
         if (shadowedAntennasThisCycle.find(*ci) == shadowedAntennasThisCycle.end()) {
             ASKAPDEBUGASSERT(*ci < itsAntennaNames.size());
@@ -146,12 +146,12 @@ void ShadowFlagTask::process(askap::cp::common::VisChunk::ShPtr& chunk)
    
    // now flag affected baselines
    if (!itsDryRun && itsShadowedAntennas.size() > 0) {
-       for (casa::uInt row = 0; row < chunk->nRow(); ++row) {
+       for (casacore::uInt row = 0; row < chunk->nRow(); ++row) {
             if ((itsShadowedAntennas.find(chunk->antenna2()[row]) != itsShadowedAntennas.end()) || 
                 (itsShadowedAntennas.find(chunk->antenna1()[row]) != itsShadowedAntennas.end())) {
                 // flag this row
-                casa::Matrix<casa::Bool> thisFlagRow = chunk->flag().yzPlane(row);
-                thisFlagRow.set(casa::True); 
+                casacore::Matrix<casacore::Bool> thisFlagRow = chunk->flag().yzPlane(row);
+                thisFlagRow.set(casacore::True); 
             }
        }
    }

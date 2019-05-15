@@ -78,10 +78,10 @@ class ChannelSelTask : public askap::cp::ingest::ITask {
         const LOFAR::ParameterSet itsParset;
 
         /// @brief First channel to select
-        casa::uInt itsStart;
+        casacore::uInt itsStart;
 
         /// @brief Number of channels to select
-        casa::uInt itsNChan;
+        casacore::uInt itsNChan;
 };
 
 }

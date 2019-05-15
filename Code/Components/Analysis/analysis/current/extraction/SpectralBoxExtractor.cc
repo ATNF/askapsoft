@@ -80,12 +80,12 @@ void SpectralBoxExtractor::initialiseArray()
     // Form itsArray and initialise to zero
     if (this->openInput()) {
         int specsize = itsInputCubePtr->shape()(itsSpcAxis);
-        casa::IPosition shape(itsInputCubePtr->shape().size(), 1);
+        casacore::IPosition shape(itsInputCubePtr->shape().size(), 1);
         shape(itsSpcAxis) = specsize;
         if(itsStkAxis>-1){
             shape(itsStkAxis) = itsStokesList.size();
         }
-        itsArray = casa::Array<Float>(shape, 0.0);
+        itsArray = casacore::Array<Float>(shape, 0.0);
         this->closeInput();
     } else {
         ASKAPLOG_ERROR_STR(logger, "Could not open image");
@@ -126,7 +126,7 @@ void SpectralBoxExtractor::defineSlicer()
             ymin = itsSource->getYmin() + itsSource->getYOffset();
             ymax = itsSource->getYmax() + itsSource->getYOffset();
         }
-        casa::IPosition blc(shape.size(), 0), trc(shape.size(), 0);
+        casacore::IPosition blc(shape.size(), 0), trc(shape.size(), 0);
         blc(itsLngAxis) = xmin;
         blc(itsLatAxis) = ymin;
         blc(itsSpcAxis) = 0;
@@ -134,13 +134,13 @@ void SpectralBoxExtractor::defineSlicer()
         trc(itsLatAxis) = ymax;
         trc(itsSpcAxis) = shape(itsSpcAxis) - 1;
         if (itsStkAxis > -1) {
-            casa::Stokes stk;
+            casacore::Stokes stk;
             blc(itsStkAxis) = trc(itsStkAxis) =
                                   itsInputCoords.stokesPixelNumber(stk.name(itsCurrentStokes));
         }
         ASKAPLOG_DEBUG_STR(logger, "Defining slicer for " << itsInputCubePtr->name() <<
                            " based on blc=" << blc << ", trc=" << trc);
-        itsSlicer = casa::Slicer(blc, trc, casa::Slicer::endIsLast);
+        itsSlicer = casacore::Slicer(blc, trc, casacore::Slicer::endIsLast);
 
         this->closeInput();
     } else {
@@ -153,24 +153,24 @@ void SpectralBoxExtractor::writeImage()
 {
     ASKAPLOG_INFO_STR(logger, "Writing spectrum to " << itsOutputFilename);
 
-    casa::CoordinateSystem newcoo = casa::CoordinateUtil::defaultCoords4D();
+    casacore::CoordinateSystem newcoo = casacore::CoordinateUtil::defaultCoords4D();
 
-    int dirCoNum = itsInputCoords.findCoordinate(casa::Coordinate::DIRECTION);
-    int spcCoNum = itsInputCoords.findCoordinate(casa::Coordinate::SPECTRAL);
-    int stkCoNum = itsInputCoords.findCoordinate(casa::Coordinate::STOKES);
+    int dirCoNum = itsInputCoords.findCoordinate(casacore::Coordinate::DIRECTION);
+    int spcCoNum = itsInputCoords.findCoordinate(casacore::Coordinate::SPECTRAL);
+    int stkCoNum = itsInputCoords.findCoordinate(casacore::Coordinate::STOKES);
 
-    casa::DirectionCoordinate dircoo(itsInputCoords.directionCoordinate(dirCoNum));
-    casa::SpectralCoordinate spcoo(itsInputCoords.spectralCoordinate(spcCoNum));
-    casa::Vector<Int> stkvec(itsStokesList.size());
+    casacore::DirectionCoordinate dircoo(itsInputCoords.directionCoordinate(dirCoNum));
+    casacore::SpectralCoordinate spcoo(itsInputCoords.spectralCoordinate(spcCoNum));
+    casacore::Vector<Int> stkvec(itsStokesList.size());
     for (size_t i = 0; i < stkvec.size(); i++) {
         stkvec[i] = itsStokesList[i];
     }
-    casa::StokesCoordinate stkcoo(stkvec);
+    casacore::StokesCoordinate stkcoo(stkvec);
 
-    newcoo.replaceCoordinate(dircoo, newcoo.findCoordinate(casa::Coordinate::DIRECTION));
-    newcoo.replaceCoordinate(spcoo, newcoo.findCoordinate(casa::Coordinate::SPECTRAL));
+    newcoo.replaceCoordinate(dircoo, newcoo.findCoordinate(casacore::Coordinate::DIRECTION));
+    newcoo.replaceCoordinate(spcoo, newcoo.findCoordinate(casacore::Coordinate::SPECTRAL));
     if (stkCoNum >= 0) {
-        newcoo.replaceCoordinate(stkcoo, newcoo.findCoordinate(casa::Coordinate::STOKES));
+        newcoo.replaceCoordinate(stkcoo, newcoo.findCoordinate(casacore::Coordinate::STOKES));
     }
 
     // shift the reference pixel for the spatial coords, so that
@@ -180,14 +180,14 @@ void SpectralBoxExtractor::writeImage()
     int latAxis = newcoo.directionAxesNumbers()[1];
     int spcAxis = newcoo.spectralAxisNumber();
     int stkAxis = newcoo.polarizationAxisNumber();
-    casa::IPosition outshape(4, 1);
+    casacore::IPosition outshape(4, 1);
     outshape(spcAxis) = itsSlicer.length()(itsSpcAxis);
     outshape(stkAxis) = stkvec.size();
-    casa::Vector<Float> shift(outshape.size(), 0);
-    casa::Vector<Float> incrFrac(outshape.size(), 1);
+    casacore::Vector<Float> shift(outshape.size(), 0);
+    casacore::Vector<Float> incrFrac(outshape.size(), 1);
     shift(lngAxis) = itsXloc;
     shift(latAxis) = itsYloc;
-    casa::Vector<Int> newshape = outshape.asVector();
+    casacore::Vector<Int> newshape = outshape.asVector();
     newcoo.subImageInSitu(shift, incrFrac, newshape);
 
     Array<Float> newarray(itsArray.reform(outshape));
@@ -207,14 +207,14 @@ void SpectralBoxExtractor::writeImage()
 }
 
 
-casa::Array<Float> SpectralBoxExtractor::frequencies()
+casacore::Array<Float> SpectralBoxExtractor::frequencies()
 {
-    casa::Vector<Float> freqs;
+    casacore::Vector<Float> freqs;
     if (this->openInput() && itsSpcAxis) {
-        casa::IPosition shape(itsInputCubePtr->shape());
-        freqs=casa::Vector<Float>(shape(itsSpcAxis),0.);
-        int spcCoNum = itsInputCoords.findCoordinate(casa::Coordinate::SPECTRAL);
-        casa::SpectralCoordinate spcoo(itsInputCoords.spectralCoordinate(spcCoNum));
+        casacore::IPosition shape(itsInputCubePtr->shape());
+        freqs=casacore::Vector<Float>(shape(itsSpcAxis),0.);
+        int spcCoNum = itsInputCoords.findCoordinate(casacore::Coordinate::SPECTRAL);
+        casacore::SpectralCoordinate spcoo(itsInputCoords.spectralCoordinate(spcCoNum));
         for(unsigned int i=0;i<shape(itsSpcAxis);i++){
             Double pix=i;
             Double freq;
@@ -232,9 +232,9 @@ std::string SpectralBoxExtractor::freqUnit()
 {
     std::string unit;
     if (this->openInput() && itsSpcAxis) {
-        int spcCoNum = itsInputCoords.findCoordinate(casa::Coordinate::SPECTRAL);
-        casa::SpectralCoordinate spcoo(itsInputCoords.spectralCoordinate(spcCoNum));
-        casa::Vector<casa::String> units=spcoo.worldAxisUnits();
+        int spcCoNum = itsInputCoords.findCoordinate(casacore::Coordinate::SPECTRAL);
+        casacore::SpectralCoordinate spcoo(itsInputCoords.spectralCoordinate(spcCoNum));
+        casacore::Vector<casacore::String> units=spcoo.worldAxisUnits();
         if(units.size()>1){
             ASKAPLOG_WARN_STR(logger, "Multiple units in spectral axis: " << units);
         }

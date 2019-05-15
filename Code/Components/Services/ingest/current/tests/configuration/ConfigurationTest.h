@@ -172,7 +172,7 @@ class ConfigurationTest : public CppUnit::TestFixture {
 
         void testArrayName() {
             Configuration conf(itsParset);
-            CPPUNIT_ASSERT_EQUAL(casa::String("ASKAP"), conf.arrayName());
+            CPPUNIT_ASSERT_EQUAL(casacore::String("ASKAP"), conf.arrayName());
         }
 
         void testSchedulingBlockID() {
@@ -226,21 +226,21 @@ class ConfigurationTest : public CppUnit::TestFixture {
 
             // A0
             unsigned int idx = 0;
-            CPPUNIT_ASSERT_EQUAL(casa::String("ak06"), conf.antennas().at(idx).name());
-            CPPUNIT_ASSERT_EQUAL(casa::String("equatorial"), conf.antennas().at(idx).mount());
-            CPPUNIT_ASSERT_EQUAL(casa::Quantity(12, "m"), conf.antennas().at(idx).diameter());
+            CPPUNIT_ASSERT_EQUAL(casacore::String("ak06"), conf.antennas().at(idx).name());
+            CPPUNIT_ASSERT_EQUAL(casacore::String("equatorial"), conf.antennas().at(idx).mount());
+            CPPUNIT_ASSERT_EQUAL(casacore::Quantity(12, "m"), conf.antennas().at(idx).diameter());
 
             // A1
             idx = 1;
-            CPPUNIT_ASSERT_EQUAL(casa::String("ak01"), conf.antennas().at(idx).name());
-            CPPUNIT_ASSERT_EQUAL(casa::String("equatorial"), conf.antennas().at(idx).mount());
-            CPPUNIT_ASSERT_EQUAL(casa::Quantity(12, "m"), conf.antennas().at(idx).diameter());
+            CPPUNIT_ASSERT_EQUAL(casacore::String("ak01"), conf.antennas().at(idx).name());
+            CPPUNIT_ASSERT_EQUAL(casacore::String("equatorial"), conf.antennas().at(idx).mount());
+            CPPUNIT_ASSERT_EQUAL(casacore::Quantity(12, "m"), conf.antennas().at(idx).diameter());
 
             // A2
             idx = 2;
-            CPPUNIT_ASSERT_EQUAL(casa::String("ak03"), conf.antennas().at(idx).name());
-            CPPUNIT_ASSERT_EQUAL(casa::String("equatorial"), conf.antennas().at(idx).mount());
-            CPPUNIT_ASSERT_EQUAL(casa::Quantity(12, "m"), conf.antennas().at(idx).diameter());
+            CPPUNIT_ASSERT_EQUAL(casacore::String("ak03"), conf.antennas().at(idx).name());
+            CPPUNIT_ASSERT_EQUAL(casacore::String("equatorial"), conf.antennas().at(idx).mount());
+            CPPUNIT_ASSERT_EQUAL(casacore::Quantity(12, "m"), conf.antennas().at(idx).diameter());
         }
 
         void testFeed() {
@@ -248,19 +248,19 @@ class ConfigurationTest : public CppUnit::TestFixture {
             const FeedConfig& feed = conf.feed();
             CPPUNIT_ASSERT_EQUAL(4u, feed.nFeeds());
 
-            CPPUNIT_ASSERT_EQUAL(casa::Quantity(-0.5, "deg"), feed.offsetX(0));
-            CPPUNIT_ASSERT_EQUAL(casa::Quantity(0.5, "deg"), feed.offsetY(0));
+            CPPUNIT_ASSERT_EQUAL(casacore::Quantity(-0.5, "deg"), feed.offsetX(0));
+            CPPUNIT_ASSERT_EQUAL(casacore::Quantity(0.5, "deg"), feed.offsetY(0));
 
-            CPPUNIT_ASSERT_EQUAL(casa::Quantity(0.5, "deg"), feed.offsetX(1));
-            CPPUNIT_ASSERT_EQUAL(casa::Quantity(0.5, "deg"), feed.offsetY(1));
+            CPPUNIT_ASSERT_EQUAL(casacore::Quantity(0.5, "deg"), feed.offsetX(1));
+            CPPUNIT_ASSERT_EQUAL(casacore::Quantity(0.5, "deg"), feed.offsetY(1));
 
-            CPPUNIT_ASSERT_EQUAL(casa::Quantity(-0.5, "deg"), feed.offsetX(2));
-            CPPUNIT_ASSERT_EQUAL(casa::Quantity(-0.5, "deg"), feed.offsetY(2));
+            CPPUNIT_ASSERT_EQUAL(casacore::Quantity(-0.5, "deg"), feed.offsetX(2));
+            CPPUNIT_ASSERT_EQUAL(casacore::Quantity(-0.5, "deg"), feed.offsetY(2));
 
-            CPPUNIT_ASSERT_EQUAL(casa::Quantity(0.5, "deg"), feed.offsetX(3));
-            CPPUNIT_ASSERT_EQUAL(casa::Quantity(-0.5, "deg"), feed.offsetY(3));
+            CPPUNIT_ASSERT_EQUAL(casacore::Quantity(0.5, "deg"), feed.offsetX(3));
+            CPPUNIT_ASSERT_EQUAL(casacore::Quantity(-0.5, "deg"), feed.offsetY(3));
 
-            CPPUNIT_ASSERT_EQUAL(casa::String("X Y"), feed.pol(0));
+            CPPUNIT_ASSERT_EQUAL(casacore::String("X Y"), feed.pol(0));
         }
      
         void testCorrelator() {

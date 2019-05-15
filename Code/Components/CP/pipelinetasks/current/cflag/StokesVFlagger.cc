@@ -67,7 +67,7 @@ using namespace askap::cp::pipelinetasks;
 
 vector< boost::shared_ptr<IFlagger> > StokesVFlagger::build(
         const LOFAR::ParameterSet& parset,
-        const casa::MeasurementSet& /*ms*/)
+        const casacore::MeasurementSet& /*ms*/)
 {
     vector< boost::shared_ptr<IFlagger> > flaggers;
     const string key = "stokesv_flagger.enable";
@@ -128,7 +128,7 @@ FlaggingStats StokesVFlagger::stats(void) const
     return itsStats;
 }
 
-casa::Bool StokesVFlagger::processingRequired(const casa::uInt pass)
+casacore::Bool StokesVFlagger::processingRequired(const casacore::uInt pass)
 {
     if (itsIntegrateSpectra || itsIntegrateTimes) {
         return (pass<2);
@@ -137,41 +137,41 @@ casa::Bool StokesVFlagger::processingRequired(const casa::uInt pass)
     }
 }
 
-casa::StokesConverter& StokesVFlagger::getStokesConverter(
-    const casa::ROMSPolarizationColumns& polc, const casa::Int polId)
+casacore::StokesConverter& StokesVFlagger::getStokesConverter(
+    const casacore::ROMSPolarizationColumns& polc, const casacore::Int polId)
 {
-    const casa::Vector<Int> corrType = polc.corrType()(polId);
-    std::map<casa::Int, casa::StokesConverter>::iterator it = itsConverterCache.find(polId);
+    const casacore::Vector<Int> corrType = polc.corrType()(polId);
+    std::map<casacore::Int, casacore::StokesConverter>::iterator it = itsConverterCache.find(polId);
     if (it == itsConverterCache.end()) {
         //ASKAPLOG_DEBUG_STR(logger, "Creating StokesConverter for pol table entry " << polId);
-        const casa::Vector<Int> target(1, Stokes::V);
-        itsConverterCache.insert(pair<casa::Int, casa::StokesConverter>(polId,
-                                 casa::StokesConverter(target, corrType)));
+        const casacore::Vector<Int> target(1, Stokes::V);
+        itsConverterCache.insert(pair<casacore::Int, casacore::StokesConverter>(polId,
+                                 casacore::StokesConverter(target, corrType)));
     }
 
     return itsConverterCache[polId];
 }
 
-void StokesVFlagger::processRow(casa::MSColumns& msc, const casa::uInt pass,
-                                const casa::uInt row, const bool dryRun)
+void StokesVFlagger::processRow(casacore::MSColumns& msc, const casacore::uInt pass,
+                                const casacore::uInt row, const bool dryRun)
 {
     // Get a description of what correlation products are in the data table.
-    const casa::ROMSDataDescColumns& ddc = msc.dataDescription();
-    const casa::Int dataDescId = msc.dataDescId()(row);
-    const casa::Int polId = ddc.polarizationId()(dataDescId);
+    const casacore::ROMSDataDescColumns& ddc = msc.dataDescription();
+    const casacore::Int dataDescId = msc.dataDescId()(row);
+    const casacore::Int polId = ddc.polarizationId()(dataDescId);
 
     // Get the (potentially cached) stokes converter
     const StokesConverter& stokesconv = getStokesConverter(msc.polarization(), polId);
 
     // Convert data to Stokes V (imag(data(2,i))-imag(data(3,i)))
-    const Matrix<casa::Complex> data = msc.data()(row);
-    casa::Matrix<casa::Complex> vmatrix(1, data.ncolumn());
+    const Matrix<casacore::Complex> data = msc.data()(row);
+    casacore::Matrix<casacore::Complex> vmatrix(1, data.ncolumn());
     stokesconv.convert(vmatrix, data);
-    casa::Vector<casa::Complex> vdata = vmatrix.row(0);
+    casacore::Vector<casacore::Complex> vdata = vmatrix.row(0);
 
     // Build a vector with the amplitudes
-    Matrix<casa::Bool> flags = msc.flag()(row);
-    std::vector<casa::Float> tmpamps;
+    Matrix<casacore::Bool> flags = msc.flag()(row);
+    std::vector<casacore::Float> tmpamps;
     for (size_t i = 0; i < vdata.size(); ++i) {
         bool anyFlagged = anyEQ(flags.column(i), true);
         if (!anyFlagged) {
@@ -208,15 +208,15 @@ void StokesVFlagger::processRow(casa::MSColumns& msc, const casa::uInt pass,
 
     if ( pass==0 ) {
 
-        // Convert to a casa::Vector so we can use ArrayMath functions
+        // Convert to a casacore::Vector so we can use ArrayMath functions
         // to determine the mean and stddev
-        casa::Vector<casa::Float> amps(tmpamps);
+        casacore::Vector<casacore::Float> amps(tmpamps);
 
         // Flag all correlations where the Stokes V product
         // is greater than the threshold
-        casa::Float sigma, avg;
+        casacore::Float sigma, avg;
         if (itsRobustStatistics) {
-            casa::Vector<casa::Float> statsVector = getRobustStats(amps);
+            casacore::Vector<casacore::Float> statsVector = getRobustStats(amps);
             avg = statsVector[0];
             sigma = statsVector[1];
             // if min and max are bounded, they all are.
@@ -234,20 +234,20 @@ void StokesVFlagger::processRow(casa::MSColumns& msc, const casa::uInt pass,
 
         // If stokes-v can't be formed due to lack of the necessary input products
         // then vdata will contain all zeros. In this case, no flagging can be done.
-        const casa::Float epsilon = std::numeric_limits<casa::Float>::epsilon();
+        const casacore::Float epsilon = std::numeric_limits<casacore::Float>::epsilon();
         if (near(sigma, 0.0, epsilon) && near(avg, 0.0, epsilon)) {
             return;
         }
 
         // Apply threshold based flagging and accumulate any averages
         // only need these if itsIntegrateTimes
-        casa::Double aveTime = 0.0;
-        casa::uInt countTime = 0;
+        casacore::Double aveTime = 0.0;
+        casacore::uInt countTime = 0;
         for (size_t i = 0; i < vdata.size(); ++i) {
-            const casa::Float amp = abs(vdata(i));
+            const casacore::Float amp = abs(vdata(i));
             // Apply threshold based flagging
             if (amp > (avg + (sigma * itsThreshold))) {
-                for (casa::uInt pol = 0; pol < flags.nrow(); ++pol) {
+                for (casacore::uInt pol = 0; pol < flags.nrow(); ++pol) {
                     if (flags(pol, i)) {
                         itsStats.visAlreadyFlagged++;
                         continue;
@@ -263,7 +263,7 @@ void StokesVFlagger::processRow(casa::MSColumns& msc, const casa::uInt pass,
                     // do spectra integration
                     itsAveSpectra[key][i] += amp;
                     itsCountSpectra[key][i]++;
-                    itsAverageFlagsAreReady = casa::False;
+                    itsAverageFlagsAreReady = casacore::False;
                 }
                 if ( itsIntegrateTimes ) {
                     // do time-series integration
@@ -276,12 +276,12 @@ void StokesVFlagger::processRow(casa::MSColumns& msc, const casa::uInt pass,
             // normalise this average
             if ( countTime>0 ) {
                 itsAveTimes[key][itsCountTimes[key]] =
-                    aveTime/casa::Double(countTime);
-                itsMaskTimes[key][itsCountTimes[key]] = casa::True;
-                itsAverageFlagsAreReady = casa::False;
+                    aveTime/casacore::Double(countTime);
+                itsMaskTimes[key][itsCountTimes[key]] = casacore::True;
+                itsAverageFlagsAreReady = casacore::False;
             }
             else {
-                itsMaskTimes[key][itsCountTimes[key]] = casa::False;
+                itsMaskTimes[key][itsCountTimes[key]] = casacore::False;
             }
         }
 
@@ -297,7 +297,7 @@ void StokesVFlagger::processRow(casa::MSColumns& msc, const casa::uInt pass,
                 rowFlagged = true;
                 itsStats.rowsFlagged++;
                 for (size_t i = 0; i < vdata.size(); ++i) {
-                    for (casa::uInt pol = 0; pol < flags.nrow(); ++pol) {
+                    for (casacore::uInt pol = 0; pol < flags.nrow(); ++pol) {
                         if (flags(pol, i)) continue;
                         flags(pol, i) = true;
                         wasUpdated = true;
@@ -311,7 +311,7 @@ void StokesVFlagger::processRow(casa::MSColumns& msc, const casa::uInt pass,
         if ( itsIntegrateSpectra && !rowFlagged ) {
             for (size_t i = 0; i < vdata.size(); ++i) {
                 if ( !itsMaskSpectra[key][i] ) {
-                    for (casa::uInt pol = 0; pol < flags.nrow(); ++pol) {
+                    for (casacore::uInt pol = 0; pol < flags.nrow(); ++pol) {
                         if ( flags(pol, i) ) continue;
                         flags(pol, i) = true;
                         wasUpdated = true;
@@ -331,39 +331,39 @@ void StokesVFlagger::processRow(casa::MSColumns& msc, const casa::uInt pass,
 }
 
 
-void StokesVFlagger::processRows(casa::MSColumns& msc, const casa::uInt pass,
-                                 const casa::uInt row, const casa::uInt nrow,
+void StokesVFlagger::processRows(casacore::MSColumns& msc, const casacore::uInt pass,
+                                 const casacore::uInt row, const casacore::uInt nrow,
                                  const bool dryRun)
 {
     // Get a description of what correlation products are in the data table.
-    const casa::ROMSDataDescColumns& ddc = msc.dataDescription();
-    const casa::Int dataDescId = msc.dataDescId()(row);
-    const casa::Int polId = ddc.polarizationId()(dataDescId);
+    const casacore::ROMSDataDescColumns& ddc = msc.dataDescription();
+    const casacore::Int dataDescId = msc.dataDescId()(row);
+    const casacore::Int polId = ddc.polarizationId()(dataDescId);
 
     // Get the (potentially cached) stokes converter
     const StokesConverter& stokesconv = getStokesConverter(msc.polarization(), polId);
 
     // Convert data to Stokes V (imag(data(2,i))-imag(data(3,i)))
     Slicer rowSlicer(Slice(row,nrow));
-    const Cube<casa::Complex> data = msc.data().getColumnRange(rowSlicer);
+    const Cube<casacore::Complex> data = msc.data().getColumnRange(rowSlicer);
     // does it help to keep this around?
-    static casa::Cube<casa::Complex> vcube;
+    static casacore::Cube<casacore::Complex> vcube;
     vcube.resize(1, data.shape()[1], data.shape()[2]);
     stokesconv.convert(vcube, data);
-    casa::Matrix<casa::Complex> vdata = vcube.yzPlane(0);
-    Cube<casa::Bool> flags = msc.flag().getColumnRange(rowSlicer);
-    casa::uInt nPol = flags.shape()(0);
-    casa::uInt nChan = flags.shape()(1);
+    casacore::Matrix<casacore::Complex> vdata = vcube.yzPlane(0);
+    Cube<casacore::Bool> flags = msc.flag().getColumnRange(rowSlicer);
+    casacore::uInt nPol = flags.shape()(0);
+    casacore::uInt nChan = flags.shape()(1);
     bool wasUpdated = false;
 
-    for (casa::uInt k = 0; k < nrow;  k++) {
+    for (casacore::uInt k = 0; k < nrow;  k++) {
 
         // Build a vector with the amplitudes
         bool allFlagged = true;
-        std::vector<casa::Float> tmpamps;
+        std::vector<casacore::Float> tmpamps;
         for (size_t i = 0; i < nChan; ++i) {
             bool anyFlagged = false;
-            for (casa::uInt pol=0; pol < nPol; pol++)
+            for (casacore::uInt pol=0; pol < nPol; pol++)
                 if (flags(pol,i,k)) anyFlagged = true;
             if (!anyFlagged) {
                 if (pass == 0) tmpamps.push_back(abs(vdata(i,k)));
@@ -400,15 +400,15 @@ void StokesVFlagger::processRows(casa::MSColumns& msc, const casa::uInt pass,
 
         if ( pass==0 ) {
 
-            // Convert to a casa::Vector so we can use ArrayMath functions
+            // Convert to a casacore::Vector so we can use ArrayMath functions
             // to determine the mean and stddev
-            casa::Vector<casa::Float> amps(tmpamps);
+            casacore::Vector<casacore::Float> amps(tmpamps);
 
             // Flag all correlations where the Stokes V product
             // is greater than the threshold
-            casa::Float sigma, avg;
+            casacore::Float sigma, avg;
             if (itsRobustStatistics) {
-                casa::Vector<casa::Float> statsVector = getRobustStats(amps);
+                casacore::Vector<casacore::Float> statsVector = getRobustStats(amps);
                 avg = statsVector[0];
                 sigma = statsVector[1];
                 // if min and max are bounded, they all are.
@@ -426,20 +426,20 @@ void StokesVFlagger::processRows(casa::MSColumns& msc, const casa::uInt pass,
 
             // If stokes-v can't be formed due to lack of the necessary input products
             // then vdata will contain all zeros. In this case, no flagging can be done.
-            const casa::Float epsilon = std::numeric_limits<casa::Float>::epsilon();
+            const casacore::Float epsilon = std::numeric_limits<casacore::Float>::epsilon();
             if (near(sigma, 0.0, epsilon) && near(avg, 0.0, epsilon)) {
                 continue;
             }
 
             // Apply threshold based flagging and accumulate any averages
             // only need these if itsIntegrateTimes
-            casa::Double aveTime = 0.0;
-            casa::uInt countTime = 0;
+            casacore::Double aveTime = 0.0;
+            casacore::uInt countTime = 0;
             for (size_t i = 0; i < nChan; ++i) {
-                const casa::Float amp = abs(vdata(i,k));
+                const casacore::Float amp = abs(vdata(i,k));
                 // Apply threshold based flagging
                 if (amp > (avg + (sigma * itsThreshold))) {
-                    for (casa::uInt pol = 0; pol < nPol; ++pol) {
+                    for (casacore::uInt pol = 0; pol < nPol; ++pol) {
                         if (flags(pol, i, k)) {
                             itsStats.visAlreadyFlagged++;
                             continue;
@@ -455,7 +455,7 @@ void StokesVFlagger::processRows(casa::MSColumns& msc, const casa::uInt pass,
                         // do spectra integration
                         itsAveSpectra[key][i] += amp;
                         itsCountSpectra[key][i]++;
-                        itsAverageFlagsAreReady = casa::False;
+                        itsAverageFlagsAreReady = casacore::False;
                     }
                     if ( itsIntegrateTimes ) {
                         // do time-series integration
@@ -468,12 +468,12 @@ void StokesVFlagger::processRows(casa::MSColumns& msc, const casa::uInt pass,
                 // normalise this average
                 if ( countTime>0 ) {
                     itsAveTimes[key][itsCountTimes[key]] =
-                        aveTime/casa::Double(countTime);
-                    itsMaskTimes[key][itsCountTimes[key]] = casa::True;
-                    itsAverageFlagsAreReady = casa::False;
+                        aveTime/casacore::Double(countTime);
+                    itsMaskTimes[key][itsCountTimes[key]] = casacore::True;
+                    itsAverageFlagsAreReady = casacore::False;
                 }
                 else {
-                    itsMaskTimes[key][itsCountTimes[key]] = casa::False;
+                    itsMaskTimes[key][itsCountTimes[key]] = casacore::False;
                 }
             }
 
@@ -489,7 +489,7 @@ void StokesVFlagger::processRows(casa::MSColumns& msc, const casa::uInt pass,
                     rowFlagged = true;
                     itsStats.rowsFlagged++;
                     for (size_t i = 0; i < nChan; ++i) {
-                        for (casa::uInt pol = 0; pol < nPol; ++pol) {
+                        for (casacore::uInt pol = 0; pol < nPol; ++pol) {
                             if (flags(pol, i, k)) continue;
                             flags(pol, i, k) = true;
                             wasUpdatedRow = true;
@@ -502,7 +502,7 @@ void StokesVFlagger::processRows(casa::MSColumns& msc, const casa::uInt pass,
             if ( itsIntegrateSpectra && !rowFlagged ) {
                 for (size_t i = 0; i < nChan; ++i) {
                     if ( !itsMaskSpectra[key][i] ) {
-                        for (casa::uInt pol = 0; pol < nPol; ++pol) {
+                        for (casacore::uInt pol = 0; pol < nPol; ++pol) {
                             if ( flags(pol, i, k) ) continue;
                             flags(pol, i, k) = true;
                             wasUpdatedRow = true;
@@ -526,40 +526,40 @@ void StokesVFlagger::processRows(casa::MSColumns& msc, const casa::uInt pass,
 
 
 // return the median, the interquartile range, and the min/max of a masked array
-casa::Vector<casa::Float>StokesVFlagger::getRobustStats(
-    casa::MaskedArray<casa::Float> maskedAmplitudes)
+casacore::Vector<casacore::Float>StokesVFlagger::getRobustStats(
+    casacore::MaskedArray<casacore::Float> maskedAmplitudes)
 {
     // extract all of the unflagged amplitudes
-    casa::Vector<casa::Float> amplitudes = maskedAmplitudes.getCompressedArray();
+    casacore::Vector<casacore::Float> amplitudes = maskedAmplitudes.getCompressedArray();
 
     // return with zeros if all of the data are flagged
     if (amplitudes.nelements() == 0) {
-        casa::Vector<casa::Float> statsVector(4,0.0);
+        casacore::Vector<casacore::Float> statsVector(4,0.0);
         return(statsVector);
     }
     return getRobustStats(amplitudes);
 }
 
 // return the median, the interquartile range, and the min/max of a non-masked array
-casa::Vector<casa::Float>StokesVFlagger::getRobustStats(
-    casa::Vector<casa::Float> amplitudes)
+casacore::Vector<casacore::Float>StokesVFlagger::getRobustStats(
+    casacore::Vector<casacore::Float> amplitudes)
 {
-    casa::Float minVal, maxVal;
-    casa::minMax(minVal,maxVal,amplitudes);
+    casacore::Float minVal, maxVal;
+    casacore::minMax(minVal,maxVal,amplitudes);
 
     // Now find median and IQR
     // Use the fact that nth_element does a partial sort:
     // all elements before the selected element will be smaller
-    casa::uInt n = amplitudes.nelements();
-    std::vector<casa::Float> vamp = amplitudes.tovector();
-    const casa::uInt Q1 = n / 4;
-    const casa::uInt Q2 = n / 2;
-    const casa::uInt Q3 = 3 * n /4;
+    casacore::uInt n = amplitudes.nelements();
+    std::vector<casacore::Float> vamp = amplitudes.tovector();
+    const casacore::uInt Q1 = n / 4;
+    const casacore::uInt Q2 = n / 2;
+    const casacore::uInt Q3 = 3 * n /4;
     std::nth_element(vamp.begin(),        vamp.begin() + Q2, vamp.end());
     std::nth_element(vamp.begin(),        vamp.begin() + Q1, vamp.begin() + Q2);
     std::nth_element(vamp.begin() + Q2+1, vamp.begin() + Q3, vamp.end());
 
-    casa::Vector<casa::Float> statsVector(4);
+    casacore::Vector<casacore::Float> statsVector(4);
     statsVector[0] = vamp[Q2]; // median
     statsVector[1] = (vamp[Q3] - vamp[Q1]) / 1.34896; // sigma from IQR
     statsVector[2] = minVal; // min
@@ -569,8 +569,8 @@ casa::Vector<casa::Float>StokesVFlagger::getRobustStats(
 
 // Generate a key for a given row and polarisation
 rowKey StokesVFlagger::getRowKey(
-    const casa::MSColumns& msc,
-    const casa::uInt row)
+    const casacore::MSColumns& msc,
+    const casacore::uInt row)
 {
 
     // looking for outliers in a single polarisation, so set the corr key to zero
@@ -582,19 +582,19 @@ rowKey StokesVFlagger::getRowKey(
                              msc.antenna2()(row),
                              0); // corr
 #else
-    casa::Int field = msc.fieldId()(row);
-    casa::Int feed1 = msc.feed1()(row);
+    casacore::Int field = msc.fieldId()(row);
+    casacore::Int feed1 = msc.feed1()(row);
     //feed2 = msc.feed2()(row);
-    casa::Int ant1  = msc.antenna1()(row);
-    casa::Int ant2  = msc.antenna2()(row);
-    casa::Int nant = msc.antenna().nrow();
-    casa::Int nfeed = msc.feed().nrow();
+    casacore::Int ant1  = msc.antenna1()(row);
+    casacore::Int ant2  = msc.antenna2()(row);
+    casacore::Int nant = msc.antenna().nrow();
+    casacore::Int nfeed = msc.feed().nrow();
     if (nant > 0 && nfeed >= nant) nfeed /= nant;
     return (((field*nfeed+feed1)*nant+ant2)*nant+ant1);
 #endif
 }
 
-void StokesVFlagger::updateTimeVectors(const rowKey &key, const casa::uInt pass)
+void StokesVFlagger::updateTimeVectors(const rowKey &key, const casacore::uInt pass)
 {
     if (itsCountTimes.find(key) == itsCountTimes.end()) {
         itsCountTimes[key] = 0; // init counter for this key
@@ -603,20 +603,20 @@ void StokesVFlagger::updateTimeVectors(const rowKey &key, const casa::uInt pass)
         itsCountTimes[key]++;
     }
     if ( pass==0 ) {
-        itsAveTimes[key].resize(itsCountTimes[key]+1,casa::True);
-        itsMaskTimes[key].resize(itsCountTimes[key]+1,casa::True);
-        itsMaskTimes[key][itsCountTimes[key]] = casa::True;
+        itsAveTimes[key].resize(itsCountTimes[key]+1,casacore::True);
+        itsMaskTimes[key].resize(itsCountTimes[key]+1,casacore::True);
+        itsMaskTimes[key][itsCountTimes[key]] = casacore::True;
     }
 }
 
-void StokesVFlagger::initSpectrumVectors(const rowKey &key, const casa::IPosition &shape)
+void StokesVFlagger::initSpectrumVectors(const rowKey &key, const casacore::IPosition &shape)
 {
     itsAveSpectra[key].resize(shape);
     itsAveSpectra[key].set(0.0);
     itsCountSpectra[key].resize(shape);
     itsCountSpectra[key].set(0);
     itsMaskSpectra[key].resize(shape);
-    itsMaskSpectra[key].set(casa::True);
+    itsMaskSpectra[key].set(casacore::True);
 }
 
 // Set flags based on integrated quantities
@@ -625,36 +625,36 @@ void StokesVFlagger::setFlagsFromIntegrations(void)
 
     if ( itsIntegrateSpectra ) {
 
-        for (std::map<rowKey, casa::Vector<casa::Double> >::iterator
+        for (std::map<rowKey, casacore::Vector<casacore::Double> >::iterator
              it=itsAveSpectra.begin(); it!=itsAveSpectra.end(); ++it) {
 
             // get the spectra
-            casa::Vector<casa::Float> aveSpectrum(it->second.shape());
-            casa::Vector<casa::Int> countSpectrum = itsCountSpectra[it->first];
-            casa::Vector<casa::Bool> maskSpectrum = itsMaskSpectra[it->first];
-            //std::vector<casa::Float> tmpamps; // use instead of MaskedArray?
+            casacore::Vector<casacore::Float> aveSpectrum(it->second.shape());
+            casacore::Vector<casacore::Int> countSpectrum = itsCountSpectra[it->first];
+            casacore::Vector<casacore::Bool> maskSpectrum = itsMaskSpectra[it->first];
+            //std::vector<casacore::Float> tmpamps; // use instead of MaskedArray?
 
             for (size_t chan = 0; chan < aveSpectrum.size(); ++chan) {
                 if (countSpectrum[chan]>0) {
                     aveSpectrum[chan] = it->second[chan] /
-                                        casa::Double(countSpectrum[chan]);
+                                        casacore::Double(countSpectrum[chan]);
                     //tmpamps.push_back(aveSpectrum[chan]);
                     countSpectrum[chan] = 1;
-                    maskSpectrum[chan] = casa::True;
+                    maskSpectrum[chan] = casacore::True;
                 }
                 else {
-                    maskSpectrum[chan] = casa::False;
+                    maskSpectrum[chan] = casacore::False;
                 }
             }
 
             // generate the flagging stats. could fill the unflagged spectrum
             // directly in the preceding loop, but the full vector is needed below
-            casa::MaskedArray<casa::Float>
+            casacore::MaskedArray<casacore::Float>
                 maskedAmplitudes(aveSpectrum, maskSpectrum);
-            casa::Vector<casa::Float> statsVector =
+            casacore::Vector<casacore::Float> statsVector =
                 getRobustStats(maskedAmplitudes);
-            casa::Float median = statsVector[0];
-            casa::Float sigma_IQR = statsVector[1];
+            casacore::Float median = statsVector[0];
+            casacore::Float sigma_IQR = statsVector[1];
 
             // check min and max relative to thresholds.
             // do not loop over data again if all unflagged channels are good
@@ -662,10 +662,10 @@ void StokesVFlagger::setFlagsFromIntegrations(void)
                 (statsVector[3] > median+itsSpectraThreshold*sigma_IQR)) {
 
                 for (size_t chan = 0; chan < aveSpectrum.size(); ++chan) {
-                    if (maskSpectrum[chan]==casa::False) continue;
+                    if (maskSpectrum[chan]==casacore::False) continue;
                     if ((aveSpectrum[chan]<median-itsSpectraThreshold*sigma_IQR) ||
                         (aveSpectrum[chan]>median+itsSpectraThreshold*sigma_IQR)) {
-                        maskSpectrum[chan]=casa::False;
+                        maskSpectrum[chan]=casacore::False;
                     }
                 }
 
@@ -677,22 +677,22 @@ void StokesVFlagger::setFlagsFromIntegrations(void)
 
     if ( itsIntegrateTimes ) {
 
-        for (std::map<rowKey, casa::Vector<casa::Float> >::iterator
+        for (std::map<rowKey, casacore::Vector<casacore::Float> >::iterator
              it=itsAveTimes.begin(); it!=itsAveTimes.end(); ++it) {
 
             // reset the counter for this key
             itsCountTimes[it->first] = -1;
 
             // get the spectra
-            casa::Vector<casa::Float> aveTime = it->second;
-            casa::Vector<casa::Bool> maskTime = itsMaskTimes[it->first];
+            casacore::Vector<casacore::Float> aveTime = it->second;
+            casacore::Vector<casacore::Bool> maskTime = itsMaskTimes[it->first];
 
             // generate the flagging stats
-            casa::MaskedArray<casa::Float> maskedAmplitudes(aveTime, maskTime);
-            casa::Vector<casa::Float>
+            casacore::MaskedArray<casacore::Float> maskedAmplitudes(aveTime, maskTime);
+            casacore::Vector<casacore::Float>
                 statsVector = getRobustStats(maskedAmplitudes);
-            casa::Float median = statsVector[0];
-            casa::Float sigma_IQR = statsVector[1];
+            casacore::Float median = statsVector[0];
+            casacore::Float sigma_IQR = statsVector[1];
 
             // check min and max relative to thresholds.
             // do not loop over data again if all unflagged times are good
@@ -700,10 +700,10 @@ void StokesVFlagger::setFlagsFromIntegrations(void)
                 (statsVector[3] > median+itsTimesThreshold*sigma_IQR)) {
 
                 for (size_t t = 0; t < aveTime.size(); ++t) {
-                    if (maskTime[t] == casa::False) continue;
+                    if (maskTime[t] == casacore::False) continue;
                     if ((aveTime[t] < median-itsTimesThreshold*sigma_IQR) ||
                         (aveTime[t] > median+itsTimesThreshold*sigma_IQR)) {
-                        maskTime[t] = casa::False;
+                        maskTime[t] = casacore::False;
                     }
                 }
 
@@ -713,6 +713,6 @@ void StokesVFlagger::setFlagsFromIntegrations(void)
 
     }
 
-    itsAverageFlagsAreReady = casa::True;
+    itsAverageFlagsAreReady = casacore::True;
 
 }

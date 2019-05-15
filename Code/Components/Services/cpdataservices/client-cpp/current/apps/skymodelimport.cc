@@ -49,14 +49,14 @@ void processLine(const std::string& line, std::vector<Component>& components)
     //////////////////////////////////////////////////////////////////////////////////////
     // The below Matt's SKADS .dat file format
     //////////////////////////////////////////////////////////////////////////////////////
-    const casa::uShort totalTokens = 13;
-    const casa::uShort raPos = 3;
-    const casa::uShort decPos = 4;
-    const casa::uShort i_610_Pos = 9;
-    const casa::uShort i_1400_Pos = 10;
-    const casa::uShort majorAxisPos = 6;
-    const casa::uShort minorAxisPos = 7;
-    const casa::uShort positionAnglePos = 5;
+    const casacore::uShort totalTokens = 13;
+    const casacore::uShort raPos = 3;
+    const casacore::uShort decPos = 4;
+    const casacore::uShort i_610_Pos = 9;
+    const casacore::uShort i_1400_Pos = 10;
+    const casacore::uShort majorAxisPos = 6;
+    const casacore::uShort minorAxisPos = 7;
+    const casacore::uShort positionAnglePos = 5;
 
     // Tokenize the line
     stringstream iss(line);
@@ -70,20 +70,20 @@ void processLine(const std::string& line, std::vector<Component>& components)
     }
 
     // Extract the values from the tokens
-    casa::Double ra = boost::lexical_cast<casa::Double>(tokens[raPos]);
-    casa::Double dec = boost::lexical_cast<casa::Double>(tokens[decPos]);
-    casa::Double i_610 = pow(10.0, boost::lexical_cast<casa::Double>(tokens[i_610_Pos]));
-    casa::Double i_1400 = pow(10.0, boost::lexical_cast<casa::Double>(tokens[i_1400_Pos]));
-    casa::Double majorAxis = boost::lexical_cast<casa::Double>(tokens[majorAxisPos]);
-    casa::Double minorAxis = boost::lexical_cast<casa::Double>(tokens[minorAxisPos]);
-    casa::Double positionAngle = boost::lexical_cast<casa::Double>(tokens[positionAnglePos]);
+    casacore::Double ra = boost::lexical_cast<casacore::Double>(tokens[raPos]);
+    casacore::Double dec = boost::lexical_cast<casacore::Double>(tokens[decPos]);
+    casacore::Double i_610 = pow(10.0, boost::lexical_cast<casacore::Double>(tokens[i_610_Pos]));
+    casacore::Double i_1400 = pow(10.0, boost::lexical_cast<casacore::Double>(tokens[i_1400_Pos]));
+    casacore::Double majorAxis = boost::lexical_cast<casacore::Double>(tokens[majorAxisPos]);
+    casacore::Double minorAxis = boost::lexical_cast<casacore::Double>(tokens[minorAxisPos]);
+    casacore::Double positionAngle = boost::lexical_cast<casacore::Double>(tokens[positionAnglePos]);
 
     // Fix some quirks in gaussian sources
     if (majorAxis > 0.0 || minorAxis > 0.0) {
 
         // Ensure major axis is larger than minor axis
         if (majorAxis < minorAxis) {
-            casa::Double tmp = minorAxis;
+            casacore::Double tmp = minorAxis;
             minorAxis = majorAxis;
             majorAxis = tmp;
         }
@@ -100,12 +100,12 @@ void processLine(const std::string& line, std::vector<Component>& components)
     const double spectralCurvature = 0.0;
 
     components.push_back(Component(-1,
-            casa::Quantity(ra, "deg"),
-            casa::Quantity(dec, "deg"),
-            casa::Quantity(positionAngle, "rad"),
-            casa::Quantity(majorAxis, "arcsec"),
-            casa::Quantity(minorAxis, "arcsec"),
-            casa::Quantity(i_1400, "Jy"),
+            casacore::Quantity(ra, "deg"),
+            casacore::Quantity(dec, "deg"),
+            casacore::Quantity(positionAngle, "rad"),
+            casacore::Quantity(majorAxis, "arcsec"),
+            casacore::Quantity(minorAxis, "arcsec"),
+            casacore::Quantity(i_1400, "Jy"),
             spectralIndex,
             spectralCurvature));
 }
@@ -165,7 +165,7 @@ int main(int argc, char *argv[])
     std::vector<Component> components;
 
     // Process the file
-    const casa::uLong batchSize = 50000;
+    const casacore::uLong batchSize = 50000;
     std::string line;
     while (getline(file, line)) {
         if (line.find_first_of("#") == std::string::npos) {

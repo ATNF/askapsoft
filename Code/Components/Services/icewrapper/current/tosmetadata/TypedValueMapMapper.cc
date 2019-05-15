@@ -50,43 +50,43 @@ TypedValueMapMapper::TypedValueMapMapper(TypedValueMap& map) :
 {
 }
 
-void TypedValueMapMapper::setInt(const std::string& key, const casa::Int& val)
+void TypedValueMapMapper::setInt(const std::string& key, const casacore::Int& val)
 {
-    set<casa::Int, TypeInt, TypedValueInt>(key, val);
+    set<casacore::Int, TypeInt, TypedValueInt>(key, val);
 }
 
-void TypedValueMapMapper::setLong(const std::string& key, const casa::Long& val)
+void TypedValueMapMapper::setLong(const std::string& key, const casacore::Long& val)
 {
-    // ::Ice::Long is 64-bit (even on 32-bit x86) whereas casa::Long will be 
+    // ::Ice::Long is 64-bit (even on 32-bit x86) whereas casacore::Long will be 
     // 32-bit. Using this mapper on such a system will likely lead to grief.
 #ifndef __LP64__
     ASKAPTHROW(AskapError, "This platform does not support 64-bit long");
 #else
-    set<casa::Long, TypeLong, TypedValueLong>(key, val);
+    set<casacore::Long, TypeLong, TypedValueLong>(key, val);
 #endif
 }
 
-void TypedValueMapMapper::setString(const std::string& key, const casa::String& val)
+void TypedValueMapMapper::setString(const std::string& key, const casacore::String& val)
 {
-    set<casa::String, TypeString, TypedValueString>(key, val);
+    set<casacore::String, TypeString, TypedValueString>(key, val);
 }
 
-void TypedValueMapMapper::setBool(const std::string& key, const casa::Bool& val)
+void TypedValueMapMapper::setBool(const std::string& key, const casacore::Bool& val)
 {
-    set<casa::Bool, TypeBool, TypedValueBool>(key, val);
+    set<casacore::Bool, TypeBool, TypedValueBool>(key, val);
 }
 
-void TypedValueMapMapper::setFloat(const std::string& key, const casa::Float& val)
+void TypedValueMapMapper::setFloat(const std::string& key, const casacore::Float& val)
 {
-    set<casa::Float, TypeFloat, TypedValueFloat>(key, val);
+    set<casacore::Float, TypeFloat, TypedValueFloat>(key, val);
 }
 
-void TypedValueMapMapper::setDouble(const std::string& key, const casa::Double& val)
+void TypedValueMapMapper::setDouble(const std::string& key, const casacore::Double& val)
 {
-    set<casa::Double, TypeDouble, TypedValueDouble>(key, val);
+    set<casacore::Double, TypeDouble, TypedValueDouble>(key, val);
 }
 
-void TypedValueMapMapper::setFloatComplex(const std::string& key, const casa::Complex& val)
+void TypedValueMapMapper::setFloatComplex(const std::string& key, const casacore::Complex& val)
 {
     askap::interfaces::FloatComplex obj;
     obj.real = val.real();
@@ -94,7 +94,7 @@ void TypedValueMapMapper::setFloatComplex(const std::string& key, const casa::Co
     set<FloatComplex, TypeFloatComplex, TypedValueFloatComplex>(key, obj);
 }
 
-void TypedValueMapMapper::setDoubleComplex(const std::string& key, const casa::DComplex& val)
+void TypedValueMapMapper::setDoubleComplex(const std::string& key, const casacore::DComplex& val)
 {
     askap::interfaces::DoubleComplex obj;
     obj.real = val.real();
@@ -102,21 +102,21 @@ void TypedValueMapMapper::setDoubleComplex(const std::string& key, const casa::D
     set<DoubleComplex, TypeDoubleComplex, TypedValueDoubleComplex>(key, obj);
 }
 
-void TypedValueMapMapper::setDirection(const std::string& key, const casa::MDirection& val)
+void TypedValueMapMapper::setDirection(const std::string& key, const casacore::MDirection& val)
 {
     askap::interfaces::Direction obj = convertDirection(val);
     set<Direction, TypeDirection, TypedValueDirection>(key, obj);
 }
 
 
-void TypedValueMapMapper::setIntSeq(const std::string& key, const std::vector<casa::Int>& val)
+void TypedValueMapMapper::setIntSeq(const std::string& key, const std::vector<casacore::Int>& val)
 {
-    set<std::vector<casa::Int>, TypeIntSeq, TypedValueIntSeq>(key, val);
+    set<std::vector<casacore::Int>, TypeIntSeq, TypedValueIntSeq>(key, val);
 }
 
-void TypedValueMapMapper::setLongSeq(const std::string& key, const std::vector<casa::Long>& val)
+void TypedValueMapMapper::setLongSeq(const std::string& key, const std::vector<casacore::Long>& val)
 {
-    // ::Ice::Long is 64-bit (even on 32-bit x86) whereas casa::Long will be 
+    // ::Ice::Long is 64-bit (even on 32-bit x86) whereas casacore::Long will be 
     // 32-bit. Using this mapper on such a system will likely lead to grief.
 #ifndef __LP64__
     ASKAPTHROW(AskapError, "This platform does not support 64-bit long");
@@ -128,31 +128,31 @@ void TypedValueMapMapper::setLongSeq(const std::string& key, const std::vector<c
 #endif
 }
 
-void TypedValueMapMapper::setStringSeq(const std::string& key, const std::vector<casa::String>& val)
+void TypedValueMapMapper::setStringSeq(const std::string& key, const std::vector<casacore::String>& val)
 {
     StringSeq seq(val.begin(), val.end());
     set<StringSeq, TypeStringSeq, TypedValueStringSeq>(key, seq);
 }
 
-void TypedValueMapMapper::setBoolSeq(const std::string& key, const std::vector<casa::Bool>& val)
+void TypedValueMapMapper::setBoolSeq(const std::string& key, const std::vector<casacore::Bool>& val)
 {
-    set<std::vector<casa::Bool>, TypeBoolSeq, TypedValueBoolSeq>(key, val);
+    set<std::vector<casacore::Bool>, TypeBoolSeq, TypedValueBoolSeq>(key, val);
 }
 
-void TypedValueMapMapper::setFloatSeq(const std::string& key, const std::vector<casa::Float>& val)
+void TypedValueMapMapper::setFloatSeq(const std::string& key, const std::vector<casacore::Float>& val)
 {
-    set<std::vector<casa::Float>, TypeFloatSeq, TypedValueFloatSeq>(key, val);
+    set<std::vector<casacore::Float>, TypeFloatSeq, TypedValueFloatSeq>(key, val);
 }
 
-void TypedValueMapMapper::setDoubleSeq(const std::string& key, const std::vector<casa::Double>& val)
+void TypedValueMapMapper::setDoubleSeq(const std::string& key, const std::vector<casacore::Double>& val)
 {
-    set<std::vector<casa::Double>, TypeDoubleSeq, TypedValueDoubleSeq>(key, val);
+    set<std::vector<casacore::Double>, TypeDoubleSeq, TypedValueDoubleSeq>(key, val);
 }
 
-void TypedValueMapMapper::setFloatComplexSeq(const std::string& key, const std::vector<casa::Complex>& val)
+void TypedValueMapMapper::setFloatComplexSeq(const std::string& key, const std::vector<casacore::Complex>& val)
 {
     askap::interfaces::FloatComplexSeq seq;
-    std::vector<casa::Complex>::const_iterator it;
+    std::vector<casacore::Complex>::const_iterator it;
     for (it = val.begin(); it != val.end(); ++it) {
         askap::interfaces::FloatComplex obj;
         obj.real = it->real();
@@ -162,10 +162,10 @@ void TypedValueMapMapper::setFloatComplexSeq(const std::string& key, const std::
     set<FloatComplexSeq, TypeFloatComplexSeq, TypedValueFloatComplexSeq>(key, seq);
 }
 
-void TypedValueMapMapper::setDoubleComplexSeq(const std::string& key, const std::vector<casa::DComplex>& val)
+void TypedValueMapMapper::setDoubleComplexSeq(const std::string& key, const std::vector<casacore::DComplex>& val)
 {
     askap::interfaces::DoubleComplexSeq seq;
-    std::vector<casa::DComplex>::const_iterator it;
+    std::vector<casacore::DComplex>::const_iterator it;
     for (it = val.begin(); it != val.end(); ++it) {
         askap::interfaces::DoubleComplex obj;
         obj.real = it->real();
@@ -175,10 +175,10 @@ void TypedValueMapMapper::setDoubleComplexSeq(const std::string& key, const std:
     set<DoubleComplexSeq, TypeDoubleComplexSeq, TypedValueDoubleComplexSeq>(key, seq);
 }
 
-void TypedValueMapMapper::setDirectionSeq(const std::string& key, const std::vector<casa::MDirection>& val)
+void TypedValueMapMapper::setDirectionSeq(const std::string& key, const std::vector<casacore::MDirection>& val)
 {
     DirectionSeq seq;
-    std::vector<casa::MDirection>::const_iterator it;
+    std::vector<casacore::MDirection>::const_iterator it;
     for (it = val.begin(); it != val.end(); ++it) {
         askap::interfaces::Direction obj = convertDirection(*it);
         seq.push_back(obj);
@@ -193,17 +193,17 @@ void TypedValueMapMapper::set(const std::string& key, const T& val)
 }
 
 
-askap::interfaces::Direction TypedValueMapMapper::convertDirection(const casa::MDirection& dir) const
+askap::interfaces::Direction TypedValueMapMapper::convertDirection(const casacore::MDirection& dir) const
 {
     askap::interfaces::Direction obj;
     obj.coord1 = dir.getAngle().getValue("deg")(0);
     obj.coord2 = dir.getAngle().getValue("deg")(1);
 
     switch (dir.getRef().getType()) {
-        case casa::MDirection::J2000 :
+        case casacore::MDirection::J2000 :
             obj.sys = J2000;
             break;
-        case casa::MDirection::AZEL :
+        case casacore::MDirection::AZEL :
             obj.sys = AZEL;
             break;
         default:

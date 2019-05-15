@@ -51,10 +51,10 @@ class DataserviceAccessor : public IGlobalSkyModel {
 
         /// @see askap::cp::pipelinetasks::IGlobalSkyModel::coneSearch
         virtual askap::cp::sms::client::ComponentListPtr coneSearch(
-                const casa::Quantity& ra,
-                const casa::Quantity& dec,
-                const casa::Quantity& searchRadius,
-                const casa::Quantity& fluxLimit);
+                const casacore::Quantity& ra,
+                const casacore::Quantity& dec,
+                const casacore::Quantity& searchRadius,
+                const casacore::Quantity& fluxLimit);
 
     private:
 

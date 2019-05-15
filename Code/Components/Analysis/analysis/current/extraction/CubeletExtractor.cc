@@ -88,8 +88,8 @@ void CubeletExtractor::defineSlicer()
 
     if (this->openInput()) {
         IPosition shape = itsInputCubePtr->shape();
-        casa::IPosition blc(shape.size(), 0);
-        casa::IPosition trc = shape - 1;
+        casacore::IPosition blc(shape.size(), 0);
+        casacore::IPosition trc = shape - 1;
 
         long zero = 0;
         blc(itsLngAxis) = std::max(zero, itsSource->getXmin() - itsSpatialPad + itsSource->getXOffset());
@@ -108,7 +108,7 @@ void CubeletExtractor::defineSlicer()
         }
         /// @todo Not yet dealing with Stokes axis properly.
 
-        itsSlicer = casa::Slicer(blc, trc, casa::Slicer::endIsLast);
+        itsSlicer = casacore::Slicer(blc, trc, casacore::Slicer::endIsLast);
         this->closeInput();
         this->initialiseArray();
     } else {
@@ -125,7 +125,7 @@ void CubeletExtractor::initialiseArray()
         if (itsSpcAxis >= 0){
             spcsize = itsSlicer.length()(itsSpcAxis);
         }
-        casa::IPosition shape(itsInputCubePtr->shape());
+        casacore::IPosition shape(itsInputCubePtr->shape());
         shape(itsLngAxis) = lngsize;
         shape(itsLatAxis) = latsize;
         if(itsSpcAxis >= 0){
@@ -134,7 +134,7 @@ void CubeletExtractor::initialiseArray()
         ASKAPLOG_DEBUG_STR(logger,
                            "Cubelet extraction: Initialising array to zero with shape " <<
                            shape);
-        itsArray = casa::Array<Float>(shape, 0.0);
+        itsArray = casacore::Array<Float>(shape, 0.0);
         this->closeInput();
     } else {
         ASKAPLOG_ERROR_STR(logger, "Could not open image");
@@ -155,7 +155,7 @@ void CubeletExtractor::extract()
         sub(new SubImage<Float>(*itsInputCubePtr, itsSlicer));
 
         ASKAPASSERT(sub->size() > 0);
-        const casa::MaskedArray<Float> msub(sub->get(), sub->getMask());
+        const casacore::MaskedArray<Float> msub(sub->get(), sub->getMask());
         ASKAPASSERT(itsArray.size() == msub.size());
         itsArray = msub;
 
@@ -172,36 +172,36 @@ void CubeletExtractor::writeImage()
     itsInputCube = itsInputCubeList[0];
     if (this->openInput()) {
         IPosition inshape = itsInputCubePtr->shape();
-        casa::CoordinateSystem newcoo;
+        casacore::CoordinateSystem newcoo;
         if (itsStkAxis>=0){
-            newcoo = casa::CoordinateUtil::defaultCoords4D();
+            newcoo = casacore::CoordinateUtil::defaultCoords4D();
         } else {
-            newcoo = casa::CoordinateUtil::defaultCoords3D();
+            newcoo = casacore::CoordinateUtil::defaultCoords3D();
         }
 
-        int dirCoNum = itsInputCoords.findCoordinate(casa::Coordinate::DIRECTION);
-        casa::DirectionCoordinate dircoo(itsInputCoords.directionCoordinate(dirCoNum));
-        newcoo.replaceCoordinate(dircoo, newcoo.findCoordinate(casa::Coordinate::DIRECTION));
+        int dirCoNum = itsInputCoords.findCoordinate(casacore::Coordinate::DIRECTION);
+        casacore::DirectionCoordinate dircoo(itsInputCoords.directionCoordinate(dirCoNum));
+        newcoo.replaceCoordinate(dircoo, newcoo.findCoordinate(casacore::Coordinate::DIRECTION));
 
         if (itsSpcAxis >= 0){
-            int spcCoNum = itsInputCoords.findCoordinate(casa::Coordinate::SPECTRAL);
-            casa::SpectralCoordinate spcoo(itsInputCoords.spectralCoordinate(spcCoNum));
-            newcoo.replaceCoordinate(spcoo, newcoo.findCoordinate(casa::Coordinate::SPECTRAL));
+            int spcCoNum = itsInputCoords.findCoordinate(casacore::Coordinate::SPECTRAL);
+            casacore::SpectralCoordinate spcoo(itsInputCoords.spectralCoordinate(spcCoNum));
+            newcoo.replaceCoordinate(spcoo, newcoo.findCoordinate(casacore::Coordinate::SPECTRAL));
         }
 
-        casa::Vector<Int> stkvec(itsStokesList.size());
+        casacore::Vector<Int> stkvec(itsStokesList.size());
         if (itsStkAxis >= 0) {
             for (size_t i = 0; i < stkvec.size(); i++) {
                 stkvec[i] = itsStokesList[i];
             }
-            casa::StokesCoordinate stkcoo(stkvec);
-            newcoo.replaceCoordinate(stkcoo, newcoo.findCoordinate(casa::Coordinate::STOKES));
+            casacore::StokesCoordinate stkcoo(stkvec);
+            newcoo.replaceCoordinate(stkcoo, newcoo.findCoordinate(casacore::Coordinate::STOKES));
         }
 
         // shift the reference pixel for the spatial coords, so that
         // the RA/DEC (or whatever) are correct. Leave the
         // spectral/stokes axes untouched.
-        casa::IPosition outshape(itsSlicer.ndim(), 1);
+        casacore::IPosition outshape(itsSlicer.ndim(), 1);
         int lngAxis = newcoo.directionAxesNumbers()[0];
         int latAxis = newcoo.directionAxesNumbers()[1];
         outshape(lngAxis) = itsSlicer.length()(itsLngAxis);
@@ -214,15 +214,15 @@ void CubeletExtractor::writeImage()
             int stkAxis = newcoo.polarizationAxisNumber();
             outshape(stkAxis) = stkvec.size();
         }
-        casa::Vector<Float> shift(outshape.size(), 0);
-        casa::Vector<Float> incrFac(outshape.size(), 1);
+        casacore::Vector<Float> shift(outshape.size(), 0);
+        casacore::Vector<Float> incrFac(outshape.size(), 1);
         shift(lngAxis) = itsSource->getXmin() - itsSpatialPad + itsSource->getXOffset();
         shift(latAxis) = itsSource->getYmin() - itsSpatialPad + itsSource->getYOffset();
         if (itsSpcAxis >= 0){
             int spcAxis = newcoo.spectralAxisNumber();
             shift(spcAxis) = itsSource->getZmin() - itsSpectralPad + itsSource->getZOffset();
         }
-        casa::Vector<Int> newshape = outshape.asVector();
+        casacore::Vector<Int> newshape = outshape.asVector();
 
         newcoo.subImageInSitu(shift, incrFac, newshape);
 
@@ -243,10 +243,10 @@ void CubeletExtractor::writeImage()
 
         if (itsInputCubePtr->isMasked()) {
             // copy the image mask to the cubelet, if there is one.
-            casa::LogicalArray
+            casacore::LogicalArray
             mask(itsInputCubePtr->pixelMask().getSlice(itsSlicer).reform(outshape));
             ia->makeDefaultMask(itsOutputFilename);
-            ia->writeMask(itsOutputFilename, mask, casa::IPosition(outshape.nelements(), 0));
+            ia->writeMask(itsOutputFilename, mask, casacore::IPosition(outshape.nelements(), 0));
         }
 
         this->closeInput();

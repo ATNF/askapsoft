@@ -162,7 +162,7 @@ static void addFields(VOTableTable& tab)
 // @param[in] y         the expected value
 // @param[in] x         the x value at which to evaluate the polynomial
 // @param[in] freqstr   the string indicating the frequency being tested
-static void verifyFit(const casa::Vector<double>& solution, double y, double x,
+static void verifyFit(const casacore::Vector<double>& solution, double y, double x,
                const std::string& freqstr)
 {
     // Assert Preconditions
@@ -170,7 +170,7 @@ static void verifyFit(const casa::Vector<double>& solution, double y, double x,
             << solution.size());
 
     // Test the result
-    casa::Polynomial<double> poly(2);
+    casacore::Polynomial<double> poly(2);
     poly.setCoefficient(0, solution[0]);
     poly.setCoefficient(1, solution[1]);
     poly.setCoefficient(2, solution[2]);
@@ -179,7 +179,7 @@ static void verifyFit(const casa::Vector<double>& solution, double y, double x,
     const double tolerance = std::numeric_limits<float>::epsilon();
     const double expected = y;
     const double actual = poly(x);
-    ASKAPCHECK(casa::near(expected, actual, tolerance),
+    ASKAPCHECK(casacore::near(expected, actual, tolerance),
             "Fitting error " << freqstr << " - Expected: " << expected << ", actual: " << actual);
 }
 
@@ -189,23 +189,23 @@ static pair<double, double> fluxFit(double i_610, double i_1400, double i_4860)
     // Assemble input data
     const size_t n = 3;
 
-    casa::Vector<double> x(n);
+    casacore::Vector<double> x(n);
     x(0) = log10(610.0 / 1400.0);
     x(1) = log10(1400.0 / 1400.0);
     x(2) = log10(4860.0 / 1400.0);
 
-    casa::Vector<double> fluxes(n);
+    casacore::Vector<double> fluxes(n);
     fluxes(0) = i_610;
     fluxes(1) = i_1400;
     fluxes(2) = i_4860;
 
     // Create a fitter
-    casa::LinearFit<double> fitter;
-    casa::Polynomial<casa::AutoDiff<double> > combination(2);
+    casacore::LinearFit<double> fitter;
+    casacore::Polynomial<casacore::AutoDiff<double> > combination(2);
     fitter.setFunction(combination);
 
     // Do fitting
-    const casa::Vector<double> solution = fitter.fit(x, fluxes);
+    const casacore::Vector<double> solution = fitter.fit(x, fluxes);
 
     // Verify the fit result can recover the three input fluxes
     verifyFit(solution, fluxes(0), x(0), "i_610");
@@ -228,26 +228,26 @@ static VOTableRow processLine(const std::string& line)
     ASKAPCHECK(tokens.size() == 13, "Expected 13 tokens, got " << tokens.size());
 
     // Create these once to avoid the performance impact of creating them over and over.
-    static casa::Unit deg("deg");
-    static casa::Unit rad("rad");
-    static casa::Unit arcsec("arcsec");
-    static casa::Unit Jy("Jy");
-    static casa::Unit mJy("mJy");
+    static casacore::Unit deg("deg");
+    static casacore::Unit rad("rad");
+    static casacore::Unit arcsec("arcsec");
+    static casacore::Unit Jy("Jy");
+    static casacore::Unit mJy("mJy");
 
-    const casa::Quantity ra(boost::lexical_cast<casa::Double>(tokens[3]), deg);
-    const casa::Quantity dec(boost::lexical_cast<casa::Double>(tokens[4]), deg);
+    const casacore::Quantity ra(boost::lexical_cast<casacore::Double>(tokens[3]), deg);
+    const casacore::Quantity dec(boost::lexical_cast<casacore::Double>(tokens[4]), deg);
 
     // Process Flux (log10 of integrated flux)
-    const casa::Quantity flux(pow(10.0, boost::lexical_cast<casa::Double>(tokens[10])), Jy);
+    const casacore::Quantity flux(pow(10.0, boost::lexical_cast<casacore::Double>(tokens[10])), Jy);
 
     // Process major axis (arcsec)
-    const casa::Quantity majorAxis(boost::lexical_cast<casa::Double>(tokens[6]), arcsec);
+    const casacore::Quantity majorAxis(boost::lexical_cast<casacore::Double>(tokens[6]), arcsec);
 
     // Process minor axis (arcsec)
-    const casa::Quantity minorAxis(boost::lexical_cast<casa::Double>(tokens[7]), arcsec);
+    const casacore::Quantity minorAxis(boost::lexical_cast<casacore::Double>(tokens[7]), arcsec);
 
     // Process position angle (degrees)
-    const casa::Quantity positionAngle(boost::lexical_cast<casa::Double>(tokens[5]), rad);
+    const casacore::Quantity positionAngle(boost::lexical_cast<casacore::Double>(tokens[5]), rad);
 
     VOTableRow row;
     row.addCell(toString(ra.getValue(deg), 8));
@@ -257,9 +257,9 @@ static VOTableRow processLine(const std::string& line)
     row.addCell(toString(majorAxis.getValue(arcsec), 2));
     row.addCell(toString(positionAngle.getValue(deg), 2));
     const pair<double, double> fluxChange = fluxFit(
-            boost::lexical_cast<casa::Double>(tokens[9]),
-            boost::lexical_cast<casa::Double>(tokens[10]),
-            boost::lexical_cast<casa::Double>(tokens[11]));
+            boost::lexical_cast<casacore::Double>(tokens[9]),
+            boost::lexical_cast<casacore::Double>(tokens[10]),
+            boost::lexical_cast<casacore::Double>(tokens[11]));
 
     row.addCell(toString(fluxChange.first, 8)); // Spectral index
     row.addCell(toString(fluxChange.second, 8)); // Spectral curvature

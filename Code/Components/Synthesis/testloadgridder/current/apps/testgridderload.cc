@@ -48,8 +48,8 @@ int main (int argc, const char** argv)
   try {
 
     // Ensure that CASA log messages are captured
-    casa::LogSinkInterface* globalSink = new Log4cxxLogSink();
-    casa::LogSink::globalSink (globalSink);
+    casacore::LogSinkInterface* globalSink = new Log4cxxLogSink();
+    casacore::LogSink::globalSink (globalSink);
     // the following line is necessary just to initialise the logger
     askap::askapparallel::AskapParallel ap(argc, argv);
     ASKAPLOG_INFO_STR(logger, "Testing dynamic loading of the gridder");

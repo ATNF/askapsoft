@@ -69,30 +69,30 @@ ASKAP_LOGGER(logger, "tMSSink");
 class ParallelGenerator {
 public:
    explicit ParallelGenerator(float rms, unsigned int nThreads = 1, int seed = 0) : itsRMS(rms), itsNThreads(nThreads), itsSeed(seed) {}
-   void generate(boost::shared_ptr<casa::Complex> &data, casa::uInt size) const {
+   void generate(boost::shared_ptr<casacore::Complex> &data, casacore::uInt size) const {
         ASKAPASSERT(itsNThreads > 0);
-        const casa::uInt chunkSize = size / itsNThreads;
-        casa::uInt offset = 0;
-        for (casa::uInt part = 1; part < itsNThreads; ++part, ++itsSeed) {
-             boost::shared_ptr<casa::Complex> start(data.get() + offset, utility::NullDeleter());
+        const casacore::uInt chunkSize = size / itsNThreads;
+        casacore::uInt offset = 0;
+        for (casacore::uInt part = 1; part < itsNThreads; ++part, ++itsSeed) {
+             boost::shared_ptr<casacore::Complex> start(data.get() + offset, utility::NullDeleter());
              itsGroup.create_thread(boost::bind(&ParallelGenerator::generatePart, this, start, chunkSize, itsSeed));
              offset += chunkSize;
         }
         // process the remaining data in the main thread
         ASKAPDEBUGASSERT(offset < size);
-        const casa::uInt remainder  = size - offset;
+        const casacore::uInt remainder  = size - offset;
         ASKAPDEBUGASSERT(remainder >= chunkSize);
-        boost::shared_ptr<casa::Complex> start(data.get() + offset, utility::NullDeleter());
+        boost::shared_ptr<casacore::Complex> start(data.get() + offset, utility::NullDeleter());
         generatePart(start, remainder);
         itsGroup.join_all();
    }
 
 private:
 
-   void generatePart(boost::shared_ptr<casa::Complex> &data, casa::uInt size, casa::Int seed1 = 0) const {
-      scimath::ComplexGaussianNoise cns(casa::square(itsRMS),seed1);
-      casa::Complex *rawPtr = data.get();
-      casa::Complex *endMark = rawPtr + size;
+   void generatePart(boost::shared_ptr<casacore::Complex> &data, casacore::uInt size, casacore::Int seed1 = 0) const {
+      scimath::ComplexGaussianNoise cns(casacore::square(itsRMS),seed1);
+      casacore::Complex *rawPtr = data.get();
+      casacore::Complex *endMark = rawPtr + size;
       for (; rawPtr != endMark; ++rawPtr) {
            *rawPtr = cns();
       }
@@ -105,7 +105,7 @@ private:
 
    mutable boost::thread_group itsGroup;
    
-   mutable casa::Int itsSeed;
+   mutable casacore::Int itsSeed;
 };
 
 class TCPSinkTestApp : public askap::cp::common::ParallelCPApplication
@@ -129,25 +129,25 @@ public:
       boost::shared_ptr<common::VisChunk> chunk = conv.visChunk();
       ASKAPASSERT(chunk);
       chunk->flag().set(false);
-      for (casa::uInt chan = 0; chan < chunk->nChannel(); ++chan) {
+      for (casacore::uInt chan = 0; chan < chunk->nChannel(); ++chan) {
            chunk->frequency()[chan] = 1e9 + 1e6/54.*double(chan);
       }
       chunk->scan() = 0;
       if (numProcs() > 1) {
           // patch beam IDs in the chunk to ensure different ranks have different beams
-          const casa::uInt maxBeams = config().getUint("maxbeams");
+          const casacore::uInt maxBeams = config().getUint("maxbeams");
           const int beamStep = maxBeams * rank();
           ASKAPLOG_INFO_STR(logger, "Adding "<<beamStep<<" to beam indices simulated by this rank");
-          casa::Vector<casa::uInt> &beam1 = chunk->beam1();
-          casa::Vector<casa::uInt> &beam2 = chunk->beam2();
+          casacore::Vector<casacore::uInt> &beam1 = chunk->beam1();
+          casacore::Vector<casacore::uInt> &beam2 = chunk->beam2();
           ASKAPDEBUGASSERT(chunk->nRow() == chunk->beam1().nelements());
           ASKAPDEBUGASSERT(chunk->nRow() == chunk->beam2().nelements());
-          for (casa::uInt row=0; row<beam1.nelements(); ++row) {
+          for (casacore::uInt row=0; row<beam1.nelements(); ++row) {
                beam1[row] += beamStep;
                beam2[row] += beamStep;
           }
       }
-      casa::Timer timer;
+      casacore::Timer timer;
       float processingTime = 0.;
       size_t actualCount = 0;
 
@@ -158,8 +158,8 @@ public:
       const float initTime = timer.real();
       ASKAPLOG_INFO_STR(logger, "TCPSink initialisation time: "<<initTime<<" seconds");
 
-      scimath::ComplexGaussianNoise cns(casa::square(config().getFloat("rms",1.)));
-      const casa::uInt nThreads = config().getUint("nthreads",10);
+      scimath::ComplexGaussianNoise cns(casacore::square(config().getFloat("rms",1.)));
+      const casacore::uInt nThreads = config().getUint("nthreads",10);
       ParallelGenerator pg(config().getFloat("rms",1.),nThreads, isStandAlone() ? 0 : rank() * nThreads);
       
       ASKAPLOG_INFO_STR(logger, "Running the test for rank="<<rank());
@@ -167,9 +167,9 @@ public:
       for (uint32_t count = 0; (count < expectedCount) || !expectedCount; ++count) {
            // prepare the integration
            timer.mark();
-           casa::Quantity q;
-           ASKAPCHECK(casa::MVTime::read(q, "today"), "MVTime::read failed");
-           chunk->time() = casa::MVEpoch(q);
+           casacore::Quantity q;
+           ASKAPCHECK(casacore::MVTime::read(q, "today"), "MVTime::read failed");
+           chunk->time() = casacore::MVEpoch(q);
            // if we want synchronised times, it may be interesting to have this code optional
            if (numProcs() > 1) {
                double timeRecvBuf[2];
@@ -180,12 +180,12 @@ public:
                const int response = MPI_Bcast(timeRecvBuf, 2, MPI_DOUBLE, 0, MPI_COMM_WORLD);
                ASKAPCHECK(response == MPI_SUCCESS, "Error gathering times, response from MPI_Bcast = "<<response);
                if (rank() != 0) {
-                   const casa::MVEpoch receivedTime(timeRecvBuf[0], timeRecvBuf[1]);
+                   const casacore::MVEpoch receivedTime(timeRecvBuf[0], timeRecvBuf[1]);
                    chunk->time() = receivedTime;
                }
            }
            ASKAPDEBUGASSERT(chunk->visibility().contiguousStorage());
-           boost::shared_ptr<casa::Complex> data(chunk->visibility().data(), utility::NullDeleter());
+           boost::shared_ptr<casacore::Complex> data(chunk->visibility().data(), utility::NullDeleter());
            pg.generate(data, chunk->visibility().nelements());
            float generationTime = timer.real();
            //

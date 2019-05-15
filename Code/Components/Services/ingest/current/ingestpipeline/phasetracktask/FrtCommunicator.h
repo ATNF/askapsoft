@@ -70,7 +70,7 @@ class FrtCommunicator : public boost::noncopyable {
         /// @brief request DRx delay
         /// @param[in] ant antenna index
         /// @param[in] delay delay setting (in the units required by hardware)
-        void setDRxDelay(const casa::uInt ant, const int delay);
+        void setDRxDelay(const casacore::uInt ant, const int delay);
 
         /// @brief request FR setting
         /// @details upload hardware fringe rotator parameters
@@ -78,7 +78,7 @@ class FrtCommunicator : public boost::noncopyable {
         /// @param[in] phaseRate phase rate to set (in the units required by hardware)
         /// @param[in] phaseSlope phase slope to set (in the units required by hardware)
         /// @param[in] phaseOffset phase offset to set (in the units required by hardware)
-        void setFRParameters(const casa::uInt ant, const int phaseRate, const int phaseSlope, const int phaseOffset);
+        void setFRParameters(const casacore::uInt ant, const int phaseRate, const int phaseSlope, const int phaseOffset);
 
         /// @brief simultaneously request both DRx and FR setting
         /// @details upload hardware fringe rotator parameters and DRx delays in a single call
@@ -87,32 +87,32 @@ class FrtCommunicator : public boost::noncopyable {
         /// @param[in] phaseRate phase rate to set (in the units required by hardware)
         /// @param[in] phaseSlope phase slope to set (in the units required by hardware)
         /// @param[in] phaseOffset phase offset to set (in the units required by hardware)
-        void setDRxAndFRParameters(const casa::uInt ant, const int delay, const int phaseRate, const int phaseSlope, const int phaseOffset);
+        void setDRxAndFRParameters(const casacore::uInt ant, const int delay, const int phaseRate, const int phaseSlope, const int phaseOffset);
 
         /// @brief get requested DRx delay
         /// @param[in] ant antenna index
         /// @return DRx delay setting
-        int requestedDRxDelay(const casa::uInt ant) const;
+        int requestedDRxDelay(const casacore::uInt ant) const;
 
         /// @brief get requested FR phase rate
         /// @param[in] ant antenna index
         /// @return FR phase rate (in hardware units)
-        int requestedFRPhaseRate(const casa::uInt ant) const;
+        int requestedFRPhaseRate(const casacore::uInt ant) const;
 
         /// @brief get requested FR phase frequency slope
         /// @param[in] ant antenna index
         /// @return FR phase frequency slope (in hardware units)
-        int requestedFRPhaseSlope(const casa::uInt ant) const;
+        int requestedFRPhaseSlope(const casacore::uInt ant) const;
 
         /// @brief get requested FR phase offset
         /// @param[in] ant antenna index
         /// @return FR phase offset (in hardware units)
-        int requestedFRPhaseOffset(const casa::uInt ant) const;
+        int requestedFRPhaseOffset(const casacore::uInt ant) const;
 
         /// @brief get the BAT of the last FR parameter update
         /// @param[in] ant antenna index
         /// @return BAT when the last update was implemented
-        uint64_t lastFRUpdateBAT(const casa::uInt ant) const;
+        uint64_t lastFRUpdateBAT(const casacore::uInt ant) const;
 
         /// @brief test whether FR parameters have ever been updated
         /// @details This method allows to test the validity of the BAT
@@ -122,26 +122,26 @@ class FrtCommunicator : public boost::noncopyable {
         /// @param[in] ant antenna index
         /// @return true, if FR parameters have ever been updated or
         /// false otherwise
-        bool hadFRUpdate(const casa::uInt ant) const;
+        bool hadFRUpdate(const casacore::uInt ant) const;
 
         /// @brief test if antenna produces valid data
         /// @param[in] ant antenna index
         /// @return true, if the given antenna produces valid data
-        bool isValid(const casa::uInt ant) const;
+        bool isValid(const casacore::uInt ant) const;
 
         /// @brief test if antenna is uninitialised
         /// @param[in] ant antenna index
         /// @return true, if the given antenna is uninitialised
-        bool isUninitialised(const casa::uInt ant) const;
+        bool isUninitialised(const casacore::uInt ant) const;
 
         /// @brief invalidate the antenna
         /// @param[in] ant antenna index
-        void invalidate(const casa::uInt ant);
+        void invalidate(const casacore::uInt ant);
 
         /// @brief signal of the new time stamp
         /// @details Without asynchronous thread, the current implementation relies on this method
         /// being called every cycle. It manages time outs and flags/unflags antennas as necessary.
-        void newTimeStamp(const casa::MVEpoch &epoch);
+        void newTimeStamp(const casacore::MVEpoch &epoch);
 
     protected:
 
@@ -151,14 +151,14 @@ class FrtCommunicator : public boost::noncopyable {
         /// @param[in] phaseSlope phase slope to set (in the units required by hardware)
         /// @param[in] phaseOffset phase offset to set (in the units required by hardware)
         /// @return map with the message
-        std::map<std::string, int> getFRParametersMsg(const casa::uInt ant, const int phaseRate,
+        std::map<std::string, int> getFRParametersMsg(const casacore::uInt ant, const int phaseRate,
                                                       const int phaseSlope, const int phaseOffset);
 
         /// @brief helper method to form a message to set DRx delay
         /// @param[in] ant antenna index
         /// @param[in] delay delay setting (in the units required by hardware)
         /// @return map with the message
-        std::map<std::string, int> getDRxDelayMsg(const casa::uInt ant, const int delay);
+        std::map<std::string, int> getDRxDelayMsg(const casacore::uInt ant, const int delay);
 
         /// @brief helper method to tag a message with time-based ID
         /// @details We need to be able to track which requests are completed and when. It is done
@@ -188,7 +188,7 @@ class FrtCommunicator : public boost::noncopyable {
         std::vector<int> itsAntennaRequestIDs;
 
         /// @brief times of the request passing through for each antenna in the "being updated" status
-        casa::Vector<casa::MVEpoch> itsRequestCompletedTimes;
+        casacore::Vector<casacore::MVEpoch> itsRequestCompletedTimes;
 
         /// @brief BAT of the last update of the hardware fringe rotator parameters
         std::vector<uint64_t> itsFRUpdateBATs;
@@ -219,7 +219,7 @@ class FrtCommunicator : public boost::noncopyable {
         /// @details It takes 5 cycles or or so for the change to propagate
         /// through the system. This class implements a delay before unflagging
         /// a particular antenna. This field determines how log to wait (in 5 sec cycles)
-        casa::uInt itsCyclesToWait;
+        casacore::uInt itsCyclesToWait;
 
         /// @brief message counter
         mutable int itsMsgCounter;

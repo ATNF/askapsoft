@@ -60,20 +60,20 @@ using namespace askap;
 void process(const std::string &fname) 
 {
   ASKAPLOG_INFO_STR(logger,  "Searching "<<fname<<" for NaNs and flagging appropriate points");
-  casa::Table ms(fname, casa::Table::Update);
+  casacore::Table ms(fname, casacore::Table::Update);
   
-  casa::ArrayColumn<casa::Bool> flagCol(ms, "FLAG");
-  casa::ArrayColumn<casa::Complex> visCol(ms, "DATA");
+  casacore::ArrayColumn<casacore::Bool> flagCol(ms, "FLAG");
+  casacore::ArrayColumn<casacore::Complex> visCol(ms, "DATA");
   
   ASKAPLOG_INFO_STR(logger,"Total number of rows in the measurement set: "<<ms.nrow());
   size_t nFlagged = 0;
   size_t nAlreadyFlagged = 0;
 
-  for (casa::uInt row = 0; row<ms.nrow(); ++row) {
-       casa::Array<casa::Bool> flagBuf;
+  for (casacore::uInt row = 0; row<ms.nrow(); ++row) {
+       casacore::Array<casacore::Bool> flagBuf;
        flagCol.get(row,flagBuf);
 
-       casa::Array<casa::Complex> visBuf;
+       casacore::Array<casacore::Complex> visBuf;
        visCol.get(row, visBuf);
 
        bool changed = false;
@@ -82,13 +82,13 @@ void process(const std::string &fname)
        ASKAPDEBUGASSERT(visBuf.shape().nelements() == 2);
        ASKAPDEBUGASSERT(visBuf.shape() == flagBuf.shape());
 
-       casa::Matrix<casa::Complex> vis(visBuf);
-       casa::Matrix<casa::Bool> flag(flagBuf);
-       for (casa::uInt ch=0; ch<vis.nrow(); ++ch) {
-            for (casa::uInt pol=0; pol<vis.ncolumn(); ++pol) {
+       casacore::Matrix<casacore::Complex> vis(visBuf);
+       casacore::Matrix<casacore::Bool> flag(flagBuf);
+       for (casacore::uInt ch=0; ch<vis.nrow(); ++ch) {
+            for (casacore::uInt pol=0; pol<vis.ncolumn(); ++pol) {
                  if (std::isnan(real(vis(ch,pol))) || std::isnan(imag(vis(ch,pol)))) {
                      changed = true;
-                     vis(ch,pol) = casa::Complex(0.,0.);
+                     vis(ch,pol) = casacore::Complex(0.,0.);
                      if (flag(ch,pol)) {
                          ++nAlreadyFlagged;
                      } else {
@@ -117,7 +117,7 @@ int main(int argc, const char** argv)
     askap::askapparallel::AskapParallel comms(argc, argv);
     
     try {
-       casa::Timer timer;
+       casacore::Timer timer;
        timer.mark();
        
        cmdlineparser::Parser parser; // a command line parser

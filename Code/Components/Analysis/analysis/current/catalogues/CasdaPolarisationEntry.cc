@@ -101,9 +101,9 @@ CasdaPolarisationEntry::CasdaPolarisationEntry(CasdaComponent *comp,
     itsDetectionThreshold = rmdata.detectionThreshold();
     itsDebiasThreshold = rmdata.debiasThreshold();
 
-    casa::Unit cubeBunit = poldata.I().bunit();
+    casacore::Unit cubeBunit = poldata.I().bunit();
     const double intFluxScale =
-        casa::Quantum<float>(1.0, cubeBunit).getValue(casda::intFluxUnitContinuum);
+        casacore::Quantum<float>(1.0, cubeBunit).getValue(casda::intFluxUnitContinuum);
 
     itsFluxImedian = poldata.I().median() * intFluxScale;
     itsFluxQmedian = poldata.Q().median() * intFluxScale;

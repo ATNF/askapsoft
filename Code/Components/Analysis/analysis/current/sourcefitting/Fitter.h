@@ -64,8 +64,8 @@ void logparameters(Matrix<Double> &m, std::string loc = "DEBUG");
 /// @ingroup sourcefitting
 /// @brief A class to manage the 2D profile fitting.
 /// @details The class handles the calling of the fitting
-/// functions, and stores the results using the casa::FitGaussian class
-/// and a casa::Matrix with the best fit. The FittingParameters class
+/// functions, and stores the results using the casacore::FitGaussian class
+/// and a casacore::Matrix with the best fit. The FittingParameters class
 /// holds the relevant parameters.
 class Fitter {
     public:
@@ -112,9 +112,9 @@ class Fitter {
         /// data.  The fit(s) are only performed if itsFitExists is
         /// true, which is determined by whether the number of degrees
         /// of freedom for the fitting is positive.
-        void fit(casa::Matrix<casa::Double> pos,
-                 casa::Vector<casa::Double> f,
-                 casa::Vector<casa::Double> sigma);
+        void fit(casacore::Matrix<casacore::Double> pos,
+                 casacore::Vector<casacore::Double> f,
+                 casacore::Vector<casacore::Double> sigma);
 
         /// @brief Functions to test the fit according to various criteria.
         /// @{
@@ -170,15 +170,15 @@ class Fitter {
         /// @brief Return an ordered list of peak fluxes
         std::multimap<double, int> peakFluxList();
 
-        /// @brief Return a casa::Gaussian2D version of a particular component.
-        casa::Gaussian2D<casa::Double> gaussian(unsigned int num);
+        /// @brief Return a casacore::Gaussian2D version of a particular component.
+        casacore::Gaussian2D<casacore::Double> gaussian(unsigned int num);
 
         /// @brief Return a vector of errors for the given component
-        casa::Vector<casa::Double> error(unsigned int num);
+        casacore::Vector<casacore::Double> error(unsigned int num);
 
         /// @brief Subtract fit from the flux values
-        casa::Vector<casa::Double> subtractFit(casa::Matrix<casa::Double> pos,
-                                               casa::Vector<casa::Double> f);
+        casacore::Vector<casacore::Double> subtractFit(casacore::Matrix<casacore::Double> pos,
+                                               casacore::Vector<casacore::Double> f);
 
 
     protected:
@@ -190,16 +190,16 @@ class Fitter {
         /// @brief The number of Gaussian functions to fit.
         unsigned int itsNumGauss;
         /// @brief The casa Gaussian Fitter
-        FitGaussian<casa::Double> itsFitter;
+        FitGaussian<casacore::Double> itsFitter;
         /// @brief The number of degrees of freedom in the fit
         int itsNDoF;
         /// @brief The reduced chi-squared of the fit
         float itsRedChisq;
 
         /// @brief The fitted components
-        casa::Matrix<casa::Double> itsSolution;
+        casacore::Matrix<casacore::Double> itsSolution;
         /// @brief The errors on the fitted components
-        casa::Matrix<casa::Double> itsErrors;
+        casacore::Matrix<casacore::Double> itsErrors;
 
 };
 

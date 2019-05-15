@@ -44,10 +44,10 @@
 // Using
 using namespace askap::cp::common;
 
-VisChunk::VisChunk(const casa::uInt nRow,
-                   const casa::uInt nChannel,
-                   const casa::uInt nPol,
-                   const casa::uInt nAntenna)
+VisChunk::VisChunk(const casacore::uInt nRow,
+                   const casacore::uInt nChannel,
+                   const casacore::uInt nPol,
+                   const casacore::uInt nAntenna)
         : itsNumberOfRows(nRow),
         itsNumberOfChannels(nChannel),
         itsNumberOfPolarisations(nPol),
@@ -73,7 +73,7 @@ VisChunk::VisChunk(const casa::uInt nRow,
         itsFrequency(nChannel),
         itsChannelWidth(-1),
         itsStokes(nPol),
-        itsDirectionFrame(casa::MDirection::DEFAULT)
+        itsDirectionFrame(casacore::MDirection::DEFAULT)
 {
 }
 
@@ -104,202 +104,202 @@ const VisChunk& VisChunk::operator=(const VisChunk &)
    return *this;
 }
 
-casa::uInt VisChunk::nRow() const
+casacore::uInt VisChunk::nRow() const
 {
     return itsNumberOfRows;
 }
 
-casa::uInt VisChunk::nChannel() const
+casacore::uInt VisChunk::nChannel() const
 {
     return itsNumberOfChannels;
 }
 
-casa::uInt VisChunk::nPol() const
+casacore::uInt VisChunk::nPol() const
 {
     return itsNumberOfPolarisations;
 }
 
-casa::uInt VisChunk::nAntenna() const
+casacore::uInt VisChunk::nAntenna() const
 {
     return itsNumberOfAntennas;
 }
 
-casa::uInt& VisChunk::scan()
+casacore::uInt& VisChunk::scan()
 {
     return itsScan;
 }
 
-const casa::uInt& VisChunk::scan() const
+const casacore::uInt& VisChunk::scan() const
 {
     return itsScan;
 }
 
-casa::Vector<casa::uInt>& VisChunk::antenna1()
+casacore::Vector<casacore::uInt>& VisChunk::antenna1()
 {
     return itsAntenna1;
 }
 
-const casa::Vector<casa::uInt>& VisChunk::antenna1() const
+const casacore::Vector<casacore::uInt>& VisChunk::antenna1() const
 {
     return itsAntenna1;
 }
 
-casa::Vector<casa::uInt>& VisChunk::antenna2()
+casacore::Vector<casacore::uInt>& VisChunk::antenna2()
 {
     return itsAntenna2;
 }
 
-const casa::Vector<casa::uInt>& VisChunk::antenna2() const
+const casacore::Vector<casacore::uInt>& VisChunk::antenna2() const
 {
     return itsAntenna2;
 }
 
-casa::Vector<casa::uInt>& VisChunk::beam1()
+casacore::Vector<casacore::uInt>& VisChunk::beam1()
 {
     return itsBeam1;
 }
 
-const casa::Vector<casa::uInt>& VisChunk::beam1() const
+const casacore::Vector<casacore::uInt>& VisChunk::beam1() const
 {
     return itsBeam1;
 }
 
-casa::Vector<casa::uInt>& VisChunk::beam2()
+casacore::Vector<casacore::uInt>& VisChunk::beam2()
 {
     return itsBeam2;
 }
 
-const casa::Vector<casa::uInt>& VisChunk::beam2() const
+const casacore::Vector<casacore::uInt>& VisChunk::beam2() const
 {
     return itsBeam2;
 }
 
-casa::Vector<casa::Float>& VisChunk::beam1PA()
+casacore::Vector<casacore::Float>& VisChunk::beam1PA()
 {
     return itsBeam1PA;
 }
 
-const casa::Vector<casa::Float>& VisChunk::beam1PA() const
+const casacore::Vector<casacore::Float>& VisChunk::beam1PA() const
 {
     return itsBeam1PA;
 }
 
-casa::Vector<casa::Float>& VisChunk::beam2PA()
+casacore::Vector<casacore::Float>& VisChunk::beam2PA()
 {
     return itsBeam2PA;
 }
 
-const casa::Vector<casa::Float>& VisChunk::beam2PA() const
+const casacore::Vector<casacore::Float>& VisChunk::beam2PA() const
 {
     return itsBeam2PA;
 }
 
-casa::Vector<casa::MVDirection>& VisChunk::phaseCentre()
+casacore::Vector<casacore::MVDirection>& VisChunk::phaseCentre()
 {
     return itsPhaseCentre;
 }
 
-const casa::Vector<casa::MVDirection>& VisChunk::phaseCentre() const
+const casacore::Vector<casacore::MVDirection>& VisChunk::phaseCentre() const
 {
     return itsPhaseCentre;
 }
 
-casa::Vector<casa::MDirection>& VisChunk::targetPointingCentre()
+casacore::Vector<casacore::MDirection>& VisChunk::targetPointingCentre()
 {
     return itsTargetPointingCentre;
 }
 
-const casa::Vector<casa::MDirection>& VisChunk::targetPointingCentre() const
+const casacore::Vector<casacore::MDirection>& VisChunk::targetPointingCentre() const
 {
     return itsTargetPointingCentre;
 }
 
-casa::Vector<casa::MDirection>& VisChunk::actualPointingCentre()
+casacore::Vector<casacore::MDirection>& VisChunk::actualPointingCentre()
 {
     return itsActualPointingCentre;
 }
 
-const casa::Vector<casa::MDirection>& VisChunk::actualPointingCentre() const
+const casacore::Vector<casacore::MDirection>& VisChunk::actualPointingCentre() const
 {
     return itsActualPointingCentre;
 }
 
-casa::Vector<casa::Quantity>& VisChunk::actualPolAngle()
+casacore::Vector<casacore::Quantity>& VisChunk::actualPolAngle()
 {
     return itsActualPolAngle;
 }
 
-const casa::Vector<casa::Quantity>& VisChunk::actualPolAngle() const
+const casacore::Vector<casacore::Quantity>& VisChunk::actualPolAngle() const
 {
     return itsActualPolAngle;
 }
 
-casa::Vector<casa::Quantity>& VisChunk::actualAzimuth()
+casacore::Vector<casacore::Quantity>& VisChunk::actualAzimuth()
 {
     return itsActualAzimuth;
 }
 
-const casa::Vector<casa::Quantity>& VisChunk::actualAzimuth() const
+const casacore::Vector<casacore::Quantity>& VisChunk::actualAzimuth() const
 {
     return itsActualAzimuth;
 }
 
-casa::Vector<casa::Quantity>& VisChunk::actualElevation()
+casacore::Vector<casacore::Quantity>& VisChunk::actualElevation()
 {
     return itsActualElevation;
 }
 
-const casa::Vector<casa::Quantity>& VisChunk::actualElevation() const
+const casacore::Vector<casacore::Quantity>& VisChunk::actualElevation() const
 {
     return itsActualElevation;
 }
 
-casa::Vector<bool>& VisChunk::onSourceFlag()
+casacore::Vector<bool>& VisChunk::onSourceFlag()
 {
     return itsOnSourceFlag;
 }
 
-const casa::Vector<bool>& VisChunk::onSourceFlag() const
+const casacore::Vector<bool>& VisChunk::onSourceFlag() const
 {
     return itsOnSourceFlag;
 }
 
-casa::Cube<casa::Complex>& VisChunk::visibility()
+casacore::Cube<casacore::Complex>& VisChunk::visibility()
 {
     return itsVisibility;
 }
 
-const casa::Cube<casa::Complex>& VisChunk::visibility() const
+const casacore::Cube<casacore::Complex>& VisChunk::visibility() const
 {
     return itsVisibility;
 }
 
-casa::Cube<casa::Bool>& VisChunk::flag()
+casacore::Cube<casacore::Bool>& VisChunk::flag()
 {
     return itsFlag;
 }
 
-const casa::Cube<casa::Bool>& VisChunk::flag() const
+const casacore::Cube<casacore::Bool>& VisChunk::flag() const
 {
     return itsFlag;
 }
 
-casa::Vector<casa::RigidVector<casa::Double, 3> >& VisChunk::uvw()
+casacore::Vector<casacore::RigidVector<casacore::Double, 3> >& VisChunk::uvw()
 {
     return itsUVW;
 }
 
-const casa::Vector<casa::RigidVector<casa::Double, 3> >& VisChunk::uvw() const
+const casacore::Vector<casacore::RigidVector<casacore::Double, 3> >& VisChunk::uvw() const
 {
     return itsUVW;
 }
 
-casa::MVEpoch& VisChunk::time()
+casacore::MVEpoch& VisChunk::time()
 {
     return itsTime;
 }
 
-const casa::MVEpoch& VisChunk::time() const
+const casacore::MVEpoch& VisChunk::time() const
 {
     return itsTime;
 }
@@ -314,52 +314,52 @@ const std::string& VisChunk::targetName() const
     return itsTargetName;
 }
 
-casa::Double& VisChunk::interval()
+casacore::Double& VisChunk::interval()
 {
     return itsInterval;
 }
 
-const casa::Double& VisChunk::interval() const
+const casacore::Double& VisChunk::interval() const
 {
     return itsInterval;
 }
 
-casa::Vector<casa::Double>& VisChunk::frequency()
+casacore::Vector<casacore::Double>& VisChunk::frequency()
 {
     return itsFrequency;
 }
 
-const casa::Vector<casa::Double>& VisChunk::frequency() const
+const casacore::Vector<casacore::Double>& VisChunk::frequency() const
 {
     return itsFrequency;
 }
 
-casa::Double& VisChunk::channelWidth()
+casacore::Double& VisChunk::channelWidth()
 {
     return itsChannelWidth;
 }
 
-const casa::Double& VisChunk::channelWidth() const
+const casacore::Double& VisChunk::channelWidth() const
 {
     return itsChannelWidth;
 }
 
-casa::Vector<casa::Stokes::StokesTypes>& VisChunk::stokes()
+casacore::Vector<casacore::Stokes::StokesTypes>& VisChunk::stokes()
 {
     return itsStokes;
 }
 
-const casa::Vector<casa::Stokes::StokesTypes>& VisChunk::stokes() const
+const casacore::Vector<casacore::Stokes::StokesTypes>& VisChunk::stokes() const
 {
     return itsStokes;
 }
 
-casa::MDirection::Ref& VisChunk::directionFrame()
+casacore::MDirection::Ref& VisChunk::directionFrame()
 {
     return itsDirectionFrame;
 }
 
-const casa::MDirection::Ref& VisChunk::directionFrame() const
+const casacore::MDirection::Ref& VisChunk::directionFrame() const
 {
     return itsDirectionFrame;
 }
@@ -368,20 +368,20 @@ const casa::MDirection::Ref& VisChunk::directionFrame() const
 /// @return a reference to matrix with beam offsets
 /// @note This matrix may be uninitialised, if static beam offsets are used
 /// Otherwise, the matrix is 2 x nBeam
-casa::Matrix<double>& VisChunk::beamOffsets()
+casacore::Matrix<double>& VisChunk::beamOffsets()
 {
    return itsBeamOffsets;
 }
 
 /// @copydoc VisChunk::beamOffsets()
-const casa::Matrix<double>& VisChunk::beamOffsets() const
+const casacore::Matrix<double>& VisChunk::beamOffsets() const
 {
    return itsBeamOffsets;
 }
 
-void VisChunk::resize(const casa::Cube<casa::Complex>& visibility,
-        const casa::Cube<casa::Bool>& flag,
-        const casa::Vector<casa::Double>& frequency)
+void VisChunk::resize(const casacore::Cube<casacore::Complex>& visibility,
+        const casacore::Cube<casacore::Bool>& flag,
+        const casacore::Vector<casacore::Double>& frequency)
 {
     if ((visibility.nrow() != itsNumberOfRows) && (flag.nrow() != itsNumberOfRows)) {
         ASKAPTHROW(AskapError,
@@ -393,7 +393,7 @@ void VisChunk::resize(const casa::Cube<casa::Complex>& visibility,
                 "New cubes must have the same number of polarisations as the existing cubes");
     }
 
-    const casa::uInt newNChan = visibility.ncolumn();
+    const casacore::uInt newNChan = visibility.ncolumn();
     if (newNChan != flag.ncolumn() || newNChan != frequency.size()) {
         ASKAPTHROW(AskapError, "Number of channels must be equal for all input containers");
     }

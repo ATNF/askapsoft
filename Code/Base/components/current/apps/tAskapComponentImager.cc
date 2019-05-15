@@ -60,7 +60,7 @@ using namespace askap::components;
 using namespace casa;
 using namespace std;
 
-casa::CoordinateSystem createCoordinateSystem(casa::uInt nx, casa::uInt ny)
+casacore::CoordinateSystem createCoordinateSystem(casacore::uInt nx, casacore::uInt ny)
 {
     CoordinateSystem coordsys;
 
@@ -111,16 +111,16 @@ int main(int argc, char *argv[])
     }
 
     // Ensure that CASA log messages are captured
-    casa::LogSinkInterface* globalSink = new Log4cxxLogSink();
-    casa::LogSink::globalSink(globalSink);
+    casacore::LogSinkInterface* globalSink = new Log4cxxLogSink();
+    casacore::LogSink::globalSink(globalSink);
 
     // Centre of the image
-    const MDirection dir(casa::Quantity(187.5, "deg"),
-            casa::Quantity(-45.0, "deg"),
+    const MDirection dir(casacore::Quantity(187.5, "deg"),
+            casacore::Quantity(-45.0, "deg"),
             MDirection::J2000);
 
     // Create a component
-    const Flux<casa::Double> flux(1.0); // Q=U=V=0
+    const Flux<casacore::Double> flux(1.0); // Q=U=V=0
     const ConstantSpectrum spectrum;
     const PointShape shape(dir);
 
@@ -134,10 +134,10 @@ int main(int argc, char *argv[])
     IPosition imgShape(3, nx, ny, 1);
 
     CoordinateSystem coordsys = createCoordinateSystem(nx, ny);
-    casa::PagedImage<casa::Float> image(TiledShape(imgShape), coordsys, "image.tAskapComponentImager");
+    casacore::PagedImage<casacore::Float> image(TiledShape(imgShape), coordsys, "image.tAskapComponentImager");
 
     // Set brightness units
-    image.setUnits(casa::Unit("Jy/pixel"));
+    image.setUnits(casacore::Unit("Jy/pixel"));
 
     AskapComponentImager::project(image, list);
 

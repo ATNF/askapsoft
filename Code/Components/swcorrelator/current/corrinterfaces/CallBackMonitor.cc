@@ -156,23 +156,23 @@ void CallBackMonitor::publish(const CorrProducts &buf)
   // note, we need to specify 'ull' type for the constant as the value exceeds the capacity of long, 
   // which is assumed by default
   const uint64_t microsecondsPerDay = 86400000000ull;
-  const casa::MVEpoch timeTAI(double(buf.itsBAT / microsecondsPerDay), double(buf.itsBAT % microsecondsPerDay)/double(microsecondsPerDay));
-  const casa::MEpoch epoch = casa::MEpoch::Convert(casa::MEpoch(timeTAI, casa::MEpoch::Ref(casa::MEpoch::TAI)), 
-                             casa::MEpoch::Ref(casa::MEpoch::UTC))();
+  const casacore::MVEpoch timeTAI(double(buf.itsBAT / microsecondsPerDay), double(buf.itsBAT % microsecondsPerDay)/double(microsecondsPerDay));
+  const casacore::MEpoch epoch = casacore::MEpoch::Convert(casacore::MEpoch(timeTAI, casacore::MEpoch::Ref(casacore::MEpoch::TAI)), 
+                             casacore::MEpoch::Ref(casacore::MEpoch::UTC))();
   result.itsTime = epoch.getValue().get();                           
   //
-  casa::Vector<casa::Float> delays = BasicMonitor::estimateDelays(buf.itsVisibility);
+  casacore::Vector<casacore::Float> delays = BasicMonitor::estimateDelays(buf.itsVisibility);
   ASKAPDEBUGASSERT(buf.itsVisibility.nrow() == result.itsDelays.size());
   ASKAPDEBUGASSERT(buf.itsVisibility.nrow() == delays.size());
   ASKAPDEBUGASSERT(buf.itsVisibility.nrow() == result.itsAmplitudes.size());
   ASKAPDEBUGASSERT(buf.itsVisibility.nrow() == result.itsPhases.size());
   ASKAPDEBUGASSERT(buf.itsVisibility.nrow() == result.itsFlags.size());
-  for (casa::uInt baseline = 0; baseline < buf.itsVisibility.nrow(); ++baseline) {
+  for (casacore::uInt baseline = 0; baseline < buf.itsVisibility.nrow(); ++baseline) {
        result.itsDelays[baseline] = delays[baseline]*1e9; // in nsec
        // average in frequency
-       casa::Complex temp(0.,0.);
-       casa::uInt counter = 0;
-       for (casa::uInt chan=0; chan < buf.itsVisibility.ncolumn(); ++chan) {
+       casacore::Complex temp(0.,0.);
+       casacore::uInt counter = 0;
+       for (casacore::uInt chan=0; chan < buf.itsVisibility.ncolumn(); ++chan) {
             if (!buf.itsFlag(baseline,chan)) {
                 temp += buf.itsVisibility(baseline,chan);
                 ++counter;
@@ -187,7 +187,7 @@ void CallBackMonitor::publish(const CorrProducts &buf)
            result.itsFlags[baseline] = true;
        }
        result.itsAmplitudes[baseline] = abs(temp);
-       result.itsPhases[baseline] = arg(temp)/casa::C::pi*180.; // in degrees      
+       result.itsPhases[baseline] = arg(temp)/casacore::C::pi*180.; // in degrees      
   }
   // publish the result via call-backs
   boost::lock_guard<boost::mutex> lock(itsRegistryMutex);

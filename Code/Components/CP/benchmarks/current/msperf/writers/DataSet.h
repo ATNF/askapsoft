@@ -50,7 +50,7 @@ class DataSet
         void initFeeds(void);
         void initObs(void);
 
-        casa::MeasurementSet* itsMs;
+        casacore::MeasurementSet* itsMs;
         LOFAR::ParameterSet itsParset;
 };
 

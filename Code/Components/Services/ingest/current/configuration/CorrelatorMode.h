@@ -49,40 +49,40 @@ class CorrelatorMode {
 
         /// @brief Constructor
         CorrelatorMode(const std::string& modeName,
-             const casa::Quantity& chanWidth,
-             const casa::uInt nChan,
-             const std::vector<casa::Stokes::StokesTypes>& stokes,
-             const casa::uInt interval,
-             const casa::Quantity& freqOffset);
+             const casacore::Quantity& chanWidth,
+             const casacore::uInt nChan,
+             const std::vector<casacore::Stokes::StokesTypes>& stokes,
+             const casacore::uInt interval,
+             const casacore::Quantity& freqOffset);
 
         /// @brief Returns the correlator mode name
         const std::string& name(void) const;
 
         /// @brief The number of spectral channels
-        casa::uInt nChan(void) const;
+        casacore::uInt nChan(void) const;
 
         /// @brief The width (in Hz) of a single spectral channel.
         /// @note This may be a negative width in the case where increasing
         /// channel number corresponds to decreasing frequency.
-        const casa::Quantity& chanWidth(void) const;
+        const casacore::Quantity& chanWidth(void) const;
 
         /// @brief The stokes types to be observed
-        const std::vector<casa::Stokes::StokesTypes>& stokes(void) const;
+        const std::vector<casacore::Stokes::StokesTypes>& stokes(void) const;
 
         /// @brief Returns, in microseconds, correlator integration interval.
-        casa::uInt interval(void) const;
+        casacore::uInt interval(void) const;
 
         /// @brief Frequency offset
         /// @return bulk offset in frequency for the current configuration
-        const casa::Quantity& freqOffset() const;
+        const casacore::Quantity& freqOffset() const;
 
     private:
         std::string itsModeName;
-        casa::Quantity itsChanWidth;
-        casa::uInt itsNChan;
-        std::vector<casa::Stokes::StokesTypes> itsStokes;
-        casa::uInt itsInterval;
-        casa::Quantity itsFreqOffset;
+        casacore::Quantity itsChanWidth;
+        casacore::uInt itsNChan;
+        std::vector<casacore::Stokes::StokesTypes> itsStokes;
+        casacore::uInt itsInterval;
+        casacore::Quantity itsFreqOffset;
 };
 
 }

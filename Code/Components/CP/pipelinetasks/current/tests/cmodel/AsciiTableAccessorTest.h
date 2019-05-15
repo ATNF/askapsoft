@@ -78,10 +78,10 @@ class AsciiTableAccessorTest : public CppUnit::TestFixture {
             ss << "   12205907  12205907         1      187.500000  -45.000000            0.0        0.0        0.0  1.0e-5  1.0e-5  1.0e-6  1.0e-5  1.0e-5" << std::endl;
             ss << "    8262173   8262173         1      187.500000  -45.000000            0.0        0.0        0.0  1.0e-5  1.0e-5 -8.0000  1.0e-5  1.0e-5" << std::endl;
 
-            casa::Quantity fluxLimit(1, "uJy");
-            casa::Quantity radius(5.0, "deg");
-            casa::Quantity ra(187.5, "deg");
-            casa::Quantity dec(-45.0, "deg");
+            casacore::Quantity fluxLimit(1, "uJy");
+            casacore::Quantity radius(5.0, "deg");
+            casacore::Quantity ra(187.5, "deg");
+            casacore::Quantity dec(-45.0, "deg");
             AsciiTableAccessor acc(ss, itsParset);
             ComponentListPtr list = acc.coneSearch(ra, dec, radius, fluxLimit);
             CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(1), list->size());
@@ -93,10 +93,10 @@ class AsciiTableAccessorTest : public CppUnit::TestFixture {
             ss << "   12205907  12205907         1      187.500000  -45.000000            0.0        0.0        0.0  1.0e-5  1.0e-5  1.0e-6  1.0e-5  1.0e-5" << std::endl;
             ss << "    8262173   8262173         1      150.500000  -45.000000            0.0        0.0        0.0  1.0e-5  1.0e-5  1.0e-6  1.0e-5  1.0e-5" << std::endl;
 
-            casa::Quantity fluxLimit(1, "uJy");
-            casa::Quantity radius(5.0, "deg");
-            casa::Quantity ra(187.5, "deg");
-            casa::Quantity dec(-45.0, "deg");
+            casacore::Quantity fluxLimit(1, "uJy");
+            casacore::Quantity radius(5.0, "deg");
+            casacore::Quantity ra(187.5, "deg");
+            casacore::Quantity dec(-45.0, "deg");
             AsciiTableAccessor acc(ss, itsParset);
             ComponentListPtr list = acc.coneSearch(ra, dec, radius, fluxLimit);
             CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(1), list->size());
@@ -107,10 +107,10 @@ class AsciiTableAccessorTest : public CppUnit::TestFixture {
             ss << "# component    galaxy structure right_ascension declination position_angle major_axis minor_axis   i_151   i_610  i_1400  i_4860 i_18000" << std::endl;
             ss << "   12205907  12205907         1      001.000000  -45.000000            0.0        0.0        0.0  1.0e-5  1.0e-5  1.0e-6  1.0e-5  1.0e-5" << std::endl;
 
-            casa::Quantity fluxLimit(1, "uJy");
-            casa::Quantity radius(2.0, "deg");
-            casa::Quantity ra(359.5, "deg");
-            casa::Quantity dec(-45.0, "deg");
+            casacore::Quantity fluxLimit(1, "uJy");
+            casacore::Quantity radius(2.0, "deg");
+            casacore::Quantity ra(359.5, "deg");
+            casacore::Quantity dec(-45.0, "deg");
             AsciiTableAccessor acc(ss, itsParset);
             ComponentListPtr list = acc.coneSearch(ra, dec, radius, fluxLimit);
             CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(1), list->size());
@@ -121,10 +121,10 @@ class AsciiTableAccessorTest : public CppUnit::TestFixture {
             ss << "# component    galaxy structure right_ascension declination position_angle major_axis minor_axis   i_151   i_610  i_1400  i_4860 i_18000" << std::endl;
             ss << "   12205907  12205907         1      187.500000  -89.900000            0.0        0.0        0.0  1.0e-5  1.0e-5  1.0e-6  1.0e-5  1.0e-5" << std::endl;
 
-            casa::Quantity fluxLimit(1, "uJy");
-            casa::Quantity radius(2.0, "deg");
-            casa::Quantity ra(7.5, "deg");
-            casa::Quantity dec(-89.5, "deg");
+            casacore::Quantity fluxLimit(1, "uJy");
+            casacore::Quantity radius(2.0, "deg");
+            casacore::Quantity ra(7.5, "deg");
+            casacore::Quantity dec(-89.5, "deg");
             AsciiTableAccessor acc(ss, itsParset);
             ComponentListPtr list = acc.coneSearch(ra, dec, radius, fluxLimit);
             CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(1), list->size());

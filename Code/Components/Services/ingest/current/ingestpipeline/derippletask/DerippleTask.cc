@@ -77,9 +77,9 @@ void DerippleTask::process(askap::cp::common::VisChunk::ShPtr& chunk)
                "Support only chunks with complete coarse channels, e.g. 16416 fine channels, you have "
                << chunk->nChannel());
 
-    for (casa::uInt chan = 0; chan < chunk->nChannel(); ++chan) {
-        casa::Matrix<casa::Complex> slice = chunk->visibility().xzPlane(chan);
-        slice *= static_cast<casa::Float>(theirCoeffs[chan % 54]);
+    for (casacore::uInt chan = 0; chan < chunk->nChannel(); ++chan) {
+        casacore::Matrix<casacore::Complex> slice = chunk->visibility().xzPlane(chan);
+        slice *= static_cast<casacore::Float>(theirCoeffs[chan % 54]);
     }
 }
 

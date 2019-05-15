@@ -145,7 +145,7 @@ class RadioSource : public duchamp::Detection {
         /// times), and the Value element being the location of the
         /// peak, stored as a PixelInfo::Voxel.
         std::multimap<int, PixelInfo::Voxel>
-        findDistinctPeaks(casa::Vector<casa::Double> f);
+        findDistinctPeaks(casacore::Vector<casacore::Double> f);
 
         /// @brief Estimate the FWHM of the Detection.
         /// @details This returns an estimate of an object's shape,
@@ -165,8 +165,8 @@ class RadioSource : public duchamp::Detection {
 
         /// @brief Return a list of subcomponents.
         std::vector<SubComponent>
-        getSubComponentList(casa::Matrix<casa::Double> pos,
-                            casa::Vector<casa::Double> &f);
+        getSubComponentList(casacore::Matrix<casacore::Double> pos,
+                            casacore::Vector<casacore::Double> &f);
 
         /// @brief Return a list of subcomponents that lie above a
         /// flux threshold
@@ -214,9 +214,9 @@ class RadioSource : public duchamp::Detection {
         /// extracting the voxels from the given
         /// voxelList. Their flux values are placed in the
         /// flux matrix, which is passed to
-        /// fitGauss(casa::Matrix<casa::Double> pos,
-        /// casa::Vector<casa::Double> f,
-        /// casa::Vector<casa::Double> sigma). The FittingParameters need to have
+        /// fitGauss(casacore::Matrix<casacore::Double> pos,
+        /// casacore::Vector<casacore::Double> f,
+        /// casacore::Vector<casacore::Double> sigma). The FittingParameters need to have
         /// been set prior to calling (via setFitParams).
         bool fitGauss(std::vector<PixelInfo::Voxel> &voxelList);
 
@@ -224,8 +224,8 @@ class RadioSource : public duchamp::Detection {
         /// values by extracting the voxels from fluxArray that are
         /// within the box surrounding the object. Their flux values
         /// are placed in the flux matrix, which is passed to
-        /// fitGauss(casa::Matrix<casa::Double> pos,
-        /// casa::Vector<casa::Double> f, casa::Vector<casa::Double>
+        /// fitGauss(casacore::Matrix<casacore::Double> pos,
+        /// casacore::Vector<casacore::Double> f, casacore::Vector<casacore::Double>
         /// sigma). The FittingParameters need to have
         /// been set prior to calling (via setFitParams).
         bool fitGauss(std::vector<float> &fluxArray,
@@ -250,9 +250,9 @@ class RadioSource : public duchamp::Detection {
         ///
         /// @return The return value is the value of itsFlagHasFit,
         /// which indicates whether a valid fit was made.
-        bool fitGauss(casa::Matrix<casa::Double> &pos,
-                      casa::Vector<casa::Double> &f,
-                      casa::Vector<casa::Double> &sigma);
+        bool fitGauss(casacore::Matrix<casacore::Double> &pos,
+                      casacore::Vector<casacore::Double> &f,
+                      casacore::Vector<casacore::Double> &sigma);
 
         /// @brief Function to run just the fitting.
         /// @details This function actually calls the fitting routines. It
@@ -262,9 +262,9 @@ class RadioSource : public duchamp::Detection {
         /// results.
         Fitter fitGauss(int nGauss,
                         std::vector<SubComponent> &estimateList,
-                        casa::Matrix<casa::Double> &pos,
-                        casa::Vector<casa::Double> &f,
-                        casa::Vector<casa::Double> &sigma);
+                        casacore::Matrix<casacore::Double> &pos,
+                        casacore::Vector<casacore::Double> &f,
+                        casacore::Vector<casacore::Double> &sigma);
 
 ///@}
 
@@ -325,11 +325,11 @@ class RadioSource : public duchamp::Detection {
         {
             return itsBestFitMap[type];
         };
-        std::vector<casa::Gaussian2D<Double> > gaussFitSet(std::string type)
+        std::vector<casacore::Gaussian2D<Double> > gaussFitSet(std::string type)
         {
             return itsBestFitMap[type].fitSet();
         };
-        std::vector<casa::Gaussian2D<Double> > gaussFitSet()
+        std::vector<casacore::Gaussian2D<Double> > gaussFitSet()
         {
             return itsBestFitMap["best"].fitSet();
         };
@@ -352,7 +352,7 @@ class RadioSource : public duchamp::Detection {
         std::vector<double> betaErrors(std::string type) {return itsBetaError[type];};
 
         /// @brief Return a reference to the set of Gaussian fits.
-        std::vector<casa::Gaussian2D<Double> >& fitset(std::string type)
+        std::vector<casacore::Gaussian2D<Double> >& fitset(std::string type)
         {
             return itsBestFitMap[type].fits();
         };
@@ -487,9 +487,9 @@ class RadioSource : public duchamp::Detection {
         size_t boxSize() {return boxXsize() * boxYsize();};
 
         /// Return the full box description
-        casa::Slicer box() {return itsBox;};
+        casacore::Slicer box() {return itsBox;};
         /// Define the box in one shot
-        void setBox(casa::Slicer box) {itsBox = box;};
+        void setBox(casacore::Slicer box) {itsBox = box;};
 
         // @}
 
@@ -585,7 +585,7 @@ class RadioSource : public duchamp::Detection {
 
         /// @brief The extent of the box, taking into account the
         /// borders of the data array
-        casa::Slicer itsBox;
+        casacore::Slicer itsBox;
 
         /// @brief The spectral indices of the source components
         std::map<std::string, std::vector<double> > itsAlphaMap;

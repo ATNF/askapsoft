@@ -79,10 +79,10 @@ class SimpleMonitorTask : public askap::cp::ingest::ITask {
         /// @param[in] flag flag spectrum for the given baseline/pol index to work with
         /// @param[in] baseline baseline ID
         /// @param[in] beam beam ID
-        void processRow(const casa::Vector<casa::Complex> &vis,
-                        const casa::Vector<casa::Bool> &flag,
-                        const casa::uInt baseline,
-                        const casa::uInt beam);
+        void processRow(const casacore::Vector<casacore::Complex> &vis,
+                        const casacore::Vector<casacore::Bool> &flag,
+                        const casacore::uInt baseline,
+                        const casacore::uInt beam);
 
         /// @brief Publish the buffer
         void publishBuffer();
@@ -95,10 +95,10 @@ class SimpleMonitorTask : public askap::cp::ingest::ITask {
         double itsStartTime;
 
         /// @brief buffer for averaged visibility for each baseline/polarisation index and beam
-        casa::Matrix<casa::Complex> itsVisBuffer;
+        casacore::Matrix<casacore::Complex> itsVisBuffer;
 
         /// @brief buffer for delay for each baseline/polarisation index and beam
-        casa::Matrix<casa::Double> itsDelayBuffer;
+        casacore::Matrix<casacore::Double> itsDelayBuffer;
 
         /// @brief baselines/polarisation indices to monitor
         /// @details One can setup a subset of baselines to monitor. In particular,

@@ -85,7 +85,7 @@ void SolverCore::solveNE(askap::scimath::INormalEquations::ShPtr ne_p)
 {
     Tracing::entry(Tracing::SolveNE);
 
-    casa::Timer timer;
+    casacore::Timer timer;
     timer.mark();
 
     itsSolver->init();
@@ -133,23 +133,23 @@ double SolverCore::getPeakResidual(askap::scimath::INormalEquations::ShPtr ne_p)
     // we could have returned some special value (e.g. negative), but throw exception for now
     ASKAPCHECK(ine, "Current code to calculate peak residuals works for imaging-specific normal equations only");
     double peak = -1.;
-    const std::map< std::string, casa::Vector<double> >& dataVector =
+    const std::map< std::string, casacore::Vector<double> >& dataVector =
         ine->dataVector();
-    const std::map< std::string, casa::Vector<double> >& diag =
+    const std::map< std::string, casacore::Vector<double> >& diag =
         ine->normalMatrixDiagonal();
-    for (std::map< std::string, casa::Vector<double> >::const_iterator ci =
+    for (std::map< std::string, casacore::Vector<double> >::const_iterator ci =
                 dataVector.begin(); ci != dataVector.end(); ++ci) {
         if (ci->first.find("image") == 0) {
             // this is an image
             ASKAPASSERT(ci->second.nelements() != 0);
-            std::map< std::string, casa::Vector<double> >::const_iterator diagIt =
+            std::map< std::string, casacore::Vector<double> >::const_iterator diagIt =
                 diag.find(ci->first);
             ASKAPDEBUGASSERT(diagIt != diag.end());
-            const double maxDiag = casa::max(diagIt->second);
+            const double maxDiag = casacore::max(diagIt->second);
             // hard coded at this stage
             const double cutoff = 1e-2 * maxDiag;
             ASKAPDEBUGASSERT(diagIt->second.nelements() == ci->second.nelements());
-            for (casa::uInt elem = 0; elem < diagIt->second.nelements(); ++elem) {
+            for (casacore::uInt elem = 0; elem < diagIt->second.nelements(); ++elem) {
                 const double thisDiagElement = std::abs(diagIt->second[elem]);
                 if (thisDiagElement > cutoff) {
                     const double tempPeak = ci->second[elem] / thisDiagElement;

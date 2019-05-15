@@ -143,61 +143,61 @@ class MSSink : public askap::cp::ingest::ITask,
         void create(void);
 
         // Add observation table row
-        casa::Int addObs(const casa::String& telescope,
-                const casa::String& observer,
+        casacore::Int addObs(const casacore::String& telescope,
+                const casacore::String& observer,
                 const double obsStartTime,
                 const double obsEndTime);
 
         // Add field table row
-        casa::Int addField(const casa::String& fieldName,
-                const casa::MDirection& fieldDirection,
-                const casa::String& calCode);
+        casacore::Int addField(const casacore::String& fieldName,
+                const casacore::MDirection& fieldDirection,
+                const casacore::String& calCode);
 
         // Add antenna table row
-        casa::Int addAntenna(const casa::String& station,
-                const casa::Vector<double>& antXYZ,
-                const casa::String& name,
-                const casa::String& mount,
-                const casa::Double& dishDiameter);
+        casacore::Int addAntenna(const casacore::String& station,
+                const casacore::Vector<double>& antXYZ,
+                const casacore::String& name,
+                const casacore::String& mount,
+                const casacore::Double& dishDiameter);
 
         // Add entries from the VisChunk to the pointint table
         void addPointingRows(const askap::cp::common::VisChunk& chunk);
 
         // Add data description table row
-        casa::Int addDataDesc(const casa::Int spwId, const casa::Int polId);
+        casacore::Int addDataDesc(const casacore::Int spwId, const casacore::Int polId);
 
         // Add spectral window table row
-        casa::Int addSpectralWindow(const casa::String& name,
+        casacore::Int addSpectralWindow(const casacore::String& name,
                 const int nChan,
-                const casa::Quantity& startFreq,
-                const casa::Quantity& freqInc);
+                const casacore::Quantity& startFreq,
+                const casacore::Quantity& freqInc);
 
         // Add polarisation table row
-        casa::Int addPolarisation(const casa::Vector<casa::Stokes::StokesTypes>& stokesTypes);
+        casacore::Int addPolarisation(const casacore::Vector<casacore::Stokes::StokesTypes>& stokesTypes);
 
         // Find or add a FIELD table entry
-        casa::Int findOrAddField(const askap::cp::common::VisChunk::ShPtr chunk);
+        casacore::Int findOrAddField(const askap::cp::common::VisChunk::ShPtr chunk);
 
         // Find or add a DATA DESCRIPTION (including SPECTRAL INDEX and POLARIZATION)
         // table entry for the provided scan index number.
-        casa::Int findOrAddDataDesc(askap::cp::common::VisChunk::ShPtr chunk);
+        casacore::Int findOrAddDataDesc(askap::cp::common::VisChunk::ShPtr chunk);
 
         // Compares the given row in the spectral window table with the spectral window
         // setup as defined in the Scan.
         bool isSpectralWindowRowEqual(askap::cp::common::VisChunk::ShPtr chunk,
-                const casa::uInt row) const;
+                const casacore::uInt row) const;
 
         // Compares the given row in the polarisation table with the polarisation
         // setup as defined in the Scan.
         bool isPolarisationRowEqual(askap::cp::common::VisChunk::ShPtr chunk,
-                const casa::uInt row) const;
+                const casacore::uInt row) const;
 
         // Generate any monitoring data from the "chunk" and submit to the
         // MonitoringSingleton
         void submitMonitoringPoints(askap::cp::common::VisChunk::ShPtr chunk);
 
         // Helper function to compare MDirections
-        static bool equal(const casa::MDirection &dir1, const casa::MDirection &dir2);
+        static bool equal(const casacore::MDirection &dir1, const casacore::MDirection &dir2);
 
 
         /// @brief helper method to obtain stream sequence number
@@ -221,18 +221,18 @@ class MSSink : public askap::cp::ingest::ITask,
         // The index number of the scan for the previous VisChunk. Some things
         // (such as spectral window or field) are allowed to change from scan
         // to scan, this allows a new scan to be detected
-        casa::Int itsPreviousScanIndex;
+        casacore::Int itsPreviousScanIndex;
 
         // The current field row. This is cached until the scan index is
         // incremented
-        casa::Int itsFieldRow;
+        casacore::Int itsFieldRow;
 
         // The current data description row. This is cached until the scan
         // index is incremented
-        casa::Int itsDataDescRow;
+        casacore::Int itsDataDescRow;
 
         // Measurement set
-        boost::scoped_ptr<casa::MeasurementSet> itsMs;
+        boost::scoped_ptr<casacore::MeasurementSet> itsMs;
 
         /// @brief sequence number of the stream
         /// @details We may have more MPI ranks available than the number of

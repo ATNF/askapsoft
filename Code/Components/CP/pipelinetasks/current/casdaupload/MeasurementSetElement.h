@@ -56,16 +56,16 @@ class MeasurementSetElement : public ProjectElementBase {
 
         xercesc::DOMElement* toXmlElement(xercesc::DOMDocument& doc) const;
 
-        casa::MEpoch getObsStart(void) const;
+        casacore::MEpoch getObsStart(void) const;
 
-        casa::MEpoch getObsEnd(void) const;
+        casacore::MEpoch getObsEnd(void) const;
 
     protected:
 
         void extractData(void);
 
-        casa::MEpoch itsObsStart;
-        casa::MEpoch itsObsEnd;
+        casacore::MEpoch itsObsStart;
+        casacore::MEpoch itsObsEnd;
         std::vector<ScanElement> itsScans;
 };
 

@@ -67,22 +67,22 @@ void DistributedImageWriter::create()
     }
 }
 
-void DistributedImageWriter::write(const casa::Array<casa::Float> &data,
-                                   const casa::IPosition &loc, bool accumulate)
+void DistributedImageWriter::write(const casacore::Array<casacore::Float> &data,
+                                   const casacore::IPosition &loc, bool accumulate)
 {
-    casa::Array<bool> mask(data.shape(), true);
+    casacore::Array<bool> mask(data.shape(), true);
     write(data, mask, loc, accumulate);
 }
 
-void DistributedImageWriter::write(const casa::MaskedArray<casa::Float> &data,
-                                   const casa::IPosition &loc, bool accumulate)
+void DistributedImageWriter::write(const casacore::MaskedArray<casacore::Float> &data,
+                                   const casacore::IPosition &loc, bool accumulate)
 {
     write(data.getArray(), data.getMask(), loc, accumulate);
 }
 
-void DistributedImageWriter::write(const casa::Array<casa::Float> &data,
-                                   const casa::Array<bool> &mask,
-                                   const casa::IPosition &loc, bool accumulate)
+void DistributedImageWriter::write(const casacore::Array<casacore::Float> &data,
+                                   const casacore::Array<bool> &mask,
+                                   const casacore::IPosition &loc, bool accumulate)
 {
 
     if (itsComms->isParallel()) {

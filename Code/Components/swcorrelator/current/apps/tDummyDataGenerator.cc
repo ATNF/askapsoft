@@ -56,32 +56,32 @@ using namespace askap;
 using namespace askap::scimath;
 using namespace askap::swcorrelator;
 
-casa::Complex sampledFunc(const float time, const float delay)
+casacore::Complex sampledFunc(const float time, const float delay)
 {
-  casa::Complex res = 0.;
+  casacore::Complex res = 0.;
   const int spPt = 200;
   for (int i=0; i<spPt; ++i) {
        const float freq = 1e6/sqrt(2.)*float(i-spPt/2)/float(spPt);
-       const float phase = -2.*casa::C::pi*freq*(time-delay);
-       res += casa::Complex(cos(phase),sin(phase))/float(spPt);
+       const float phase = -2.*casacore::C::pi*freq*(time-delay);
+       res += casacore::Complex(cos(phase),sin(phase))/float(spPt);
   }
   return res;
 }
 
-void acquire(casa::Vector<casa::Complex> &buf1, casa::Vector<casa::Complex> &buf2, const float delay, 
+void acquire(casacore::Vector<casacore::Complex> &buf1, casacore::Vector<casacore::Complex> &buf2, const float delay, 
                  const int nSamples, const float rate)
 {
   buf1.resize(nSamples);
   buf2.resize(nSamples);
   for (int i=0; i<nSamples; ++i) {
        const float time = float(i) / rate;
-       buf1[i] = casa::Complex(4000)*sampledFunc(time,0.);
-       buf2[i] = casa::Complex(4000)*sampledFunc(time, delay);       
+       buf1[i] = casacore::Complex(4000)*sampledFunc(time,0.);
+       buf2[i] = casacore::Complex(4000)*sampledFunc(time, delay);       
   }
 }
 
 struct Worker {
-   Worker(const casa::Vector<casa::Complex> &data, const int antID, const int chanID, const int nbeams) : 
+   Worker(const casacore::Vector<casacore::Complex> &data, const int antID, const int chanID, const int nbeams) : 
           itsData(data), itsAnt(antID), itsChan(chanID), itsNBeam(nbeams) 
    {
      ASKAPCHECK(itsNBeam > 0, "Number of beams is supposed to be positive");
@@ -192,7 +192,7 @@ private:
    static boost::shared_mutex theirSampleTriggerMutex;
    static uint64_t theirSampleBAT;
    // data
-   casa::Vector<casa::Complex> itsData;   
+   casacore::Vector<casacore::Complex> itsData;   
    int itsAnt;
    int itsChan;
    int itsNBeam;
@@ -209,12 +209,12 @@ int main(int argc, const char** argv)
     askap::askapparallel::AskapParallel comms(argc, argv);
 
     try {
-       casa::Timer timer;
+       casacore::Timer timer;
        timer.mark();
     
        const float samplingRate = 32./27.*1e6; // in samples per second
-       casa::Vector<casa::Complex> buf1;
-       casa::Vector<casa::Complex> buf2;
+       casacore::Vector<casacore::Complex> buf1;
+       casacore::Vector<casacore::Complex> buf2;
        acquire(buf1,buf2,5.2e-7,BufferManager::NumberOfSamples(),samplingRate);
        // assume that antenna1 = antenna3 for this simple test
 

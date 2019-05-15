@@ -70,33 +70,33 @@ FDFwriter::FDFwriter(LOFAR::ParameterSet &parset,
     itsObjectName = itsParset.getString("objectname", "");
 
     // Set up coordinate systems
-    const boost::shared_ptr<casa::ImageInterface<Float> > inputCubePtr =
+    const boost::shared_ptr<casacore::ImageInterface<Float> > inputCubePtr =
         askap::analysisutilities::openImage(itsInputCube);
-    const casa::CoordinateSystem inputcoords = inputCubePtr->coordinates();
+    const casacore::CoordinateSystem inputcoords = inputCubePtr->coordinates();
 
-    const int dirCoNum = inputcoords.findCoordinate(casa::Coordinate::DIRECTION);
-    casa::DirectionCoordinate dircoo(inputcoords.directionCoordinate(dirCoNum));
+    const int dirCoNum = inputcoords.findCoordinate(casacore::Coordinate::DIRECTION);
+    casacore::DirectionCoordinate dircoo(inputcoords.directionCoordinate(dirCoNum));
 
     itsCoordSysForFDF.addCoordinate(dircoo);
     itsCoordSysForRMSF.addCoordinate(dircoo);
 
     // shift the origin of the direction axes to the component position
-    casa::Vector<Float> shift(2, 0);
-    casa::Vector<Float> incrFrac(2, 1);
+    casacore::Vector<Float> shift(2, 0);
+    casacore::Vector<Float> incrFrac(2, 1);
     shift(itsCoordSysForFDF.directionAxesNumbers()[0]) = poldata.I().specExtractor()->srcXloc();
     shift(itsCoordSysForFDF.directionAxesNumbers()[1]) = poldata.I().specExtractor()->srcYloc();
-    casa::IPosition dirshape(2, 1);
+    casacore::IPosition dirshape(2, 1);
     itsCoordSysForFDF.subImageInSitu(shift, incrFrac, dirshape.asVector());
     itsCoordSysForRMSF.subImageInSitu(shift, incrFrac, dirshape.asVector());
 
     // Define the linear coordinate for the Faraday depth axis.
     // First for the FDF
-    casa::Vector<Double> crpix(1); crpix = 0.0;
-    casa::Vector<Double> crval(1); crval = rmsynth.phi()[0];
-    casa::Vector<Double> cdelt(1); cdelt = rmsynth.deltaPhi();
-    casa::Matrix<Double> pc(1, 1); pc = 0; pc.diagonal() = 1.0;
-    casa::Vector<String> name(1);  name = "Faraday depth";
-    casa::Vector<String> units(1); units = "rad/m2";
+    casacore::Vector<Double> crpix(1); crpix = 0.0;
+    casacore::Vector<Double> crval(1); crval = rmsynth.phi()[0];
+    casacore::Vector<Double> cdelt(1); cdelt = rmsynth.deltaPhi();
+    casacore::Matrix<Double> pc(1, 1); pc = 0; pc.diagonal() = 1.0;
+    casacore::Vector<String> name(1);  name = "Faraday depth";
+    casacore::Vector<String> units(1); units = "rad/m2";
     casacore::LinearCoordinate FDcoordFDF(name, units, crval, cdelt, pc, crpix);
     itsCoordSysForFDF.addCoordinate(FDcoordFDF);
 
@@ -106,11 +106,11 @@ FDFwriter::FDFwriter(LOFAR::ParameterSet &parset,
     itsCoordSysForRMSF.addCoordinate(FDcoordRMSF);
 
     // Define the shapes of the output images, and reform the arrays
-    casa::IPosition fdfShape(3, 1);
+    casacore::IPosition fdfShape(3, 1);
     fdfShape[itsCoordSysForFDF.linearAxesNumbers()[0]] = rmsynth.fdf().size();
     itsFDF = rmsynth.fdf().reform(fdfShape);
 
-    casa::IPosition rmsfShape(3, 1);
+    casacore::IPosition rmsfShape(3, 1);
     rmsfShape[itsCoordSysForRMSF.linearAxesNumbers()[0]] = rmsynth.rmsf().size();
     itsRMSF = rmsynth.rmsf().reform(rmsfShape);
 
@@ -134,13 +134,13 @@ void FDFwriter::write()
         ss.str("");
         ss << itsOutputBase << "_FDF_" << idstring;
         std::string fdfName = ss.str();
-        casa::PagedImage<casa::Complex> imgF(casa::TiledShape(itsFDF.shape()), itsCoordSysForFDF, fdfName);
+        casacore::PagedImage<casacore::Complex> imgF(casacore::TiledShape(itsFDF.shape()), itsCoordSysForFDF, fdfName);
         imgF.put(itsFDF);
 
         ss.str("");
         ss << itsOutputBase << "_RMSF_" << idstring;
         std::string rmsfName = ss.str();
-        casa::PagedImage<casa::Complex> imgR(casa::TiledShape(itsRMSF.shape()), itsCoordSysForRMSF, rmsfName);
+        casacore::PagedImage<casacore::Complex> imgR(casacore::TiledShape(itsRMSF.shape()), itsCoordSysForRMSF, rmsfName);
         imgR.put(itsRMSF);
 
     } else {
@@ -152,37 +152,37 @@ void FDFwriter::write()
         ss.str("");
         ss << itsOutputBase << "_FDF_amp_" << idstring;
         std::string fdfName = ss.str();
-        // casa::PagedImage<float> imgFa(casa::TiledShape(itsFDF.shape()), itsCoordSysForFDF, fdfName);
-        // imgFa.put(casa::amplitude(itsFDF));
+        // casacore::PagedImage<float> imgFa(casacore::TiledShape(itsFDF.shape()), itsCoordSysForFDF, fdfName);
+        // imgFa.put(casacore::amplitude(itsFDF));
         imageAcc->create(fdfName, itsFDF.shape(), itsCoordSysForFDF);
-        imageAcc->write(fdfName, casa::amplitude(itsFDF));
+        imageAcc->write(fdfName, casacore::amplitude(itsFDF));
         updateHeaders(fdfName);
 
         ss.str("");
         ss << itsOutputBase << "_FDF_phase_" << idstring;
         fdfName = ss.str();
-        // casa::PagedImage<float> imgFp(casa::TiledShape(itsFDF.shape()), itsCoordSysForFDF, fdfName);
-        // imgFp.put(casa::phase(itsFDF));
+        // casacore::PagedImage<float> imgFp(casacore::TiledShape(itsFDF.shape()), itsCoordSysForFDF, fdfName);
+        // imgFp.put(casacore::phase(itsFDF));
         imageAcc->create(fdfName, itsFDF.shape(), itsCoordSysForFDF);
-        imageAcc->write(fdfName, casa::phase(itsFDF));
+        imageAcc->write(fdfName, casacore::phase(itsFDF));
         updateHeaders(fdfName);
 
         ss.str("");
         ss << itsOutputBase << "_RMSF_amp_" << idstring;
         std::string rmsfName = ss.str();
-        // casa::PagedImage<float> imgRa(casa::TiledShape(itsRMSF.shape()), itsCoordSysForRMSF, rmsfName);
-        // imgRa.put(casa::amplitude(itsRMSF));
+        // casacore::PagedImage<float> imgRa(casacore::TiledShape(itsRMSF.shape()), itsCoordSysForRMSF, rmsfName);
+        // imgRa.put(casacore::amplitude(itsRMSF));
         imageAcc->create(rmsfName, itsRMSF.shape(), itsCoordSysForRMSF);
-        imageAcc->write(rmsfName, casa::amplitude(itsRMSF));
+        imageAcc->write(rmsfName, casacore::amplitude(itsRMSF));
         updateHeaders(rmsfName);
 
         ss.str("");
         ss << itsOutputBase << "_RMSF_phase_" << idstring;
         rmsfName = ss.str();
-        // casa::PagedImage<float> imgRp(casa::TiledShape(itsRMSF.shape()), itsCoordSysForRMSF, rmsfName);
-        // imgRp.put(casa::phase(itsRMSF));
+        // casacore::PagedImage<float> imgRp(casacore::TiledShape(itsRMSF.shape()), itsCoordSysForRMSF, rmsfName);
+        // imgRp.put(casacore::phase(itsRMSF));
         imageAcc->create(rmsfName, itsRMSF.shape(), itsCoordSysForRMSF);
-        imageAcc->write(rmsfName, casa::phase(itsRMSF));
+        imageAcc->write(rmsfName, casacore::phase(itsRMSF));
         updateHeaders(rmsfName);
 
     }

@@ -84,8 +84,8 @@ class AskapComponentImagerTest : public CppUnit::TestFixture {
             ComponentList list;
 
             // Centre of the image
-            const MDirection dir(casa::Quantity(187.5, "deg"),
-                    casa::Quantity(-45.0, "deg"),
+            const MDirection dir(casacore::Quantity(187.5, "deg"),
+                    casacore::Quantity(-45.0, "deg"),
                     MDirection::J2000);
 
             // Create a component at the image centre with constant spectrum
@@ -94,7 +94,7 @@ class AskapComponentImagerTest : public CppUnit::TestFixture {
             fluxVals(1) = 0.7; 
             fluxVals(2) = 0.6; 
             fluxVals(3) = 0.5; 
-            const Flux<casa::Double> flux(fluxVals(0), fluxVals(1), fluxVals(2), fluxVals(3));
+            const Flux<casacore::Double> flux(fluxVals(0), fluxVals(1), fluxVals(2), fluxVals(3));
             {
                 const ConstantSpectrum spectrum;
                 const PointShape shape(dir);
@@ -106,8 +106,8 @@ class AskapComponentImagerTest : public CppUnit::TestFixture {
             SpectralIndex spectrum2(MFrequency(Quantity(850, "MHz")), -0.7);
             {
                 const PointShape shape(MDirection(
-                            casa::Quantity(187.5, "deg"),
-                            casa::Quantity(-45.02, "deg"),
+                            casacore::Quantity(187.5, "deg"),
+                            casacore::Quantity(-45.02, "deg"),
                             MDirection::J2000));
                 list.add(SkyComponent(flux, shape, spectrum2));
             }
@@ -139,17 +139,17 @@ class AskapComponentImagerTest : public CppUnit::TestFixture {
             ComponentList list;
 
             // Centre of the image
-            const MDirection dir(casa::Quantity(187.5, "deg"),
-                    casa::Quantity(-45.0, "deg"),
+            const MDirection dir(casacore::Quantity(187.5, "deg"),
+                    casacore::Quantity(-45.0, "deg"),
                     MDirection::J2000);
 
             // Create a component at the image centre with constant spectrum
-            const Flux<casa::Double> flux(1.0);
+            const Flux<casacore::Double> flux(1.0);
             const ConstantSpectrum spectrum;
             const GaussianShape shape(dir,
-                    casa::Quantity(12.0, "arcsec"),
-                    casa::Quantity(6.0, "arcsec"),
-                    casa::Quantity(0, "deg"));
+                    casacore::Quantity(12.0, "arcsec"),
+                    casacore::Quantity(6.0, "arcsec"),
+                    casacore::Quantity(0, "deg"));
             list.add(SkyComponent(flux, shape, spectrum));
 
             Vector<Int> iquv(1);
@@ -170,13 +170,13 @@ class AskapComponentImagerTest : public CppUnit::TestFixture {
             ComponentList list;
 
             // Centre of the image
-            const MDirection dir(casa::Quantity(187.5, "deg"),
-                    casa::Quantity(-45.0, "deg"),
+            const MDirection dir(casacore::Quantity(187.5, "deg"),
+                    casacore::Quantity(-45.0, "deg"),
                     MDirection::J2000);
 
             // Create a component at the image centre with spectral index
             const Double fluxVal = 7.0; // Jy
-            const Flux<casa::Double> flux(fluxVal);
+            const Flux<casacore::Double> flux(fluxVal);
             const Double spectralIndex = -0.7;
             const SpectralIndex spectrum(MFrequency(Quantity(1400, "MHz")), spectralIndex);
             const PointShape shape(dir);
@@ -216,7 +216,7 @@ class AskapComponentImagerTest : public CppUnit::TestFixture {
         }
 
     private:
-        casa::CoordinateSystem createCoordinateSystem(const casa::uInt nx, const casa::uInt ny,
+        casacore::CoordinateSystem createCoordinateSystem(const casacore::uInt nx, const casacore::uInt ny,
             const Vector<Int>& stokes)
         {
             CoordinateSystem coordsys;
@@ -258,17 +258,17 @@ class AskapComponentImagerTest : public CppUnit::TestFixture {
         }
 
         template <class T>
-        casa::TempImage<T> createImage(const MDirection& dir,
+        casacore::TempImage<T> createImage(const MDirection& dir,
             const uInt nx, const uInt ny, const Vector<Int>& stokes) {
 
             // Create the image
             IPosition imgShape(4, nx, ny, stokes.size(), 1);
             CoordinateSystem coordsys = createCoordinateSystem(nx, ny, stokes);
-            casa::TempImage<T> image(TiledShape(imgShape), coordsys);
+            casacore::TempImage<T> image(TiledShape(imgShape), coordsys);
             image.set(0.0);
 
             // Set brightness units
-            image.setUnits(casa::Unit("Jy/pixel"));
+            image.setUnits(casacore::Unit("Jy/pixel"));
             return image;
         }
 };

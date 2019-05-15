@@ -63,7 +63,7 @@ public:
   /// @param[in] parset parset file name
   /// @param[in] readonly if true, additional checks are done that file exists
 
-  explicit ServiceCalSolutionAccessor(const LOFAR::ParameterSet &parset, casa::Long iD = 0, bool readonly = false);
+  explicit ServiceCalSolutionAccessor(const LOFAR::ParameterSet &parset, casacore::Long iD = 0, bool readonly = false);
 
   /// @brief constructor
   /// @details It is passed a service client - so therefore does not need the parset
@@ -72,7 +72,7 @@ public:
   /// @brief destructor
   /// @details Not yet sure what functionality that needs to be here
 
-  explicit ServiceCalSolutionAccessor(boost::shared_ptr<askap::cp::caldataservice::CalibrationDataServiceClient> inClient, casa::Long iD = 0, bool readonly = false);
+  explicit ServiceCalSolutionAccessor(boost::shared_ptr<askap::cp::caldataservice::CalibrationDataServiceClient> inClient, casacore::Long iD = 0, bool readonly = false);
 
 
   virtual ~ServiceCalSolutionAccessor();
@@ -112,7 +112,7 @@ public:
   /// @param[in] index ant/beam index
   /// @param[in] chan spectral channel of interest
   /// @return JonesJTerm object with gains and validity flags
-  virtual accessors::JonesJTerm bandpass(const accessors::JonesIndex &index, const casa::uInt chan) const; // override;
+  virtual accessors::JonesJTerm bandpass(const accessors::JonesIndex &index, const casacore::uInt chan) const; // override;
 
   /// @brief set gains (J-Jones)
   /// @details This method writes parallel-hand gains for both
@@ -137,7 +137,7 @@ public:
   /// @note We may add later variants of this method assuming that the bandpass is
   /// approximated somehow, e.g. by a polynomial. For simplicity, for now we deal with
   /// gains set explicitly for each channel.
-  virtual void setBandpass(const accessors::JonesIndex &index, const accessors::JonesJTerm &bp, const casa::uInt chan); // override;
+  virtual void setBandpass(const accessors::JonesIndex &index, const accessors::JonesJTerm &bp, const casacore::uInt chan); // override;
 
   /// @brief shared pointer definition
   typedef boost::shared_ptr<ServiceCalSolutionAccessor> ShPtr;

@@ -79,42 +79,42 @@ TosMetadata& TosMetadata::operator=(const TosMetadata &other)
   return *this;
 }
 
-casa::uLong TosMetadata::time(void) const
+casacore::uLong TosMetadata::time(void) const
 {
     return itsTime;
 }
 
-void TosMetadata::time(const casa::uLong time)
+void TosMetadata::time(const casacore::uLong time)
 {
     itsTime = time;
 }
 
-casa::Int TosMetadata::scanId(void) const
+casacore::Int TosMetadata::scanId(void) const
 {
     return itsScanId;
 }
 
-void TosMetadata::scanId(const casa::Int id)
+void TosMetadata::scanId(const casacore::Int id)
 {
     itsScanId = id;
 }
 
-casa::Bool TosMetadata::flagged(void) const
+casacore::Bool TosMetadata::flagged(void) const
 {
     return itsFlagged;
 }
 
-void TosMetadata::flagged(const casa::Bool flag)
+void TosMetadata::flagged(const casacore::Bool flag)
 {
     itsFlagged = flag;
 }
 
-casa::Quantity TosMetadata::centreFreq(void) const
+casacore::Quantity TosMetadata::centreFreq(void) const
 {
     return itsCentreFreq;
 }
 
-void TosMetadata::centreFreq(const casa::Quantity& freq)
+void TosMetadata::centreFreq(const casacore::Quantity& freq)
 {
     itsCentreFreq = freq;
 }
@@ -129,22 +129,22 @@ void TosMetadata::targetName(const std::string& name)
     itsTargetName = name;
 }
 
-casa::MDirection TosMetadata::targetDirection(void) const
+casacore::MDirection TosMetadata::targetDirection(void) const
 {
     return itsTargetDirection;
 }
 
-void TosMetadata::targetDirection(const casa::MDirection& dir)
+void TosMetadata::targetDirection(const casacore::MDirection& dir)
 {
     itsTargetDirection = dir;
 }
 
-casa::MDirection TosMetadata::phaseDirection(void) const
+casacore::MDirection TosMetadata::phaseDirection(void) const
 {
     return itsPhaseDirection;
 }
 
-void TosMetadata::phaseDirection(const casa::MDirection& dir)
+void TosMetadata::phaseDirection(const casacore::MDirection& dir)
 {
     itsPhaseDirection = dir;
 }
@@ -164,14 +164,14 @@ std::string TosMetadata::corrMode(void) const
 /// for all antennas. Also in some special modes we set these offsets to zero
 /// regardless of the actual beam pointings. Values are in radians (although this
 /// class doesn't rely on particular units and passes whatever value was set.
-const casa::Matrix<casa::Double>& TosMetadata::beamOffsets() const
+const casacore::Matrix<casacore::Double>& TosMetadata::beamOffsets() const
 {
     return itsBeamOffsets;
 }
 
 /// @brief Set beam offsets
 /// @param[in] offsets 2xnBeam beam offsets matrix 
-void TosMetadata::beamOffsets(const casa::Matrix<casa::Double> &offsets)
+void TosMetadata::beamOffsets(const casacore::Matrix<casacore::Double> &offsets)
 {
     if (offsets.nelements() != 0) {
         ASKAPCHECK(offsets.nrow() == 2, "Beam offset matrix is expected to have 2 x nBeam shape, you have: "<<offsets.shape());
@@ -194,9 +194,9 @@ void TosMetadata::addAntenna(const TosMetadataAntenna& ant)
     itsAntennas.insert(make_pair(ant.name(), ant));
 }
 
-casa::uInt TosMetadata::nAntenna() const
+casacore::uInt TosMetadata::nAntenna() const
 {
-    return static_cast<casa::uInt>(itsAntennas.size());
+    return static_cast<casacore::uInt>(itsAntennas.size());
 }
 
 std::vector<std::string> TosMetadata::antennaNames(void) const
@@ -248,7 +248,7 @@ LOFAR::BlobIStream& LOFAR::operator>>(LOFAR::BlobIStream& is, askap::cp::TosMeta
    obj = TosMetadata();
    uint64 time;
    is >> time;
-   obj.time(static_cast<casa::uLong>(time));
+   obj.time(static_cast<casacore::uLong>(time));
    int scanId;
    is >> scanId;
    obj.scanId(scanId);
@@ -256,14 +256,14 @@ LOFAR::BlobIStream& LOFAR::operator>>(LOFAR::BlobIStream& is, askap::cp::TosMeta
    is >> flag;
    obj.flagged(flag);
    
-   casa::Quantity q;
+   casacore::Quantity q;
    is >> q;
    obj.centreFreq(q);
    std::string bufStr;
    is >> bufStr;
    obj.targetName(bufStr);
 
-   casa::MDirection dir;
+   casacore::MDirection dir;
    is >> dir;
    obj.targetDirection(dir);
    is >> dir;
@@ -271,7 +271,7 @@ LOFAR::BlobIStream& LOFAR::operator>>(LOFAR::BlobIStream& is, askap::cp::TosMeta
    is >> bufStr;
    obj.corrMode(bufStr);
 
-   casa::Matrix<casa::Double> offsetBuf;
+   casacore::Matrix<casacore::Double> offsetBuf;
    is >> offsetBuf;
    // technically this does an unnecessary copy, we could've benefited from reference semantics
    // of casa arrays and access data fields directly, but it breaks encapsulation - so will do it

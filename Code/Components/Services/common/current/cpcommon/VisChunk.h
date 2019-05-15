@@ -58,10 +58,10 @@ class VisChunk {
         ///                     be created with this size for that dimension.
         /// @param[in] nPol containers with a nPol dimension will be created
         ///                 with this size for that dimension.
-        VisChunk(const casa::uInt nRow,
-                 const casa::uInt nChannel,
-                 const casa::uInt nPol,
-                 const casa::uInt nAntenna);
+        VisChunk(const casacore::uInt nRow,
+                 const casacore::uInt nChannel,
+                 const casacore::uInt nPol,
+                 const casacore::uInt nAntenna);
 
         /// @brief copy constructor
         /// @details
@@ -77,29 +77,29 @@ class VisChunk {
 
         /// The number of rows in this chunk
         /// @return the number of rows in this chunk
-        casa::uInt nRow() const;
+        casacore::uInt nRow() const;
 
         // The following methods implement metadata access
 
         /// The number of spectral channels (equal for all rows)
         /// @return the number of spectral channels
-        casa::uInt nChannel() const;
+        casacore::uInt nChannel() const;
 
         /// The number of polarization products (equal for all rows)
         /// @return the number of polarization products (can be 1,2 or 4)
-        casa::uInt nPol() const;
+        casacore::uInt nPol() const;
 
         /// The number of antennas
         /// @return the number antennas.
-        casa::uInt nAntenna() const;
+        casacore::uInt nAntenna() const;
 
         /// Timestamp for this correlator integration
         /// @return a timestamp for this buffer. Absolute time expressed as
         /// seconds since MJD=0 UTC.
-        casa::MVEpoch& time();
+        casacore::MVEpoch& time();
 
         /// @copydoc VisChunk::time()
-        const casa::MVEpoch& time() const;
+        const casacore::MVEpoch& time() const;
 
         /// Target (field/source) name
         std::string& targetName();
@@ -109,16 +109,16 @@ class VisChunk {
 
         /// Data sampling interval.
         /// Units: Seconds
-        casa::Double& interval();
+        casacore::Double& interval();
 
         /// @copydoc VisChunk::interval()
-        const casa::Double& interval() const;
+        const casacore::Double& interval() const;
 
         /// Scan index number (zero based).
-        casa::uInt& scan();
+        casacore::uInt& scan();
 
         /// @copydoc VisChunk::scan()
-        const casa::uInt& scan() const;
+        const casacore::uInt& scan() const;
 
         /// First antenna IDs for all rows
         ///
@@ -126,10 +126,10 @@ class VisChunk {
         ///
         /// @return a vector with IDs of the first antenna corresponding
         /// to each visibility (one for each row)
-        casa::Vector<casa::uInt>& antenna1();
+        casacore::Vector<casacore::uInt>& antenna1();
 
         /// @copydoc VisChunk::antenna1()
-        const casa::Vector<casa::uInt>& antenna1() const;
+        const casacore::Vector<casacore::uInt>& antenna1() const;
 
         /// Second antenna IDs for all rows
         ///
@@ -137,10 +137,10 @@ class VisChunk {
         ///
         /// @return a vector with IDs of the second antenna corresponding
         /// to each visibility (one for each row)
-        casa::Vector<casa::uInt>& antenna2();
+        casacore::Vector<casacore::uInt>& antenna2();
 
         /// @copydoc VisChunk::antenna2()
-        const casa::Vector<casa::uInt>& antenna2() const;
+        const casacore::Vector<casacore::uInt>& antenna2() const;
 
         /// First beam IDs for all rows
         ///
@@ -148,10 +148,10 @@ class VisChunk {
         ///
         /// @return a vector with IDs of the first beam corresponding
         /// to each visibility (one for each row)
-        casa::Vector<casa::uInt>& beam1();
+        casacore::Vector<casacore::uInt>& beam1();
 
         /// @copydoc VisChunk::beam1()
-        const casa::Vector<casa::uInt>& beam1() const;
+        const casacore::Vector<casacore::uInt>& beam1() const;
 
         /// Second beam IDs for all rows
         ///
@@ -159,121 +159,121 @@ class VisChunk {
         ///
         /// @return a vector with IDs of the second beam corresponding
         /// to each visibility (one for each row)
-        casa::Vector<casa::uInt>& beam2();
+        casacore::Vector<casacore::uInt>& beam2();
 
         /// @copydoc VisChunk::beam2()
-        const casa::Vector<casa::uInt>& beam2() const;
+        const casacore::Vector<casacore::uInt>& beam2() const;
 
         /// Position angles of the first beam for all rows
         /// @return a vector with position angles of the
         /// first beam corresponding to each visibility
         /// Units: Radians
-        casa::Vector<casa::Float>& beam1PA();
+        casacore::Vector<casacore::Float>& beam1PA();
 
         /// @copydoc VisChunk::beam1PA()
-        const casa::Vector<casa::Float>& beam1PA() const;
+        const casacore::Vector<casacore::Float>& beam1PA() const;
 
         /// Position angles of the second beam for all rows
         /// @return a vector with position angles of the
         /// second beam corresponding to each visibility
         /// Units: Radians
-        casa::Vector<casa::Float>& beam2PA();
+        casacore::Vector<casacore::Float>& beam2PA();
 
         /// @copydoc VisChunk::beamsPA()
-        const casa::Vector<casa::Float>& beam2PA() const;
+        const casacore::Vector<casacore::Float>& beam2PA() const;
 
         /// Return phase centre directions the the given row of data
         /// @return a vector with direction measures 
-        casa::Vector<casa::MVDirection>& phaseCentre();
+        casacore::Vector<casacore::MVDirection>& phaseCentre();
 
         /// @copydoc VisChunk::phaseCentre()
-        const casa::Vector<casa::MVDirection>& phaseCentre() const;
+        const casacore::Vector<casacore::MVDirection>& phaseCentre() const;
 
         /// Returns the TARGET dish pointing centre for each antenna.
         /// The length of the vector will be of length nAntennas, and the 
         /// vector indexing matches the index returned from either the
         /// antenna1() or antenna2() methods.
         /// @return a vector of direction measures, one for each antenna
-        casa::Vector<casa::MDirection>& targetPointingCentre();
+        casacore::Vector<casacore::MDirection>& targetPointingCentre();
 
         /// @copydoc VisChunk::targetPointingCentre()
-        const casa::Vector<casa::MDirection>& targetPointingCentre() const;
+        const casacore::Vector<casacore::MDirection>& targetPointingCentre() const;
 
         /// Returns the ACTUAL dish pointing centre for each antenna.
         /// The length of the vector will be of length nAntennas, and the 
         /// vector indexing matches the index returned from either the
         /// antenna1() or antenna2() methods.
         /// @return a vector of direction measures, one for each antenna
-        casa::Vector<casa::MDirection>& actualPointingCentre();
+        casacore::Vector<casacore::MDirection>& actualPointingCentre();
 
         /// Returns the ACTUAL polarisation axis position  for each antenna.
         /// The length of the vector will be of length nAntennas, and the 
         /// vector indexing matches the index returned from either the
         /// antenna1() or antenna2() methods.
         /// @return a vector of quantities, one for each antenna
-        const casa::Vector<casa::MDirection>& actualPointingCentre() const;
+        const casacore::Vector<casacore::MDirection>& actualPointingCentre() const;
 
         /// Actual polarisation axis offset for each antenna
         /// @brief pol axis angle for each antenna
-        casa::Vector<casa::Quantity>& actualPolAngle();
+        casacore::Vector<casacore::Quantity>& actualPolAngle();
 
         /// @copydoc VisChunk::actualPolAngle()
-        const casa::Vector<casa::Quantity>& actualPolAngle() const;
+        const casacore::Vector<casacore::Quantity>& actualPolAngle() const;
 
         /// Actual azimuth for each antenna
         /// @brief azimuth angle for each antenna as reported by TOS
-        casa::Vector<casa::Quantity>& actualAzimuth();
+        casacore::Vector<casacore::Quantity>& actualAzimuth();
 
         /// @copydoc VisChunk::actualAzimuth()
-        const casa::Vector<casa::Quantity>& actualAzimuth() const;
+        const casacore::Vector<casacore::Quantity>& actualAzimuth() const;
 
         /// Actual elevation for each antenna
         /// @brief elevation angle for each antenna as reported by TOS
-        casa::Vector<casa::Quantity>& actualElevation();
+        casacore::Vector<casacore::Quantity>& actualElevation();
 
         /// @copydoc VisChunk::actualElevation()
-        const casa::Vector<casa::Quantity>& actualElevation() const;
+        const casacore::Vector<casacore::Quantity>& actualElevation() const;
 
         /// On-source flag for each antenna
         /// @brief true for each antenna which was on-source according to TOS
-        casa::Vector<bool>& onSourceFlag();
+        casacore::Vector<bool>& onSourceFlag();
 
         /// @copydoc VisChunk::onSourceFlag()
-        const casa::Vector<bool>& onSourceFlag() const;
+        const casacore::Vector<bool>& onSourceFlag() const;
 
         /// VisChunk (a cube is nRow x nChannel x nPol; each element is
         /// a complex visibility)
         /// @return a reference to nRow x nChannel x nPol cube, containing
         /// all visibility data
-        casa::Cube<casa::Complex>& visibility();
+        casacore::Cube<casacore::Complex>& visibility();
 
         /// @copydoc VisChunk::visibility()
-        const casa::Cube<casa::Complex>& visibility() const;
+        const casacore::Cube<casacore::Complex>& visibility() const;
 
         /// Cube of flags corresponding to the output of visibility()
         /// @return a reference to nRow x nChannel x nPol cube with flag
         ///         information. If True, the corresponding element is flagged.
-        casa::Cube<casa::Bool>& flag();
+        casacore::Cube<casacore::Bool>& flag();
 
         /// @copydoc VisChunk::flag()
-        const casa::Cube<casa::Bool>& flag() const;
+        const casacore::Cube<casacore::Bool>& flag() const;
 
         /// UVW
         /// @return a reference to vector containing uvw-coordinates
         /// packed into a 3-D rigid vector
-        casa::Vector<casa::RigidVector<casa::Double, 3> >& uvw();
+        casacore::Vector<casacore::RigidVector<casacore::Double, 3> >& uvw();
 
         /// @copydoc VisChunk::uvw()
-        const casa::Vector<casa::RigidVector<casa::Double, 3> >& uvw() const;
+        const casacore::Vector<casacore::RigidVector<casacore::Double, 3> >& uvw() const;
 
         /// Frequency for each channel.
         /// Units: Hz
         /// @return a reference to vector containing frequencies for each
         ///         spectral channel (vector size is nChannel).
-        casa::Vector<casa::Double>& frequency();
+        casacore::Vector<casacore::Double>& frequency();
 
         /// @copydoc VisChunk::frequency()
-        const casa::Vector<casa::Double>& frequency() const;
+        const casacore::Vector<casacore::Double>& frequency() const;
 
         /// Channel width of each spectral channel.
         /// All spectral channels in the frequency vector have a channel
@@ -281,37 +281,37 @@ class VisChunk {
         /// however is stored here for efficiency.
         /// Units: Hz
         /// @return  a refernece to the channel width of each spectral channel.
-        casa::Double& channelWidth();
+        casacore::Double& channelWidth();
 
         /// @copydoc VisChunk::channelWidth()
-        const casa::Double& channelWidth() const;
+        const casacore::Double& channelWidth() const;
 
         /// @brief polarisation type for each product
         /// @return a reference to vector containing polarisation types for
         /// each product in the visibility cube (nPol() elements).
         /// @note All rows of the accessor have the same structure of the visibility
         /// cube, i.e. polarisation types returned by this method are valid for all rows.
-        casa::Vector<casa::Stokes::StokesTypes>& stokes();
+        casacore::Vector<casacore::Stokes::StokesTypes>& stokes();
 
         /// @copydoc VisChunk::stokes()
-        const casa::Vector<casa::Stokes::StokesTypes>& stokes() const;
+        const casacore::Vector<casacore::Stokes::StokesTypes>& stokes() const;
 
         /// @brief direction reference frame for all MVDirection instances
         /// in this class.
         /// @return a reference to the MDirection:Ref.
-        casa::MDirection::Ref& directionFrame();
+        casacore::MDirection::Ref& directionFrame();
 
         /// @copydoc VisChunk::directionFrame()
-        const casa::MDirection::Ref& directionFrame() const;
+        const casacore::MDirection::Ref& directionFrame() const;
 
         /// @brief beam offsets
         /// @return a reference to matrix with beam offsets
         /// @note This matrix may be uninitialised, if static beam offsets are used
         /// Otherwise, the matrix is 2 x nBeam
-        casa::Matrix<double>& beamOffsets();
+        casacore::Matrix<double>& beamOffsets();
 
         /// @copydoc VisChunk::beamOffsets()
-        const casa::Matrix<double>& beamOffsets() const;
+        const casacore::Matrix<double>& beamOffsets() const;
 
         /// Allows the VisChunk's nChannel dimension to be resized.
         /// This allows resizing in the nChannel dimension only, and by
@@ -333,9 +333,9 @@ class VisChunk {
         /// @param[in] visibility the new visibility cube to assign.
         /// @param[in] flag  the new flag cube to assign.
         /// @param[in] frequency the new frequency vector to assign.
-        void resize(const casa::Cube<casa::Complex>& visibility,
-                    const casa::Cube<casa::Bool>& flag,
-                    const casa::Vector<casa::Double>& frequency);
+        void resize(const casacore::Cube<casacore::Complex>& visibility,
+                    const casacore::Cube<casacore::Bool>& flag,
+                    const casacore::Vector<casacore::Double>& frequency);
 
         /// @brief Shared pointer typedef
         typedef boost::shared_ptr<VisChunk> ShPtr;
@@ -343,91 +343,91 @@ class VisChunk {
     private:
 
         /// Number of rows
-        casa::uInt itsNumberOfRows;
+        casacore::uInt itsNumberOfRows;
 
         /// Number of channels
-        casa::uInt itsNumberOfChannels;
+        casacore::uInt itsNumberOfChannels;
 
         /// Number of polarisations
-        casa::uInt itsNumberOfPolarisations;
+        casacore::uInt itsNumberOfPolarisations;
 
         /// Number of antennas
-        casa::uInt itsNumberOfAntennas;
+        casacore::uInt itsNumberOfAntennas;
 
         /// Time
-        casa::MVEpoch itsTime;
+        casacore::MVEpoch itsTime;
 
         /// Target Name
         std::string itsTargetName;
 
         /// Interval
-        casa::Double itsInterval;
+        casacore::Double itsInterval;
 
         /// Scan Index
-        casa::uInt itsScan;
+        casacore::uInt itsScan;
 
         /// Antenna1
-        casa::Vector<casa::uInt> itsAntenna1;
+        casacore::Vector<casacore::uInt> itsAntenna1;
 
         /// Antenna2
-        casa::Vector<casa::uInt> itsAntenna2;
+        casacore::Vector<casacore::uInt> itsAntenna2;
 
         /// Beam1
-        casa::Vector<casa::uInt> itsBeam1;
+        casacore::Vector<casacore::uInt> itsBeam1;
 
         /// Beam2
-        casa::Vector<casa::uInt> itsBeam2;
+        casacore::Vector<casacore::uInt> itsBeam2;
 
         /// Beam1 position angle
-        casa::Vector<casa::Float> itsBeam1PA;
+        casacore::Vector<casacore::Float> itsBeam1PA;
 
         /// Beam2 position angle
-        casa::Vector<casa::Float> itsBeam2PA;
+        casacore::Vector<casacore::Float> itsBeam2PA;
 
         /// Phase centre of for the given row (beam/baseline)
-        casa::Vector<casa::MVDirection> itsPhaseCentre;
+        casacore::Vector<casacore::MVDirection> itsPhaseCentre;
 
         /// Target dish pointing direction for each antenna
-        casa::Vector<casa::MDirection> itsTargetPointingCentre;
+        casacore::Vector<casacore::MDirection> itsTargetPointingCentre;
 
         /// Actual dish pointing direction for each antenna
-        casa::Vector<casa::MDirection> itsActualPointingCentre;
+        casacore::Vector<casacore::MDirection> itsActualPointingCentre;
 
         /// Actual polarisation axis offset for each antenna
-        casa::Vector<casa::Quantity> itsActualPolAngle;
+        casacore::Vector<casacore::Quantity> itsActualPolAngle;
 
         /// Actual azimuth axis position for each antenna
-        casa::Vector<casa::Quantity> itsActualAzimuth;
+        casacore::Vector<casacore::Quantity> itsActualAzimuth;
 
         /// Actual elevation axis position for each antenna
-        casa::Vector<casa::Quantity> itsActualElevation;
+        casacore::Vector<casacore::Quantity> itsActualElevation;
 
         /// on-source flag for each antenna
-        casa::Vector<bool> itsOnSourceFlag;
+        casacore::Vector<bool> itsOnSourceFlag;
 
         /// Visibility
-        casa::Cube<casa::Complex> itsVisibility;
+        casacore::Cube<casacore::Complex> itsVisibility;
 
         /// Flag
-        casa::Cube<casa::Bool> itsFlag;
+        casacore::Cube<casacore::Bool> itsFlag;
 
         /// UVW
-        casa::Vector<casa::RigidVector<casa::Double, 3> > itsUVW;
+        casacore::Vector<casacore::RigidVector<casacore::Double, 3> > itsUVW;
 
         /// Frequency
-        casa::Vector<casa::Double> itsFrequency;
+        casacore::Vector<casacore::Double> itsFrequency;
 
         /// Channel Width
-        casa::Double itsChannelWidth;
+        casacore::Double itsChannelWidth;
 
         /// Stokes
-        casa::Vector<casa::Stokes::StokesTypes> itsStokes;
+        casacore::Vector<casacore::Stokes::StokesTypes> itsStokes;
 
         /// Direction frame
-        casa::MDirection::Ref itsDirectionFrame;
+        casacore::MDirection::Ref itsDirectionFrame;
 
         /// Beam offsets (2xnBeam or empty matrix)
-        casa::Matrix<casa::Double> itsBeamOffsets;
+        casacore::Matrix<casacore::Double> itsBeamOffsets;
 
 };
 

@@ -110,7 +110,7 @@ public:
    ///            one could fit in the available rank space
    /// @return proxy object for the given processing step or steps. This is used to setup connections between 
    /// steps via communicators. For multi-rank steps "local" communicator is created automatically.
-   StepIDProxy addSubStep(const boost::shared_ptr<IProcessingStep> &substep, const casa::IPosition &shape, 
+   StepIDProxy addSubStep(const boost::shared_ptr<IProcessingStep> &substep, const casacore::IPosition &shape, 
                    int nRanks = 1, int count = USE_ALL_AVAILABLE);
 
    // optional communicators - calls to these methods just register the request, actual communicators

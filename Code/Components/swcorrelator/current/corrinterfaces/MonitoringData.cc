@@ -52,7 +52,7 @@ MonitoringData::MonitoringData(const int beam) : itsBeam(beam), itsAmplitudes(3,
 /// @return the date/time corresponding to itsTime as a string (to simplify reporting)
 std::string MonitoringData::timeString() const
 {
-  const casa::MVEpoch epoch(itsTime);
+  const casacore::MVEpoch epoch(itsTime);
   std::ostringstream os;
   epoch.print(os);
   return os.str();

@@ -65,8 +65,8 @@ using std::endl;
 using namespace askap;
 using namespace askap::accessors;
 
-std::string printComplex(const casa::Complex &val) {
-  return std::string("[")+utility::toString<float>(casa::real(val))+" , "+utility::toString<float>(casa::imag(val))+"]";
+std::string printComplex(const casacore::Complex &val) {
+  return std::string("[")+utility::toString<float>(casacore::real(val))+" , "+utility::toString<float>(casacore::imag(val))+"]";
 }
 
 void process(const IConstDataSource &ds, const float flux, const int ctrl = -1) {
@@ -74,52 +74,52 @@ void process(const IConstDataSource &ds, const float flux, const int ctrl = -1) 
   sel->chooseCrossCorrelations();
   //sel->chooseFeed(7);
   if (ctrl >=0 ) {
-      sel->chooseUserDefinedIndex("CONTROL",casa::uInt(ctrl));
+      sel->chooseUserDefinedIndex("CONTROL",casacore::uInt(ctrl));
   }
   IDataConverterPtr conv=ds.createConverter();  
-  conv->setFrequencyFrame(casa::MFrequency::Ref(casa::MFrequency::TOPO),"MHz");
-  conv->setEpochFrame(casa::MEpoch(casa::Quantity(55913.0,"d"),
-                      casa::MEpoch::Ref(casa::MEpoch::UTC)),"s");
-  conv->setDirectionFrame(casa::MDirection::Ref(casa::MDirection::J2000));                    
-  casa::Matrix<casa::Complex> buf;
-  casa::Vector<double> freq;
+  conv->setFrequencyFrame(casacore::MFrequency::Ref(casacore::MFrequency::TOPO),"MHz");
+  conv->setEpochFrame(casacore::MEpoch(casacore::Quantity(55913.0,"d"),
+                      casacore::MEpoch::Ref(casacore::MEpoch::UTC)),"s");
+  conv->setDirectionFrame(casacore::MDirection::Ref(casacore::MDirection::J2000));                    
+  casacore::Matrix<casacore::Complex> buf;
+  casacore::Vector<double> freq;
   size_t counter = 0;
   size_t nGoodRows = 0;
   size_t nBadRows = 0;
-  casa::uInt nChan = 0;
-  casa::uInt nRow = 0;
+  casacore::uInt nChan = 0;
+  casacore::uInt nRow = 0;
   double startTime = 0;
   double stopTime = 0;
 
-  casa::Vector<casa::uInt> ant1IDs;
-  casa::Vector<casa::uInt> ant2IDs;
+  casacore::Vector<casacore::uInt> ant1IDs;
+  casacore::Vector<casacore::uInt> ant2IDs;
     
   // the assumed baseline order depends on this parameter
   const bool useSWCorrelator = false;
   const bool useADECorrelator = true;
 
-  casa::uInt cPol = 3;
+  casacore::uInt cPol = 3;
   for (IConstDataSharedIter it=ds.createConstIterator(sel,conv);it!=it.end();++it) {  
        // for every iteration we first build an index into all unflagged rows
-       std::vector<casa::uInt> rowIndex;
+       std::vector<casacore::uInt> rowIndex;
        rowIndex.reserve(it->nRow());
        ASKAPASSERT(cPol<it->nPol());
 
        if (counter >= 5800) break;
 
-       for (casa::uInt row = 0; row<it->nRow(); ++row) {
-            casa::Vector<casa::Bool> flags = it->flag().xyPlane(cPol).row(row);
+       for (casacore::uInt row = 0; row<it->nRow(); ++row) {
+            casacore::Vector<casacore::Bool> flags = it->flag().xyPlane(cPol).row(row);
             
             // this code ensures that all channels are unflagged
             bool flagged = false;
-            for (casa::uInt ch = 0; ch < flags.nelements(); ++ch) {
+            for (casacore::uInt ch = 0; ch < flags.nelements(); ++ch) {
                  flagged |= flags[ch];
             }
             
             /*
             // this code ensures that at least one channel is unflagged
             bool flagged = true;
-            for (casa::uInt ch = 0; ch < flags.nelements(); ++ch) {
+            for (casacore::uInt ch = 0; ch < flags.nelements(); ++ch) {
                  flagged &= flags[ch];
             }
             */
@@ -132,7 +132,7 @@ void process(const IConstDataSource &ds, const float flux, const int ctrl = -1) 
            nChan = it->nChannel();
            nRow = rowIndex.size();//it->nRow();
            buf.resize(nRow,nChan);
-           buf.set(casa::Complex(0.,0.));
+           buf.set(casacore::Complex(0.,0.));
            freq = it->frequency();
            ant1IDs = it->antenna1().copy();
            ant2IDs = it->antenna2().copy();
@@ -158,7 +158,7 @@ void process(const IConstDataSource &ds, const float flux, const int ctrl = -1) 
            //
            ASKAPDEBUGASSERT(ant1IDs.nelements() == it->nRow());
            ASKAPDEBUGASSERT(ant2IDs.nelements() == it->nRow());
-           for (casa::uInt row = 0; row<it->nRow(); ++row) {
+           for (casacore::uInt row = 0; row<it->nRow(); ++row) {
                 ASKAPCHECK(ant1IDs[row] == it->antenna1()[row], "Mismatch of antenna 1 index for row "<<row<<
                            " - got "<<it->antenna1()[row]<<" expected "<<ant1IDs[row]);
                 ASKAPCHECK(ant2IDs[row] == it->antenna2()[row], "Mismatch of antenna 2 index for row "<<row<<
@@ -171,8 +171,8 @@ void process(const IConstDataSource &ds, const float flux, const int ctrl = -1) 
        // we require that 3 baselines come in certain order, so we can hard code conjugation for calculation
        // of the closure phase.
        // the order is different for software and hardware correlator. Just hard code the differences
-       for (casa::uInt validRow = 0; validRow<nRow; validRow+=3) {
-            const casa::uInt row = rowIndex[validRow];
+       for (casacore::uInt validRow = 0; validRow<nRow; validRow+=3) {
+            const casacore::uInt row = rowIndex[validRow];
             if (useSWCorrelator) {
                 ASKAPCHECK(it->antenna2()[row] == it->antenna1()[row+1], "Expect baselines in the order 1-2,2-3 and 1-3");
                 ASKAPCHECK(it->antenna1()[row] == it->antenna1()[row+2], "Expect baselines in the order 1-2,2-3 and 1-3");
@@ -192,14 +192,14 @@ void process(const IConstDataSource &ds, const float flux, const int ctrl = -1) 
        //
        
        // add new spectrum to the buffer
-       for (casa::uInt validRow=0; validRow<nRow; ++validRow) {
-            const casa::uInt row = rowIndex[validRow];
-            casa::Vector<casa::Bool> flags = it->flag().xyPlane(cPol).row(row);
+       for (casacore::uInt validRow=0; validRow<nRow; ++validRow) {
+            const casacore::uInt row = rowIndex[validRow];
+            casacore::Vector<casacore::Bool> flags = it->flag().xyPlane(cPol).row(row);
       
             bool flagged = false;
             /*
             // to ensure nothing is flagged
-            for (casa::uInt ch = 0; ch < flags.nelements(); ++ch) {
+            for (casacore::uInt ch = 0; ch < flags.nelements(); ++ch) {
                  // to ensure nothing is flagged
                  flagged |= flags[ch];
             }
@@ -207,9 +207,9 @@ void process(const IConstDataSource &ds, const float flux, const int ctrl = -1) 
             if (flagged) {
                ++nBadRows;
             } else {
-                casa::Vector<casa::Complex> thisRow = buf.row(validRow);
+                casacore::Vector<casacore::Complex> thisRow = buf.row(validRow);
                 //thisRow += it->visibility().xyPlane(cPol).row(row);
-                for (casa::uInt ch = 0; ch<thisRow.nelements(); ++ch) {
+                for (casacore::uInt ch = 0; ch<thisRow.nelements(); ++ch) {
                      if (!flags[ch]) {
                          thisRow[ch] += it->visibility()(row,ch,cPol);
                      }
@@ -239,10 +239,10 @@ void process(const IConstDataSource &ds, const float flux, const int ctrl = -1) 
       { // export averaged spectrum
         ASKAPDEBUGASSERT(freq.nelements() == nChan);
         std::ofstream os("avgspectrum.dat");
-        for (casa::uInt chan=0; chan<nChan; ++chan) {
+        for (casacore::uInt chan=0; chan<nChan; ++chan) {
              os<<chan<<" "<<freq[chan];
-             for (casa::uInt row=0; row<nRow; ++row) {
-                  os<<" "<<casa::abs(buf(row,chan))<<" "<<casa::arg(buf(row,chan))/casa::C::pi*180.;
+             for (casacore::uInt row=0; row<nRow; ++row) {
+                  os<<" "<<casacore::abs(buf(row,chan))<<" "<<casacore::arg(buf(row,chan))/casacore::C::pi*180.;
              }
              os<<std::endl;
         }
@@ -255,24 +255,24 @@ void process(const IConstDataSource &ds, const float flux, const int ctrl = -1) 
       } else {
           os<<"# all gain amplitudes are 1."<<std::endl;
       }
-      for (casa::uInt row = 0; row<buf.nrow(); row+=3) {
+      for (casacore::uInt row = 0; row<buf.nrow(); row+=3) {
            ASKAPDEBUGASSERT(row+2<buf.nrow());
-           casa::Vector<casa::Complex> spAvg(3,casa::Complex(0.,0.));
-           for (casa::uInt baseline = 0; baseline<spAvg.nelements(); ++baseline) {
-                casa::Vector<casa::Complex> thisRow = buf.row(row+baseline);
-                //casa::Vector<casa::Complex> thisRow = buf.row(row+baseline)(casa::Slice(38,32));
-                spAvg[baseline] = casa::sum(thisRow);
+           casacore::Vector<casacore::Complex> spAvg(3,casacore::Complex(0.,0.));
+           for (casacore::uInt baseline = 0; baseline<spAvg.nelements(); ++baseline) {
+                casacore::Vector<casacore::Complex> thisRow = buf.row(row+baseline);
+                //casacore::Vector<casacore::Complex> thisRow = buf.row(row+baseline)(casacore::Slice(38,32));
+                spAvg[baseline] = casacore::sum(thisRow);
                 spAvg[baseline] /= float(buf.ncolumn());
            }
            if (!useSWCorrelator) {
                // the hw-correlator has a different baseline order: 0-1, 0-2 and 1-2, we need to swap last two baselines to get 0-1,1-2,0-2 everywhere 
-               const casa::Complex tempBuf = spAvg[2];
+               const casacore::Complex tempBuf = spAvg[2];
                spAvg[2] = spAvg[1];
                spAvg[1] = tempBuf;
                /*
                if (useADECorrelator) {
                    // for ADE need to conjugate all; antenna order 4,5,12
-                   for (casa::uInt i=0; i<spAvg.nelements();++i) {
+                   for (casacore::uInt i=0; i<spAvg.nelements();++i) {
                         spAvg[i] = conj(spAvg[i]);
                    }
                }
@@ -282,30 +282,30 @@ void process(const IConstDataSource &ds, const float flux, const int ctrl = -1) 
            const float ph2 = -arg(spAvg[2]);
            const float closurePh = arg(spAvg[0]*spAvg[1]*conj(spAvg[2]));
            
-           const casa::uInt beam = row/3;
-           os<<"# Beam "<<beam<<" closure phase: "<<closurePh/casa::C::pi*180.<<" deg"<<std::endl;
+           const casacore::uInt beam = row/3;
+           os<<"# Beam "<<beam<<" closure phase: "<<closurePh/casacore::C::pi*180.<<" deg"<<std::endl;
            std::string blStr = "(0-1,1-2,0-2)";
            if (useADECorrelator) {
                blStr = "(5-4,5-12,5-12)";
            }
                
-           os<<"# measured phases              "<<blStr<<": "<<arg(spAvg[0])/casa::C::pi*180.<<" "<<arg(spAvg[1])/casa::C::pi*180.<<" "<<arg(spAvg[2])/casa::C::pi*180.<<std::endl;
-           os<<"# measured amplitudes          "<<blStr<<": "<<casa::abs(spAvg[0])<<" "<<casa::abs(spAvg[1])<<" "<<casa::abs(spAvg[2])<<std::endl;
+           os<<"# measured phases              "<<blStr<<": "<<arg(spAvg[0])/casacore::C::pi*180.<<" "<<arg(spAvg[1])/casacore::C::pi*180.<<" "<<arg(spAvg[2])/casacore::C::pi*180.<<std::endl;
+           os<<"# measured amplitudes          "<<blStr<<": "<<casacore::abs(spAvg[0])<<" "<<casacore::abs(spAvg[1])<<" "<<casacore::abs(spAvg[2])<<std::endl;
            float amp0 = 1.;
            float amp1 = 1.;
            float amp2 = 1.;
            if (flux > 0) {
-               ASKAPCHECK((casa::abs(spAvg[0])> 1e-6) && (casa::abs(spAvg[1])> 1e-6) && (casa::abs(spAvg[2])> 1e-6), "One of the measured amplitudes is too close to 0.: "<<spAvg);
-               amp0 = sqrt(casa::abs(spAvg[2]) * casa::abs(spAvg[0]) / casa::abs(spAvg[1]) / flux);
-               amp1 = sqrt(casa::abs(spAvg[1]) * casa::abs(spAvg[0]) / casa::abs(spAvg[2]) / flux);
-               amp2 = sqrt(casa::abs(spAvg[2]) * casa::abs(spAvg[1]) / casa::abs(spAvg[0]) / flux);
+               ASKAPCHECK((casacore::abs(spAvg[0])> 1e-6) && (casacore::abs(spAvg[1])> 1e-6) && (casacore::abs(spAvg[2])> 1e-6), "One of the measured amplitudes is too close to 0.: "<<spAvg);
+               amp0 = sqrt(casacore::abs(spAvg[2]) * casacore::abs(spAvg[0]) / casacore::abs(spAvg[1]) / flux);
+               amp1 = sqrt(casacore::abs(spAvg[1]) * casacore::abs(spAvg[0]) / casacore::abs(spAvg[2]) / flux);
+               amp2 = sqrt(casacore::abs(spAvg[2]) * casacore::abs(spAvg[1]) / casacore::abs(spAvg[0]) / flux);
            }
-           const casa::Complex g0(amp0,0.);
-           const casa::Complex g1 = casa::Complex(cos(ph1),sin(ph1)) * amp1;
-           const casa::Complex g2 = casa::Complex(cos(ph2),sin(ph2)) * amp2;
+           const casacore::Complex g0(amp0,0.);
+           const casacore::Complex g1 = casacore::Complex(cos(ph1),sin(ph1)) * amp1;
+           const casacore::Complex g2 = casacore::Complex(cos(ph2),sin(ph2)) * amp2;
 
-           os<<"# phases after calibration     "<<blStr<<": "<<arg(spAvg[0]/g0/conj(g1))/casa::C::pi*180.<<" "<<arg(spAvg[1]/g1/conj(g2))/casa::C::pi*180.<<" "<<arg(spAvg[2]/g0/conj(g2))/casa::C::pi*180.<<std::endl;
-           os<<"# amplitudes after calibration "<<blStr<<": "<<casa::abs(spAvg[0]/g0/conj(g1))<<" "<<casa::abs(spAvg[1]/g1/conj(g2))<<" "<<casa::abs(spAvg[2]/g0/conj(g2))<<std::endl;
+           os<<"# phases after calibration     "<<blStr<<": "<<arg(spAvg[0]/g0/conj(g1))/casacore::C::pi*180.<<" "<<arg(spAvg[1]/g1/conj(g2))/casacore::C::pi*180.<<" "<<arg(spAvg[2]/g0/conj(g2))/casacore::C::pi*180.<<std::endl;
+           os<<"# amplitudes after calibration "<<blStr<<": "<<casacore::abs(spAvg[0]/g0/conj(g1))<<" "<<casacore::abs(spAvg[1]/g1/conj(g2))<<" "<<casacore::abs(spAvg[2]/g0/conj(g2))<<std::endl;
 
            int baseAnt = 0;
            if (useADECorrelator) {
@@ -331,7 +331,7 @@ int main(int argc, char **argv) {
 	 return -2;
      }
 
-     casa::Timer timer;
+     casacore::Timer timer;
      const std::string msName = argv[argc - 1];
      const float flux = argc == 2 ? -1 : utility::fromString<float>(argv[1]);
 

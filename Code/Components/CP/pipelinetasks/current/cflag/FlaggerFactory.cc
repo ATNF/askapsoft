@@ -60,7 +60,7 @@ void FlaggerFactory::appendFlaggers(vector< boost::shared_ptr<IFlagger> >& v1,
 }
 
 std::vector< boost::shared_ptr<IFlagger> > FlaggerFactory::build(
-    const LOFAR::ParameterSet& parset, const casa::MeasurementSet& ms)
+    const LOFAR::ParameterSet& parset, const casacore::MeasurementSet& ms)
 {
     vector< boost::shared_ptr<IFlagger> > flaggers;
 

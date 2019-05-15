@@ -85,14 +85,14 @@ std::set<std::string> DateTimeSubstitutionRule::keywords() const
 /// mechanism to obtain values for all keywords handled by this object.
 void DateTimeSubstitutionRule::initialise()
 {
-   // special structure to have full control over it, otherwise could've used casa::Time
+   // special structure to have full control over it, otherwise could've used casacore::Time
    struct TimeBuf {
-     casa::uInt year;
-     casa::uInt month;
-     casa::uInt day;
-     casa::uInt hour;
-     casa::uInt min;
-     casa::uInt sec;
+     casacore::uInt year;
+     casacore::uInt month;
+     casacore::uInt day;
+     casacore::uInt hour;
+     casacore::uInt min;
+     casacore::uInt sec;
 
      // technically we don't need the constructor, but it is neater to have it
      TimeBuf() : year(0), month(0), day(0), hour(0), min(0), sec(0) {}
@@ -101,7 +101,7 @@ void DateTimeSubstitutionRule::initialise()
    // The call to initialise method implies that date/time is used in the requested string
    TimeBuf tbuf;
    if ( (itsNProcs == 1) || (itsRank == 0) ) {
-         casa::Time tm;
+         casacore::Time tm;
          tm.now();
          tbuf.year = tm.year();
          tbuf.month = tm.month();

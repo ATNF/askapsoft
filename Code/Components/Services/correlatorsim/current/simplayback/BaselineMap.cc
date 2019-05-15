@@ -71,7 +71,7 @@ BaselineMap::BaselineMap(const LOFAR::ParameterSet& parset)
     }
 }
 
-int32_t BaselineMap::operator()(int32_t antenna1, int32_t antenna2, const casa::Stokes::StokesTypes& stokes) const
+int32_t BaselineMap::operator()(int32_t antenna1, int32_t antenna2, const casacore::Stokes::StokesTypes& stokes) const
 {
     BaselineMapKey key;
     key.antenna1 = antenna1;

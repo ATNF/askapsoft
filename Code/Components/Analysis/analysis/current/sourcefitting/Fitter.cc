@@ -75,7 +75,7 @@ void Fitter::setEstimates(std::vector<SubComponent> cmpntList)
     itsFitter.setDimensions(2);
     itsFitter.setNumGaussians(itsNumGauss);
 
-    casa::Matrix<casa::Double> estimate;
+    casacore::Matrix<casacore::Double> estimate;
     estimate.resize(itsNumGauss, 6);
 
     uInt nCmpnt = cmpntList.size();
@@ -102,8 +102,8 @@ void Fitter::setEstimates(std::vector<SubComponent> cmpntList)
 
 void Fitter::setRetries()
 {
-    casa::Matrix<casa::Double> retryfactors;
-    casa::Matrix<casa::Double> baseRetryfactors;
+    casacore::Matrix<casacore::Double> retryfactors;
+    casacore::Matrix<casacore::Double> baseRetryfactors;
     baseRetryfactors.resize(1, 6);
     retryfactors.resize(itsNumGauss, 6);
     baseRetryfactors(0, 0) = 1.1;
@@ -166,9 +166,9 @@ void logparameters(Matrix<Double> &m, std::string loc)
 
 //**************************************************************//
 
-void Fitter::fit(casa::Matrix<casa::Double> pos,
-                 casa::Vector<casa::Double> f,
-                 casa::Vector<casa::Double> sigma)
+void Fitter::fit(casacore::Matrix<casacore::Double> pos,
+                 casacore::Vector<casacore::Double> f,
+                 casacore::Vector<casacore::Double> sigma)
 {
 
     itsParams.setBoxFlux(f);
@@ -524,23 +524,23 @@ std::multimap<double, int> Fitter::peakFluxList()
 
 //**************************************************************//
 
-casa::Gaussian2D<casa::Double> Fitter::gaussian(unsigned int num)
+casacore::Gaussian2D<casacore::Double> Fitter::gaussian(unsigned int num)
 {
     if (itsSolution(num, 3) > 0.) {
-        casa::Gaussian2D<casa::Double>
+        casacore::Gaussian2D<casacore::Double>
         gauss(itsSolution(num, 0),
               itsSolution(num, 1), itsSolution(num, 2),
               itsSolution(num, 3), itsSolution(num, 4), itsSolution(num, 5));
         return gauss;
     } else {
         ASKAPLOG_WARN_STR(logger, "Gaussian #" << num << " has major axis of " << itsSolution(num, 3) << " - must be positive. Returning blank Gaussian");
-        return casa::Gaussian2D<casa::Double>();
+        return casacore::Gaussian2D<casacore::Double>();
     }
 }
 
-casa::Vector<casa::Double> Fitter::error(unsigned int num)
+casacore::Vector<casacore::Double> Fitter::error(unsigned int num)
 {
-    casa::Vector<casa::Double>  row = itsErrors.row(num);
+    casacore::Vector<casacore::Double>  row = itsErrors.row(num);
     ASKAPASSERT(row.size() == 6);
     return row;
 }
@@ -548,17 +548,17 @@ casa::Vector<casa::Double> Fitter::error(unsigned int num)
 
 //**************************************************************//
 
-casa::Vector<casa::Double> Fitter::subtractFit(casa::Matrix<casa::Double> pos,
-        casa::Vector<casa::Double> f)
+casacore::Vector<casacore::Double> Fitter::subtractFit(casacore::Matrix<casacore::Double> pos,
+        casacore::Vector<casacore::Double> f)
 {
 
-    casa::Vector<casa::Double> newflux(f.size());
+    casacore::Vector<casacore::Double> newflux(f.size());
     for (size_t i = 0; i < f.size(); i++) {
         newflux(i) = f(i);
         const int x = pos.row(i)(0);
         const int y = pos.row(i)(1);
         for (size_t ng = 0; ng < itsNumGauss; ng++) {
-            casa::Gaussian2D<casa::Double> gauss = gaussian(ng);
+            casacore::Gaussian2D<casacore::Double> gauss = gaussian(ng);
             double gaussFlux = askap::components::AskapComponentImager::evaluateGaussian(gauss, x, y);
             newflux(i) -= gaussFlux;
         }

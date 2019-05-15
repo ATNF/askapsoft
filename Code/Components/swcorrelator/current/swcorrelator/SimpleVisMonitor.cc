@@ -82,7 +82,7 @@ void SimpleVisMonitor::initialise(const int nAnt, const int nBeam, const int nCh
   itsVisBuffer.resize(nBeam,nBaselines);
   itsDelayBuffer.resize(nBeam,nBaselines);
   itsControlBuffer.resize(nAnt);
-  itsVisBuffer.set(casa::Complex(0.,0.));
+  itsVisBuffer.set(casacore::Complex(0.,0.));
   itsDelayBuffer.set(0.);
   itsControlBuffer.set(0u);
 }
@@ -99,7 +99,7 @@ void SimpleVisMonitor::publish(const CorrProducts &buf)
   }
   if (itsBAT != buf.itsBAT) {
       itsBAT = buf.itsBAT;
-      itsVisBuffer.set(casa::Complex(0.,0.));
+      itsVisBuffer.set(casacore::Complex(0.,0.));
       itsDelayBuffer.set(0.);
       itsControlBuffer.set(0u);
   }
@@ -107,16 +107,16 @@ void SimpleVisMonitor::publish(const CorrProducts &buf)
   {
     const std::string fname = "spc_beam" + utility::toString<int>(buf.itsBeam) + ".dat";
     std::ofstream os(fname.c_str());
-    for (casa::uInt chan=0; chan < buf.itsVisibility.ncolumn(); ++chan) {
+    for (casacore::uInt chan=0; chan < buf.itsVisibility.ncolumn(); ++chan) {
          os<<chan<<" ";
-         for (casa::uInt baseline = 0; baseline < buf.itsVisibility.nrow(); ++baseline) {
-              os<<abs(buf.itsVisibility(baseline,chan))<<" "<<arg(buf.itsVisibility(baseline,chan))/casa::C::pi*180.<<" ";                       
+         for (casacore::uInt baseline = 0; baseline < buf.itsVisibility.nrow(); ++baseline) {
+              os<<abs(buf.itsVisibility(baseline,chan))<<" "<<arg(buf.itsVisibility(baseline,chan))/casacore::C::pi*180.<<" ";                       
          }
          os<<std::endl;
     }
   }
   
-  const casa::Vector<casa::Float> delays = BasicMonitor::estimateDelays(buf.itsVisibility);
+  const casacore::Vector<casacore::Float> delays = BasicMonitor::estimateDelays(buf.itsVisibility);
   ASKAPLOG_DEBUG_STR(logger, "Beam "<<buf.itsBeam<<": delays (s) = "<<delays);
   ASKAPDEBUGASSERT(delays.nelements() == buf.itsVisibility.nrow());
   if (buf.itsBeam >= int(itsVisBuffer.nrow())) {
@@ -125,7 +125,7 @@ void SimpleVisMonitor::publish(const CorrProducts &buf)
       return;     
   }
             
-  for (casa::uInt baseline = 0; baseline < buf.itsVisibility.nrow(); ++baseline) {
+  for (casacore::uInt baseline = 0; baseline < buf.itsVisibility.nrow(); ++baseline) {
                  
        itsDelayBuffer(buf.itsBeam, baseline) = delays[baseline];
                  
@@ -136,8 +136,8 @@ void SimpleVisMonitor::publish(const CorrProducts &buf)
        }
        
        // average in frequency
-       casa::Complex temp(0.,0.);
-       for (casa::uInt chan=0; chan < buf.itsVisibility.ncolumn(); ++chan) {
+       casacore::Complex temp(0.,0.);
+       for (casacore::uInt chan=0; chan < buf.itsVisibility.ncolumn(); ++chan) {
             temp += buf.itsVisibility(baseline,chan);
        }
        itsVisBuffer(buf.itsBeam,baseline) = temp / float(buf.itsVisibility.ncolumn());
@@ -161,13 +161,13 @@ void SimpleVisMonitor::finalise()
   }
   itsOStream<<double(itsBAT-itsStartBAT)/1e6/60.<<" ";
   for (int beam=0; beam < int(itsVisBuffer.nrow()); ++beam) {
-       for (casa::uInt baseline = 0; baseline < itsVisBuffer.ncolumn(); ++baseline) {
-            itsOStream<<abs(itsVisBuffer(beam,baseline))<<" "<<arg(itsVisBuffer(beam,baseline))/casa::C::pi*180.<<" "
+       for (casacore::uInt baseline = 0; baseline < itsVisBuffer.ncolumn(); ++baseline) {
+            itsOStream<<abs(itsVisBuffer(beam,baseline))<<" "<<arg(itsVisBuffer(beam,baseline))/casacore::C::pi*180.<<" "
                <<itsDelayBuffer(beam,baseline)*1e9<<" ";
         }
   }
   // only show control field for the first beam (it should be the same)
-  for (casa::uInt baseline = 0; baseline < itsControlBuffer.nelements(); ++baseline) {
+  for (casacore::uInt baseline = 0; baseline < itsControlBuffer.nelements(); ++baseline) {
        itsOStream<<itsControlBuffer[baseline]<<" ";
   }
   //

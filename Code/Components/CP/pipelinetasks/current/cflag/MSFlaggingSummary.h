@@ -40,7 +40,7 @@ class MSFlaggingSummary {
 
         /// @brief Prints a summary of the measurement set to the log
         /// @param[in] msc  Measurement set columns
-        static void printToLog(const casa::MSColumns& msc);
+        static void printToLog(const casacore::MSColumns& msc);
 
         /// @brief Print summary for a single chunk of data.
         /// This is a utility function used by printToLog()
@@ -55,8 +55,8 @@ class MSFlaggingSummary {
         ///         (i.e. the next chunk starts at this row, or this row is
         ///         past the end of the table in the case the last chunk
         ///         was being processed).
-        static casa::uInt summariseChunk(const casa::MSColumns& msc,
-                                         casa::uInt row, casa::uInt chunkId);
+        static casacore::uInt summariseChunk(const casacore::MSColumns& msc,
+                                         casacore::uInt row, casacore::uInt chunkId);
 };
 
 }

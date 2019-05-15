@@ -85,7 +85,7 @@ class CubeMaker {
         void getReferenceData();
 
         /// @brief Write the rest frequency to a coordinate system
-        void setRestFreq(casa::CoordinateSystem& csys);
+        void setRestFreq(casacore::CoordinateSystem& csys);
 
         /// @brief Write an individual channel image to the cube
         bool writeSlice(size_t i);
@@ -101,12 +101,12 @@ class CubeMaker {
         size_t itsBeamImageNum;
 
         int itsNumChan;
-        casa::IPosition itsRefShape;
-        casa::CoordinateSystem itsRefCoordinates;
-        casa::CoordinateSystem itsSecondCoordinates;
-        casa::Unit itsRefUnits;
+        casacore::IPosition itsRefShape;
+        casacore::CoordinateSystem itsRefCoordinates;
+        casacore::CoordinateSystem itsSecondCoordinates;
+        casacore::Unit itsRefUnits;
 
-        boost::scoped_ptr< casa::PagedImage<float> > itsCube;
+        boost::scoped_ptr< casacore::PagedImage<float> > itsCube;
 };
 
 }

@@ -58,8 +58,8 @@ class RMSynthesisTest : public CppUnit::TestFixture {
     private:
         LOFAR::ParameterSet parset_uniform;
         LOFAR::ParameterSet parset_variance;
-        casa::IPosition shape;
-        casa::Vector<float> freq, wl, lamsq, psi, u, q, noise, model, coeffs;
+        casacore::IPosition shape;
+        casacore::Vector<float> freq, wl, lamsq, psi, u, q, noise, model, coeffs;
 
     public:
 
@@ -82,19 +82,19 @@ class RMSynthesisTest : public CppUnit::TestFixture {
             parset_variance.replace(LOFAR::KVpair("polThresholdSNR", threshSNR));
             parset_variance.replace(LOFAR::KVpair("polDebiasSNR", threshDB));
 
-            freq = casa::Vector<float>(nchan);
-            casa::indgen<float>(freq, 1150.e6, 1.e6);
+            freq = casacore::Vector<float>(nchan);
+            casacore::indgen<float>(freq, 1150.e6, 1.e6);
             wl = C_ms / freq;
             lamsq = wl * wl;
             // this is the polarisation position angle
             psi = lamsq * RM + psiZero;
             u = sin(2.F * psi);
             q = cos(2.F * psi);
-            noise = casa::Vector<float>(nchan);
-            casa::indgen<float>(noise, 1., 0.01);
+            noise = casacore::Vector<float>(nchan);
+            casacore::indgen<float>(noise, 1., 0.01);
 
-            model = casa::Vector<float>(nchan, 1.);
-            coeffs = casa::Vector<float>(1, 1.);
+            model = casacore::Vector<float>(nchan, 1.);
+            coeffs = casacore::Vector<float>(1, 1.);
 
         }
 
@@ -199,13 +199,13 @@ class RMSynthesisTest : public CppUnit::TestFixture {
             rmsynthU.imodel().setCoeffs(coeffs);
             rmsynthU.imodel().setType("poly");
             rmsynthU.calculate(lamsq, q, u, noise);
-            const casa::Vector<casa::Complex> fdf = rmsynthU.fdf();
+            const casacore::Vector<casacore::Complex> fdf = rmsynthU.fdf();
             ASKAPLOG_DEBUG_STR(logger, fdf);
-            const casa::Vector<float> fdf_p = casa::amplitude(fdf);
-            const casa::Vector<float> phi_rmsynth = rmsynthU.phi();
+            const casacore::Vector<float> fdf_p = casacore::amplitude(fdf);
+            const casacore::Vector<float> phi_rmsynth = rmsynthU.phi();
             float minFDF, maxFDF;
-            casa::IPosition locMin, locMax;
-            casa::minMax<float>(minFDF, maxFDF, locMin, locMax, fdf_p);
+            casacore::IPosition locMin, locMax;
+            casacore::minMax<float>(minFDF, maxFDF, locMin, locMax, fdf_p);
             ASKAPLOG_DEBUG_STR(logger, "minFDF=" << minFDF << ", maxFDF=" << maxFDF);
             ASKAPLOG_DEBUG_STR(logger, "locminFDF=" << locMin << ", locmaxFDF=" << locMax);
 
@@ -214,7 +214,7 @@ class RMSynthesisTest : public CppUnit::TestFixture {
                                " and got " << maxFDF);
             CPPUNIT_ASSERT_DOUBLES_EQUAL(expectedMax, maxFDF, 1.e-5);
 
-            casa::IPosition expectedLoc(1, int(RM / deltaPhi + 0.5 * numPhiChan));
+            casacore::IPosition expectedLoc(1, int(RM / deltaPhi + 0.5 * numPhiChan));
             ASKAPLOG_DEBUG_STR(logger, "Expect max of FDF to be at " << expectedLoc <<
                                " and got " << locMax);
             CPPUNIT_ASSERT_EQUAL(expectedLoc[0], locMax[0]);
@@ -235,20 +235,20 @@ class RMSynthesisTest : public CppUnit::TestFixture {
             rmsynthU.imodel().setType("poly");
             rmsynthU.calculate(lamsq, q, u, noise);
 
-            casa::Vector<casa::Complex> rmsf = rmsynthU.rmsf();
-            casa::Vector<float> rmsf_p = casa::amplitude(rmsf);
+            casacore::Vector<casacore::Complex> rmsf = rmsynthU.rmsf();
+            casacore::Vector<float> rmsf_p = casacore::amplitude(rmsf);
             std::cout << rmsf_p.size() << "\n";
-            casa::Vector<float> phi_rmsynth_rmsf = rmsynthU.phi_rmsf();
+            casacore::Vector<float> phi_rmsynth_rmsf = rmsynthU.phi_rmsf();
             float minRMSF, maxRMSF;
-            casa::IPosition locMin, locMax;
-            casa::minMax<float>(minRMSF, maxRMSF, locMin, locMax, rmsf_p);
+            casacore::IPosition locMin, locMax;
+            casacore::minMax<float>(minRMSF, maxRMSF, locMin, locMax, rmsf_p);
             float expectedMax = 1.0;
 
             ASKAPLOG_DEBUG_STR(logger, "Expect max of RMSF to be " << expectedMax <<
                                " and got " << maxRMSF);
             CPPUNIT_ASSERT_DOUBLES_EQUAL(expectedMax, maxRMSF, 1.e-5);
 
-            casa::IPosition expectedLoc(1, numPhiChan);
+            casacore::IPosition expectedLoc(1, numPhiChan);
             ASKAPLOG_DEBUG_STR(logger, "Expect max of RMSF to be at " << expectedLoc <<
                                " and got " << locMax);
             CPPUNIT_ASSERT_EQUAL(expectedLoc[0], locMax[0]);

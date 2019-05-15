@@ -100,7 +100,7 @@ class RadioSourceTest : public CppUnit::TestFixture {
 
     private:
 
-        casa::Vector<float>              itsArray;
+        casacore::Vector<float>              itsArray;
         std::vector<size_t>             itsDim;
         std::vector<PixelInfo::Object2D> itsObjlist;
         std::vector<SubComponent>        itsSublist;
@@ -176,7 +176,7 @@ class RadioSourceTest : public CppUnit::TestFixture {
             itsFitparams.setMaxRMS(5.);
 
             float thresh = 5.;
-            itsArray = casa::Vector<float>(casa::IPosition(1, arraySize), src);
+            itsArray = casacore::Vector<float>(casacore::IPosition(1, arraySize), src);
             duchamp::Image *itsImage = new duchamp::Image(itsDim.data());
             itsImage->saveArray(itsArray.data(), arraySize);
             itsImage->stats().setThreshold(thresh);
@@ -299,11 +299,11 @@ class RadioSourceTest : public CppUnit::TestFixture {
         {
             CPPUNIT_ASSERT(itsObjlist.size() == 1);
 
-            casa::Matrix<casa::Double> itsPos;
-            casa::Vector<casa::Double> itsF;
+            casacore::Matrix<casacore::Double> itsPos;
+            casacore::Vector<casacore::Double> itsF;
             itsPos.resize(arraySize, 2);
             itsF.resize(arraySize);
-            casa::Vector<casa::Double> curpos(2);
+            casacore::Vector<casacore::Double> curpos(2);
             curpos = 0;
             for (size_t x = 0; x < arrayDim; x++) {
                 for (size_t y = 0; y < arrayDim; y++) {
@@ -329,7 +329,7 @@ class RadioSourceTest : public CppUnit::TestFixture {
 
             itsGaussSource.fitGauss(itsGaussArray, itsDim);
 
-            std::vector<casa::Gaussian2D<Double> > fits = itsGaussSource.gaussFitSet();
+            std::vector<casacore::Gaussian2D<Double> > fits = itsGaussSource.gaussFitSet();
             ASKAPLOG_DEBUG_STR(logger, "Have fit " << fits[0]);
             CPPUNIT_ASSERT(fits.size() == 1);
             CPPUNIT_ASSERT(fabs(fits[0].height() - gaussNorm) < 1.e-6);
@@ -352,7 +352,7 @@ class RadioSourceTest : public CppUnit::TestFixture {
 
             itsGaussSource.fitGauss(itsGaussArray, itsDim);
 
-            std::vector<casa::Gaussian2D<Double> > fits = itsGaussSource.gaussFitSet();
+            std::vector<casacore::Gaussian2D<Double> > fits = itsGaussSource.gaussFitSet();
             duchamp::DuchampBeam beam(BMAJ, BMIN, BPA);
             std::vector<double> deconvShape = analysisutilities::deconvolveGaussian(fits[0], beam);
             ASKAPLOG_DEBUG_STR(logger, "Deconvolved gaussian to get shape " << deconvShape);
@@ -376,7 +376,7 @@ class RadioSourceTest : public CppUnit::TestFixture {
             itsGauss2Source.setNoiseLevel(0.1);
             itsGauss2Source.fitGauss(itsGauss2Array, itsDim);
 
-            std::vector<casa::Gaussian2D<Double> > fits = itsGauss2Source.gaussFitSet();
+            std::vector<casacore::Gaussian2D<Double> > fits = itsGauss2Source.gaussFitSet();
             ASKAPLOG_DEBUG_STR(logger, "Have fit " << fits[0]);
             CPPUNIT_ASSERT(fits.size() == 2);
         }

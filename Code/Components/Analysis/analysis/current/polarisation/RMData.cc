@@ -85,9 +85,9 @@ RMData::RMData(const LOFAR::ParameterSet &parset):
 
 void RMData::calculate(RMSynthesis *rmsynth)
 {
-    const casa::Vector<casa::Complex> fdf = rmsynth->fdf();
-    casa::Vector<float> fdf_p = casa::amplitude(fdf);
-    const casa::Vector<float> phi_rmsynth = rmsynth->phi();
+    const casacore::Vector<casacore::Complex> fdf = rmsynth->fdf();
+    casacore::Vector<float> fdf_p = casacore::amplitude(fdf);
+    const casacore::Vector<float> phi_rmsynth = rmsynth->phi();
     const float noise = rmsynth->fdf_noise();
     const float RMSF_FWHM = rmsynth->rmsf_width();
     const float lsqzero = rmsynth->refLambdaSq();
@@ -96,8 +96,8 @@ void RMData::calculate(RMSynthesis *rmsynth)
     ASKAPLOG_DEBUG_STR(logger, fdf_p);
 
     float minFDF, maxFDF;
-    casa::IPosition locMin, locMax;
-    casa::minMax<float>(minFDF, maxFDF, locMin, locMax, fdf_p);
+    casacore::IPosition locMin, locMax;
+    casacore::minMax<float>(minFDF, maxFDF, locMin, locMax, fdf_p);
     ASKAPLOG_DEBUG_STR(logger, "minFDF=" << minFDF << ", maxFDF=" << maxFDF);
 
     itsSNR = maxFDF / noise;
@@ -142,7 +142,7 @@ void RMData::calculate(RMSynthesis *rmsynth)
         }
 
 
-        itsPolAngleRef = 0.5 * casa::arg(fdf(locMax)) * 180. / M_PI;
+        itsPolAngleRef = 0.5 * casacore::arg(fdf(locMax)) * 180. / M_PI;
         itsPolAngleRef_err = 0.5 * noise / fabs(itsPintPeak) * 180. / M_PI;
 
         itsPolAngleZero = itsPolAngleRef - itsPhiPeak * lsqzero;
@@ -154,17 +154,17 @@ void RMData::calculate(RMSynthesis *rmsynth)
         itsFracPol_err = sqrt(itsPintPeak_err * itsPintPeak_err + noise * noise);
 
         // Define arrays used to find the complexity measures - built from the fractional polarisation spectrum in RMSynthesis.
-        casa::Vector<casa::Complex> fracPol = rmsynth->fracPolSpectrum();
-        casa::Vector<float> p = casa::amplitude(fracPol);
-        casa::Vector<float> q = casa::real(fracPol);
-        casa::Vector<float> u = casa::imag(fracPol);
+        casacore::Vector<casacore::Complex> fracPol = rmsynth->fracPolSpectrum();
+        casacore::Vector<float> p = casacore::amplitude(fracPol);
+        casacore::Vector<float> q = casacore::real(fracPol);
+        casacore::Vector<float> u = casacore::imag(fracPol);
 
         // Find the first complexity metric. From the POSSUM-62 document:
         // "The first codifies the deviation in fractional polarised intensity from a constant value"
         // @todo May want to bin up p here before finding C1
-        float meanp = casa::mean(p);
-        float varp = casa::variance(p);
-        itsComplexityConstant = casa::sum((p - meanp) * (p - meanp)) / ((p.size() - 1) * varp);
+        float meanp = casacore::mean(p);
+        float varp = casacore::variance(p);
+        itsComplexityConstant = casacore::sum((p - meanp) * (p - meanp)) / ((p.size() - 1) * varp);
 
         // Find the second complexity metric. From the POSSUM-62 document:
         // "The second metric measures the residual structure in the
@@ -172,10 +172,10 @@ void RMData::calculate(RMSynthesis *rmsynth)
         // been subtracted from the peak."
 
         // 2(psi_0 + phi_peak*lambdaSq)
-        casa::Vector<float> args = 2.F * (itsPolAngleZero + itsPhiPeak * rmsynth->lambdaSquared());
-        casa::Vector<float> qmodel = p * casa::cos(args);
-        casa::Vector<float> umodel = p * casa::sin(args);
-        itsComplexityResidual = casa::sum((q - qmodel) * (q - qmodel) + (u - umodel) * (u - umodel)) / ((p.size() - 1) * varp);
+        casacore::Vector<float> args = 2.F * (itsPolAngleZero + itsPhiPeak * rmsynth->lambdaSquared());
+        casacore::Vector<float> qmodel = p * casacore::cos(args);
+        casacore::Vector<float> umodel = p * casacore::sin(args);
+        itsComplexityResidual = casacore::sum((q - qmodel) * (q - qmodel) + (u - umodel) * (u - umodel)) / ((p.size() - 1) * varp);
 
     } else {
 

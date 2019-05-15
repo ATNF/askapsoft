@@ -61,11 +61,11 @@ struct CorrProducts : private boost::noncopyable {
   
   /// @brief obtain the number of antennas
   /// @return number of antennas handled by this buffer
-  casa::uInt nAnt() const;
+  casacore::uInt nAnt() const;
   
   /// @brief obtain the number of baselines
   /// @return number of baselines handled by this buffer
-  casa::uInt nBaseline() const;
+  casacore::uInt nBaseline() const;
   
   /// @brief baseline index for a pair of antennas
   /// @details For more than 3 antennas mapping between antennas and baselines 
@@ -92,10 +92,10 @@ struct CorrProducts : private boost::noncopyable {
   
   
   /// @brief visibility buffer (dimensions are baseline and channel)
-  casa::Matrix<casa::Complex> itsVisibility;   
+  casacore::Matrix<casacore::Complex> itsVisibility;   
   
   /// @brief flagging information (dimensions are baseline and channel)
-  casa::Matrix<casa::Bool> itsFlag;
+  casacore::Matrix<casacore::Bool> itsFlag;
   
   /// @brief beam index (negative value means that this buffer is not valid)
   int itsBeam;
@@ -104,17 +104,17 @@ struct CorrProducts : private boost::noncopyable {
   uint64_t itsBAT;
   
   /// @brief baseline spacings for all 3 baselines (rows are baselines)
-  casa::Matrix<double> itsUVW;
+  casacore::Matrix<double> itsUVW;
   
   /// @brief delay vector for all 3 baselines
   /// @details We can't use W from itsUVW because it is in J2000 rather than JTRUE
-  casa::Vector<double> itsDelays;
+  casacore::Vector<double> itsDelays;
   
   /// @brief flag that uvw matrix and delay vector are filled with valid info
   bool itsUVWValid;
 
   /// @brief user defined control words for antennas 1,2 and 3
-  casa::Vector<uint32_t> itsControl;
+  casacore::Vector<uint32_t> itsControl;
 };
 
 } // namespace swcorrelator

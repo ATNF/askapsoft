@@ -158,37 +158,37 @@ static VOTableRow processLine(const std::string& line)
     ASKAPCHECK(tokens.size() == 22, "Expected 22 tokens, got " << tokens.size());
 
     // Create these once to avoid the performance impact of creating them over and over.
-    static casa::Unit deg("deg");
-    static casa::Unit arcsec("arcsec");
-    static casa::Unit Jy("Jy");
-    static casa::Unit mJy("mJy");
+    static casacore::Unit deg("deg");
+    static casacore::Unit arcsec("arcsec");
+    static casacore::Unit Jy("Jy");
+    static casacore::Unit mJy("mJy");
 
     // Process Right Ascension (e.g. 23 59 57.37)
-    const double ra_hours = boost::lexical_cast<casa::Double>(tokens[0]);
-    const double ra_mins = boost::lexical_cast<casa::Double>(tokens[1]);
-    const double ra_secs = boost::lexical_cast<casa::Double>(tokens[2]);
-    const casa::Quantity ra(15 * (ra_hours + ra_mins/60 + ra_secs/3600), deg);
+    const double ra_hours = boost::lexical_cast<casacore::Double>(tokens[0]);
+    const double ra_mins = boost::lexical_cast<casacore::Double>(tokens[1]);
+    const double ra_secs = boost::lexical_cast<casacore::Double>(tokens[2]);
+    const casacore::Quantity ra(15 * (ra_hours + ra_mins/60 + ra_secs/3600), deg);
 
     // Process declination (e.g. -31 09 53.1)
-    const double dec_degs = boost::lexical_cast<casa::Double>(tokens[3]);
-    const double dec_mins = boost::lexical_cast<casa::Double>(tokens[4]);
-    const double dec_secs = boost::lexical_cast<casa::Double>(tokens[5]);
-    casa::Quantity dec(fabs(dec_degs) + dec_mins/60 + dec_secs/3600, deg);
+    const double dec_degs = boost::lexical_cast<casacore::Double>(tokens[3]);
+    const double dec_mins = boost::lexical_cast<casacore::Double>(tokens[4]);
+    const double dec_secs = boost::lexical_cast<casacore::Double>(tokens[5]);
+    casacore::Quantity dec(fabs(dec_degs) + dec_mins/60 + dec_secs/3600, deg);
     if (dec_degs < 0.0) {
         dec *= -1.0;
     }
 
     // Process Flux (integrated flux in mJy)
-    const casa::Quantity flux = casa::Quantity(boost::lexical_cast<casa::Double>(tokens[10]), mJy);
+    const casacore::Quantity flux = casacore::Quantity(boost::lexical_cast<casacore::Double>(tokens[10]), mJy);
 
     // Process major axis (arcsec)
-    const casa::Quantity majorAxis(boost::lexical_cast<casa::Double>(tokens[12]), arcsec);
+    const casacore::Quantity majorAxis(boost::lexical_cast<casacore::Double>(tokens[12]), arcsec);
 
     // Process minor axis (arcsec)
-    const casa::Quantity minorAxis(boost::lexical_cast<casa::Double>(tokens[13]), arcsec);
+    const casacore::Quantity minorAxis(boost::lexical_cast<casacore::Double>(tokens[13]), arcsec);
 
     // Process position angle (degrees)
-    const casa::Quantity positionAngle(boost::lexical_cast<casa::Double>(tokens[14]), deg);
+    const casacore::Quantity positionAngle(boost::lexical_cast<casacore::Double>(tokens[14]), deg);
 
     VOTableRow row;
     row.addCell(toString(ra.getValue(deg), 8));

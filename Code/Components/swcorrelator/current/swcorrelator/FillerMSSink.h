@@ -82,7 +82,7 @@ public:
   /// @param[in] buf products buffer
   /// @note The calculation is bypassed if itsUVWValid flag is already set in the buffer
   /// @return time epoch corresponding to the BAT of the buffer
-  virtual casa::MEpoch calculateUVW(CorrProducts &buf) const;
+  virtual casacore::MEpoch calculateUVW(CorrProducts &buf) const;
   
   /// @brief write one buffer to the measurement set
   /// @details Current fieldID and dataDescID are assumed
@@ -127,7 +127,7 @@ public:
   /// @note a negative value is returned if the given baseline is not found, no substitution is performed
   /// with the recent changes to CorrProducts this methid could be made redundant, provide it for
   /// compatibility for the time being
-  static int baselineIndex(const casa::uInt ant1, const casa::uInt ant2);
+  static int baselineIndex(const casacore::uInt ant1, const casacore::uInt ant2);
   
 protected:
   /// @brief helper method to substitute antenna index
@@ -144,7 +144,7 @@ protected:
   /// @brief helper method to make a string out of an integer
   /// @param[in] in unsigned integer number
   /// @return a string padded with zero on the left size, if necessary
-  static std::string makeString(const casa::uInt in);
+  static std::string makeString(const casacore::uInt in);
     
   /// @brief Initialises ANTENNA and FEED tables
   /// @details This method extracts configuration from the parset and fills in the 
@@ -168,40 +168,40 @@ protected:
   // methods borrowed from Ben's MSSink class (see CP/ingest)
 
   // Add observation table row
-  casa::Int addObs(const casa::String& telescope,
-             const casa::String& observer,
+  casacore::Int addObs(const casacore::String& telescope,
+             const casacore::String& observer,
              const double obsStartTime,
              const double obsEndTime);
 
   // Add field table row
-  casa::Int addField(const casa::String& fieldName,
-             const casa::MDirection& fieldDirection,
-             const casa::String& calCode);
+  casacore::Int addField(const casacore::String& fieldName,
+             const casacore::MDirection& fieldDirection,
+             const casacore::String& calCode);
 
   // Add feeds table rows
-  void addFeeds(const casa::Int antennaID,
-             const casa::Vector<double>& x,
-             const casa::Vector<double>& y,
-             const casa::Vector<casa::String>& polType);
+  void addFeeds(const casacore::Int antennaID,
+             const casacore::Vector<double>& x,
+             const casacore::Vector<double>& y,
+             const casacore::Vector<casacore::String>& polType);
   
   // Add antenna table row
-  casa::Int addAntenna(const casa::String& station,
-             const casa::Vector<double>& antXYZ,
-             const casa::String& name,
-             const casa::String& mount,
-             const casa::Double& dishDiameter);
+  casacore::Int addAntenna(const casacore::String& station,
+             const casacore::Vector<double>& antXYZ,
+             const casacore::String& name,
+             const casacore::String& mount,
+             const casacore::Double& dishDiameter);
 
   // Add data description table row
-  casa::Int addDataDesc(const casa::Int spwId, const casa::Int polId);
+  casacore::Int addDataDesc(const casacore::Int spwId, const casacore::Int polId);
   
   // Add spectral window table row
-  casa::Int addSpectralWindow(const casa::String& name,
+  casacore::Int addSpectralWindow(const casacore::String& name,
             const int nChan,
-            const casa::Quantity& startFreq,
-            const casa::Quantity& freqInc);
+            const casacore::Quantity& startFreq,
+            const casacore::Quantity& freqInc);
 
   // Add polarisation table row
-  casa::Int addPolarisation(const casa::Vector<casa::Stokes::StokesTypes>& stokesTypes);
+  casacore::Int addPolarisation(const casacore::Vector<casacore::Stokes::StokesTypes>& stokesTypes);
   
 
   /// @brief guess the effective LO frequency from the current sky frequency, increment and the number of channels
@@ -214,27 +214,27 @@ private:
   LOFAR::ParameterSet itsParset;
   
   /// @brief data descriptor ID used for all added rows
-  casa::uInt itsDataDescID;
+  casacore::uInt itsDataDescID;
 
   /// @brief field ID used for all added rows
-  casa::uInt itsFieldID;
+  casacore::uInt itsFieldID;
 
   /// @brief dish pointing centre corresponding to itsFieldID
-  casa::MDirection itsDishPointing;
+  casacore::MDirection itsDishPointing;
   
   /// @brief true if uvw's are calculated for the centre of each beam (default)
   bool itsBeamOffsetUVW;
   
   /// @brief global (ITRF) coordinates of all antennas
   /// @details row is antenna number, column is X,Y and Z
-  casa::Matrix<double> itsAntXYZ;
+  casacore::Matrix<double> itsAntXYZ;
   
   /// @brief beam offsets in radians
   /// @details assumed the same for all antennas, row is antenna numbers, column is the coordinate
-  casa::Matrix<double> itsBeamOffsets;
+  casacore::Matrix<double> itsBeamOffsets;
   
   /// @brief Measurement set
-  boost::scoped_ptr<casa::MeasurementSet> itsMs;
+  boost::scoped_ptr<casacore::MeasurementSet> itsMs;
     
   /// @brief cached number of channels
   /// @details We don't use it for the real-time correlator, but it is handy for the converter

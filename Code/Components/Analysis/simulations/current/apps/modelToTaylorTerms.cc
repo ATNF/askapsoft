@@ -87,8 +87,8 @@ class Model2TTApp : public askap::Application {
                 StatReporter stats;
 
                 // Ensure that CASA log messages are captured
-                casa::LogSinkInterface* globalSink = new Log4cxxLogSink();
-                casa::LogSink::globalSink(globalSink);
+                casacore::LogSinkInterface* globalSink = new Log4cxxLogSink();
+                casacore::LogSink::globalSink(globalSink);
 
                 LOFAR::ParameterSet subset(config().makeSubset("model2TT."));
                 ASKAPLOG_INFO_STR(logger, "Subset follows:\n" << subset);
@@ -108,9 +108,9 @@ class Model2TTApp : public askap::Application {
                 float logevery = subset.getFloat("logevery", 10.);
                 ASKAPLOG_INFO_STR(logger, "Will log every " << logevery << "% of the time");
 
-                casa::PagedImage<Float> img(modelimage);
+                casacore::PagedImage<Float> img(modelimage);
                 IPosition shape = img.shape();
-                casa::CoordinateSystem csys = img.coordinates();
+                casacore::CoordinateSystem csys = img.coordinates();
                 int specCoord = csys.findCoordinate(Coordinate::SPECTRAL);
                 int specAxis = csys.worldAxes(specCoord)[0];
                 ASKAPLOG_DEBUG_STR(logger, "Model image " << modelimage <<
@@ -119,8 +119,8 @@ class Model2TTApp : public askap::Application {
                                    " and the spectral axis is #" << specAxis);
 
                 Unit bunit = img.units();
-                casa::Vector<casa::Quantum<Double> > beam = img.imageInfo().restoringBeam().toVector();
-                casa::ImageInfo ii = img.imageInfo();
+                casacore::Vector<casacore::Quantum<Double> > beam = img.imageInfo().restoringBeam().toVector();
+                casacore::ImageInfo ii = img.imageInfo();
                 ii.setRestoringBeam(beam);
 
 
@@ -130,16 +130,16 @@ class Model2TTApp : public askap::Application {
                         std::stringstream outname;
                         outname << modelimagebase << ".taylor." << t;
 
-                        casa::IPosition tileshape(shape.size(), 1);
+                        casacore::IPosition tileshape(shape.size(), 1);
                         tileshape(0) = std::min(128L, shape(0));
                         tileshape(1) = std::min(128L, shape(1));
-                        casa::IPosition fulloutshape(shape);
+                        casacore::IPosition fulloutshape(shape);
                         fulloutshape(specAxis) = 1;
 
                         ASKAPLOG_INFO_STR(logger, "Creating a new CASA image " <<
                                           outname.str() << " with the shape " <<
                                           fulloutshape << " and tileshape " << tileshape);
-                        casa::PagedImage<float> outimg(casa::TiledShape(fulloutshape, tileshape),
+                        casacore::PagedImage<float> outimg(casacore::TiledShape(fulloutshape, tileshape),
                                                        csys, outname.str());
 
                         outimg.setUnits(bunit);
@@ -213,12 +213,12 @@ class Model2TTApp : public askap::Application {
                                        "   x in [" << xmin << "," << xmax <<
                                        "]   y in [" << ymin << "," << ymax << "]");
 
-                    casa::IPosition outshape(2, xlen, ylen);
+                    casacore::IPosition outshape(2, xlen, ylen);
                     outshape[specAxis] = 1;
                     ASKAPLOG_DEBUG_STR(logger, "Shape of output images is " << outshape);
-                    casa::Array<Float> outputs[nterms];
+                    casacore::Array<Float> outputs[nterms];
                     for (int i = 0; i < nterms; i++) {
-                        outputs[i] = casa::Array<Float>(outshape, 0.);
+                        outputs[i] = casacore::Array<Float>(outshape, 0.);
                     }
 
 
@@ -252,19 +252,19 @@ class Model2TTApp : public askap::Application {
                     }
 
 
-                    casa::IPosition start(shape.size(), 0);
+                    casacore::IPosition start(shape.size(), 0);
                     start[0] = xmin;
                     start[1] = ymin;
-                    casa::IPosition end(shape - 1);
+                    casacore::IPosition end(shape - 1);
                     end[0] = xmax;
                     end[1] = ymax;
-                    casa::IPosition outpos(2, 0, 0);
+                    casacore::IPosition outpos(2, 0, 0);
 
                     std::vector<float> subcube(xlen * ylen * shape[specAxis]);
                     for (int z = 0; z < shape[specAxis]; z++) {
                         start[specAxis] = end[specAxis] = z;
-                        casa::Slicer specslice(start, end, casa::Slicer::endIsLast);
-                        casa::Array<Float> channel = img.getSlice(specslice, True);
+                        casacore::Slicer specslice(start, end, casacore::Slicer::endIsLast);
+                        casacore::Array<Float> channel = img.getSlice(specslice, True);
                         for (size_t y = 0; y < ylen; y++) {
                             for (size_t x = 0; x < xlen; x++) {
                                 subcube[x + y * xlen + z * xlen * ylen] =
@@ -329,8 +329,8 @@ class Model2TTApp : public askap::Application {
 
                             std::stringstream outname;
                             outname << modelimagebase << ".taylor." << t;
-                            casa::PagedImage<float> outimg(outname.str());
-                            casa::IPosition location(shape.size(), 0);
+                            casacore::PagedImage<float> outimg(outname.str());
+                            casacore::IPosition location(shape.size(), 0);
                             location[0] = xmin;
                             location[1] = ymin;
                             ASKAPLOG_INFO_STR(logger, "Writing to CASA image " <<

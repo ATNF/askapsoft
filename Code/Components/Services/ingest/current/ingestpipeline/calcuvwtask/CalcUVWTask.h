@@ -79,15 +79,15 @@ class CalcUVWTask : public askap::cp::ingest::ITask {
         /// @details
         /// @param[in] ant antenna index
         /// @return 3-element vector with X,Y and Z
-        casa::Vector<double> antXYZ(const casa::uInt ant) const;
+        casacore::Vector<double> antXYZ(const casacore::uInt ant) const;
 
         /// @brief obtain maximum number of antennas
         /// @return maximum number of antennas
-        inline casa::uInt nAntennas() const { return itsAntXYZ.ncolumn(); }
+        inline casacore::uInt nAntennas() const { return itsAntXYZ.ncolumn(); }
 
         /// @brief obtain maximum number of beams
         /// @return maximum number of beams
-        inline casa::uInt nBeams() const { return itsBeamOffset.nelements(); }
+        inline casacore::uInt nBeams() const { return itsBeamOffset.nelements(); }
 
         /// @brief obtain phase centre for a given beam
         /// @details This method encapsulates common operations to obtain the direction
@@ -95,17 +95,17 @@ class CalcUVWTask : public askap::cp::ingest::ITask {
         /// @param[in] dishPointing pointing centre for the whole dish
         /// @param[in] beam beam index to work 
         /// @return direction measure for the phase centre
-        casa::MDirection phaseCentre(const casa::MDirection &dishPointing,
-                                     const casa::uInt beam) const;
+        casacore::MDirection phaseCentre(const casacore::MDirection &dishPointing,
+                                     const casacore::uInt beam) const;
 
         /// @brief obtain gast for the given epoch
         /// @param[in] epoch UTC epoch to convert to GAST
         /// @return gast in radians modulo 2pi
-        static double calcGAST(const casa::MVEpoch &epoch);
+        static double calcGAST(const casacore::MVEpoch &epoch);
  
     private:
         // Calculates UVW coordinates for the specified "row" in the "chunk"
-        void calcForRow(askap::cp::common::VisChunk::ShPtr chunk, const casa::uInt row);
+        void calcForRow(askap::cp::common::VisChunk::ShPtr chunk, const casacore::uInt row);
 
         // Populates the antenna Position Matrix
         void createPositionMatrix(const Configuration& config);
@@ -113,17 +113,17 @@ class CalcUVWTask : public askap::cp::ingest::ITask {
         // Populates the itsBeamOffset vector
         void setupBeamOffsets(const Configuration& config);
  
-        void setupBeamOffsets(const casa::Matrix<casa::Double>& offsets);
+        void setupBeamOffsets(const casacore::Matrix<casacore::Double>& offsets);
 
         // A matrix containing antenna positions.
         // The antenna positions. Size is 3 (x, y & z) rows by nAntenna columns.
         // Rows are x, y, z and columns are indexed by antenna id.
-        casa::Matrix<double> itsAntXYZ;
+        casacore::Matrix<double> itsAntXYZ;
 
         // A vector with one element per beam. Each element then is a
         // two element vector containing the x and y offsets at index
         // 0 and 1 respectivly
-        casa::Vector< casa::RigidVector<double, 2> > itsBeamOffset;
+        casacore::Vector< casacore::RigidVector<double, 2> > itsBeamOffset;
 };
 
 }

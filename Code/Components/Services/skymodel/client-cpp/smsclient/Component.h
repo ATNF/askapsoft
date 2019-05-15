@@ -50,60 +50,60 @@ class Component {
         /// not conform to the appropriate unit. See the accessor methods for
         /// the specification of units for each attribute.
         Component(const ComponentId id,
-                  const casa::Quantity& rightAscension,
-                  const casa::Quantity& declination,
-                  const casa::Quantity& positionAngle,
-                  const casa::Quantity& majorAxis,
-                  const casa::Quantity& minorAxis,
-                  const casa::Quantity& i1400,
-                  const casa::Double& spectralIndex,
-                  const casa::Double& spectralCurvature);
+                  const casacore::Quantity& rightAscension,
+                  const casacore::Quantity& declination,
+                  const casacore::Quantity& positionAngle,
+                  const casacore::Quantity& majorAxis,
+                  const casacore::Quantity& minorAxis,
+                  const casacore::Quantity& i1400,
+                  const casacore::Double& spectralIndex,
+                  const casacore::Double& spectralCurvature);
 
         /// Unique component index number
         ComponentId id() const;
 
         /// Right ascension in the J2000 coordinate system
         /// Base units: degrees
-        casa::Quantity rightAscension() const;
+        casacore::Quantity rightAscension() const;
 
         /// Declination in the J2000 coordinate system
         /// Base units: degrees
-        casa::Quantity declination() const;
+        casacore::Quantity declination() const;
 
         /// Deconvolved position angle. Counted east from north.
         /// Base units: radians
-        casa::Quantity positionAngle() const;
+        casacore::Quantity positionAngle() const;
 
         /// Deconvolved major axis
         /// Base units: arcsecs
-        casa::Quantity majorAxis() const;
+        casacore::Quantity majorAxis() const;
 
         /// Deconvolved minor axis
         /// Base units: arcsecs
-        casa::Quantity minorAxis() const;
+        casacore::Quantity minorAxis() const;
 
         /// Flux at 1400 Mhz
         /// Base units: Jy
-        casa::Quantity i1400() const;
+        casacore::Quantity i1400() const;
 
         /// Spectral index
         /// Base units: N/A
-        casa::Double spectralIndex() const;
+        casacore::Double spectralIndex() const;
 
         /// Spectral curvature
         /// Base units: N/A
-        casa::Double spectralCurvature() const;
+        casacore::Double spectralCurvature() const;
 
     private:
         ComponentId itsId;
-        casa::Quantity itsRightAscension;
-        casa::Quantity itsDeclination;
-        casa::Quantity itsPositionAngle;
-        casa::Quantity itsMajorAxis;
-        casa::Quantity itsMinorAxis;
-        casa::Quantity itsI1400;
-        casa::Double itsSpectralIndex;
-        casa::Double itsSpectralCurvature;
+        casacore::Quantity itsRightAscension;
+        casacore::Quantity itsDeclination;
+        casacore::Quantity itsPositionAngle;
+        casacore::Quantity itsMajorAxis;
+        casacore::Quantity itsMinorAxis;
+        casacore::Quantity itsI1400;
+        casacore::Double itsSpectralIndex;
+        casacore::Double itsSpectralCurvature;
 };
 
 };

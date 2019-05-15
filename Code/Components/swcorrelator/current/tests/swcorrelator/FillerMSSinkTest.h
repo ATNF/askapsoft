@@ -57,14 +57,14 @@ public:
   void setUp() {
      itsParset = LOFAR::ParameterSet("./tests/swcorrelator/testmssink.in");
      std::string fname("test.ms");
-     casa::File tmpFile(fname);
+     casacore::File tmpFile(fname);
      if (tmpFile.exists()) {
          if (tmpFile.isDirectory()) {
-             casa::Directory dir(fname);
+             casacore::Directory dir(fname);
              dir.removeRecursive();
          } else {
              ASKAPASSERT(tmpFile.isRegular());
-             casa::RegularFile rf(fname);
+             casacore::RegularFile rf(fname);
              rf.remove();
          }         
      }          
@@ -81,8 +81,8 @@ public:
      for (int timestamp = 0; timestamp < 10; ++timestamp) {
           for (int beam = 0; beam < nbeam; ++beam) { 
               CorrProducts buf(nchan,beam);
-              buf.itsVisibility.set(casa::Complex(4.,3.));
-              buf.itsFlag.set(casa::False);
+              buf.itsVisibility.set(casacore::Complex(4.,3.));
+              buf.itsFlag.set(casacore::False);
               buf.itsBAT = (4752000000ull + uint64_t(timestamp)*10) * 1000000ull;
               sink.write(buf);
           }

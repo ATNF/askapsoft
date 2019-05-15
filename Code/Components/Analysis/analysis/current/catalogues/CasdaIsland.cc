@@ -102,15 +102,15 @@ CasdaIsland::CasdaIsland(sourcefitting::RadioSource &obj,
     // Convert the header class to use FREQ type and the appropriate unit
     duchamp::FitsHeader newHead_freq = changeSpectralAxis(obj.header(), "FREQ-???", casda::freqUnit);
 
-    casa::Unit wcsFreqUnits(newHead_freq.getSpectralUnits());
-    casa::Unit freqUnits(casda::freqUnit);
-    double freqScale = casa::Quantity(1., wcsFreqUnits).getValue(freqUnits);
+    casacore::Unit wcsFreqUnits(newHead_freq.getSpectralUnits());
+    casacore::Unit freqUnits(casda::freqUnit);
+    double freqScale = casacore::Quantity(1., wcsFreqUnits).getValue(freqUnits);
 
     double pixelSize = obj.header().getAvPixScale();
     std::string pixelUnits(obj.header().WCS().cunit[0]);
     pixelUnits += "2";
-    casa::Unit solidAngleUnits(casda::solidangleUnit);
-    double pixelToSolidAngle = casa::Quantity(pixelSize * pixelSize, pixelUnits).getValue(solidAngleUnits);
+    casacore::Unit solidAngleUnits(casda::solidangleUnit);
+    double pixelToSolidAngle = casacore::Quantity(pixelSize * pixelSize, pixelUnits).getValue(solidAngleUnits);
 
     double peakFluxscale = getPeakFluxConversionScale(newHead_freq, casda::fluxUnit);
     itsFluxPeak *= peakFluxscale;
@@ -121,9 +121,9 @@ CasdaIsland::CasdaIsland(sourcefitting::RadioSource &obj,
     itsFluxInt.value() *= intFluxscale;
 
     // scale factor for the angular size
-    casa::Unit headerShapeUnits(obj.header().getShapeUnits());
-    casa::Unit shapeUnits(casda::shapeUnit);
-    double shapeScale = casa::Quantity(1., headerShapeUnits).getValue(shapeUnits);
+    casacore::Unit headerShapeUnits(obj.header().getShapeUnits());
+    casacore::Unit shapeUnits(casda::shapeUnit);
+    double shapeScale = casacore::Quantity(1., headerShapeUnits).getValue(shapeUnits);
     itsMaj = obj.getMajorAxis() * shapeScale;
     itsMin = obj.getMinorAxis() * shapeScale;
 

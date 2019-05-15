@@ -83,21 +83,21 @@ class StokesSpectrum {
         unsigned int size() {return itsSpectrum.size();};
 
         /// @brief Return the source spectrum
-        casa::Vector<float> spectrum() {return itsSpectrum;};
+        casacore::Vector<float> spectrum() {return itsSpectrum;};
         /// @brief Return the noise spectrum
-        casa::Vector<float> noiseSpectrum() {return itsNoiseSpectrum;};
+        casacore::Vector<float> noiseSpectrum() {return itsNoiseSpectrum;};
 
         /// @brief Return the median value of source spectrum
         float median() {return itsMedianValue;};
         /// @brief Return the median value of noise spectrum
         float medianNoise() {return itsMedianNoise;};
         /// @brief Return the list of channel frequency values
-        casa::Vector<float> frequencies() {return itsFrequencies;};
+        casacore::Vector<float> frequencies() {return itsFrequencies;};
         /// @brief Return the frequency units as a string
         std::string freqUnit() {return itsSpecExtractor->freqUnit();};
         /// @brief Return the brightness unit for the source spectrum as a
-        /// casa::Unit object
-        casa::Unit bunit() {return itsSpecExtractor->bunit();};
+        /// casacore::Unit object
+        casacore::Unit bunit() {return itsSpecExtractor->bunit();};
 
         /// @brief Name of the cube the spectra are extracted from
         std::string cubeName() {return itsSpecExtractor->inputCube();};
@@ -128,16 +128,16 @@ class StokesSpectrum {
         NoiseSpectrumExtractor  *itsNoiseExtractor;
 
         /// @brief The extracted spectrum
-        casa::Vector<float>     itsSpectrum;
+        casacore::Vector<float>     itsSpectrum;
         /// @brief The median value of the extracted spectrum
         float                   itsMedianValue;
         /// @brief The extracted noise spectrum
-        casa::Vector<float>     itsNoiseSpectrum;
+        casacore::Vector<float>     itsNoiseSpectrum;
         /// @brief The median value of the noise spectrum
         float                   itsMedianNoise;
 
         /// @brief The set of frequency values for the spectra
-        casa::Vector<float>     itsFrequencies;
+        casacore::Vector<float>     itsFrequencies;
 
 };
 

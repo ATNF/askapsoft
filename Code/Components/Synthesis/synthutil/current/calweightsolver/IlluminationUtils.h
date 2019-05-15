@@ -83,8 +83,8 @@ public:
    /// @param[in] offsets a matrix with offsets of the elements (number of columns should be 2,
    /// number of rows is the number of elements).
    /// @param[in] weights a vector of complex weights
-   void useSyntheticPattern(const casa::Matrix<double> &offsets, 
-                            const casa::Vector<casa::Complex> &weights);
+   void useSyntheticPattern(const casacore::Matrix<double> &offsets, 
+                            const casacore::Vector<casacore::Complex> &weights);
 protected:
    /// @brief save complex array into an image
    /// @details 
@@ -93,8 +93,8 @@ protected:
    /// @param[in] arr array to take the data from
    /// @param[in] what type of the image requested, e.g. amplitude (default),
    /// real, imag, phase, complex. Minimum match applies.
-   void saveComplexImage(const std::string &name, const casa::CoordinateSystem &coords,
-                         const casa::Array<casa::Complex> &arr,
+   void saveComplexImage(const std::string &name, const casacore::CoordinateSystem &coords,
+                         const casacore::Array<casacore::Complex> &arr,
                          const std::string &what = "amp");
       
 private:

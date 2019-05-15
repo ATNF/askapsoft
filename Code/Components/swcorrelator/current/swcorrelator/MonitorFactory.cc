@@ -108,7 +108,7 @@ void MonitorFactory::addDLMonitor(const std::string &name)
   ASKAPLOG_INFO_STR(logger, "Data monitor "<<name<<
                  " is not in the registry, attempting to load it dynamically from libaskap_"<<libname
                  <<".[so|dylib] and execute register_"<<libname<<"() method");
-  casa::DynLib dl(libname, std::string("libaskap_"), "register_"+libname, false);
+  casacore::DynLib dl(libname, std::string("libaskap_"), "register_"+libname, false);
   if (dl.getHandle()) {
       // Successfully loaded. Get the creator function.
       ASKAPLOG_INFO_STR(logger, "Dynamically loaded data monitor " << name);

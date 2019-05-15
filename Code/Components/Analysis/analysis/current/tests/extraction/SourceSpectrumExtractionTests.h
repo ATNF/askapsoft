@@ -75,7 +75,7 @@ class SourceSpectrumExtractionTest : public CppUnit::TestFixture {
         std::string outfile;
         RadioSource object, gaussobject;
         float alpha;
-        casa::IPosition cubeShape, outShape;
+        casacore::IPosition cubeShape, outShape;
         // std::vector<double> beam;
 
     public:
@@ -93,24 +93,24 @@ class SourceSpectrumExtractionTest : public CppUnit::TestFixture {
             outfile = "tempOutputFromExtractionTest";
             basePolList = "IQUV";
             alpha = 0.5;
-            cubeShape = casa::IPosition(4, xdim, xdim, basePolList.size(), 10);
-            outShape = casa::IPosition(4, 1, 1, basePolList.size(), 10);
+            cubeShape = casacore::IPosition(4, xdim, xdim, basePolList.size(), 10);
+            outShape = casacore::IPosition(4, 1, 1, basePolList.size(), 10);
 
             //-----------------------------------
             // Make the coordinate system for the images
 
             Matrix<Double> xform(2, 2); xform = 0.; xform.diagonal() = 1.;
-            casa::DirectionCoordinate dircoo(MDirection::J2000, Projection(Projection::SIN),
-                                             casa::Quantum<Double>(187.5, "deg"),
-                                             casa::Quantum<Double>(-45., "deg"),
-                                             casa::Quantum<Double>(10. / 3600., "deg"),
-                                             casa::Quantum<Double>(10. / 3600., "deg"),
+            casacore::DirectionCoordinate dircoo(MDirection::J2000, Projection(Projection::SIN),
+                                             casacore::Quantum<Double>(187.5, "deg"),
+                                             casacore::Quantum<Double>(-45., "deg"),
+                                             casacore::Quantum<Double>(10. / 3600., "deg"),
+                                             casacore::Quantum<Double>(10. / 3600., "deg"),
                                              xform, 5, 5);
 
-            casa::SpectralCoordinate spcoo(MFrequency::TOPO, 1.4e9, 1.e6, 0, 1420405751.786);
-            casa::CoordinateSystem coo = casa::CoordinateUtil::defaultCoords4D();
-            coo.replaceCoordinate(dircoo, coo.findCoordinate(casa::Coordinate::DIRECTION));
-            coo.replaceCoordinate(spcoo, coo.findCoordinate(casa::Coordinate::SPECTRAL));
+            casacore::SpectralCoordinate spcoo(MFrequency::TOPO, 1.4e9, 1.e6, 0, 1420405751.786);
+            casacore::CoordinateSystem coo = casacore::CoordinateUtil::defaultCoords4D();
+            coo.replaceCoordinate(dircoo, coo.findCoordinate(casacore::Coordinate::DIRECTION));
+            coo.replaceCoordinate(spcoo, coo.findCoordinate(casacore::Coordinate::SPECTRAL));
 
             //-----------------------------------
             // make a synthetic array where the box sum of a given width will be equal to the width
@@ -126,17 +126,17 @@ class SourceSpectrumExtractionTest : public CppUnit::TestFixture {
                                      16., 16., 16., 16., 16., 16., 16., 16., 16.
                                     };
 
-            casa::IPosition shape(cubeShape), shapeSml(cubeShape);
+            casacore::IPosition shape(cubeShape), shapeSml(cubeShape);
             shapeSml(2) = 1;
             shapeSml(3) = 1;
-            casa::Array<Float> array(shape), arrSml(shapeSml), arrayPL(shape);
+            casacore::Array<Float> array(shape), arrSml(shapeSml), arrayPL(shape);
             for (int s = 0; s < 4; s++) {
                 for (int y = 0; y < 9; y++) {
                     for (int x = 0; x < 9; x++) {
-                        casa::IPosition locSml(4, x, y, 0, 0);
+                        casacore::IPosition locSml(4, x, y, 0, 0);
                         arrSml(locSml) = float(1. / pixels[y * 9 + x]);
                         for (int z = 0; z < 10; z++) {
-                            casa::IPosition loc(4, x, y, s, z);
+                            casacore::IPosition loc(4, x, y, s, z);
                             array(loc) = arrSml(locSml);
                             arrayPL(loc) = arrSml(locSml) * pow(double(z + 1), alpha);
                         }
@@ -177,16 +177,16 @@ class SourceSpectrumExtractionTest : public CppUnit::TestFixture {
             float sigMajsq = bmaj * bmaj / 8. / M_LN2;
             float sigMinsq = bmin * bmin / 8. / M_LN2;
             float bpa = M_PI / 4.;
-            casa::Array<Float> gaussarray(shape), gaussarrSml(shapeSml);
+            casacore::Array<Float> gaussarray(shape), gaussarrSml(shapeSml);
             for (int s = 0; s < 4; s++) {
                 for (int y = 0; y < 9; y++) {
                     for (int x = 0; x < 9; x++) {
                         double u = (x - 4) * cos(bpa) + (y - 4) * sin(bpa);
                         double v = (x - 4) * sin(bpa) - (y - 4) * cos(bpa);
-                        casa::IPosition locSml(4, x, y, 0, 0);
+                        casacore::IPosition locSml(4, x, y, 0, 0);
                         gaussarrSml(locSml) = exp(-0.5 * (u * u / sigMajsq + v * v / sigMinsq));
                         for (int z = 0; z < 10; z++) {
-                            casa::IPosition loc(4, x, y, s, z);
+                            casacore::IPosition loc(4, x, y, s, z);
                             gaussarray(loc) = gaussarrSml(locSml);
                         }
                     }

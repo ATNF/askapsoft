@@ -62,8 +62,8 @@ class CasaBlobUtilsTest : public CppUnit::TestFixture {
 
         void testMVEpoch()
         {
-            casa::MVEpoch source(casa::Quantity((1000000.0), "s"));
-            casa::MVEpoch target;
+            casacore::MVEpoch source(casacore::Quantity((1000000.0), "s"));
+            casacore::MVEpoch target;
 
             // Encode
             std::vector<int8_t> buf;
@@ -86,10 +86,10 @@ class CasaBlobUtilsTest : public CppUnit::TestFixture {
 
         void testMDirection()
         {
-            casa::MDirection source(casa::Quantity(123.0, "rad"),
-                    casa::Quantity(456.0, "rad"),
-                    casa::MDirection::Ref(casa::MDirection::B1950));
-            casa::MDirection target;
+            casacore::MDirection source(casacore::Quantity(123.0, "rad"),
+                    casacore::Quantity(456.0, "rad"),
+                    casacore::MDirection::Ref(casacore::MDirection::B1950));
+            casacore::MDirection target;
 
             // Encode
             std::vector<int8_t> buf;

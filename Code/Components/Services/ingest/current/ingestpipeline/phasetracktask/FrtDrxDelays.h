@@ -75,7 +75,7 @@ class FrtDrxDelays : virtual public IFrtApproach {
         ///                  beams (columns) in radians per second
         /// @param[in] effLO effective LO frequency in Hz
         virtual void process(const askap::cp::common::VisChunk::ShPtr& chunk,
-                             const casa::Matrix<double> &delays, const casa::Matrix<double> &rates, const double effLO);
+                             const casacore::Matrix<double> &delays, const casacore::Matrix<double> &rates, const double effLO);
 
     private:
         /// @brief communicator with the python part executing OSL scripts
@@ -89,7 +89,7 @@ class FrtDrxDelays : virtual public IFrtApproach {
         bool itsTrackResidualDelay;
 
         /// @brief index of an antenna used as a reference
-        casa::uInt itsRefAntIndex;
+        casacore::uInt itsRefAntIndex;
 };
 
 } // namespace ingest

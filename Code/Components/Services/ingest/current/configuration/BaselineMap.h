@@ -112,7 +112,7 @@ class BaselineMap {
         /// @param[in] id   the baseline id.
         /// @return stokes type, or Stokes::Undefined in the case the baseline
         ///         id mapping does not exist.
-        casa::Stokes::StokesTypes idToStokes(const int32_t id) const;
+        casacore::Stokes::StokesTypes idToStokes(const int32_t id) const;
 
         /// Returns the number of entries in the map
         size_t size() const;
@@ -131,7 +131,7 @@ class BaselineMap {
         /// @param[in] pol polarisation product
         /// @return the index of the selected baseline/polarisation, or -1 if
         ///         the selected baseline/polarisation does not exist in the map.
-        int32_t getID(const int32_t ant1, const int32_t ant2, const casa::Stokes::StokesTypes pol) const;
+        int32_t getID(const int32_t ant1, const int32_t ant2, const casacore::Stokes::StokesTypes pol) const;
 
 
         /// @brief correlator produces lower triangle?
@@ -160,7 +160,7 @@ class BaselineMap {
         /// @param[in] ant1 first antenna index
         /// @param[in] ant2 second antenna index
         /// @param[in] pol stokes parameter
-        void add(int32_t id, int32_t ant1, int32_t ant2, casa::Stokes::StokesTypes pol);
+        void add(int32_t id, int32_t ant1, int32_t ant2, casacore::Stokes::StokesTypes pol);
 
         /// @brief populate map for ADE correlator
         /// @details To avoid carrying the map for 2628 products explicitly in fcm, 
@@ -177,7 +177,7 @@ class BaselineMap {
         size_t itsSize;
 
         // correlator product descriptor, i.e. ant1, ant2 and polarisation type
-        typedef boost::tuple<int32_t, int32_t, casa::Stokes::StokesTypes> ProductDesc;
+        typedef boost::tuple<int32_t, int32_t, casacore::Stokes::StokesTypes> ProductDesc;
 
         /// @brief mao of correlator product (baselineid) to descriptor
         std::map<int32_t, ProductDesc> itsMap;

@@ -74,7 +74,7 @@ static int testGetNumNodes(MPIBasicComms& comms)
     return 0;
 }
 
-static int testBroadcastUpdateModel(MPIBasicComms& comms, const casa::IPosition& dim)
+static int testBroadcastUpdateModel(MPIBasicComms& comms, const casacore::IPosition& dim)
 {
     const int root = 0;
     if (comms.getId() == root) {
@@ -83,7 +83,7 @@ static int testBroadcastUpdateModel(MPIBasicComms& comms, const casa::IPosition&
 
         // Inside block tofree array after add().
         {
-            casa::Array<double> array(dim);
+            casacore::Array<double> array(dim);
             array.set(8);
             model_p->add("testparam", array);
         }
@@ -103,7 +103,7 @@ static int testBroadcastUpdateModel(MPIBasicComms& comms, const casa::IPosition&
             return 1;
         }
 
-        const casa::Array<double>& array = model_p->value("testparam");
+        const casacore::Array<double>& array = model_p->value("testparam");
         if (array.shape() != dim) {
             std::cout << "testBroadcastUpdateModel: Wrong shape" << std::endl;
             return 1;
@@ -134,14 +134,14 @@ int main(int argc, char *argv[])
             reportFail("testGetNumNodes()");
         }
 
-        const casa::IPosition dimSmall(2, 1024, 1024);
+        const casacore::IPosition dimSmall(2, 1024, 1024);
         if (testBroadcastUpdateModel(comms, dimSmall) == 0) {
             reportPass("testBroadcastUpdateModel(1x1024x1028)");
         } else {
             reportFail("testBroadcastUpdateModel(1x1024x1028)");
         }
 
-        const casa::IPosition dimLarge(3, 4, 8192, 8192);
+        const casacore::IPosition dimLarge(3, 4, 8192, 8192);
         if (testBroadcastUpdateModel(comms, dimLarge) == 0) {
             reportPass("testBroadcastUpdateModel(4x8192x8192)");
         } else {

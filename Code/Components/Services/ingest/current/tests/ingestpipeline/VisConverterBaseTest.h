@@ -109,16 +109,16 @@ class VisConverterBaseTest : public CppUnit::TestFixture {
 
             // Check stokes
             CPPUNIT_ASSERT_EQUAL(size_t(nPol), chunk->stokes().size());
-            CPPUNIT_ASSERT(chunk->stokes()(0) == casa::Stokes::XX);
-            CPPUNIT_ASSERT(chunk->stokes()(1) == casa::Stokes::XY);
-            CPPUNIT_ASSERT(chunk->stokes()(2) == casa::Stokes::YX);
-            CPPUNIT_ASSERT(chunk->stokes()(3) == casa::Stokes::YY);
+            CPPUNIT_ASSERT(chunk->stokes()(0) == casacore::Stokes::XX);
+            CPPUNIT_ASSERT(chunk->stokes()(1) == casacore::Stokes::XY);
+            CPPUNIT_ASSERT(chunk->stokes()(2) == casacore::Stokes::YX);
+            CPPUNIT_ASSERT(chunk->stokes()(3) == casacore::Stokes::YY);
 
             // checking individual rows
-            for (casa::uInt row=0; row < chunk->nRow(); ++row) {
-                 const casa::uInt ant1 = chunk->antenna1()(row);
-                 const casa::uInt ant2 = chunk->antenna2()(row);
-                 const casa::uInt beam = chunk->beam1()(row);
+            for (casacore::uInt row=0; row < chunk->nRow(); ++row) {
+                 const casacore::uInt ant1 = chunk->antenna1()(row);
+                 const casacore::uInt ant2 = chunk->antenna2()(row);
+                 const casacore::uInt beam = chunk->beam1()(row);
                  // consistency check
                  CPPUNIT_ASSERT_EQUAL(row,
                                 itsInstance->calculateRow(ant1, ant2, beam));
@@ -140,11 +140,11 @@ class VisConverterBaseTest : public CppUnit::TestFixture {
             const uint32_t nBeams = 4;
             const uint32_t nProducts = 21;
             // expected baseline and polarisation, refer to ConfigurationHelper
-            const casa::uInt expectedAnt1[nProducts] = {0,0,0,0,0,0,0,0,0,0,0,
+            const casacore::uInt expectedAnt1[nProducts] = {0,0,0,0,0,0,0,0,0,0,0,
                            1,1,1,1,1,1,1,2,2,2};
-            const casa::uInt expectedAnt2[nProducts] = {0,0,1,1,2,2,0,1,1,2,2,
+            const casacore::uInt expectedAnt2[nProducts] = {0,0,1,1,2,2,0,1,1,2,2,
                            1,1,2,2,1,2,2,2,2,2};
-            const casa::uInt expectedPol[nProducts] = {0,1,0,1,0,1,3,2,3,2,3,
+            const casacore::uInt expectedPol[nProducts] = {0,1,0,1,0,1,3,2,3,2,3,
                            0,1,0,1,3,2,3,0,1,3};
             VisChunk::ShPtr chunk = itsInstance->visChunk();
             CPPUNIT_ASSERT(chunk);
@@ -152,11 +152,11 @@ class VisConverterBaseTest : public CppUnit::TestFixture {
             for (uint32_t beam = 0; beam < nBeams; ++beam) {
                  for (uint32_t n = 0; n < nProducts; ++n) {
                       // hardware indices are 1-based
-                      const boost::optional<std::pair<casa::uInt, casa::uInt> >  
+                      const boost::optional<std::pair<casacore::uInt, casacore::uInt> >  
                           product = itsInstance->mapCorrProduct(n+1, beam +1);
                       CPPUNIT_ASSERT(product);
                       CPPUNIT_ASSERT_EQUAL(expectedPol[n], product->second);
-                      const casa::uInt row = product->first;
+                      const casacore::uInt row = product->first;
                       CPPUNIT_ASSERT(row < chunk->nRow());
                       CPPUNIT_ASSERT(product->second < chunk->nPol());
                       CPPUNIT_ASSERT_EQUAL(expectedAnt1[n], chunk->antenna1()(row));
@@ -187,24 +187,24 @@ class VisConverterBaseTest : public CppUnit::TestFixture {
             const CorrelatorMode corrMode = itsInstance->itsConfig.lookupCorrelatorMode("standard");
 
             itsInstance->initVisChunk(starttime, corrMode);
-            const casa::uInt nAntennas = itsInstance->itsConfig.antennas().size();
+            const casacore::uInt nAntennas = itsInstance->itsConfig.antennas().size();
             CPPUNIT_ASSERT_EQUAL(6u, nAntennas);
             // nothing should be flagged at this stage
-            for (casa::uInt ant = 0; ant<nAntennas; ++ant) {
+            for (casacore::uInt ant = 0; ant<nAntennas; ++ant) {
                  CPPUNIT_ASSERT(itsInstance->isAntennaGood(ant));
             }
             // progressively flag antennas one by one and check that
             // the flag propagates as expected
-            for (casa::uInt ant = 0; ant<nAntennas; ++ant) {
+            for (casacore::uInt ant = 0; ant<nAntennas; ++ant) {
                  itsInstance->flagAntenna(ant);
-                 for (casa::uInt testAnt = 0; testAnt < nAntennas; ++testAnt) {
+                 for (casacore::uInt testAnt = 0; testAnt < nAntennas; ++testAnt) {
                       CPPUNIT_ASSERT_EQUAL(testAnt > ant, 
                                     itsInstance->isAntennaGood(testAnt));
                  }
             }
             // moving to next chunk should reset flags
             itsInstance->initVisChunk(starttime + 5000000ul, corrMode);
-            for (casa::uInt ant = 0; ant<nAntennas; ++ant) {
+            for (casacore::uInt ant = 0; ant<nAntennas; ++ant) {
                  CPPUNIT_ASSERT(itsInstance->isAntennaGood(ant));
             }
         }

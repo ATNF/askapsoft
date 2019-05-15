@@ -88,14 +88,14 @@ class HIdata {
     const float fluxStddev(){return itsFluxStddev;};
     const float fluxRMS(){return itsFluxRMS;};
 
-    const casa::Vector<double> BFparams(){return itsBFparams;};
-    const casa::Vector<double> BFerrors(){return itsBFerrors;};
+    const casacore::Vector<double> BFparams(){return itsBFparams;};
+    const casacore::Vector<double> BFerrors(){return itsBFerrors;};
     const double BFchisq(){return itsBFchisq;};
     const double BFredChisq(){return itsBFredChisq;};
     const size_t BFndof(){return itsBFndof;};
 
-    const casa::Vector<double> mom0Fit(){return itsMom0Fit;};
-    const casa::Vector<double> mom0FitError(){return itsMom0FitError;};
+    const casacore::Vector<double> mom0Fit(){return itsMom0Fit;};
+    const casacore::Vector<double> mom0FitError(){return itsMom0FitError;};
     const bool mom0Resolved(){return itsMom0Resolved;};
     
 protected:
@@ -135,9 +135,9 @@ protected:
     /// @{
     /// Busy Function fit results
     /// @brief Vector of BF fit parameters.
-    casa::Vector<double> itsBFparams;
+    casacore::Vector<double> itsBFparams;
     /// @brief Vector of BF fit uncertainties on the parameters.
-    casa::Vector<double> itsBFerrors;
+    casacore::Vector<double> itsBFerrors;
     /// @brief chi-squared value from busy function fit
     double itsBFchisq;
     /// @brief Reduced chi-squared value (chisq/ndof)
@@ -149,9 +149,9 @@ protected:
     /// @{
     /// Gaussian fitting to moment-0 map
     /// @brief Vector of 2D Gaussian shape parameters - major/minor/pa (in degrees)
-    casa::Vector<double> itsMom0Fit;
+    casacore::Vector<double> itsMom0Fit;
     /// @brief Vector of errors in fitted 2D Gaussian shape parameters - major/minor/pa (in degrees)
-    casa::Vector<double> itsMom0FitError;
+    casacore::Vector<double> itsMom0FitError;
     /// @brief Is the moment-0 map resolved (does the PSF fit give an acceptable result?)
     bool itsMom0Resolved;
     /// @}

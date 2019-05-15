@@ -66,7 +66,7 @@ bool imageExists(std::string imagename);
 /// Open an image and return an ImageInterface object
 const boost::shared_ptr<ImageInterface<Float> > openImage(std::string imagename);
 
-/// Return a subsection of an image, given by a casa::Slicer
+/// Return a subsection of an image, given by a casacore::Slicer
 const boost::shared_ptr<SubImage<Float> > getSubImage(std::string imagename, Slicer slicer);
 
 /// @ingroup analysisutilities
@@ -94,7 +94,7 @@ wcsprm *casaImageToWCS(const boost::shared_ptr<ImageInterface<Float> > imagePtr)
 
 /// @ingroup analysisutilities
 /// @brief Convert a WCS struct to a casa coordinate specification
-casa::CoordinateSystem wcsToCASAcoord(wcsprm *wcs, int nstokes);
+casacore::CoordinateSystem wcsToCASAcoord(wcsprm *wcs, int nstokes);
 
 /// @ingroup analysisutilities
 /// @brief Convert a duchamp subsection to a casa Slicer
@@ -109,9 +109,9 @@ void fixSlicer(Slicer &slice, wcsprm *wcs);
 float findSurroundingNoise(std::string filename, float xpt, float ypt, int noiseBoxSize);
 
 /// @brief Return a vector of pixel values in a box subsection of an image.
-// casa::Array<casa::Float> getPixelsInBox(std::string imageName, casa::Slicer box,
+// casacore::Array<casacore::Float> getPixelsInBox(std::string imageName, casacore::Slicer box,
 //                                         bool fixSlicer = true);
-casa::MaskedArray<casa::Float> getPixelsInBox(std::string imageName, casa::Slicer box,
+casacore::MaskedArray<casacore::Float> getPixelsInBox(std::string imageName, casacore::Slicer box,
                                               bool fixSlicer = true);
 
 /// @brief Increase the length of a Slicer by adding degenerate dimensions on the end

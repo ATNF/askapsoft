@@ -106,12 +106,12 @@ void CModelMaster::run(void)
     // field, but given the current implementations of cone search do not
     // include extended components with centre outside the field, it is best
     // to search a larger radius anyway.
-    const casa::uInt nx = itsParset.getUintVector("shape").at(0);
-    const casa::uInt ny = itsParset.getUintVector("shape").at(1);
+    const casacore::uInt nx = itsParset.getUintVector("shape").at(0);
+    const casacore::uInt ny = itsParset.getUintVector("shape").at(1);
     const std::vector<std::string> cellSizeVector = itsParset.getStringVector("cellsize");
     const Quantity xcellsize = asQuantity(cellSizeVector.at(0), "arcsec");
     const Quantity ycellsize = asQuantity(cellSizeVector.at(1), "arcsec");
-    const casa::Quantity searchRadius(
+    const casacore::Quantity searchRadius(
             std::max(xcellsize.getValue("deg") * nx, ycellsize.getValue("deg") * ny),
             "deg");
 
@@ -119,7 +119,7 @@ void CModelMaster::run(void)
     gsm.reset(0);
     ASKAPLOG_INFO_STR(logger, "Number of components in result set: " << pList->size());
 
-    const casa::uInt batchSize = itsParset.getUint("batchsize", 200);
+    const casacore::uInt batchSize = itsParset.getUint("batchsize", 200);
     const unsigned int nterms = itsParset.getUint("nterms", 1);
 
     // Send components to each worker until complete
@@ -159,7 +159,7 @@ void CModelMaster::run(void)
             filename += askap::utility::toString(term);
         }
 
-        casa::PagedImage<casa::Float> image = ImageFactory::createPagedImage(parset, filename);
+        casacore::PagedImage<casacore::Float> image = ImageFactory::createPagedImage(parset, filename);
         ASKAPLOG_INFO_STR(logger, "Beginning reduction step");
         itsComms.sumImages(image, 0);
         ASKAPLOG_INFO_STR(logger, "Completed reduction step");

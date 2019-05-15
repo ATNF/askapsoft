@@ -44,7 +44,7 @@
 // Using
 using namespace askap::cp;
 
-TosMetadataAntenna::TosMetadataAntenna(const casa::String& name)
+TosMetadataAntenna::TosMetadataAntenna(const casacore::String& name)
     : itsName(name), itsOnSource(false), itsFlagged(true)
 {
 }
@@ -76,64 +76,64 @@ TosMetadataAntenna& TosMetadataAntenna::operator=(const TosMetadataAntenna &othe
 }
     
 
-casa::String TosMetadataAntenna::name(void) const
+casacore::String TosMetadataAntenna::name(void) const
 {
     return itsName;
 }
 
-casa::MDirection TosMetadataAntenna::actualRaDec(void) const
+casacore::MDirection TosMetadataAntenna::actualRaDec(void) const
 {
     return itsActualRaDec;
 }
 
-void TosMetadataAntenna::actualRaDec(const casa::MDirection& val)
+void TosMetadataAntenna::actualRaDec(const casacore::MDirection& val)
 {
     itsActualRaDec = val;
 }
 
-casa::MDirection TosMetadataAntenna::actualAzEl(void) const
+casacore::MDirection TosMetadataAntenna::actualAzEl(void) const
 {
     return itsActualAzEl;
 }
 
-void TosMetadataAntenna::actualAzEl(const casa::MDirection& val)
+void TosMetadataAntenna::actualAzEl(const casacore::MDirection& val)
 {
     itsActualAzEl = val;
 }
 
-casa::Quantity TosMetadataAntenna::actualPolAngle(void) const
+casacore::Quantity TosMetadataAntenna::actualPolAngle(void) const
 {
     return itsPolAngle;
 }
 
-void TosMetadataAntenna::actualPolAngle(const casa::Quantity& q)
+void TosMetadataAntenna::actualPolAngle(const casacore::Quantity& q)
 {
     itsPolAngle = q;
 }
 
-casa::Bool TosMetadataAntenna::onSource(void) const
+casacore::Bool TosMetadataAntenna::onSource(void) const
 {
     return itsOnSource;
 }
 
-void TosMetadataAntenna::onSource(const casa::Bool& val)
+void TosMetadataAntenna::onSource(const casacore::Bool& val)
 {
     itsOnSource = val;
 }
 
-casa::Bool TosMetadataAntenna::flagged(void) const
+casacore::Bool TosMetadataAntenna::flagged(void) const
 {
     return itsFlagged;
 }
 
-void TosMetadataAntenna::flagged(const casa::Bool& val)
+void TosMetadataAntenna::flagged(const casacore::Bool& val)
 {
     itsFlagged = val;
 }
 
 /// @brief Get the values of the UVW vector
 /// @return vector with UVWs, 3 values for each beam
-const casa::Vector<casa::Double>& TosMetadataAntenna::uvw() const
+const casacore::Vector<casacore::Double>& TosMetadataAntenna::uvw() const
 {
     return itsUVW;
 }
@@ -142,7 +142,7 @@ const casa::Vector<casa::Double>& TosMetadataAntenna::uvw() const
 /// @param[in] val the vector with UVWs
 /// @note It is expected that we get 3 values per beam. An exception is thrown if the number of
 /// elements is not divisable by 3.
-void TosMetadataAntenna::uvw(const casa::Vector<casa::Double> &uvw)
+void TosMetadataAntenna::uvw(const casacore::Vector<casacore::Double> &uvw)
 {
    using namespace askap;
    ASKAPCHECK(uvw.nelements() % 3 == 0, "The uvw vector in the metadata is expected to have 3*Nbeam elements, you have "<<uvw.nelements());
@@ -173,22 +173,22 @@ LOFAR::BlobIStream& LOFAR::operator>>(LOFAR::BlobIStream& is, askap::cp::TosMeta
    using namespace askap;
    const int version = is.getStart("TosMetadataAntenna");
    ASKAPASSERT(version == 2);
-   casa::String name;
+   casacore::String name;
    is >> name;
    obj = TosMetadataAntenna(name);
-   casa::Bool flag, onSource;
+   casacore::Bool flag, onSource;
    is >> flag >> onSource;
    obj.flagged(flag);
    obj.onSource(onSource);
-   casa::Quantity q;
+   casacore::Quantity q;
    is >> q;
    obj.actualPolAngle(q);
-   casa::MDirection dir;
+   casacore::MDirection dir;
    is >> dir;
    obj.actualAzEl(dir);
    is >> dir;
    obj.actualRaDec(dir);
-   casa::Vector<casa::Double> uvwBuf;
+   casacore::Vector<casacore::Double> uvwBuf;
    is >> uvwBuf;
    obj.uvw(uvwBuf);
    is.getEnd();

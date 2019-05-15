@@ -63,7 +63,7 @@ using namespace askap::accessors;
 struct DeadBeamsList {
    explicit DeadBeamsList(const std::string &fname) : itsOS(fname.c_str()) { ASKAPCHECK(itsOS, "Unable to create file "<<fname); itsDeadBeams.reserve(72);}
    
-   void add(casa::uInt beam)  { itsDeadBeams.push_back(beam); }
+   void add(casacore::uInt beam)  { itsDeadBeams.push_back(beam); }
    void flushAndReset(double time) {
       itsOS<<time;
       if (itsDeadBeams.size()) {
@@ -79,7 +79,7 @@ struct DeadBeamsList {
    
    ~DeadBeamsList() { if (itsDeadBeams.size() > 0) { std::cout<<"Dead beams list not flushed before the destructor, last integration will be lost"; }}
 private:
-   std::vector<casa::uInt> itsDeadBeams;
+   std::vector<casacore::uInt> itsDeadBeams;
    std::ofstream itsOS;
 };
 
@@ -90,24 +90,24 @@ void process(const IConstDataSource &ds, const int ctrl = -1) {
   //sel->chooseCrossCorrelations();
   sel->chooseAutoCorrelations();
   if (ctrl >=0 ) {
-      //sel->chooseUserDefinedIndex("CONTROL",casa::uInt(ctrl));
-      sel->chooseUserDefinedIndex("SCAN_NUMBER",casa::uInt(ctrl));
+      //sel->chooseUserDefinedIndex("CONTROL",casacore::uInt(ctrl));
+      sel->chooseUserDefinedIndex("SCAN_NUMBER",casacore::uInt(ctrl));
   }
   IDataConverterPtr conv=ds.createConverter();  
-  conv->setFrequencyFrame(casa::MFrequency::Ref(casa::MFrequency::TOPO),"MHz");
-  conv->setEpochFrame(casa::MEpoch(casa::Quantity(55913.0,"d"),
-                      casa::MEpoch::Ref(casa::MEpoch::UTC)),"s");
-  conv->setDirectionFrame(casa::MDirection::Ref(casa::MDirection::J2000));                    
-  casa::Vector<double> freq;
+  conv->setFrequencyFrame(casacore::MFrequency::Ref(casacore::MFrequency::TOPO),"MHz");
+  conv->setEpochFrame(casacore::MEpoch(casacore::Quantity(55913.0,"d"),
+                      casacore::MEpoch::Ref(casacore::MEpoch::UTC)),"s");
+  conv->setDirectionFrame(casacore::MDirection::Ref(casacore::MDirection::J2000));                    
+  casacore::Vector<double> freq;
   size_t counter = 0;
   size_t nGoodRows = 0;
   size_t nBadRows = 0;
-  casa::uInt nChan = 0;
-  casa::uInt nRow = 0;
+  casacore::uInt nChan = 0;
+  casacore::uInt nRow = 0;
   double startTime = 0;
   double stopTime = 0;
   
-  casa::Vector<casa::uInt> ant1ids, ant2ids, beamids;
+  casacore::Vector<casacore::uInt> ant1ids, ant2ids, beamids;
 
   std::ofstream os3("autoamps.dat");
 
@@ -117,7 +117,7 @@ void process(const IConstDataSource &ds, const int ctrl = -1) {
   dbl[2].reset(new DeadBeamsList("ak12_deadbeams.dat"));
 
   bool firstTimeStamp = true;
-  casa::uInt numberOfRowsPerBeam = 0;
+  casacore::uInt numberOfRowsPerBeam = 0;
   for (IConstDataSharedIter it=ds.createConstIterator(sel,conv);it!=it.end();++it, ++counter) {  
        if (firstTimeStamp) {
            startTime = it->time();
@@ -136,7 +136,7 @@ void process(const IConstDataSource &ds, const int ctrl = -1) {
            beamids = it->feed1();
            std::cout<<"Baseline order is as follows: "<<std::endl;
            numberOfRowsPerBeam = 0;
-           for (casa::uInt row = 0; row<nRow; ++row) {
+           for (casacore::uInt row = 0; row<nRow; ++row) {
                 if (beamids[row] == 0) {
                     std::cout<<"baseline (1-based) = "<<row+1<<" is "<<ant1ids[row]<<" - "<<ant2ids[row]<<std::endl; 
                 } else {
@@ -144,7 +144,7 @@ void process(const IConstDataSource &ds, const int ctrl = -1) {
                         numberOfRowsPerBeam = row;
                     }
                     ASKAPCHECK(numberOfRowsPerBeam != 0, "First beam should have an ID of zero");
-                    const casa::uInt firstBeamRow = row % numberOfRowsPerBeam;
+                    const casacore::uInt firstBeamRow = row % numberOfRowsPerBeam;
                     ASKAPCHECK(ant1ids[firstBeamRow] == ant1ids[row], "Inconsistent antenna 1 ids at row = "<<row<<" for beam "<<beamids[row]);
                     ASKAPCHECK(ant2ids[firstBeamRow] == ant2ids[row], "Inconsistent antenna 2 ids at row = "<<row<<" for beam "<<beamids[row]);             
                 }
@@ -163,7 +163,7 @@ void process(const IConstDataSource &ds, const int ctrl = -1) {
        ASKAPASSERT(it->nPol() == 4);
        ASKAPASSERT(it->nChannel() > 1);
        // check that the products come in consistent way across the interations
-       for (casa::uInt row = 0; row<nRow; ++row) {
+       for (casacore::uInt row = 0; row<nRow; ++row) {
             ASKAPCHECK(it->antenna1()[row] == ant1ids[row], "Inconsistent antenna 1 ids at row = "<<row);
             ASKAPCHECK(it->antenna2()[row] == ant2ids[row], "Inconsistent antenna 2 ids at row = "<<row);             
        }
@@ -174,14 +174,14 @@ void process(const IConstDataSource &ds, const int ctrl = -1) {
 
        bool somethingFlaggedThisTimestamp = false;
 
-       for (casa::uInt row=0; row<nRow; ++row) {
+       for (casacore::uInt row=0; row<nRow; ++row) {
             
           
-            casa::Vector<casa::Bool> flagsX = it->flag().xyPlane(0).row(row);
-            casa::Vector<casa::Bool> flagsY = it->flag().xyPlane(3).row(row);
+            casacore::Vector<casacore::Bool> flagsX = it->flag().xyPlane(0).row(row);
+            casacore::Vector<casacore::Bool> flagsY = it->flag().xyPlane(3).row(row);
             bool flagged = false;
             bool allFlagged = true;
-            for (casa::uInt ch = 0; ch < flagsX.nelements(); ++ch) {
+            for (casacore::uInt ch = 0; ch < flagsX.nelements(); ++ch) {
                  ASKAPDEBUGASSERT(ch < flagsY.nelements());
                  flagged |= flagsX[ch];
                  flagged |= flagsY[ch];
@@ -189,15 +189,15 @@ void process(const IConstDataSource &ds, const int ctrl = -1) {
                  allFlagged &= flagsY[ch];
             }
             
-            casa::Vector<casa::Complex> measuredRowX = it->visibility().xyPlane(0).row(row);
-            casa::Vector<casa::Complex> measuredRowY = it->visibility().xyPlane(3).row(row);
+            casacore::Vector<casacore::Complex> measuredRowX = it->visibility().xyPlane(0).row(row);
+            casacore::Vector<casacore::Complex> measuredRowY = it->visibility().xyPlane(3).row(row);
             
             if ((ant1ids[row] >= 3) || (ant1ids[row] == 1)) {
-                casa::Complex sumX(0.,0.);
-                casa::Complex sumY(0.,0.);
+                casacore::Complex sumX(0.,0.);
+                casacore::Complex sumY(0.,0.);
                 size_t nGoodChX = 0;
                 size_t nGoodChY = 0;
-                for (casa::uInt ch=0; ch < measuredRowX.nelements(); ++ch) {
+                for (casacore::uInt ch=0; ch < measuredRowX.nelements(); ++ch) {
                      ASKAPDEBUGASSERT(ch < flagsX.nelements());
                      ASKAPDEBUGASSERT(ch < flagsY.nelements());
                      ASKAPDEBUGASSERT(ch < measuredRowY.nelements());
@@ -232,8 +232,8 @@ void process(const IConstDataSource &ds, const int ctrl = -1) {
             /*
             if ((counter == 10) && (row==12)) {
                 std::ofstream os4("testsp.dat");
-                for (casa::uInt ch=0; ch<measuredRow.nelements(); ++ch) {
-                     os4<<ch<<" "<<arg(measuredRow[ch])/casa::C::pi*180.<<" "<<arg(reducedResVis[ch/54])/casa::C::pi*180.<<std::endl;
+                for (casacore::uInt ch=0; ch<measuredRow.nelements(); ++ch) {
+                     os4<<ch<<" "<<arg(measuredRow[ch])/casacore::C::pi*180.<<" "<<arg(reducedResVis[ch/54])/casacore::C::pi*180.<<std::endl;
                 }
             }
             */
@@ -276,10 +276,10 @@ void process(const IConstDataSource &ds, const int ctrl = -1) {
   if (counter>1) {
       //ASKAPCHECK(nGoodRows % nRow == 0, "Number of good rows="<<nGoodRows<<" is supposed to be integral multiple of number of rows in a cycle="<<nRow);
       std::cout<<"Each integration has "<<nRow<<" rows"<<std::endl;
-      casa::uInt nGoodCycles = nGoodRows / nRow;
+      casacore::uInt nGoodCycles = nGoodRows / nRow;
       std::cout<<"Processed "<<nGoodCycles<<" integration cycles, "<<nGoodRows<<" good and "<<nBadRows<<" bad rows, time span "<<(stopTime-startTime)/60.<<" minutues, cycles="<<counter<<std::endl;
-      casa::MVEpoch startEpoch(casa::Quantity(55913.0,"d"));
-      startEpoch += casa::MVEpoch(casa::Quantity(startTime, "s"));
+      casacore::MVEpoch startEpoch(casacore::Quantity(55913.0,"d"));
+      startEpoch += casacore::MVEpoch(casacore::Quantity(startTime, "s"));
       std::cout<<"Start time "<<startEpoch<<std::endl;
   } else {
      std::cout<<"No data found!"<<std::endl;
@@ -294,7 +294,7 @@ int main(int argc, char **argv) {
 	 return -2;
      }
 
-     casa::Timer timer;
+     casacore::Timer timer;
      const std::string msName = argv[argc - 1];
      const int ctrl = argc == 2 ? -1 : utility::fromString<int>(argv[1]);
 

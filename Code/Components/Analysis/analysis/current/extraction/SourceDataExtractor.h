@@ -39,7 +39,7 @@
 #include <casacore/casa/Quanta/Unit.h>
 #include <Common/ParameterSet.h>
 #include <casacore/measures/Measures/Stokes.h>
-#include <utils/PolConverter.h>
+#include <askap/scimath/utils/PolConverter.h>
 #include <boost/shared_ptr.hpp>
 #include <boost/scoped_ptr.hpp>
 
@@ -88,13 +88,13 @@ class SourceDataExtractor {
         virtual void writeImage() = 0;
 
         /// @brief Return the extracted array
-        casa::Array<Float> array() {return itsArray;};
+        casacore::Array<Float> array() {return itsArray;};
         /// @brief Return the input cube name
         std::string inputCube() {return itsInputCube;};
     /// @brief Return the input cube restoring beam
-    casa::Vector<Quantum<Double> > inputBeam();
+    casacore::Vector<Quantum<Double> > inputBeam();
     /// @brief Return the input cube's coordinate system
-    casa::CoordinateSystem inputCoordSys(){return itsInputCoords;};
+    casacore::CoordinateSystem inputCoordSys(){return itsInputCoords;};
         /// @brief Return the list of all possible input cubes
         std::vector<std::string> inputCubeList() {return itsInputCubeList;};
         /// @brief Return the base name of the output image(s)
@@ -122,10 +122,10 @@ class SourceDataExtractor {
         };
         /// @brief Return the brightness unit for the current input
         /// image
-        casa::Unit bunit();
+        casacore::Unit bunit();
 
     /// @brief Return the slicer used for the extraction
-    casa::Slicer slicer(){return itsSlicer;};
+    casacore::Slicer slicer(){return itsSlicer;};
 
     /// @brief Define the object ID (itsObjID) and name (itsObjectName)
     void setObjectIDs(const std::string &objid, const std::string &objectname);
@@ -161,12 +161,12 @@ class SourceDataExtractor {
         /// stokes parameter.
         /// @param image Name of the image to check
         /// @param stokes Stokes type to check for.
-        bool checkPol(std::string image, casa::Stokes::StokesTypes stokes);
+        bool checkPol(std::string image, casacore::Stokes::StokesTypes stokes);
 
         /// @brief Return the shape of the given image
         /// @details Internal function only that uses openImage()
         /// @param image Name of image to examine.
-        casa::IPosition getShape(std::string image);
+        casacore::IPosition getShape(std::string image);
 
         /// @brief Initialise the array for the extracted data -
         /// implementation left for derived classes
@@ -211,34 +211,34 @@ class SourceDataExtractor {
     /// J123456-123456 or similar.
     std::string                                      itsObjectName;
         /// @brief The slicer used to perform the extraction
-        casa::Slicer                                     itsSlicer;
+        casacore::Slicer                                     itsSlicer;
         /// @brief The input cube the array is extracted from
         std::string                                      itsInputCube;
         /// @brief The list of potential input cubes - typically one
         /// per Stokes parameter
         std::vector<std::string>                         itsInputCubeList;
         /// @brief Mapping between input cubes and Stokes parameters
-        std::map<casa::Stokes::StokesTypes, std::string> itsCubeStokesMap;
+        std::map<casacore::Stokes::StokesTypes, std::string> itsCubeStokesMap;
         /// @brief The image interface pointer, used to access the
         /// input image on disk
-        boost::shared_ptr<casa::ImageInterface<Float> >  itsInputCubePtr;
+        boost::shared_ptr<casacore::ImageInterface<Float> >  itsInputCubePtr;
         /// @brief The list of desired Stokes parameters
-        casa::Vector<casa::Stokes::StokesTypes>          itsStokesList;
+        casacore::Vector<casacore::Stokes::StokesTypes>          itsStokesList;
         /// @brief The Stokes parameter currently being used
-        casa::Stokes::StokesTypes                        itsCurrentStokes;
+        casacore::Stokes::StokesTypes                        itsCurrentStokes;
         /// @brief The base for the output filename, that can be added
         /// to to make the actual output filename
         std::string                                      itsOutputFilenameBase;
         /// @brief The name of the output file
         std::string                                      itsOutputFilename;
         /// @brief The array of extracted pixels
-        casa::Array<Float>                               itsArray;
+        casacore::Array<Float>                               itsArray;
         /// @brief The pixel location of the source in the x-direction
         float                                            itsXloc;
         /// @brief The pixel location of the source in the y-direction
         float                                            itsYloc;
         /// @brief The coordinate system of the input cube
-        casa::CoordinateSystem                           itsInputCoords;
+        casacore::CoordinateSystem                           itsInputCoords;
         /// @brief The axis number for the longitude axis (0-based)
         int                                              itsLngAxis;
         /// @brief The axis number for the latitude axis (0-based)
@@ -248,11 +248,11 @@ class SourceDataExtractor {
         /// @brief The axis number for the Stokes axis (0-based)
         int                                              itsStkAxis;
         /// @brief The brightness units of the input cube
-        casa::Unit                                       itsInputUnits;
+        casacore::Unit                                       itsInputUnits;
         /// @brief The brightness units of the output product
-        casa::Unit                                       itsOutputUnits;
+        casacore::Unit                                       itsOutputUnits;
         /// @brief Miscellaneous information for the output image
-        casa::TableRecord                                itsMiscInfo;
+        casacore::TableRecord                                itsMiscInfo;
 };
 
 }

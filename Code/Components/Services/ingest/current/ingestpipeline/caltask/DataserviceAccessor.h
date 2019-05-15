@@ -58,29 +58,29 @@ class DataserviceAccessor : public ISolutionAccessor {
         DataserviceAccessor(const std::string& locatorHost,
                             const std::string& locatorPort,
                             const std::string& serviceName,
-                            const casa::Int updateInterval);
+                            const casacore::Int updateInterval);
 
         /// Destructor.
         virtual ~DataserviceAccessor();
 
         /// @see ISolutionAccessor::getGain
-        virtual casa::Complex getGain(casa::uInt ant,
-                                      casa::uInt beam,
+        virtual casacore::Complex getGain(casacore::uInt ant,
+                                      casacore::uInt beam,
                                       ISolutionAccessor::Pol pol,
-                                      casa::Bool& valid) const;
+                                      casacore::Bool& valid) const;
 
         /// @see ISolutionAccessor::getLeakage
-        virtual casa::Complex getLeakage(casa::uInt ant,
-                                         casa::uInt beam,
+        virtual casacore::Complex getLeakage(casacore::uInt ant,
+                                         casacore::uInt beam,
                                          ISolutionAccessor::LeakageTerm term,
-                                         casa::Bool& valid) const;
+                                         casacore::Bool& valid) const;
 
         /// @see ISolutionAccessor::getBandpass
-        virtual casa::Complex getBandpass(casa::uInt ant,
-                                          casa::uInt beam,
-                                          casa::uInt chan,
+        virtual casacore::Complex getBandpass(casacore::uInt ant,
+                                          casacore::uInt beam,
+                                          casacore::uInt chan,
                                           ISolutionAccessor::Pol pol,
-                                          casa::Bool& valid) const;
+                                          casacore::Bool& valid) const;
 
         void updateSolutions(void);
 
@@ -93,7 +93,7 @@ class DataserviceAccessor : public ISolutionAccessor {
         askap::cp::caldataservice::CalibrationDataServiceClient itsService;
 
         // Solution update interval in seconds
-        casa::Int itsUpdateInterval;
+        casacore::Int itsUpdateInterval;
 
         // Solution update thread
         boost::shared_ptr<boost::thread> itsUpdateThread;
@@ -101,15 +101,15 @@ class DataserviceAccessor : public ISolutionAccessor {
         // Used to request the service thread to stop
         bool itsStopRequested;
 
-        casa::Long itsGainID;
+        casacore::Long itsGainID;
         boost::shared_ptr<askap::cp::caldataservice::GainSolution> itsGainSolution;
         mutable boost::mutex itsGainMutex;
 
-        casa::Long itsLeakageID;
+        casacore::Long itsLeakageID;
         boost::shared_ptr<askap::cp::caldataservice::LeakageSolution> itsLeakageSolution;
         mutable boost::mutex itsLeakageMutex;
 
-        casa::Long itsBandpassID;
+        casacore::Long itsBandpassID;
         boost::shared_ptr<askap::cp::caldataservice::BandpassSolution> itsBandpassSolution;
         mutable boost::mutex itsBandpassMutex;
 

@@ -206,7 +206,7 @@ void RadioSource::addOffsets(long xoff, long yoff, long zoff)
 
     std::map<std::string, FitResults>::iterator fit;
     for (fit = itsBestFitMap.begin(); fit != itsBestFitMap.end(); fit++) {
-        std::vector<casa::Gaussian2D<Double> >::iterator gauss;
+        std::vector<casacore::Gaussian2D<Double> >::iterator gauss;
         for (gauss = fit->second.fits().begin();
                 gauss != fit->second.fits().end();
                 gauss++) {
@@ -224,7 +224,7 @@ void RadioSource::defineBox(duchamp::Section &sec,
 {
 
     int ndim = (spectralAxis >= 0) ? 3 : 2;
-    casa::IPosition start(ndim, 0), end(ndim, 0), stride(ndim, 1);
+    casacore::IPosition start(ndim, 0), end(ndim, 0), stride(ndim, 1);
     start(0) = std::max(long(sec.getStart(0) - this->xSubOffset),
                         this->getXmin() - itsFitParams.boxPadSize());
     end(0)   = std::min(long(sec.getEnd(0) - this->xSubOffset),
@@ -254,7 +254,7 @@ void RadioSource::defineBox(duchamp::Section &sec,
                    "RadioSource::defineBox bad slicer: end(" <<
                    end << ") < start (" << start << ")");
     }
-    itsBox = casa::Slicer(start, end, stride, Slicer::endIsLast);
+    itsBox = casacore::Slicer(start, end, stride, Slicer::endIsLast);
 }
 
 //**************************************************************//
@@ -558,8 +558,8 @@ void RadioSource::getFWHMestimate(std::vector<float> fluxarray,
 //**************************************************************//
 
 std::vector<SubComponent>
-RadioSource::getSubComponentList(casa::Matrix<casa::Double> pos,
-                                 casa::Vector<casa::Double> &f)
+RadioSource::getSubComponentList(casacore::Matrix<casacore::Double> pos,
+                                 casacore::Vector<casacore::Double> &f)
 {
     std::vector<SubComponent> cmpntlist;
     if (itsFitParams.useCurvature()) {
@@ -570,19 +570,19 @@ RadioSource::getSubComponentList(casa::Matrix<casa::Double> pos,
         // 4. run lutz_detect to get list of objects
         // 5. for each object, define a subcomponent of zero size with correct peak & position
 
-        casa::IPosition globalOffset(itsBox.start().size(), 0);
+        casacore::IPosition globalOffset(itsBox.start().size(), 0);
         globalOffset[0] = this->xSubOffset;
         globalOffset[1] = this->ySubOffset;
 
-        casa::Slicer fullImageBox(itsBox.start() + globalOffset,
+        casacore::Slicer fullImageBox(itsBox.start() + globalOffset,
                                   itsBox.length(), Slicer::endIsLength);
 
         ASKAPLOG_DEBUG_STR(logger, "For curvature extraction, formed slicer " << fullImageBox << " with globalOffsets=" << globalOffset);
 
-        // casa::Array<float> curvArray =
+        // casacore::Array<float> curvArray =
         //     analysisutilities::getPixelsInBox(itsFitParams.curvatureImage(),
         //                                       fullImageBox, false);
-        casa::MaskedArray<float> curvArray =
+        casacore::MaskedArray<float> curvArray =
             analysisutilities::getPixelsInBox(itsFitParams.curvatureImage(),
                                               fullImageBox, false);
 
@@ -741,7 +741,7 @@ RadioSource::getThresholdedSubComponentList(std::vector<float> fluxarray)
 //**************************************************************//
 
 std::multimap<int, PixelInfo::Voxel>
-RadioSource::findDistinctPeaks(casa::Vector<casa::Double> f)
+RadioSource::findDistinctPeaks(casacore::Vector<casacore::Double> f)
 {
 
     const int numThresh = itsFitParams.numSubThresholds();
@@ -861,13 +861,13 @@ bool RadioSource::fitGauss(duchamp::Cube &cube)
 bool RadioSource::fitGauss(std::vector<PixelInfo::Voxel> &voxelList)
 {
     int size = this->getSize();
-    casa::Matrix<casa::Double> pos;
-    casa::Vector<casa::Double> f;
-    casa::Vector<casa::Double> sigma;
+    casacore::Matrix<casacore::Double> pos;
+    casacore::Vector<casacore::Double> f;
+    casacore::Vector<casacore::Double> sigma;
     pos.resize(size, 2);
     f.resize(size);
     sigma.resize(size);
-    casa::Vector<casa::Double> curpos(2);
+    casacore::Vector<casacore::Double> curpos(2);
     curpos = 0;
 
     if (this->getZmin() != this->getZmax()) {
@@ -907,13 +907,13 @@ bool RadioSource::fitGauss(std::vector<float> &fluxArray,
         return false;
     }
 
-    casa::Matrix<casa::Double> pos;
-    casa::Vector<casa::Double> f;
-    casa::Vector<casa::Double> sigma;
+    casacore::Matrix<casacore::Double> pos;
+    casacore::Vector<casacore::Double> f;
+    casacore::Vector<casacore::Double> sigma;
     pos.resize(this->boxSize(), 2);
     f.resize(this->boxSize());
     sigma.resize(this->boxSize());
-    casa::Vector<casa::Double> curpos(2);
+    casacore::Vector<casacore::Double> curpos(2);
     curpos = 0;
 
     for (long x = this->boxXmin(); x <= this->boxXmax(); x++) {
@@ -942,9 +942,9 @@ bool RadioSource::fitGauss(std::vector<float> &fluxArray,
 
 Fitter RadioSource::fitGauss(int nGauss,
                              std::vector<SubComponent> &estimateList,
-                             casa::Matrix<casa::Double> &pos,
-                             casa::Vector<casa::Double> &f,
-                             casa::Vector<casa::Double> &sigma)
+                             casacore::Matrix<casacore::Double> &pos,
+                             casacore::Vector<casacore::Double> &f,
+                             casacore::Vector<casacore::Double> &sigma)
 {
     Fitter newfit(itsFitParams);
     newfit.setNumGauss(nGauss);
@@ -956,9 +956,9 @@ Fitter RadioSource::fitGauss(int nGauss,
 }
 
 
-bool RadioSource::fitGauss(casa::Matrix<casa::Double> &pos,
-                           casa::Vector<casa::Double> &f,
-                           casa::Vector<casa::Double> &sigma)
+bool RadioSource::fitGauss(casacore::Matrix<casacore::Double> &pos,
+                           casacore::Vector<casacore::Double> &f,
+                           casacore::Vector<casacore::Double> &sigma)
 {
 
     ASKAPLOG_INFO_STR(logger, "Fitting source " << this->name <<
@@ -1078,7 +1078,7 @@ bool RadioSource::fitGauss(casa::Matrix<casa::Double> &pos,
                             if (!alreadyDone) {
 
                                 ASKAPLOG_DEBUG_STR(logger, "Removing fitted Gaussian from array");
-                                casa::Vector<casa::Double> newf = fit[ctr].subtractFit(pos, f);
+                                casacore::Vector<casacore::Double> newf = fit[ctr].subtractFit(pos, f);
                                 ASKAPLOG_DEBUG_STR(logger, "Finding new subcomponents");
                                 std::vector<SubComponent> newList=cmpntList;
                                 std::vector<SubComponent> newGuessList =
@@ -1137,7 +1137,7 @@ bool RadioSource::fitGauss(casa::Matrix<casa::Double> &pos,
             itsBestFitType = "guess";
             // set the components to be at least as big as the beam
             for (size_t i = 0; i < cmpntListReference.size(); i++) {
-                casa::Gaussian2D<casa::Double> gauss = cmpntListReference[i].asGauss();
+                casacore::Gaussian2D<casacore::Double> gauss = cmpntListReference[i].asGauss();
                 if (cmpntListReference[i].maj() < itsHeader.beam().maj()) {
                     cmpntListReference[i].setMajor(itsHeader.beam().maj());
                     cmpntListReference[i].setMinor(itsHeader.beam().min());
@@ -1205,14 +1205,14 @@ void RadioSource::findSpectralTerm(std::string imageName, int term, bool doCalc)
                            ", for image " << imageName);
 
         // Get taylor1 values for box, and define positions
-        Slice xrange = casa::Slice(this->boxXmin() + this->getXOffset(),
+        Slice xrange = casacore::Slice(this->boxXmin() + this->getXOffset(),
                                    this->boxXmax() - this->boxXmin() + 1, 1);
-        Slice yrange = casa::Slice(this->boxYmin() + this->getYOffset(),
+        Slice yrange = casacore::Slice(this->boxYmin() + this->getYOffset(),
                                    this->boxYmax() - this->boxYmin() + 1, 1);
-        Slicer theBox = casa::Slicer(xrange, yrange);
+        Slicer theBox = casacore::Slicer(xrange, yrange);
 
-        // casa::Array<casa::Float> flux_all = getPixelsInBox(imageName, theBox);
-        casa::MaskedArray<casa::Float> flux_all = getPixelsInBox(imageName, theBox);
+        // casacore::Array<casacore::Float> flux_all = getPixelsInBox(imageName, theBox);
+        casacore::MaskedArray<casacore::Float> flux_all = getPixelsInBox(imageName, theBox);
 
         std::vector<double> fluxvec;
         for (size_t i = 0; i < flux_all.size(); i++) {
@@ -1220,11 +1220,11 @@ void RadioSource::findSpectralTerm(std::string imageName, int term, bool doCalc)
                 fluxvec.push_back(flux_all.getArray().data()[i]);
             }
         }
-        casa::Matrix<casa::Double> pos;
-        casa::Vector<casa::Double> sigma;
+        casacore::Matrix<casacore::Double> pos;
+        casacore::Vector<casacore::Double> sigma;
         pos.resize(fluxvec.size(), 2);
         sigma.resize(fluxvec.size());
-        casa::Vector<casa::Double> curpos(2);
+        casacore::Vector<casacore::Double> curpos(2);
         curpos = 0;
 
         // The following checks for pixels that have been blanked, and
@@ -1239,7 +1239,7 @@ void RadioSource::findSpectralTerm(std::string imageName, int term, bool doCalc)
                 counter++;
             }
         }
-        casa::Vector<casa::Double> f(fluxvec);
+        casacore::Vector<casacore::Double> f(fluxvec);
 
         // Set up fit with same parameters and do the fit
         std::vector<std::string>::iterator type;
@@ -1413,14 +1413,14 @@ void RadioSource::printTableRow(std::ostream &stream,
 
 //**************************************************************//
 
-casa::Unit getUnit(duchamp::Catalogues::Column &column)
+casacore::Unit getUnit(duchamp::Catalogues::Column &column)
 {
     std::string desiredUnitsStr = column.getUnits();
     if (desiredUnitsStr[0] == '[') {
         // may have units in square brackets, eg. Jy/beam
         desiredUnitsStr = desiredUnitsStr.substr(1, desiredUnitsStr.size() - 2);
     }
-    casa::Unit desiredUnits(desiredUnitsStr);
+    casacore::Unit desiredUnits(desiredUnitsStr);
     return desiredUnits;
 
 }
@@ -1439,7 +1439,7 @@ void RadioSource::printTableEntry(std::ostream &stream,
 
     // Define local variables that will get printed
     FitResults results = itsBestFitMap[fitType];
-    casa::Gaussian2D<Double> gauss = itsBestFitMap[fitType].gaussian(fitNum);
+    casacore::Gaussian2D<Double> gauss = itsBestFitMap[fitType].gaussian(fitNum);
     std::stringstream id;
     id << this->getID() << getSuffix(fitNum);
     std::vector<Double> deconv = deconvolveGaussian(gauss, itsHeader.getBeam());
@@ -1464,8 +1464,8 @@ void RadioSource::printTableEntry(std::ostream &stream,
     int flagGuess = results.fitIsGuess() ? 1 : 0;
     int flagSiblings = itsBestFitMap[fitType].numFits() > 1 ? 1 : 0;
 
-    casa::Unit fluxUnits(itsHeader.getFluxUnits());
-    casa::Unit intFluxUnits(itsHeader.getIntFluxUnits());
+    casacore::Unit fluxUnits(itsHeader.getFluxUnits());
+    casacore::Unit intFluxUnits(itsHeader.getIntFluxUnits());
 
     std::string type = column.type();
     if (type == "ISLAND") {
@@ -1491,22 +1491,22 @@ void RadioSource::printTableEntry(std::ostream &stream,
     } else if (type == "Y") {
         column.printEntry(stream, gauss.yCenter());
     } else if (type == "FINT") {
-        double fluxscale = casa::Quantity(1., intFluxUnits).getValue(getUnit(column));
+        double fluxscale = casacore::Quantity(1., intFluxUnits).getValue(getUnit(column));
         column.printEntry(stream, this->getIntegFlux()*fluxscale);
     } else if (type == "FPEAK") {
-        double fluxscale = casa::Quantity(1., fluxUnits).getValue(getUnit(column));
+        double fluxscale = casacore::Quantity(1., fluxUnits).getValue(getUnit(column));
         column.printEntry(stream, this->getPeakFlux()*fluxscale);
     } else if (type == "FINTFIT") {
-        double fluxscale = casa::Quantity(1., intFluxUnits).getValue(getUnit(column));
+        double fluxscale = casacore::Quantity(1., intFluxUnits).getValue(getUnit(column));
         column.printEntry(stream, intfluxfit * fluxscale);
     } else if (type == "FINTFITERR") {
-        double fluxscale = casa::Quantity(1., intFluxUnits).getValue(getUnit(column));
+        double fluxscale = casacore::Quantity(1., intFluxUnits).getValue(getUnit(column));
         column.printEntry(stream, 0.*fluxscale);
     } else if (type == "FPEAKFIT") {
-        double fluxscale = casa::Quantity(1., fluxUnits).getValue(getUnit(column));
+        double fluxscale = casacore::Quantity(1., fluxUnits).getValue(getUnit(column));
         column.printEntry(stream, gauss.height()*fluxscale);
     } else if (type == "FPEAKFITERR") {
-        double fluxscale = casa::Quantity(1., fluxUnits).getValue(getUnit(column));
+        double fluxscale = casacore::Quantity(1., fluxUnits).getValue(getUnit(column));
         column.printEntry(stream, 0.*fluxscale);
     } else if (type == "MAJFIT") {
         column.printEntry(stream, gauss.majorAxis()*pixscale);
@@ -1533,10 +1533,10 @@ void RadioSource::printTableEntry(std::ostream &stream,
     } else if (type == "CHISQFIT") {
         column.printEntry(stream, results.chisq());
     } else if (type == "RMSIMAGE") {
-        double fluxscale = casa::Quantity(1., fluxUnits).getValue(getUnit(column));
+        double fluxscale = casacore::Quantity(1., fluxUnits).getValue(getUnit(column));
         column.printEntry(stream, itsNoiseLevel * fluxscale);
     } else if (type == "RMSFIT") {
-        double fluxscale = casa::Quantity(1., fluxUnits).getValue(getUnit(column));
+        double fluxscale = casacore::Quantity(1., fluxUnits).getValue(getUnit(column));
         column.printEntry(stream, results.RMS()*fluxscale);
     } else if (type == "NFREEFIT") {
         column.printEntry(stream, results.numFreeParam());
@@ -1586,8 +1586,8 @@ RadioSource::writeFitToAnnotationFile(boost::shared_ptr<duchamp::AnnotationWrite
         pix[i * 3 + 2] = 0.;
     }
 
-    std::vector<casa::Gaussian2D<Double> > fitSet = itsBestFitMap["best"].fitSet();
-    std::vector<casa::Gaussian2D<Double> >::iterator fit;
+    std::vector<casacore::Gaussian2D<Double> > fitSet = itsBestFitMap["best"].fitSet();
+    std::vector<casacore::Gaussian2D<Double> >::iterator fit;
 
     float pixscale = itsHeader.getAvPixScale();
     if (doEllipse) {
@@ -1908,7 +1908,7 @@ LOFAR::BlobIStream& operator>>(LOFAR::BlobIStream &blob, RadioSource& src)
     if (ndim > 2) {
         blob >> z2;
     }
-    casa::IPosition start(ndim), end(ndim), stride(ndim, 1);
+    casacore::IPosition start(ndim), end(ndim), stride(ndim, 1);
     start(0) = x1; start(1) = y1;
     end(0) = x2; end(1) = y2;
     if (ndim > 2) {

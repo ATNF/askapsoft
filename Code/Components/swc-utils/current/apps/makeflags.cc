@@ -64,23 +64,23 @@ void process(const std::string &fname)
 {
   const float threshold = 0.3;
   ASKAPLOG_INFO_STR(logger,  "Extracting flags "<<fname<<" threshold: "<<threshold);
-  casa::PagedImage<casa::Float> img(fname);
-  casa::Array<casa::Float> pixels;
+  casacore::PagedImage<casacore::Float> img(fname);
+  casacore::Array<casacore::Float> pixels;
   img.get(pixels);
-  const casa::IPosition shape = pixels.shape();
+  const casacore::IPosition shape = pixels.shape();
   ASKAPLOG_INFO_STR(logger, "Input shape: "<<shape);
   ASKAPDEBUGASSERT(shape.nelements()>=2);
-  std::set<casa::uInt> bad_channels;
-  casa::Matrix<casa::Float> peaks(shape[0],shape.nelements()>2 ? shape[2] : 1,0.);
+  std::set<casacore::uInt> bad_channels;
+  casacore::Matrix<casacore::Float> peaks(shape[0],shape.nelements()>2 ? shape[2] : 1,0.);
   
   for (scimath::MultiDimArrayPlaneIter iter(shape); iter.hasMore(); iter.next()) {
-       casa::Array<casa::Float> thisPlane = iter.getPlane(pixels).nonDegenerate();
+       casacore::Array<casacore::Float> thisPlane = iter.getPlane(pixels).nonDegenerate();
        ASKAPDEBUGASSERT(thisPlane.shape().nelements() == 2);
-       for (casa::uInt ch = 0; ch < casa::uInt(shape[0]); ++ch) {
-            casa::Vector<casa::Float> thisChan = casa::Matrix<casa::Float>(thisPlane).row(ch);
+       for (casacore::uInt ch = 0; ch < casacore::uInt(shape[0]); ++ch) {
+            casacore::Vector<casacore::Float> thisChan = casacore::Matrix<casacore::Float>(thisPlane).row(ch);
             ASKAPDEBUGASSERT(ch < peaks.nrow());
             ASKAPDEBUGASSERT(iter.sequenceNumber() < peaks.ncolumn());
-            for (casa::uInt tm = 0; tm<thisChan.nelements(); ++tm) {
+            for (casacore::uInt tm = 0; tm<thisChan.nelements(); ++tm) {
                  if (thisChan[tm] > threshold) {
                      bad_channels.insert(ch);
                  }
@@ -92,14 +92,14 @@ void process(const std::string &fname)
   }
 
   std::ofstream os("flags.dat"); 
-  for (std::set<casa::uInt>::const_iterator ci = bad_channels.begin(); ci != bad_channels.end(); ++ci) {
+  for (std::set<casacore::uInt>::const_iterator ci = bad_channels.begin(); ci != bad_channels.end(); ++ci) {
        os<<*ci<<std::endl;
   }
   ASKAPLOG_INFO_STR(logger, "Total number of channels to be flagged: "<<bad_channels.size()<<" out of "<<shape[0]<<" present");
   std::ofstream os2("peaks.dat");
-  for (casa::uInt ch=0; ch<peaks.nrow(); ++ch) {
+  for (casacore::uInt ch=0; ch<peaks.nrow(); ++ch) {
        os2<<ch;
-       for (casa::uInt bsln = 0; bsln < peaks.ncolumn(); ++bsln) {
+       for (casacore::uInt bsln = 0; bsln < peaks.ncolumn(); ++bsln) {
             os2<<" "<<peaks(ch,bsln);
        }
        os2<<std::endl;
@@ -114,7 +114,7 @@ int main(int argc, const char** argv)
     askap::askapparallel::AskapParallel comms(argc, argv);
     
     try {
-       casa::Timer timer;
+       casacore::Timer timer;
        timer.mark();
        
        cmdlineparser::Parser parser; // a command line parser

@@ -79,17 +79,17 @@ class ChannelManager {
         ///                         this is a scalar parameter.
         /// @param[in] totalNChan   total number of channels in the system,
         ///                         e.g. 16416 for BETA
-        casa::Vector<casa::Double> localFrequencies(const int rank,
-                const casa::Double centreFreq,
-                const casa::Double chanWidth,
-                const casa::uInt totalNChan) const;
+        casacore::Vector<casacore::Double> localFrequencies(const int rank,
+                const casacore::Double centreFreq,
+                const casacore::Double chanWidth,
+                const casacore::uInt totalNChan) const;
 
     private:
 
         /// Converts a centre frequency into a start frequency
-        static casa::Double centreFreqToStartFreq(const casa::Double centreFreq,
-                                                  const casa::Double chanWidth,
-                                                  const casa::uInt totalNChan);
+        static casacore::Double centreFreqToStartFreq(const casacore::Double centreFreq,
+                                                  const casacore::Double chanWidth,
+                                                  const casacore::uInt totalNChan);
 
         // Tracks the number of channels each process handles
         // first: is the process rank, second: is the number
@@ -100,7 +100,7 @@ class ChannelManager {
         /// @details This value is defined in the parset and can be used to 
         /// avoid hacks when working with the partial bandwidth
         /// (also handy for some commissioning experiments)
-        casa::Double itsFreqOffset;
+        casacore::Double itsFreqOffset;
 };
 
 }

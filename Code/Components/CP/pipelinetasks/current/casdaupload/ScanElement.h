@@ -49,27 +49,27 @@ namespace pipelinetasks {
 class ScanElement {
     public:
         ScanElement(const int id,
-                    const casa::MEpoch& scanstart,
-                    const casa::MEpoch& scanend,
-                    const casa::MDirection& fieldcentre,
+                    const casacore::MEpoch& scanstart,
+                    const casacore::MEpoch& scanend,
+                    const casacore::MDirection& fieldcentre,
                     const std::string& fieldname,
-                    const casa::Vector<casa::Int> polarisations,
+                    const casacore::Vector<casacore::Int> polarisations,
                     const int numchan,
-                    const casa::Quantity& centrefreq,
-                    const casa::Quantity& channelwidth);
+                    const casacore::Quantity& centrefreq,
+                    const casacore::Quantity& channelwidth);
 
         xercesc::DOMElement* toXmlElement(xercesc::DOMDocument& doc) const;
 
     private:
         int itsId;
-        casa::MEpoch itsScanStart;
-        casa::MEpoch itsScanEnd;
-        casa::MDirection itsFieldCentre;
+        casacore::MEpoch itsScanStart;
+        casacore::MEpoch itsScanEnd;
+        casacore::MDirection itsFieldCentre;
         std::string itsFieldName;
-        casa::Vector<casa::Int> itsPolarisations;
+        casacore::Vector<casacore::Int> itsPolarisations;
         int itsNumChan;
-        casa::Quantity itsCentreFreq;
-        casa::Quantity itsChannelWidth;
+        casacore::Quantity itsCentreFreq;
+        casacore::Quantity itsChannelWidth;
 };
 
 }

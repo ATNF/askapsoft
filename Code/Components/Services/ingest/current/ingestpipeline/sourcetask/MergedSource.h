@@ -96,8 +96,8 @@ class MergedSource : public ISource,
         /// @param[in] ant antenna index (to get position on the ground)
         /// @param[in] dir direction measure to convert
         /// @return direction measure in J2000
-        casa::MDirection convertToJ2000(const casa::MVEpoch &epoch, casa::uInt ant, 
-                                        const casa::MDirection &dir) const;
+        casacore::MDirection convertToJ2000(const casacore::MVEpoch &epoch, casacore::uInt ant, 
+                                        const casacore::MDirection &dir) const;
 
     private:
 
@@ -113,7 +113,7 @@ class MergedSource : public ISource,
         /// timeouts before giving up). The value of 1 is a special case where timeout
         /// cause the cycle to be ignored instead of the exception being thrown.
         /// @return true if itsVis is invalid at the completion of this method and cycle must be skipped
-        bool ensureValidVis(casa::uInt maxNoDataRetries);
+        bool ensureValidVis(casacore::uInt maxNoDataRetries);
 
         /// @brief helper method to flag and report on bad UVWs
         /// @details It decomposes the given rows back into antennas and report in the log with
@@ -121,7 +121,7 @@ class MergedSource : public ISource,
         /// This method is a work around of UVW metadata problem (see ASKAPSDP-3431)
         /// @param[in] rowsWithBadUVWs set of rows to flag
         /// @param[in] timestamp BAT for reporting
-        void flagDueToBadUVWs(const std::set<casa::uInt> &rowsWithBadUVWs, const casa::uLong timestamp);
+        void flagDueToBadUVWs(const std::set<casacore::uInt> &rowsWithBadUVWs, const casacore::uLong timestamp);
 
 
         /// Initialises an "empty" VisChunk
@@ -172,7 +172,7 @@ class MergedSource : public ISource,
 
         /// @brief The last timestamp processed. This is stored to avoid the situation
         /// where we may produce two consecutive VisChunks with the same timestamp
-        casa::uLong itsLastTimestamp;
+        casacore::uLong itsLastTimestamp;
 
         /// @brief visibility converter
         VisConverter<VisDatagram> itsVisConverter;
@@ -191,10 +191,10 @@ class MergedSource : public ISource,
         /// needed, but it would mean doing a lot of similar operations inside the loop. 
         /// Given that we do it per antenna, rather than per baseline, it would probably be
         /// fine and may be extracting this info int he constructor is a premature optimisation.
-        casa::Matrix<casa::Double> itsArrayLayout;
+        casacore::Matrix<casacore::Double> itsArrayLayout;
 
         /// @brief cycle counter for cycles with bad UVWs
-        casa::uInt itsBadUVWCycleCounter;
+        casacore::uInt itsBadUVWCycleCounter;
 
         /// @brief maximum number of cycles with bad UVWs before an exception is thrown
         /// @note Negative number means to continue forever (with flagging)

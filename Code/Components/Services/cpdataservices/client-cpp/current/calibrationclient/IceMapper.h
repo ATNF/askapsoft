@@ -56,12 +56,12 @@ class IceMapper {
         static askap::cp::caldataservice::BandpassSolution fromIce(const askap::interfaces::calparams::TimeTaggedBandpassSolution& ice_sol);
 
     private:
-        static askap::interfaces::FloatComplex toIce(const casa::Complex& val);
+        static askap::interfaces::FloatComplex toIce(const casacore::Complex& val);
         static askap::interfaces::calparams::JonesIndex toIce(const askap::accessors::JonesIndex& jindex);
         static askap::interfaces::calparams::JonesJTerm toIce(const askap::accessors::JonesJTerm& jterm);
         static askap::interfaces::calparams::JonesDTerm toIce(const askap::accessors::JonesDTerm& dterm);
 
-        static casa::Complex fromIce(const askap::interfaces::FloatComplex& ice_val);
+        static casacore::Complex fromIce(const askap::interfaces::FloatComplex& ice_val);
         static askap::accessors::JonesIndex fromIce(const askap::interfaces::calparams::JonesIndex& ice_jindex);
         static askap::accessors::JonesJTerm fromIce(const askap::interfaces::calparams::JonesJTerm& ice_jterm);
         static askap::accessors::JonesDTerm fromIce(const askap::interfaces::calparams::JonesDTerm& ice_dterm);

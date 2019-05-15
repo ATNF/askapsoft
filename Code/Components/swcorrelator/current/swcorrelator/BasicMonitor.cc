@@ -82,7 +82,7 @@ void BasicMonitor::initialise(const int nAnt, const int nBeam, const int nChan)
       itsLastHistPosition = -1;
       itsWrapped = false;
       itsHistory.resize(nHistory,nBeam,nBaselines);
-      itsHistory.set(casa::Complex(0.,0.));
+      itsHistory.set(casacore::Complex(0.,0.));
       itsDelayHistory.resize(nHistory, nBeam, nBaselines);
       itsDelayHistory.set(0.);
       itsControlHistory.resize(nHistory, nBeam, nBaselines);
@@ -129,16 +129,16 @@ void BasicMonitor::publish(const CorrProducts &buf)
   {
     const std::string fname = "spc_beam" + utility::toString<int>(buf.itsBeam) + ".dat";
     std::ofstream os(fname.c_str());
-    for (casa::uInt chan=0; chan < buf.itsVisibility.ncolumn(); ++chan) {
+    for (casacore::uInt chan=0; chan < buf.itsVisibility.ncolumn(); ++chan) {
          os<<chan<<" ";
-         for (casa::uInt baseline = 0; baseline < buf.itsVisibility.nrow(); ++baseline) {
-              os<<abs(buf.itsVisibility(baseline,chan))<<" "<<arg(buf.itsVisibility(baseline,chan))/casa::C::pi*180.<<" ";                       
+         for (casacore::uInt baseline = 0; baseline < buf.itsVisibility.nrow(); ++baseline) {
+              os<<abs(buf.itsVisibility(baseline,chan))<<" "<<arg(buf.itsVisibility(baseline,chan))/casacore::C::pi*180.<<" ";                       
          }
          os<<std::endl;
     }
   }
   
-  const casa::Vector<casa::Float> delays = estimateDelays(buf.itsVisibility);
+  const casacore::Vector<casacore::Float> delays = estimateDelays(buf.itsVisibility);
   ASKAPLOG_DEBUG_STR(logger, "Beam "<<buf.itsBeam<<": delays (s) = "<<delays);
   ASKAPDEBUGASSERT(delays.nelements() == buf.itsVisibility.nrow());
   if (buf.itsBeam >= int(itsHistory.ncolumn())) {
@@ -147,7 +147,7 @@ void BasicMonitor::publish(const CorrProducts &buf)
       return;     
   }
             
-  for (casa::uInt baseline = 0; baseline < buf.itsVisibility.nrow(); ++baseline) {
+  for (casacore::uInt baseline = 0; baseline < buf.itsVisibility.nrow(); ++baseline) {
                  
        itsDelayHistory(itsLastHistPosition, buf.itsBeam, baseline) = delays[baseline];
                  
@@ -155,15 +155,15 @@ void BasicMonitor::publish(const CorrProducts &buf)
        itsControlHistory(itsLastHistPosition, buf.itsBeam, baseline) = buf.itsControl[baseline];         
        
        // average in frequency
-       casa::Complex temp(0.,0.);
-       for (casa::uInt chan=0; chan < buf.itsVisibility.ncolumn(); ++chan) {
+       casacore::Complex temp(0.,0.);
+       for (casacore::uInt chan=0; chan < buf.itsVisibility.ncolumn(); ++chan) {
             temp += buf.itsVisibility(baseline,chan);
        }
        itsHistory(itsLastHistPosition,buf.itsBeam,baseline) = temp / float(buf.itsVisibility.ncolumn());
               
        /*
        // middle of the band
-       const casa::uInt chan = buf.itsVisibility.ncolumn() / 2;
+       const casacore::uInt chan = buf.itsVisibility.ncolumn() / 2;
        ASKAPDEBUGASSERT(chan < buf.itsVisibility.ncolumn());
        itsHistory(itsLastHistPosition,buf.itsBeam,baseline) = buf.itsVisibility(baseline,chan);
        */
@@ -189,13 +189,13 @@ void BasicMonitor::finalise()
       }
       os<<itsBATs[curPos]<<" ";
       for (int beam=0; beam < int(itsHistory.ncolumn()); ++beam) {
-           for (casa::uInt baseline = 0; baseline < itsHistory.nplane(); ++baseline) {
-                os<<abs(itsHistory(curPos,beam,baseline))<<" "<<arg(itsHistory(curPos,beam,baseline))/casa::C::pi*180.<<" "
+           for (casacore::uInt baseline = 0; baseline < itsHistory.nplane(); ++baseline) {
+                os<<abs(itsHistory(curPos,beam,baseline))<<" "<<arg(itsHistory(curPos,beam,baseline))/casacore::C::pi*180.<<" "
                   <<itsDelayHistory(curPos,beam,baseline)*1e9<<" ";
            }
       }
       // only show control field for the first beam (it should be the same)
-      for (casa::uInt baseline = 0; baseline < itsHistory.nplane(); ++baseline) {
+      for (casacore::uInt baseline = 0; baseline < itsHistory.nplane(); ++baseline) {
            os<<itsControlHistory(curPos,0,baseline)<<" ";
       }
       //
@@ -211,12 +211,12 @@ void BasicMonitor::finalise()
 /// @param[in] vis visibility matrix (rows are baselines, columns are channels)
 /// @return delays in seconds for each baseline
 /// @note the routine assumes 1 MHz channel spacing and will not work for a very quick wrap
-casa::Vector<casa::Float> BasicMonitor::estimateDelays(const casa::Matrix<casa::Complex> &vis)
+casacore::Vector<casacore::Float> BasicMonitor::estimateDelays(const casacore::Matrix<casacore::Complex> &vis)
 {
-  casa::Vector<casa::Float> result(vis.nrow(),0.);
+  casacore::Vector<casacore::Float> result(vis.nrow(),0.);
   if (vis.ncolumn() >= 2) {
       scimath::DelayEstimator de(1e6); // hard-coded 1 MHz resolution
-      for (casa::uInt row = 0; row < vis.nrow(); ++row) {
+      for (casacore::uInt row = 0; row < vis.nrow(); ++row) {
            result[row] = float(de.getDelay(vis.row(row)));
       }
   }    

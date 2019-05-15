@@ -93,7 +93,7 @@ FringeRotationTask::FringeRotationTask(const LOFAR::ParameterSet& parset,
         ASKAPLOG_INFO_STR(logger, "The following fixed delays are specified:");
         ASKAPCHECK(itsFixedDelays.size() == nAnt, "Fixed delays do not seem to be specified for all configured antennas");
 
-        for (size_t id = 0; id < casa::min(casa::uInt(nAnt),casa::uInt(itsFixedDelays.size())); ++id) {
+        for (size_t id = 0; id < casacore::min(casacore::uInt(nAnt),casacore::uInt(itsFixedDelays.size())); ++id) {
              ASKAPLOG_INFO_STR(logger, "    antenna: " << antennas.at(id).name()<<" (id="<<id << ") delay: "
                     << itsFixedDelays[id] << " ns");
         }
@@ -170,56 +170,56 @@ void FringeRotationTask::process(askap::cp::common::VisChunk::ShPtr& chunk)
              "Parallel data streams are not supported; use fringe rotation task after Merge");
     }
 
-    casa::Matrix<double> delays(nAntennas(), nBeams(),0.);
-    casa::Matrix<double> rates(nAntennas(),nBeams(),0.);
+    casacore::Matrix<double> delays(nAntennas(), nBeams(),0.);
+    casacore::Matrix<double> rates(nAntennas(),nBeams(),0.);
 
     // geocentric U and V per antenna/beam; we need those only if
     // itsCalcUVW is true, so in principle we could've added more logic to 
     // avoid allocating unnecessary memory. But it looks like premature optimisation. 
-    casa::Matrix<double> antUs(nAntennas(), nBeams(), 0.);
-    casa::Matrix<double> antVs(nAntennas(), nBeams(), 0.);
-    casa::Matrix<double> antWs(nAntennas(), nBeams(), 0.);
-    std::vector<boost::shared_ptr<casa::UVWMachine> > uvwMachines(nBeams());
+    casacore::Matrix<double> antUs(nAntennas(), nBeams(), 0.);
+    casacore::Matrix<double> antVs(nAntennas(), nBeams(), 0.);
+    casacore::Matrix<double> antWs(nAntennas(), nBeams(), 0.);
+    std::vector<boost::shared_ptr<casacore::UVWMachine> > uvwMachines(nBeams());
 
     // calculate delays (in seconds) and rates (in radians per seconds) for each antenna
     // and beam the values are absolute per antenna w.r.t the Earth centre
 
     // Determine Greenwich Apparent Sidereal Time
     //const double gast = calcGAST(chunk->time());
-    const casa::MEpoch epoch(chunk->time(), casa::MEpoch::UTC);
+    const casacore::MEpoch epoch(chunk->time(), casacore::MEpoch::UTC);
     const double effLOFreq = getEffectiveLOFreq(*chunk);
-    const double siderealRate = casa::C::_2pi / 86400. / (1. - 1./365.25);
+    const double siderealRate = casacore::C::_2pi / 86400. / (1. - 1./365.25);
 
-    for (casa::uInt ant = 0; ant < nAntennas(); ++ant) {
+    for (casacore::uInt ant = 0; ant < nAntennas(); ++ant) {
          ASKAPASSERT(chunk->phaseCentre().nelements() > 0);
-         const casa::MDirection dishPnt = casa::MDirection(chunk->phaseCentre()[0],chunk->directionFrame());
+         const casacore::MDirection dishPnt = casacore::MDirection(chunk->phaseCentre()[0],chunk->directionFrame());
          // fixed delay in seconds
          const double fixedDelay = ant < itsFixedDelays.size() ? itsFixedDelays[ant]*1e-9 : 0.;
 
          // antenna coordinates in ITRF
-         const casa::Vector<double> xyz = antXYZ(ant);
+         const casacore::Vector<double> xyz = antXYZ(ant);
          ASKAPDEBUGASSERT(xyz.nelements() == 3);
-         const casa::MPosition antPos(casa::MVPosition(xyz), casa::MPosition::ITRF);
+         const casacore::MPosition antPos(casacore::MVPosition(xyz), casacore::MPosition::ITRF);
          /*
-         const casa::MPosition antPos(casa::MVPosition(casa::Quantity(370.81, "m"),
-                            casa::Quantity(116.6310372795, "deg"),
-                            casa::Quantity(-26.6991531922, "deg")),
-                            casa::MPosition::Ref(casa::MPosition::WGS84));
+         const casacore::MPosition antPos(casacore::MVPosition(casacore::Quantity(370.81, "m"),
+                            casacore::Quantity(116.6310372795, "deg"),
+                            casacore::Quantity(-26.6991531922, "deg")),
+                            casacore::MPosition::Ref(casacore::MPosition::WGS84));
          */
-         const casa::MeasFrame frame(epoch, antPos);
+         const casacore::MeasFrame frame(epoch, antPos);
 
-         for (casa::uInt beam = 0; beam < nBeams(); ++beam) {
+         for (casacore::uInt beam = 0; beam < nBeams(); ++beam) {
               // Current APP phase center
-              const casa::MDirection fpc = casa::MDirection::Convert(phaseCentre(dishPnt, beam),
-                                    casa::MDirection::Ref(casa::MDirection::TOPO, frame))();
-              const casa::MDirection hadec = casa::MDirection::Convert(phaseCentre(dishPnt, beam),
-                                    casa::MDirection::Ref(casa::MDirection::HADEC, frame))();
+              const casacore::MDirection fpc = casacore::MDirection::Convert(phaseCentre(dishPnt, beam),
+                                    casacore::MDirection::Ref(casacore::MDirection::TOPO, frame))();
+              const casacore::MDirection hadec = casacore::MDirection::Convert(phaseCentre(dishPnt, beam),
+                                    casacore::MDirection::Ref(casacore::MDirection::HADEC, frame))();
               if (itsCalcUVW && (ant == 0)) {
                   // for optional uvw rotation
                   // HADEC frame doesn't seem to work correctly, even apart from inversion of the first coordinate
                   // For details see ADESCOM-342.
-                  //uvwMachines[beam].reset(new casa::UVWMachine(casa::MDirection::Ref(casa::MDirection::J2000), hadec, frame));
-                  uvwMachines[beam].reset(new casa::UVWMachine(casa::MDirection::Ref(casa::MDirection::J2000), fpc, frame));
+                  //uvwMachines[beam].reset(new casacore::UVWMachine(casacore::MDirection::Ref(casacore::MDirection::J2000), hadec, frame));
+                  uvwMachines[beam].reset(new casacore::UVWMachine(casacore::MDirection::Ref(casacore::MDirection::J2000), fpc, frame));
               }
               //const double ra = fpc.getAngle().getValue()(0);
               const double dec = hadec.getValue().getLat(); //fpc.getAngle().getValue()(1);
@@ -236,11 +236,11 @@ void FringeRotationTask::process(askap::cp::common::VisChunk::ShPtr& chunk)
               // APP delay is a scalar, so transformation matrix is just a vector
               // we could probably use the matrix math to process all antennas at once, however
               // do it explicitly for now for simplicity
-              const casa::Vector<double> xyz = antXYZ(ant);
+              const casacore::Vector<double> xyz = antXYZ(ant);
               ASKAPDEBUGASSERT(xyz.nelements() == 3);
               const double delayInMetres = -cd * cH0 * xyz(0) + cd * sH0 * xyz(1) - sd * xyz(2);
-              delays(ant,beam) = fixedDelay + delayInMetres / casa::C::c;
-              rates(ant,beam) = (cd * sH0 * xyz(0) + cd * cH0 * xyz(1)) * siderealRate * casa::C::_2pi / casa::C::c * effLOFreq;
+              delays(ant,beam) = fixedDelay + delayInMetres / casacore::C::c;
+              rates(ant,beam) = (cd * sH0 * xyz(0) + cd * cH0 * xyz(1)) * siderealRate * casacore::C::_2pi / casacore::C::c * effLOFreq;
 
               // optional uvw calculation
               if (itsCalcUVW) {
@@ -252,11 +252,11 @@ void FringeRotationTask::process(askap::cp::common::VisChunk::ShPtr& chunk)
     }
 
     if (itsCalcUVW) {
-        casa::Vector<double> uvwvec(3);
-        for (casa::uInt row = 0; row<chunk->nRow(); ++row) {
-             const casa::uInt ant1 = chunk->antenna1()(row);
-             const casa::uInt ant2 = chunk->antenna2()(row);
-             const casa::uInt beam = chunk->beam1()(row);
+        casacore::Vector<double> uvwvec(3);
+        for (casacore::uInt row = 0; row<chunk->nRow(); ++row) {
+             const casacore::uInt ant1 = chunk->antenna1()(row);
+             const casacore::uInt ant2 = chunk->antenna2()(row);
+             const casacore::uInt beam = chunk->beam1()(row);
              ASKAPASSERT(ant1 < nAntennas());
              ASKAPASSERT(ant2 < nAntennas());
              ASKAPASSERT(beam < nBeams());
@@ -274,7 +274,7 @@ void FringeRotationTask::process(askap::cp::common::VisChunk::ShPtr& chunk)
                 // code for cross-check with calcUVWTask
                 // note, now it doesn't quite match as we using the frame related to each
                 // particular antenna rather than antenna 0. This gives about 0.1mm error
-             casa::Vector<double> diff = uvwvec.copy();
+             casacore::Vector<double> diff = uvwvec.copy();
              diff(0) -= chunk->uvw()(row)(0);
              diff(1) -= chunk->uvw()(row)(1);
              diff(2) -= chunk->uvw()(row)(2);

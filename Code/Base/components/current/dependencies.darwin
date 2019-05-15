@@ -1,3 +1,3 @@
 askap=/usr/local; askap_askap
-casacore=3rdParty/casacore/casacore-2.0.3
-casa_components=3rdParty/casa-components/casa-components-1.6.0
+casacore=/usr/local
+casarest=/usr/local

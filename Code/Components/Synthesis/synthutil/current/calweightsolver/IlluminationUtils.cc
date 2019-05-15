@@ -106,14 +106,14 @@ void IlluminationUtils::useSingleElement()
 /// @param[in] offsets a matrix with offsets of the elements (number of columns should be 2,
 /// number of rows is the number of elements).
 /// @param[in] weights a vector of complex weights
-void IlluminationUtils::useSyntheticPattern(const casa::Matrix<double> &offsets, 
-                            const casa::Vector<casa::Complex> &weights)
+void IlluminationUtils::useSyntheticPattern(const casacore::Matrix<double> &offsets, 
+                            const casacore::Vector<casacore::Complex> &weights)
 {
   ASKAPASSERT(itsElementIllumination);
   ASKAPASSERT(offsets.ncolumn() == 2);
   ASKAPASSERT(offsets.nrow() == weights.nelements());
-  casa::Vector<casa::RigidVector<casa::Double, 2> > elementOffsets(offsets.nrow());
-  for (casa::uInt elem = 0; elem<elementOffsets.nelements(); ++elem) {
+  casacore::Vector<casacore::RigidVector<casacore::Double, 2> > elementOffsets(offsets.nrow());
+  for (casacore::uInt elem = 0; elem<elementOffsets.nelements(); ++elem) {
        elementOffsets[elem](0) = offsets(elem,0);
        elementOffsets[elem](1) = offsets(elem,1);
   }
@@ -133,24 +133,24 @@ void IlluminationUtils::save(const std::string &name, const std::string &what)
    synthesis::UVPattern pattern(itsSize, itsSize, itsCellSize, itsCellSize, itsOverSample);
    itsIllumination->getPattern(freq, pattern);
    
-   casa::Matrix<double> xform(2,2);
+   casacore::Matrix<double> xform(2,2);
    xform = 0.; xform.diagonal() = 1.;
-   casa::Vector<casa::String> names(2);
+   casacore::Vector<casacore::String> names(2);
    names[0]="U"; names[1]="V";
    
-   casa::Vector<double> increment(2);
+   casacore::Vector<double> increment(2);
    increment[0]=-itsCellSize/double(itsOverSample);
    increment[1]=itsCellSize/double(itsOverSample);
    
-   casa::LinearCoordinate linear(names, casa::Vector<casa::String>(2,"lambda"),
-          casa::Vector<double>(2,0.), increment, xform, 
-          casa::Vector<double>(2,double(itsSize)/2));
+   casacore::LinearCoordinate linear(names, casacore::Vector<casacore::String>(2,"lambda"),
+          casacore::Vector<double>(2,0.), increment, xform, 
+          casacore::Vector<double>(2,double(itsSize)/2));
    
-   casa::CoordinateSystem coords;
+   casacore::CoordinateSystem coords;
    coords.addCoordinate(linear);    
    
-   casa::Array<casa::Complex> buf(pattern.pattern().shape());
-   casa::convertArray<casa::Complex, casa::DComplex>(buf,pattern.pattern());
+   casacore::Array<casacore::Complex> buf(pattern.pattern().shape());
+   casacore::convertArray<casacore::Complex, casacore::DComplex>(buf,pattern.pattern());
    saveComplexImage(name,coords,buf,what);
 }
 
@@ -167,26 +167,26 @@ void IlluminationUtils::saveVP(const std::string &name, const std::string &what)
    const double freq=1.4e9;
    synthesis::UVPattern pattern(itsSize, itsSize, itsCellSize, itsCellSize, itsOverSample);
    itsIllumination->getPattern(freq, pattern);
-   casa::Array<casa::DComplex> scratch(pattern.pattern().copy());
+   casacore::Array<casacore::DComplex> scratch(pattern.pattern().copy());
    scimath::fft2d(scratch,false);
-   scratch/=casa::max(casa::abs(scratch));
+   scratch/=casacore::max(casacore::abs(scratch));
    
-   casa::Matrix<double> xform(2,2);
+   casacore::Matrix<double> xform(2,2);
    xform = 0.; xform.diagonal() = 1.;
    double angularCellSize = double(itsOverSample)/itsCellSize/double(itsSize);
-   casa::IPosition blc(scratch.shape().nelements(),0);
+   casacore::IPosition blc(scratch.shape().nelements(),0);
    blc[0]=blc[1]=itsSize*(itsOverSample-1)/itsOverSample/2;
-   casa::IPosition length(scratch.shape());
+   casacore::IPosition length(scratch.shape());
    length[0]=length[1]=itsSize/itsOverSample;
-   casa::Array<casa::DComplex> slice = scratch(casa::Slicer(blc,length));
-   casa::DirectionCoordinate azel(casa::MDirection::AZEL, casa::Projection::SIN, 0.,0.,
+   casacore::Array<casacore::DComplex> slice = scratch(casacore::Slicer(blc,length));
+   casacore::DirectionCoordinate azel(casacore::MDirection::AZEL, casacore::Projection::SIN, 0.,0.,
                  -angularCellSize, angularCellSize, 
                  xform, length[0]/2, length[1]/2);
       
-   casa::CoordinateSystem coords;
+   casacore::CoordinateSystem coords;
    coords.addCoordinate(azel);    
-   casa::Array<casa::Complex> buf(slice.shape());
-   casa::convertArray<casa::Complex, casa::DComplex>(buf,slice);
+   casacore::Array<casacore::Complex> buf(slice.shape());
+   casacore::convertArray<casacore::Complex, casacore::DComplex>(buf,slice);
    saveComplexImage(name,coords,buf,what);
  }
 
@@ -198,30 +198,30 @@ void IlluminationUtils::saveVP(const std::string &name, const std::string &what)
 /// @param[in] what type of the image requested, e.g. amplitude (default),
 /// real, imag, phase, complex. Minimum match applies.
 void IlluminationUtils::saveComplexImage(const std::string &name, 
-            const casa::CoordinateSystem &coords, 
-            const casa::Array<casa::Complex> &arr,
+            const casacore::CoordinateSystem &coords, 
+            const casacore::Array<casacore::Complex> &arr,
             const std::string &what)
 {
   if (what.find("complex") == 0) {
-       casa::PagedImage<casa::Complex> result(casa::TiledShape(arr.shape()), coords, name);
-       casa::ArrayLattice<casa::Complex> patternLattice(arr);                
+       casacore::PagedImage<casacore::Complex> result(casacore::TiledShape(arr.shape()), coords, name);
+       casacore::ArrayLattice<casacore::Complex> patternLattice(arr);                
        result.setUnits("Jy/pixel");             
    } else {
-       casa::PagedImage<casa::Float> result(casa::TiledShape(arr.shape()), coords, name);
-       casa::Array<casa::Float> workArray;
+       casacore::PagedImage<casacore::Float> result(casacore::TiledShape(arr.shape()), coords, name);
+       casacore::Array<casacore::Float> workArray;
        if (what.find("amp")==0) {
-           workArray = casa::amplitude(arr);
+           workArray = casacore::amplitude(arr);
        } else if (what.find("real") == 0) {
-           workArray = casa::real(arr);
+           workArray = casacore::real(arr);
        } else if (what.find("imag") == 0) {
-           workArray = casa::imag(arr);
+           workArray = casacore::imag(arr);
        } else if (what.find("phase") == 0) {
-           workArray = casa::phase(arr);
+           workArray = casacore::phase(arr);
        } else {
           ASKAPTHROW(AskapError, "Unknown type of image requested from IlluminationUtils::saveComplexImage ("<<
                      what<<")");
        }
-       casa::ArrayLattice<casa::Float> patternLattice(workArray);
+       casacore::ArrayLattice<casacore::Float> patternLattice(workArray);
        result.copyData(patternLattice);
        result.setUnits("Jy/pixel");             
    }

@@ -52,25 +52,25 @@ class MomentMapExtractor : public SourceDataExtractor {
         void extract();
         void writeImage();
 
-    casa::Array<float> mom0() { return itsMom0map; };
-    casa::Array<float> mom1() { return itsMom1map; };
-    casa::Array<float> mom2() { return itsMom2map; };
+    casacore::Array<float> mom0() { return itsMom0map; };
+    casacore::Array<float> mom1() { return itsMom1map; };
+    casacore::Array<float> mom2() { return itsMom2map; };
 
-    casa::LogicalArray mom0mask() { return itsMom0mask; };
-    casa::LogicalArray mom1mask() { return itsMom1mask; };
-    casa::LogicalArray mom2mask() { return itsMom2mask; };
+    casacore::LogicalArray mom0mask() { return itsMom0mask; };
+    casacore::LogicalArray mom1mask() { return itsMom1mask; };
+    casacore::LogicalArray mom2mask() { return itsMom2mask; };
 
     protected:
         void defineSlicer();
-        casa::IPosition arrayShape();
+        casacore::IPosition arrayShape();
         void initialiseArray();
         std::string outfile(int moment);
         double getSpectralIncrement();
         double getSpectralIncrement(int z);
         double getSpecVal(int z);
-        void getMom0(const casa::Array<Float> &subarray);
-        void getMom1(const casa::Array<Float> &subarray);
-        void getMom2(const casa::Array<Float> &subarray);
+        void getMom0(const casacore::Array<Float> &subarray);
+        void getMom1(const casacore::Array<Float> &subarray);
+        void getMom2(const casacore::Array<Float> &subarray);
 
         /// What sort of cutout to do - full field or box around the source?
         std::string itsSpatialMethod;
@@ -84,14 +84,14 @@ class MomentMapExtractor : public SourceDataExtractor {
         /// List of moments to calculate
         std::map<int, bool> itsMomentRequest;
         /// Array containing the moment-0 map
-        casa::Array<Float> itsMom0map;
-        casa::LogicalArray itsMom0mask;
+        casacore::Array<Float> itsMom0map;
+        casacore::LogicalArray itsMom0mask;
         /// Array containing the moment-1 map
-        casa::Array<Float> itsMom1map;
-        casa::LogicalArray itsMom1mask;
+        casacore::Array<Float> itsMom1map;
+        casacore::LogicalArray itsMom1mask;
         /// Array containing the moment-2 map
-        casa::Array<Float> itsMom2map;
-        casa::LogicalArray itsMom2mask;
+        casacore::Array<Float> itsMom2map;
+        casacore::LogicalArray itsMom2mask;
 
 };
 

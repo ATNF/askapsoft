@@ -270,7 +270,7 @@ void MPIBasicComms::sendMessage(const IMessage& msg, int dest)
 
     int messageType = msg.getMessageType();
 
-    casa::Timer timer;
+    casacore::Timer timer;
     timer.mark();
 
     // First send the size of the buffer
@@ -359,7 +359,7 @@ void MPIBasicComms::sendMessageBroadcast(const IMessage& msg)
     out << msg;
     out.putEnd();
 
-    casa::Timer timer;
+    casacore::Timer timer;
     timer.mark();
 
     // First broadcast the size of the mesage broadcast

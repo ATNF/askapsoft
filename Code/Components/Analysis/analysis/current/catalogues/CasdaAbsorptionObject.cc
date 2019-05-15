@@ -77,9 +77,9 @@ CasdaAbsorptionObject::CasdaAbsorptionObject(CasdaComponent &component,
 
     itsImageID = parset.getString("image");
 
-    boost::shared_ptr<casa::ImageInterface<Float> > imagePtr = analysisutilities::openImage(itsImageID);
+    boost::shared_ptr<casacore::ImageInterface<Float> > imagePtr = analysisutilities::openImage(itsImageID);
     Quantity mjd = imagePtr->coordinates().obsInfo().obsDate().get("d");
-    itsDate = casa::MVTime(mjd.getValue()).string(MVTime::FITS);
+    itsDate = casacore::MVTime(mjd.getValue()).string(MVTime::FITS);
     itsComponentID = component.componentID();
     itsContinuumFlux = component.intFlux();
 
@@ -91,10 +91,10 @@ CasdaAbsorptionObject::CasdaAbsorptionObject(CasdaComponent &component,
     itsRA.value() = component.ra();
     itsDEC.value() = component.dec();
 
-//    casa::Unit imageFreqUnits(obj.header().getSpectralUnits());
-    casa::Unit imageFreqUnits(obj.header().WCS().cunit[obj.header().WCS().spec]);
-    casa::Unit freqUnits(casda::freqUnit);
-    double freqScale = casa::Quantity(1., imageFreqUnits).getValue(freqUnits);
+//    casacore::Unit imageFreqUnits(obj.header().getSpectralUnits());
+    casacore::Unit imageFreqUnits(obj.header().WCS().cunit[obj.header().WCS().spec]);
+    casacore::Unit freqUnits(casda::freqUnit);
+    double freqScale = casacore::Quantity(1., imageFreqUnits).getValue(freqUnits);
     // itsFreq = zworld * freqScale;
 
     int lng = obj.header().WCS().lng;

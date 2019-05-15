@@ -72,7 +72,7 @@ void CModelWorker::run(void)
 
     for (unsigned int term = 0; term < nterms; ++term) {
         // Create a TempImage and the component imager
-        casa::TempImage<casa::Float> image = ImageFactory::createTempImage(parset);
+        casacore::TempImage<casacore::Float> image = ImageFactory::createTempImage(parset);
         ComponentImagerWrapper imager(parset);
 
         // Signal master ready, receive and image components until the master

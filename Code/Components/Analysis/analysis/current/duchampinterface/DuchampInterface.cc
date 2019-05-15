@@ -402,16 +402,16 @@ duchamp::FitsHeader changeSpectralAxis(duchamp::FitsHeader &inputHead,
 
 double getPeakFluxConversionScale(duchamp::FitsHeader &inputHead, std::string newUnits)
 {
-    casa::Unit inputFluxUnits(inputHead.getFluxUnits());
-    casa::Unit fluxUnits(newUnits);
+    casacore::Unit inputFluxUnits(inputHead.getFluxUnits());
+    casacore::Unit fluxUnits(newUnits);
     double peakFluxscale = 1.;
     if (inputFluxUnits.getName() != "") {
         // Cannot do the conversion if the units string is blank. If
         // this is the case, leave the conversion factor as 1.
-        casa::Quantity unity(1., inputFluxUnits);
+        casacore::Quantity unity(1., inputFluxUnits);
         if (unity.isConform(fluxUnits)) {
             // Can we do a conversion between the requested units?
-            peakFluxscale = casa::Quantity(1., inputFluxUnits).getValue(fluxUnits);
+            peakFluxscale = casacore::Quantity(1., inputFluxUnits).getValue(fluxUnits);
         } else {
             ASKAPLOG_WARN_STR(logger, "Cannot convert between peak flux units " <<
                               inputHead.getFluxUnits() << " and " << newUnits);
@@ -423,13 +423,13 @@ double getPeakFluxConversionScale(duchamp::FitsHeader &inputHead, std::string ne
 
 double getIntFluxConversionScale(duchamp::FitsHeader &inputHead, std::string newUnits)
 {
-    casa::Unit inputIntFluxUnits(inputHead.getIntFluxUnits());
-    casa::Unit intFluxUnits(newUnits);
+    casacore::Unit inputIntFluxUnits(inputHead.getIntFluxUnits());
+    casacore::Unit intFluxUnits(newUnits);
     double intFluxscale = 1.;
     if (inputIntFluxUnits.getName() != "") {
-        casa::Quantity unity(1., inputIntFluxUnits);
+        casacore::Quantity unity(1., inputIntFluxUnits);
         if (unity.isConform(intFluxUnits)) {
-            intFluxscale = casa::Quantity(1., inputIntFluxUnits).getValue(intFluxUnits);
+            intFluxscale = casacore::Quantity(1., inputIntFluxUnits).getValue(intFluxUnits);
             if (inputHead.needBeamSize()) {
                 intFluxscale /= inputHead.beam().area(); // Convert from mJy/beam to mJy
             }

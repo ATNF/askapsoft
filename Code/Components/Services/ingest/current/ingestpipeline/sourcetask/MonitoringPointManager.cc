@@ -79,12 +79,12 @@ MonitoringPointManager::~MonitoringPointManager()
 
 void MonitoringPointManager::submitMonitoringPoints(const askap::cp::common::VisChunk& chunk) const
 {
-    const casa::MDirection target = chunk.targetPointingCentre()[0];
+    const casacore::MDirection target = chunk.targetPointingCentre()[0];
     submitPoint<int32_t>("obs.ScanId", chunk.scan());
     submitPoint<string>("obs.FieldName", chunk.targetName());
     submitPoint<string>("obs.dir1", askap::printLon(target));
     submitPoint<string>("obs.dir2", askap::printLat(target));
-    submitPoint<string>("obs.CoordSys", casa::MDirection::showType(target.type()));
+    submitPoint<string>("obs.CoordSys", casacore::MDirection::showType(target.type()));
     submitPoint<int32_t>("obs.Interval", chunk.interval() * 1000);
     submitPoint<float>("obs.SourceStartFreq", chunk.frequency()[0]/ 1000 / 1000);
     submitPoint<int32_t>("obs.SourceNChan", chunk.nChannel());
@@ -105,8 +105,8 @@ void MonitoringPointManager::submitMonitoringPoints(const askap::cp::common::Vis
 
     // casa measures "constants"
     const double mjd = chunk.time().get(); // current mjd
-    submitPoint<float>("dUTC", casa::MeasTable::dUTC(mjd));
-    submitPoint<float>("dUT1", casa::MeasTable::dUT1(mjd));
+    submitPoint<float>("dUTC", casacore::MeasTable::dUTC(mjd));
+    submitPoint<float>("dUT1", casacore::MeasTable::dUT1(mjd));
 }
 
 void MonitoringPointManager::submitPointNull(const std::string& key) const

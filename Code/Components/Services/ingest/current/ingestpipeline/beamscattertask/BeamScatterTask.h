@@ -142,12 +142,12 @@ class BeamScatterTask : public askap::cp::ingest::ITask {
         /// @param[in,out] vec vector for both input (on local rank 0) and output
         /// (on other ranks of the local communicator)
         template<typename T>
-        void scatterVector(casa::Vector<T> &vec) const;
+        void scatterVector(casacore::Vector<T> &vec) const;
 
         /// @brief specialisation to scatter vector of MVDirections
         /// @param[in,out] vec vector for both input (on local rank 0) and output
         /// (on other ranks of the local communicator)
-        void scatterVector(casa::Vector<casa::MVDirection> &vec) const;
+        void scatterVector(casacore::Vector<casacore::MVDirection> &vec) const;
 
         /// @brief helper method to scatter row-based cube
         /// @details MPI routines work with raw pointers. This method encapsulates
@@ -158,13 +158,13 @@ class BeamScatterTask : public askap::cp::ingest::ITask {
         /// (on other ranks of the local communicator). It is the requirement that
         /// the shape is correctly initialised before calling this method.
         template<typename T>
-        void scatterCube(casa::Cube<T> &cube) const;
+        void scatterCube(casacore::Cube<T> &cube) const;
 
         /// @brief trim chunk to the given number of rows
         /// @details
         /// @param[in,out] chunk the instance of VisChunk to work with
         /// @param[in] newNRows new number of rows
-        static void trimChunk(askap::cp::common::VisChunk::ShPtr& chunk, casa::uInt newNRows);
+        static void trimChunk(askap::cp::common::VisChunk::ShPtr& chunk, casacore::uInt newNRows);
 
         /// @brief reduce the number of streams if number of beams is smaller
         /// @details It is handy to have less output streams automatically, if the number of
@@ -188,7 +188,7 @@ class BeamScatterTask : public askap::cp::ingest::ITask {
         int itsStreamNumber;
 
         /// @brief rows handled by this rank
-        std::pair<casa::uInt, casa::uInt> itsHandledRows;
+        std::pair<casacore::uInt, casacore::uInt> itsHandledRows;
 
         /// @brief for row-based MPI collectives, vector of row counts
         std::vector<int> itsRowCounts;
@@ -197,14 +197,14 @@ class BeamScatterTask : public askap::cp::ingest::ITask {
         std::vector<int> itsRowOffsets;
 
         /// @brief shape of data is not expected to change - cache it
-        casa::Vector<casa::uInt> itsAntenna1;
+        casacore::Vector<casacore::uInt> itsAntenna1;
 
         /// @brief shape of data is not expected to change - cache it
-        casa::Vector<casa::uInt> itsAntenna2;
+        casacore::Vector<casacore::uInt> itsAntenna2;
 
         /// @brief shape of data is not expected to change - cache it
         /// only support beam1 == beam2, although MS is more flexible
-        casa::Vector<casa::uInt> itsBeam;
+        casacore::Vector<casacore::uInt> itsBeam;
 };
 
 }

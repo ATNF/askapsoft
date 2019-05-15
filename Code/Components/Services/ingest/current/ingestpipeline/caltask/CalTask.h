@@ -73,7 +73,7 @@ class CalTask : public askap::cp::ingest::ITask {
         /// @param[in] ant 0-based antenna id
         /// @param[in] beam 0-based beam id
         /// @param[in] pol Either 0 for XX or 1 for YY
-        casa::Complex getGain(casa::uInt ant, casa::uInt beam, casa::uInt pol) const;
+        casacore::Complex getGain(casacore::uInt ant, casacore::uInt beam, casacore::uInt pol) const;
 
         /// @brief fill Mueller matrix
         /// @details This method forms the measurement equation
@@ -87,8 +87,8 @@ class CalTask : public askap::cp::ingest::ITask {
         /// @param[in] ant2 second antenna id (0-based)
         /// @param[in] beam1 beam id at the first antenna (0-based)
         /// @param[in] beam2 beam id at the second antenna (0-based)
-        void fillMuellerMatrix(casa::Matrix<casa::Complex> &matr, casa::uInt ant1,
-                               casa::uInt ant2, casa::uInt beam1, casa::uInt beam2) const;
+        void fillMuellerMatrix(casacore::Matrix<casacore::Complex> &matr, casacore::uInt ant1,
+                               casacore::uInt ant2, casacore::uInt beam1, casacore::uInt beam2) const;
 
     private:
         /// @brief parset file with configuration parameters

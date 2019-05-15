@@ -49,7 +49,7 @@ ScanManager::~ScanManager()
 {
 }
 
-void ScanManager::update(const casa::Int newScanId)
+void ScanManager::update(const casacore::Int newScanId)
 {
     // 1: If the observation is complete then the scan state should no longer
     // be updated.
@@ -85,12 +85,12 @@ void ScanManager::update(const casa::Int newScanId)
     }
 }
 
-casa::Bool ScanManager::observationComplete(void) const
+casacore::Bool ScanManager::observationComplete(void) const
 {
     return itsObsComplete;
 }
 
-casa::Int ScanManager::scanIndex(void) const
+casacore::Int ScanManager::scanIndex(void) const
 {
     return itsScanIndex;
 }

@@ -107,7 +107,7 @@ MergedSource::MergedSource(const LOFAR::ParameterSet& params,
     itsMonitoringPointManager.submitPoint<std::string>("MeasuresTableVersion", measVersion.second);
     // additional check that the table has been updated less then one month ago
     if (config.receiverId() == 0) {
-        casa::Time now;
+        casacore::Time now;
         if (now.modifiedJulianDay() - measVersion.first > 30.) {
             ASKAPLOG_ERROR_STR(logger, "Measures table is more than one month old. Consider updating!");
         }
@@ -134,8 +134,8 @@ MergedSource::MergedSource(const LOFAR::ParameterSet& params,
     // out of the loop
     const std::vector<Antenna>& antennas = config.antennas();
     itsArrayLayout.resize(antennas.size(), 3u);
-    for (casa::uInt ant = 0; ant < antennas.size(); ++ant) {
-         casa::Vector<casa::Double> antPos = antennas[ant].position();
+    for (casacore::uInt ant = 0; ant < antennas.size(); ++ant) {
+         casacore::Vector<casacore::Double> antPos = antennas[ant].position();
          ASKAPCHECK(antPos.nelements() == 3, "Expect exactly 3 elements for antenna "<<ant<<" position");
          itsArrayLayout.row(ant) = antPos;
     }
@@ -162,12 +162,12 @@ MergedSource::~MergedSource()
 /// timeouts before giving up). The value of 1 is a special case where timeout
 /// cause the cycle to be ignored instead of the exception being thrown.
 /// @return true if itsVis is invalid at the completion of this method and cycle must be skipped
-bool MergedSource::ensureValidVis(casa::uInt maxNoDataRetries) 
+bool MergedSource::ensureValidVis(casacore::uInt maxNoDataRetries) 
 {
    ASKAPDEBUGASSERT(itsMetadata);
    ASKAPDEBUGASSERT(itsVisSrc);
    const CorrelatorMode& mode = itsVisConverter.config().lookupCorrelatorMode(itsMetadata->corrMode());
-   const casa::uInt timeout = mode.interval();
+   const casacore::uInt timeout = mode.interval();
    itsBadCycle = false;
 
    for (uint32_t count = 0; !itsVis && count < maxNoDataRetries; ++count) {
@@ -181,7 +181,7 @@ bool MergedSource::ensureValidVis(casa::uInt maxNoDataRetries)
             // (and probably rework the logic of this method which has too much BETA legacy
             //  and also fudged 10s timouts which were probably put there by Ben during early BETA debugging)
             if (itsMetadata->time() != itsVis->timestamp) {
-                const casa::uLong timeMismatch = itsVis->timestamp > itsMetadata->time() ? 
+                const casacore::uLong timeMismatch = itsVis->timestamp > itsMetadata->time() ? 
                       itsVis->timestamp -  itsMetadata->time() : itsMetadata->time() - itsVis->timestamp;
                 if (timeMismatch < mode.interval() / 2u) {
                     ASKAPLOG_ERROR_STR(logger, "Detected BAT glitch between metadata and visibility stream on card "<<
@@ -216,7 +216,7 @@ bool MergedSource::ensureValidVis(casa::uInt maxNoDataRetries)
 
 VisChunk::ShPtr MergedSource::next(void)
 {
-    casa::Timer timer;
+    casacore::Timer timer;
     // Used for a timeout
     const long ONE_SECOND = 1000000;
     const long HUNDRED_MILLISECONDS = 100000;
@@ -268,7 +268,7 @@ VisChunk::ShPtr MergedSource::next(void)
     }
     ASKAPDEBUGASSERT(itsVisSrc);
     //const CorrelatorMode& mode = itsVisConverter.config().lookupCorrelatorMode(itsMetadata->corrMode());
-    //const casa::uInt timeout = mode.interval();
+    //const casacore::uInt timeout = mode.interval();
 
     VisChunk::ShPtr chunk = createVisChunk(*itsMetadata);
     ASKAPDEBUGASSERT(chunk);
@@ -403,24 +403,24 @@ VisChunk::ShPtr MergedSource::next(void)
 /// This method is a work around of UVW metadata problem (see ASKAPSDP-3431)
 /// @param[in] rowsWithBadUVWs set of rows to flag
 /// @param[in] timestamp BAT for reporting
-void MergedSource::flagDueToBadUVWs(const std::set<casa::uInt> &rowsWithBadUVWs, const casa::uLong timestamp) {
+void MergedSource::flagDueToBadUVWs(const std::set<casacore::uInt> &rowsWithBadUVWs, const casacore::uLong timestamp) {
     //ASKAPLOG_DEBUG_STR(logger, "Inside flagDueToBadUVWs, nRowsWithBadUVWs = "<<rowsWithBadUVWs.size());    
 
     ASKAPDEBUGASSERT(rowsWithBadUVWs.size() > 0);
     VisChunk::ShPtr chunk = itsVisConverter.visChunk();
     ASKAPDEBUGASSERT(chunk);
-    const casa::uInt nAntenna = itsVisConverter.config().antennas().size();
+    const casacore::uInt nAntenna = itsVisConverter.config().antennas().size();
     ASKAPDEBUGASSERT(nAntenna > 0);
-    const casa::Vector<casa::uInt>& antenna1 = chunk->antenna1();
-    const casa::Vector<casa::uInt>& antenna2 = chunk->antenna2();
+    const casacore::Vector<casacore::uInt>& antenna1 = chunk->antenna1();
+    const casacore::Vector<casacore::uInt>& antenna2 = chunk->antenna2();
     // 1) get set of all antennas and good antennas separately
-    std::set<casa::uInt> goodAntennas;
-    std::set<casa::uInt> antennas;
-    for (casa::uInt row = 0; row<chunk->nRow(); ++row) {
+    std::set<casacore::uInt> goodAntennas;
+    std::set<casacore::uInt> antennas;
+    for (casacore::uInt row = 0; row<chunk->nRow(); ++row) {
          ASKAPDEBUGASSERT(row < antenna1.nelements());
          ASKAPDEBUGASSERT(row < antenna2.nelements());
-         const casa::uInt ant1 = antenna1[row];
-         const casa::uInt ant2 = antenna2[row];
+         const casacore::uInt ant1 = antenna1[row];
+         const casacore::uInt ant2 = antenna2[row];
          antennas.insert(ant1);
          antennas.insert(ant2);
          if ((ant1 != ant2) && (rowsWithBadUVWs.find(row) == rowsWithBadUVWs.end()) && 
@@ -434,7 +434,7 @@ void MergedSource::flagDueToBadUVWs(const std::set<casa::uInt> &rowsWithBadUVWs,
 
     // 2) flag antennas which are not in the good list, build the list for reporting
     std::string listOfBadAntennas;
-    for (std::set<casa::uInt>::const_iterator ciAnt = antennas.begin(); ciAnt != antennas.end(); ++ciAnt) {
+    for (std::set<casacore::uInt>::const_iterator ciAnt = antennas.begin(); ciAnt != antennas.end(); ++ciAnt) {
          if (goodAntennas.find(*ciAnt) == goodAntennas.end()) {
              ASKAPASSERT(*ciAnt < nAntenna);
              // only proceed if antenna is not flagged already
@@ -457,12 +457,12 @@ void MergedSource::flagDueToBadUVWs(const std::set<casa::uInt> &rowsWithBadUVWs,
     //ASKAPLOG_DEBUG_STR(logger, "Inside flagDueToBadUVWs, listOfBadAntennas: "<<listOfBadAntennas);    
 
     // 3) check that anything is left (this shouldn't happen unless we have tricky per-beam issues)
-    casa::uInt nExplicitlyFlaggedRows = 0;
-    casa::Cube<casa::Bool> &flags = chunk->flag();
-    for (std::set<casa::uInt>::const_iterator ci = rowsWithBadUVWs.begin(); ci != rowsWithBadUVWs.end(); ++ci) {
+    casacore::uInt nExplicitlyFlaggedRows = 0;
+    casacore::Cube<casacore::Bool> &flags = chunk->flag();
+    for (std::set<casacore::uInt>::const_iterator ci = rowsWithBadUVWs.begin(); ci != rowsWithBadUVWs.end(); ++ci) {
          ASKAPASSERT(*ci < chunk->nRow());
-         const casa::uInt ant1 = antenna1[*ci];
-         const casa::uInt ant2 = antenna2[*ci];
+         const casacore::uInt ant1 = antenna1[*ci];
+         const casacore::uInt ant2 = antenna2[*ci];
          if (itsVisConverter.isAntennaGood(ant1) && itsVisConverter.isAntennaGood(ant2)) {
              ++nExplicitlyFlaggedRows;
              ASKAPDEBUGASSERT(*ci < flags.nrow());
@@ -470,9 +470,9 @@ void MergedSource::flagDueToBadUVWs(const std::set<casa::uInt> &rowsWithBadUVWs,
          }
     }
     std::string msg = "Flagged the following antennas due to failed uvw vector length check: "+listOfBadAntennas+
-            " (currently "+utility::toString<casa::uInt>(itsBadUVWCycleCounter)+" cycle in a row).";
+            " (currently "+utility::toString<casacore::uInt>(itsBadUVWCycleCounter)+" cycle in a row).";
     if (nExplicitlyFlaggedRows != 0) {
-        msg += " In addition, "+utility::toString<casa::uInt>(nExplicitlyFlaggedRows)+
+        msg += " In addition, "+utility::toString<casacore::uInt>(nExplicitlyFlaggedRows)+
                " rows were flagged, which do not correpond to all baselines of some set of antennas.";
     }
     // we could've reversed chunk timestamp, but it is handy to pass what is in the metadata directly to avoid nasty surprises with precision
@@ -481,15 +481,15 @@ void MergedSource::flagDueToBadUVWs(const std::set<casa::uInt> &rowsWithBadUVWs,
 
        // some commissioning code below to store the details on affected baselines into a file 
        // we may need to comment it out in the future or to make it optional based on parset parameter
-       const casa::Vector<casa::uInt>& beam1 = chunk->beam1();
+       const casacore::Vector<casacore::uInt>& beam1 = chunk->beam1();
        ASKAPDEBUGASSERT(beam1.nelements() == chunk->nRow());
        std::ofstream os("baduvw_baselines.dbg", std::ios::app);
        os << "# "<< msg << " Timestamp: "<<bat2epoch(timestamp)<<" or 0x"<<std::hex<<timestamp<<" = "<<std::dec<<timestamp<<" :"<<std::endl;
-       for (std::set<casa::uInt>::const_iterator ci = rowsWithBadUVWs.begin(); ci != rowsWithBadUVWs.end(); ++ci) {
+       for (std::set<casacore::uInt>::const_iterator ci = rowsWithBadUVWs.begin(); ci != rowsWithBadUVWs.end(); ++ci) {
             ASKAPDEBUGASSERT(*ci < chunk->nRow());
-            const casa::uInt ant1 = antenna1[*ci];
-            const casa::uInt ant2 = antenna2[*ci];
-            const casa::uInt beam = beam1[*ci];
+            const casacore::uInt ant1 = antenna1[*ci];
+            const casacore::uInt ant2 = antenna2[*ci];
+            const casacore::uInt beam = beam1[*ci];
             ASKAPDEBUGASSERT(ant1 < nAntenna);
             ASKAPDEBUGASSERT(ant2 < nAntenna);
             const string ant1Name = itsVisConverter.config().antennas()[ant1].name();
@@ -515,7 +515,7 @@ VisChunk::ShPtr MergedSource::createVisChunk(const TosMetadata& metadata)
     VisChunk::ShPtr chunk = itsVisConverter.visChunk();
     ASKAPDEBUGASSERT(chunk);
 
-    const casa::uInt nAntenna = itsVisConverter.config().antennas().size();
+    const casacore::uInt nAntenna = itsVisConverter.config().antennas().size();
     ASKAPCHECK(nAntenna > 0, "Must have at least one antenna defined");
     ASKAPASSERT(nAntenna == itsArrayLayout.nrow());
     ASKAPDEBUGASSERT(3u == itsArrayLayout.ncolumn());
@@ -529,7 +529,7 @@ VisChunk::ShPtr MergedSource::createVisChunk(const TosMetadata& metadata)
     // Determine and add the spectral channel width
     chunk->channelWidth() = corrMode.chanWidth().getValue("Hz");
 
-    //const bool unsupported = chunk->nRow() > (casa::max(chunk->beam1()) + 1)*406u;
+    //const bool unsupported = chunk->nRow() > (casacore::max(chunk->beam1()) + 1)*406u;
 
     // Build frequencies vector
     // Frequency vector is not of length nRows, but instead nChannels
@@ -540,18 +540,18 @@ VisChunk::ShPtr MergedSource::createVisChunk(const TosMetadata& metadata)
             corrMode.nChan());
 
     // at this stage do not support variable phase centre
-    const casa::MDirection phaseDir = metadata.phaseDirection();
+    const casacore::MDirection phaseDir = metadata.phaseDirection();
     chunk->phaseCentre().set(phaseDir.getAngle());
 
     // The following buffer is used only to get uvw's in the right form.
     // It is possible to avoid buffering and/or do better cross-checks make the
     // code more flexible later on, if necessary.
     // Dimensions are nAntenna x nBeam(in uvw metadata)
-    casa::Matrix<casa::Double> uvwBuffer;
+    casacore::Matrix<casacore::Double> uvwBuffer;
     
     // Populate the per-antenna vectors
-    const casa::MDirection::Ref targetDirRef = metadata.targetDirection().getRef();
-    for (casa::uInt i = 0; i < nAntenna; ++i) {
+    const casacore::MDirection::Ref targetDirRef = metadata.targetDirection().getRef();
+    for (casacore::uInt i = 0; i < nAntenna; ++i) {
         const string antName = itsVisConverter.config().antennas()[i].name();
         const TosMetadataAntenna mdant = metadata.antenna(antName);
         chunk->targetPointingCentre()[i] = convertToJ2000(chunk->time(), i, metadata.targetDirection());
@@ -559,10 +559,10 @@ VisChunk::ShPtr MergedSource::createVisChunk(const TosMetadata& metadata)
 
         chunk->actualPolAngle()[i] = mdant.actualPolAngle();
 
-        const casa::Vector<casa::Double> azEl = mdant.actualAzEl().getAngle().getValue("deg");
+        const casacore::Vector<casacore::Double> azEl = mdant.actualAzEl().getAngle().getValue("deg");
         ASKAPASSERT(azEl.nelements() == 2);
-        chunk->actualAzimuth()[i] = casa::Quantity(azEl[0],"deg");
-        chunk->actualElevation()[i] = casa::Quantity(azEl[1], "deg");
+        chunk->actualAzimuth()[i] = casacore::Quantity(azEl[0],"deg");
+        chunk->actualElevation()[i] = casacore::Quantity(azEl[1], "deg");
 
         chunk->onSourceFlag()[i] = mdant.onSource();
         // flagging (previously was done when datagram was processed)
@@ -589,13 +589,13 @@ VisChunk::ShPtr MergedSource::createVisChunk(const TosMetadata& metadata)
             //
             */
             ASKAPCHECK(uvwBuffer.ncolumn() % 3 == 0, "Expect UVW metadata to be a vector with the length which is an integral multiple of 3");
-            for (casa::uInt beam = 0; beam < uvwBuffer.ncolumn() / 3; ++beam) {
-                 casa::Double bslnNorm2 = 0.;
-                 for (casa::uInt offset = beam * 3; offset < (beam + 1) * 3; ++offset) {
+            for (casacore::uInt beam = 0; beam < uvwBuffer.ncolumn() / 3; ++beam) {
+                 casacore::Double bslnNorm2 = 0.;
+                 for (casacore::uInt offset = beam * 3; offset < (beam + 1) * 3; ++offset) {
                       ASKAPDEBUGASSERT(offset < uvwBuffer.ncolumn());
-                      const casa::Double curVal = uvwBuffer(i, offset);
+                      const casacore::Double curVal = uvwBuffer(i, offset);
                       ASKAPCHECK(!std::isnan(curVal), "NaN encountered in UVW received in metadata for antenna: "<<antName);
-                      bslnNorm2 += casa::square(curVal);
+                      bslnNorm2 += casacore::square(curVal);
                  }
                  ASKAPCHECK(bslnNorm2 > 1e-12, "Expect non-zero per-antenna UVW in metadata - encountered a vector which is the Earth centre. Most likely junk metadata received for antenna: "<<antName<<" and (1-based) beam "<<beam + 1);
                  ASKAPCHECK(bslnNorm2 < 4.07044e13, "Encountered UVW vector which suggests an antenna lies way beyond Earth's surface. Most likely junk metadata received for antenna: "<<antName<<" and (1-based) beam "<<beam + 1);
@@ -608,32 +608,32 @@ VisChunk::ShPtr MergedSource::createVisChunk(const TosMetadata& metadata)
     }
     */
     // now populate uvw vector in the chunk
-    std::set<casa::uInt> rowsWithBadUVWs;
-    for (casa::uInt row=0; row<chunk->nRow(); ++row) {
+    std::set<casacore::uInt> rowsWithBadUVWs;
+    for (casacore::uInt row=0; row<chunk->nRow(); ++row) {
          // it is possible to move access methods outside the loop, but the overhead is small
-         const casa::uInt beam = chunk->beam1()[row];
+         const casacore::uInt beam = chunk->beam1()[row];
          ASKAPCHECK(beam == chunk->beam2()[row], "Cross-beam correlations are not supported at the moment");
-         const casa::uInt antenna1 = chunk->antenna1()[row];
-         const casa::uInt antenna2 = chunk->antenna2()[row];
+         const casacore::uInt antenna1 = chunk->antenna1()[row];
+         const casacore::uInt antenna2 = chunk->antenna2()[row];
          ASKAPASSERT(antenna1 < nAntenna);
          ASKAPASSERT(antenna2 < nAntenna);
          if (itsVisConverter.isAntennaGood(antenna1) && itsVisConverter.isAntennaGood(antenna2)) {
              double uvwLength2 = 0., layoutLength2 = 0.;
-             for (casa::uInt coord = 0, offset = beam * 3; coord < 3; ++coord,++offset) {
+             for (casacore::uInt coord = 0, offset = beam * 3; coord < 3; ++coord,++offset) {
                   ASKAPASSERT(offset < uvwBuffer.ncolumn());
                   chunk->uvw()[row](coord) = uvwBuffer(antenna1,offset) - uvwBuffer(antenna2,offset);
                   ASKAPCHECK(!std::isnan(chunk->uvw()[row](coord)), "Received NaN as one of the baseline spacings for row="<<row<<" (antennas: "<<
                              antenna1<<" "<<antenna2<<") coordinate="<<coord<<" beam="<<beam);
-                  uvwLength2 += casa::square(chunk->uvw()[row](coord));
-                  layoutLength2 += casa::square(itsArrayLayout(antenna1,coord) - itsArrayLayout(antenna2,coord));
+                  uvwLength2 += casacore::square(chunk->uvw()[row](coord));
+                  layoutLength2 += casacore::square(itsArrayLayout(antenna1,coord) - itsArrayLayout(antenna2,coord));
              }
-             if (casa::abs(casa::sqrt(uvwLength2) - casa::sqrt(layoutLength2)) >= 1e-3) {
+             if (casacore::abs(casacore::sqrt(uvwLength2) - casacore::sqrt(layoutLength2)) >= 1e-3) {
                  rowsWithBadUVWs.insert(row);
                  if ((static_cast<int>(itsBadUVWCycleCounter) >= itsMaxBadUVWCycles) && (itsMaxBadUVWCycles >= 0)) {
                      ASKAPTHROW(CheckError, "The length of uvw vector for row="<<row<<" (antennas: "<<
                              antenna1<<" ("<<itsVisConverter.config().antennas()[antenna1].name()<<") "<<antenna2<<" ("<<itsVisConverter.config().antennas()[antenna2].name()<<
                              "), beam: "<<beam<<") is more than 1mm different from the baseline length expected from array layout ("<<
-                             casa::sqrt(uvwLength2)<<" metres vs. "<<casa::sqrt(layoutLength2)<<" metres). Junk metadata are suspected for either of the antennas for epoch "<<
+                             casacore::sqrt(uvwLength2)<<" metres vs. "<<casacore::sqrt(layoutLength2)<<" metres). Junk metadata are suspected for either of the antennas for epoch "<<
                              bat2epoch(metadata.time())<<" (this is "<<(itsMaxBadUVWCycles + 1)<<" consecutive cycle which failed the check)");
                  } 
              }
@@ -676,20 +676,20 @@ VisChunk::ShPtr MergedSource::createVisChunk(const TosMetadata& metadata)
 /// @param[in] ant antenna index (to get position on the ground)
 /// @param[in] dir direction measure to convert
 /// @return direction measure in J2000
-casa::MDirection MergedSource::convertToJ2000(const casa::MVEpoch &epoch, casa::uInt ant, 
-                                              const casa::MDirection &dir) const
+casacore::MDirection MergedSource::convertToJ2000(const casacore::MVEpoch &epoch, casacore::uInt ant, 
+                                              const casacore::MDirection &dir) const
 {
-   if (dir.getRef().getType() == casa::MDirection::J2000) {
+   if (dir.getRef().getType() == casacore::MDirection::J2000) {
        // already in J2000
        return dir;
    }
-   casa::MPosition pos(casa::MVPosition(itsVisConverter.config().antennas().at(ant).position()), casa::MPosition::ITRF);
+   casacore::MPosition pos(casacore::MVPosition(itsVisConverter.config().antennas().at(ant).position()), casacore::MPosition::ITRF);
 
    // if performance is found critical (unlikely as we only do it per antenna), we could return a class
    // caching frame as there are at least two calls to this method with the same frame information. 
-   casa::MeasFrame frame(casa::MEpoch(epoch, casa::MEpoch::UTC), pos);
+   casacore::MeasFrame frame(casacore::MEpoch(epoch, casacore::MEpoch::UTC), pos);
 
-   return casa::MDirection::Convert(dir, casa::MDirection::Ref(casa::MDirection::J2000, frame))();
+   return casacore::MDirection::Convert(dir, casacore::MDirection::Ref(casacore::MDirection::J2000, frame))();
 }
 
 void MergedSource::signalHandler(const boost::system::error_code& error,

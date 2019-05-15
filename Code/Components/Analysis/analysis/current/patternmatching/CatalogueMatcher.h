@@ -152,8 +152,8 @@ class CatalogueMatcher {
         std::vector<std::pair<Point, Point> > itsMatchingPixList;
         /// @brief The epsilon error parameter for matching
         double itsEpsilon;
-        casa::Unit itsEpsilonUnits;
-        casa::Unit itsPositionUnits;
+        casacore::Unit itsEpsilonUnits;
+        casacore::Unit itsPositionUnits;
         /// @brief The number of matches after the initial attempt
         unsigned int itsNumInitialMatches;
         /// @brief Do the two catalogues have the same sense?

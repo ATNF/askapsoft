@@ -99,7 +99,7 @@ public:
   /// @param[in] vis visibility matrix (rows are baselines, columns are channels)
   /// @return delays in seconds for each baseline
   /// @note the routine assumes 1 MHz channel spacing and will not work for a very quick wrap
-  static casa::Vector<casa::Float> estimateDelays(const casa::Matrix<casa::Complex> &vis);
+  static casacore::Vector<casacore::Float> estimateDelays(const casacore::Matrix<casacore::Complex> &vis);
 
 protected:
   /// @brief advance history if necessary
@@ -109,16 +109,16 @@ protected:
   void advanceHistoryCursor(const uint64_t bat);
 private:
   /// @brief history of visibilities
-  casa::Cube<casa::Complex> itsHistory;
+  casacore::Cube<casacore::Complex> itsHistory;
   
   /// @brief history of delays
-  casa::Cube<casa::Float> itsDelayHistory;
+  casacore::Cube<casacore::Float> itsDelayHistory;
 
   /// @brief history of user defined control keywords
-  casa::Cube<uint32_t> itsControlHistory;
+  casacore::Cube<uint32_t> itsControlHistory;
   
   /// @brief BATs for the history items
-  casa::Vector<uint64_t> itsBATs;
+  casacore::Vector<uint64_t> itsBATs;
   
   /// @brief last position in the history (circular buffers)
   /// @details negative value for an uninitialised history

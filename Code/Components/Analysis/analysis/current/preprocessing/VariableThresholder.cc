@@ -146,14 +146,14 @@ void VariableThresholder::initialise(duchamp::Cube &cube,
     itsInputCoordSys = sub->coordinates();
     itsInputShape = sub->shape();
     if (itsComms->isParallel() && itsComms->isMaster()) {
-        // itsInputShape=casa::IPosition(itsInputShape.size(),1);
+        // itsInputShape=casacore::IPosition(itsInputShape.size(),1);
     } else {
         itsMask = sub->getMask();
     }
 
     duchamp::Section sec = itsSubimageDef->section(itsComms->rank() - 1);
     sec.parse(itsInputShape.asStdVector());
-    itsLocation = casa::IPosition(sec.getStartList());
+    itsLocation = casacore::IPosition(sec.getStartList());
     ASKAPLOG_DEBUG_STR(logger,
                        "Reference location for rank " << itsComms->rank() <<
                        " is " << itsLocation <<
@@ -170,7 +170,7 @@ void VariableThresholder::calculate()
 
         ASKAPLOG_INFO_STR(logger, "Reusing SNR map from file " << snrImage());
 
-        casa::MaskedArray<Float> snr = analysisutilities::getPixelsInBox(snrImage(),
+        casacore::MaskedArray<Float> snr = analysisutilities::getPixelsInBox(snrImage(),
                                        itsSlicer);
 
         if (itsCube->getRecon() == 0) {
@@ -208,17 +208,17 @@ void VariableThresholder::calculate()
         size_t spatsize = itsInputShape(lngAxis) * itsInputShape(latAxis);
         size_t specsize = (specAxis >= 0) ? itsInputShape(specAxis) : 1;
 
-        casa::IPosition chunkshape = itsInputShape;
-        casa::IPosition box;
+        casacore::IPosition chunkshape = itsInputShape;
+        casacore::IPosition box;
         size_t maxCtr;
         if (itsSearchType == "spatial") {
             if (specAxis >= 0) chunkshape(specAxis) = 1;
-            box = casa::IPosition(2, itsBoxSize, itsBoxSize);
+            box = casacore::IPosition(2, itsBoxSize, itsBoxSize);
             maxCtr = specsize;
         } else {
             if (lngAxis >= 0) chunkshape(lngAxis) = 1;
             if (latAxis >= 0) chunkshape(latAxis) = 1;
-            box = casa::IPosition(1, itsBoxSize);
+            box = casacore::IPosition(1, itsBoxSize);
             maxCtr = spatsize;
         }
 
@@ -234,15 +234,15 @@ void VariableThresholder::calculate()
                 ASKAPLOG_DEBUG_STR(logger, "Variable Thresholder calculation: Iteration " <<
                                    ctr << " of " << maxCtr);
             }
-            casa::Array<Float> inputChunk(chunkshape, 0.);
-            casa::MaskedArray<Float>
-            inputMaskedChunk(inputChunk, casa::LogicalArray(chunkshape, true));
-            casa::Array<Float> middle(chunkshape, 0.);
-            casa::Array<Float> spread(chunkshape, 0.);
-            casa::Array<Float> snr(chunkshape, 0.);
-            casa::Array<Float> boxsum(chunkshape, 0.);
+            casacore::Array<Float> inputChunk(chunkshape, 0.);
+            casacore::MaskedArray<Float>
+            inputMaskedChunk(inputChunk, casacore::LogicalArray(chunkshape, true));
+            casacore::Array<Float> middle(chunkshape, 0.);
+            casacore::Array<Float> spread(chunkshape, 0.);
+            casacore::Array<Float> snr(chunkshape, 0.);
+            casacore::Array<Float> boxsum(chunkshape, 0.);
 
-            casa::IPosition loc(itsLocation.size(), 0);
+            casacore::IPosition loc(itsLocation.size(), 0);
             if (itsSearchType == "spatial") {
                 if (specAxis >= 0) {
                     loc(specAxis) = ctr;
@@ -275,12 +275,12 @@ void VariableThresholder::calculate()
             }
 
             if (itsFlagWriteImages) {
-                casa::Array<bool> mask(inputMaskedChunk.getMask());
+                casacore::Array<bool> mask(inputMaskedChunk.getMask());
                 writeImage(spread, mask, itsNoiseImageName, itsLocation);
                 writeImage(middle, mask, itsAverageImageName, itsLocation);
                 writeImage(snr, mask, itsSNRimageName, itsLocation);
                 if (itsThresholdImageName != "") {
-                    casa::Array<Float> thresh = middle + itsSNRthreshold * spread;
+                    casacore::Array<Float> thresh = middle + itsSNRthreshold * spread;
                     writeImage(thresh, mask, itsThresholdImageName, itsLocation);
                 }
                 writeImage(boxsum, mask, itsBoxSumImageName, itsLocation);
@@ -296,15 +296,15 @@ void VariableThresholder::calculate()
 
 }
 
-void VariableThresholder::defineChunk(casa::Array<Float> &inputChunkArr,
-                                      casa::MaskedArray<Float> &outputChunk, size_t ctr)
+void VariableThresholder::defineChunk(casacore::Array<Float> &inputChunkArr,
+                                      casacore::MaskedArray<Float> &outputChunk, size_t ctr)
 {
-    casa::Array<Float>::iterator iter(inputChunkArr.begin());
+    casacore::Array<Float>::iterator iter(inputChunkArr.begin());
     int lngAxis = itsInputCoordSys.directionAxesNumbers()[0];
     int latAxis = itsInputCoordSys.directionAxesNumbers()[1];
     size_t spatsize = itsInputShape(lngAxis) * itsInputShape(latAxis);
-    casa::LogicalArray theMask(inputChunkArr.shape(), true);
-    casa::LogicalArray::iterator itermask = theMask.begin();
+    casacore::LogicalArray theMask(inputChunkArr.shape(), true);
+    casacore::LogicalArray::iterator itermask = theMask.begin();
     if (itsSearchType == "spatial") {
         for (size_t i = 0; iter != inputChunkArr.end(); iter++, i++, itermask++) {
             size_t pos = i + ctr * spatsize;
@@ -321,12 +321,12 @@ void VariableThresholder::defineChunk(casa::Array<Float> &inputChunkArr,
     outputChunk.setData(inputChunkArr, theMask);
 }
 
-void VariableThresholder::saveSNRtoCube(casa::Array<Float> &snr, size_t ctr)
+void VariableThresholder::saveSNRtoCube(casacore::Array<Float> &snr, size_t ctr)
 {
     if (itsCube->getRecon() == 0) {
         ASKAPLOG_ERROR_STR(logger, "The Cube's recon array not defined - cannot save SNR map");
     } else {
-        casa::Array<Float>::iterator iter(snr.begin());
+        casacore::Array<Float>::iterator iter(snr.begin());
         int lngAxis = itsInputCoordSys.directionAxesNumbers()[0];
         int latAxis = itsInputCoordSys.directionAxesNumbers()[1];
         size_t spatsize = itsInputShape(lngAxis) * itsInputShape(latAxis);
@@ -376,10 +376,10 @@ void VariableThresholder::createImages()
 
 }
 
-void VariableThresholder::writeImage(casa::Array<Float> &arr,
-                                     casa::Array<bool> &mask,
+void VariableThresholder::writeImage(casacore::Array<Float> &arr,
+                                     casacore::Array<bool> &mask,
                                      std::string imageName,
-                                     casa::IPosition &loc)
+                                     casacore::IPosition &loc)
 {
 
     if (imageName != "") {

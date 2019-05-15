@@ -84,30 +84,30 @@ class BaselineMapTest : public CppUnit::TestFixture {
             BaselineMap bmap(itsParset);
 
             // Auto correlations
-            CPPUNIT_ASSERT_EQUAL(0, bmap(0, 0, casa::Stokes::type("XX")));
-            CPPUNIT_ASSERT_EQUAL(1, bmap(0, 0, casa::Stokes::type("XY")));
-            CPPUNIT_ASSERT_EQUAL(2, bmap(0, 0, casa::Stokes::type("YY")));
+            CPPUNIT_ASSERT_EQUAL(0, bmap(0, 0, casacore::Stokes::type("XX")));
+            CPPUNIT_ASSERT_EQUAL(1, bmap(0, 0, casacore::Stokes::type("XY")));
+            CPPUNIT_ASSERT_EQUAL(2, bmap(0, 0, casacore::Stokes::type("YY")));
 
             // Cross correlations
-            CPPUNIT_ASSERT_EQUAL(3, bmap(0, 1, casa::Stokes::type("XX")));
-            CPPUNIT_ASSERT_EQUAL(4, bmap(0, 1, casa::Stokes::type("XY")));
-            CPPUNIT_ASSERT_EQUAL(5, bmap(0, 1, casa::Stokes::type("YX")));
-            CPPUNIT_ASSERT_EQUAL(6, bmap(0, 1, casa::Stokes::type("YY")));
+            CPPUNIT_ASSERT_EQUAL(3, bmap(0, 1, casacore::Stokes::type("XX")));
+            CPPUNIT_ASSERT_EQUAL(4, bmap(0, 1, casacore::Stokes::type("XY")));
+            CPPUNIT_ASSERT_EQUAL(5, bmap(0, 1, casacore::Stokes::type("YX")));
+            CPPUNIT_ASSERT_EQUAL(6, bmap(0, 1, casacore::Stokes::type("YY")));
 
             // Boundry conditions
-            CPPUNIT_ASSERT_EQUAL(20, bmap(2, 2, casa::Stokes::type("YY")));
+            CPPUNIT_ASSERT_EQUAL(20, bmap(2, 2, casacore::Stokes::type("YY")));
 
             // Test all fall within range
             for (int i = 0; i <= 2; ++i) {
                 for (int j = i; j <= 2; ++j) {
-                    const int32_t xx = bmap(i, j, casa::Stokes::type("XX"));
+                    const int32_t xx = bmap(i, j, casacore::Stokes::type("XX"));
                     CPPUNIT_ASSERT(xx > -1 && xx < 21);
-                    const int32_t yy = bmap(i, j, casa::Stokes::type("YY"));
+                    const int32_t yy = bmap(i, j, casacore::Stokes::type("YY"));
                     CPPUNIT_ASSERT(yy > -1 && yy < 21);
-                    const int32_t xy = bmap(i, j, casa::Stokes::type("XY"));
+                    const int32_t xy = bmap(i, j, casacore::Stokes::type("XY"));
                     CPPUNIT_ASSERT(xy > -1 && xy < 21);
                     if (i != j) {
-                        const int32_t yx = bmap(i, j, casa::Stokes::type("YX"));
+                        const int32_t yx = bmap(i, j, casacore::Stokes::type("YX"));
                         CPPUNIT_ASSERT(yx > -1 && yx < 21);
                     }
                 }
@@ -116,13 +116,13 @@ class BaselineMapTest : public CppUnit::TestFixture {
 
         void testNotFound() {
             BaselineMap bmap(itsParset);
-            CPPUNIT_ASSERT_EQUAL(-1, bmap(3, 3, casa::Stokes::type("XX")));
-            CPPUNIT_ASSERT_EQUAL(-1, bmap(0, 0, casa::Stokes::type("I")));
+            CPPUNIT_ASSERT_EQUAL(-1, bmap(3, 3, casacore::Stokes::type("XX")));
+            CPPUNIT_ASSERT_EQUAL(-1, bmap(0, 0, casacore::Stokes::type("I")));
 
             const int32_t maxuint = std::numeric_limits<int32_t>::max();
             const int32_t minuint = std::numeric_limits<int32_t>::min();
-            CPPUNIT_ASSERT_EQUAL(-1, bmap(maxuint, 0, casa::Stokes::type("XX")));
-            CPPUNIT_ASSERT_EQUAL(-1, bmap(minuint, 0, casa::Stokes::type("XX")));
+            CPPUNIT_ASSERT_EQUAL(-1, bmap(maxuint, 0, casacore::Stokes::type("XX")));
+            CPPUNIT_ASSERT_EQUAL(-1, bmap(minuint, 0, casacore::Stokes::type("XX")));
 
         }
 

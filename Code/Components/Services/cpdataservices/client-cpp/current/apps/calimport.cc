@@ -49,10 +49,10 @@ using namespace askap::cp::caldataservice;
 namespace po = boost::program_options;
 
 void addTo(std::map<JonesIndex, JonesJTerm>& map,
-        const casa::Short pol,
-        const casa::Short antenna,
-        const casa::Short beam,
-        const casa::Complex& gain)
+        const casacore::Short pol,
+        const casacore::Short antenna,
+        const casacore::Short beam,
+        const casacore::Complex& gain)
 {
     JonesJTerm jterm; // Initialised with both gains (g11 & g22) invalid
     ASKAPDEBUGASSERT(!jterm.g1IsValid());
@@ -84,12 +84,12 @@ void addTo(std::map<JonesIndex, JonesJTerm>& map,
     ASKAPCHECK(jterm.g1IsValid() || jterm.g2IsValid(), "");
 }
 
-casa::Complex makeComplex(const std::vector<float>& values)
+casacore::Complex makeComplex(const std::vector<float>& values)
 {
     if (values.size() == 1) {
-        return casa::Complex(values.at(0));
+        return casacore::Complex(values.at(0));
     } else if (values.size() == 2) {
-        return casa::Complex(values.at(0), values.at(1));
+        return casacore::Complex(values.at(0), values.at(1));
     } else {
         ASKAPTHROW(AskapError, "Can't make a complex number from value");
     }
@@ -110,7 +110,7 @@ GainSolution buildGainSolution(const LOFAR::ParameterSet& parset)
             ASKAPTHROW(AskapError, "Malformed key");
         }
 
-        casa::Short pol;
+        casacore::Short pol;
         if (key[0] == "g11") {
             pol = 1;
         } else if (key[0] == "g22") {
@@ -119,17 +119,17 @@ GainSolution buildGainSolution(const LOFAR::ParameterSet& parset)
             ASKAPTHROW(AskapError, "Malformed key");
         }
 
-        casa::Short antenna;
-        casa::Short beam;
+        casacore::Short antenna;
+        casacore::Short beam;
         try {
-            antenna = boost::lexical_cast<casa::Short>(key[1]);
-            beam = boost::lexical_cast<casa::Short>(key[2]);
+            antenna = boost::lexical_cast<casacore::Short>(key[1]);
+            beam = boost::lexical_cast<casacore::Short>(key[2]);
         } catch (const boost::bad_lexical_cast&) {
             ASKAPTHROW(AskapError, "Malformed key");
         }
 
         std::vector<float> values = parset.getFloatVector(it->first);
-        casa::Complex gain = makeComplex(values);
+        casacore::Complex gain = makeComplex(values);
         addTo(sol.map(), pol, antenna, beam, gain);
     }
 

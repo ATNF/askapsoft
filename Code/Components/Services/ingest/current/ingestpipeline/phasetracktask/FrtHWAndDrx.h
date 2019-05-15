@@ -78,7 +78,7 @@ class FrtHWAndDrx : virtual public IFrtApproach {
         ///                  beams (columns) in radians per second
         /// @param[in] effLO effective LO frequency in Hz
         virtual void process(const askap::cp::common::VisChunk::ShPtr& chunk,
-                             const casa::Matrix<double> &delays, const casa::Matrix<double> &rates, const double effLO);
+                             const casacore::Matrix<double> &delays, const casacore::Matrix<double> &rates, const double effLO);
 
     private:
         /// @brief communicator with the python part executing OSL scripts
@@ -99,7 +99,7 @@ class FrtHWAndDrx : virtual public IFrtApproach {
         bool itsFlagOutOfRangeHW;
 
         /// @brief index of an antenna used as a reference
-        casa::uInt itsRefAntIndex;
+        casacore::uInt itsRefAntIndex;
 
         /// @brief buffer for times, used for debugging only
         std::vector<double> itsTm;

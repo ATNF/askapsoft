@@ -89,7 +89,7 @@ void BufferedTask::parallelThread()
    const long ONE_SECOND = 1000000;
    ASKAPLOG_DEBUG_STR(logger, "Running service thread in rank = "<<itsRank);
 
-   casa::Timer timer;
+   casacore::Timer timer;
    double timeToGetData = 0.;
    size_t numberOfFalseWakes = 0;
    timer.mark();
@@ -164,7 +164,7 @@ void BufferedTask::process(askap::cp::common::VisChunk::ShPtr& chunk)
            // space may or may not exist
            
            const long ONE_SECOND = 1000000;
-           casa::uInt attempt = 0;
+           casacore::uInt attempt = 0;
            for (; attempt < itsMaxWait; ++attempt) {
                 if (itsBuffer.addWhenThereIsSpace(chunkCopy, ONE_SECOND)) {
                     if (attempt) {

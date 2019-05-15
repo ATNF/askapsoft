@@ -102,14 +102,14 @@ class TCPSink : public askap::cp::ingest::ITask {
         /// Is used to append the bytes for a CASA Array to the byte vector
         /// The array elements should be primative types
         template <typename T>
-        static void pushBackArray(const casa::Array<T>& src, std::vector<uint8_t>& dest);
+        static void pushBackArray(const casacore::Array<T>& src, std::vector<uint8_t>& dest);
 
         /// Is used to append the bytes for a STL vector to the byte vector.
         /// The array elements should be primative types
         template <typename T>
         static void pushBackVector(const std::vector<T>& src, std::vector<uint8_t>& dest);
 
-        static uint32_t mapStokes(casa::Stokes::StokesTypes type);
+        static uint32_t mapStokes(casacore::Stokes::StokesTypes type);
 
         /// Parameter set
         const LOFAR::ParameterSet itsParset;

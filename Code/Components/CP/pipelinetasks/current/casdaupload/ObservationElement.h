@@ -44,11 +44,11 @@ class ObservationElement {
 
         xercesc::DOMElement* toXmlElement(xercesc::DOMDocument& doc) const;
 
-        void setObsTimeRange(const casa::MEpoch& start, const casa::MEpoch& end);
+        void setObsTimeRange(const casacore::MEpoch& start, const casacore::MEpoch& end);
 
     private:
-        casa::MEpoch itsObsStart;
-        casa::MEpoch itsObsEnd;
+        casacore::MEpoch itsObsStart;
+        casacore::MEpoch itsObsEnd;
 };
 
 }

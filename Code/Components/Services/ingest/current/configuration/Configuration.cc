@@ -134,7 +134,7 @@ void Configuration::buildRanksInfo()
    //ASKAPLOG_DEBUG_STR(logger, "Rank "<<rank()<<" out of "<<nprocs()<<" available has receiverId = "<<receiverId()<<"; number of receivers = "<<nReceivingProcs());
 }
 
-casa::String Configuration::arrayName(void) const
+casacore::String Configuration::arrayName(void) const
 {
     return itsParset.getString("array.name");
 }
@@ -181,7 +181,7 @@ const CorrelatorMode& Configuration::lookupCorrelatorMode(const std::string& mod
     return it->second;
 }
 
-casa::uInt Configuration::schedulingBlockID(void) const
+casacore::uInt Configuration::schedulingBlockID(void) const
 {
     return itsParset.getUint32("sbid", 0);
 }
@@ -242,9 +242,9 @@ void Configuration::buildAntennas(void)
 {
     // Build a map of name->Antenna
     const vector<string> antId = itsParset.getStringVector("antennas");
-    const casa::Quantity defaultDiameter = asQuantity(itsParset.getString("antenna.ant.diameter"));
+    const casacore::Quantity defaultDiameter = asQuantity(itsParset.getString("antenna.ant.diameter"));
     const string defaultMount = itsParset.getString("antenna.ant.mount");
-    const casa::Quantity defaultDelay = asQuantity(itsParset.getString("antenna.ant.delay", "0s"));
+    const casacore::Quantity defaultDelay = asQuantity(itsParset.getString("antenna.ant.delay", "0s"));
     map<string, Antenna> antennaMap;
 
     for (vector<string>::const_iterator it = antId.begin(); it != antId.end(); ++it) {
@@ -254,7 +254,7 @@ void Configuration::buildAntennas(void)
               "Antenna names are expected to be single words. For "<<*it<<", you have: "<<name);
         const vector<double> location = itsParset.getDoubleVector(keyBase + "location.itrf");
 
-        casa::Quantity diameter;
+        casacore::Quantity diameter;
         if (itsParset.isDefined(keyBase + "diameter")) {
             diameter = asQuantity(itsParset.getString(keyBase + "diameter"));
         } else {
@@ -268,7 +268,7 @@ void Configuration::buildAntennas(void)
             mount = defaultMount;
         }
 
-        casa::Quantity delay;
+        casacore::Quantity delay;
         if (itsParset.isDefined(keyBase + "delay")) {
             delay = asQuantity(itsParset.getString(keyBase + "delay"));
         } else {
@@ -361,18 +361,18 @@ void Configuration::buildCorrelatorModes(void)
     for (it = modes.begin(); it != modes.end(); ++it) {
         const string name = *it;
         const string keyBase = "correlator.mode." + name + ".";
-        const casa::Quantity chanWidth = asQuantity(itsParset.getString(keyBase + "chan_width"));
-        const casa::uInt nChan = itsParset.isDefined(keyBase + "n_chan") ? itsParset.getUint32(keyBase + "n_chan") : itsParset.getUint32(standardKeyBase + "n_chan");
+        const casacore::Quantity chanWidth = asQuantity(itsParset.getString(keyBase + "chan_width"));
+        const casacore::uInt nChan = itsParset.isDefined(keyBase + "n_chan") ? itsParset.getUint32(keyBase + "n_chan") : itsParset.getUint32(standardKeyBase + "n_chan");
 
-        vector<casa::Stokes::StokesTypes> stokes;
+        vector<casacore::Stokes::StokesTypes> stokes;
         const vector<string> stokesStrings = itsParset.isDefined(keyBase + "stokes") ? itsParset.getStringVector(keyBase + "stokes") : itsParset.getStringVector(standardKeyBase + "stokes");
         for (vector<string>::const_iterator it = stokesStrings.begin();
                 it != stokesStrings.end(); ++it) {
-            stokes.push_back(casa::Stokes::type(*it));
+            stokes.push_back(casacore::Stokes::type(*it));
         }
 
-        const casa::uInt interval = itsParset.isDefined(keyBase + "interval") ? itsParset.getUint32(keyBase + "interval") : itsParset.getUint32(standardKeyBase + "interval");
-        const casa::Quantity freqOffset = asQuantity(itsParset.getString(keyBase + "freq_offset", "0.0Hz"));
+        const casacore::uInt interval = itsParset.isDefined(keyBase + "interval") ? itsParset.getUint32(keyBase + "interval") : itsParset.getUint32(standardKeyBase + "interval");
+        const casacore::Quantity freqOffset = asQuantity(itsParset.getString(keyBase + "freq_offset", "0.0Hz"));
 
         const CorrelatorMode mode(name, chanWidth, nChan, stokes, interval, freqOffset);
         itsCorrelatorModes.insert(make_pair(name, mode));
@@ -389,20 +389,20 @@ void Configuration::buildFeeds(void)
 
     const uint32_t N_RECEPTORS = 2; // Only support receptors "X Y"
     const uint32_t nFeeds = itsParset.getUint32("feeds.n_feeds");
-    const casa::Quantity spacing = asQuantity(itsParset.getString("feeds.spacing"), "rad");
+    const casacore::Quantity spacing = asQuantity(itsParset.getString("feeds.spacing"), "rad");
 
     // Get offsets for each feed/beam
-    casa::Matrix<casa::Quantity> offsets(nFeeds, N_RECEPTORS);
+    casacore::Matrix<casacore::Quantity> offsets(nFeeds, N_RECEPTORS);
     for (uint32_t i = 0; i < nFeeds; ++i) {
         const string key = "feeds.feed" + utility::toString(i);
         if (!itsParset.isDefined(key)) {
             ASKAPTHROW(AskapError, "Expected " << nFeeds << " feed offsets");
         }
-        const vector<casa::Double> xy = itsParset.getDoubleVector(key);
+        const vector<casacore::Double> xy = itsParset.getDoubleVector(key);
         offsets(i, 0) = spacing * xy.at(0);
         offsets(i, 1) = spacing * xy.at(1);
     }
-    casa::Vector<casa::String> pols(nFeeds, "X Y");
+    casacore::Vector<casacore::String> pols(nFeeds, "X Y");
 
     itsFeedConfig.reset(new FeedConfig(offsets, pols));
 }

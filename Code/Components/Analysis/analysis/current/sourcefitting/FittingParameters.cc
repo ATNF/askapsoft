@@ -145,7 +145,7 @@ FittingParameters::FittingParameters(const LOFAR::ParameterSet& parset)
 
 //**************************************************************//
 
-void FittingParameters::setBoxFlux(casa::Vector<casa::Double> f)
+void FittingParameters::setBoxFlux(casacore::Vector<casacore::Double> f)
 {
 
     itsBoxFlux = 0.;

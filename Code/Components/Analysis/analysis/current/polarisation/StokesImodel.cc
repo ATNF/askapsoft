@@ -84,14 +84,14 @@ void StokesImodel::initialise(StokesSpectrum &I,
     if (itsType == "taylor") {
 
         if (recomputeAlphaBeta) {
-            itsCoeffs = casa::Vector<float>(itsOrder);
-            itsCoeffErrs = casa::Vector<float>(itsOrder);
+            itsCoeffs = casacore::Vector<float>(itsOrder);
+            itsCoeffErrs = casacore::Vector<float>(itsOrder);
             ASKAPLOG_DEBUG_STR(logger, "About to fit to spectrum");
             fit();
             ASKAPLOG_DEBUG_STR(logger, "Fitting complete");
         } else {
-            itsCoeffs = casa::Vector<float>(3);
-            itsCoeffErrs = casa::Vector<float>(3);
+            itsCoeffs = casacore::Vector<float>(3);
+            itsCoeffErrs = casacore::Vector<float>(3);
             itsCoeffs[0] = comp->intFlux(I.bunit().getName());
             itsCoeffs[1] = comp->alpha();
             itsCoeffs[2] = comp->beta();
@@ -103,12 +103,12 @@ void StokesImodel::initialise(StokesSpectrum &I,
 
     } else {
 
-        itsCoeffs = casa::Vector<float>(itsOrder);
+        itsCoeffs = casacore::Vector<float>(itsOrder);
         fit();
 
     }
 
-    itsModelSpectrum = casa::Vector<float>(itsFreqs.size(), 0.);
+    itsModelSpectrum = casacore::Vector<float>(itsFreqs.size(), 0.);
     for (size_t i = 0; i < itsFreqs.size(); i++) {
         itsModelSpectrum[i] = flux(itsFreqs[i]);
     }
@@ -220,7 +220,7 @@ void StokesImodel::fitTT()
     analysisutilities::FitTT fitter(itsTaylorNterms);
     ASKAPLOG_DEBUG_STR(logger, "Fitting");
     // Normalise the frequency array to the reference frequency, and fit
-    casa::Array<float> normalisedFreqs = itsFreqs / itsRefFreq;
+    casacore::Array<float> normalisedFreqs = itsFreqs / itsRefFreq;
     fitter.fit(normalisedFreqs, itsIspectrum, itsInoise);
     ASKAPLOG_DEBUG_STR(logger, "Complete");
     // Get the coefficients and their errors

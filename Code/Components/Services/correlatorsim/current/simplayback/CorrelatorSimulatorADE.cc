@@ -111,7 +111,7 @@ CorrelatorSimulatorADE::CorrelatorSimulatorADE(
         itsDelay(delay), itsFailMode(failMode), 
 		itsCurrentRow(0), itsDataReadCounter(0), itsDataSentCounter(0)
 {
-    itsMS.reset(new casa::MeasurementSet(dataset, casa::Table::Old));
+    itsMS.reset(new casacore::MeasurementSet(dataset, casacore::Table::Old));
 	itsPort.reset(new askap::cp::VisPortADE(hostname, port));
 
     initBuffer();
@@ -250,16 +250,16 @@ void CorrelatorSimulatorADE::initBuffer()
     ROMSColumns msc(*itsMS);
 
     // Get reference to columns of interest
-    const casa::ROMSSpWindowColumns& spwc = msc.spectralWindow();
-    const casa::ROMSAntennaColumns& antc = msc.antenna();
-    const casa::ROMSDataDescColumns& ddc = msc.dataDescription();
-    const casa::ROMSPolarizationColumns& polc = msc.polarization();
+    const casacore::ROMSSpWindowColumns& spwc = msc.spectralWindow();
+    const casacore::ROMSAntennaColumns& antc = msc.antenna();
+    const casacore::ROMSDataDescColumns& ddc = msc.dataDescription();
+    const casacore::ROMSPolarizationColumns& polc = msc.polarization();
     const uint32_t nRow = msc.nrow();
     if (itsShelf == DISPLAY_SHELF) {
         cout << "  Reading measurement set ..." << endl;
         cout << "    Total rows in measurement set: " << nRow << endl;
     }
-    casa::Double currentTime = 0.0;
+    casacore::Double currentTime = 0.0;
 
     uint32_t dataDescId;
     uint32_t descSpwId, descPolId;
@@ -430,9 +430,9 @@ bool CorrelatorSimulatorADE::getNewBufferData()
     ROMSColumns msc(*itsMS);
 
     // Get reference to columns of interest
-    const casa::ROMSSpWindowColumns& spwc = msc.spectralWindow();
-    const casa::ROMSDataDescColumns& ddc = msc.dataDescription();
-    const casa::ROMSPolarizationColumns& polc = msc.polarization();
+    const casacore::ROMSSpWindowColumns& spwc = msc.spectralWindow();
+    const casacore::ROMSDataDescColumns& ddc = msc.dataDescription();
+    const casacore::ROMSPolarizationColumns& polc = msc.polarization();
 
     const uint32_t nRow = msc.nrow();
     if (itsCurrentRow >= nRow) {
@@ -452,12 +452,12 @@ bool CorrelatorSimulatorADE::getNewBufferData()
     // Precision of a single double may not be enough in general,
     // but should be fine for this emulator (ideally need to represent
     // time as two doubles)
-    const casa::Double currentTime = msc.time()(itsCurrentRow);
-    const casa::MEpoch epoch(
-            casa::MVEpoch(casa::Quantity(currentTime,"s")),
-            casa::MEpoch::Ref(casa::MEpoch::UTC));
-    const casa::MVEpoch epochTAI = casa::MEpoch::Convert(epoch,
-            casa::MEpoch::Ref(casa::MEpoch::TAI))().getValue();
+    const casacore::Double currentTime = msc.time()(itsCurrentRow);
+    const casacore::MEpoch epoch(
+            casacore::MVEpoch(casacore::Quantity(currentTime,"s")),
+            casacore::MEpoch::Ref(casacore::MEpoch::UTC));
+    const casacore::MVEpoch epochTAI = casacore::MEpoch::Convert(epoch,
+            casacore::MEpoch::Ref(casacore::MEpoch::TAI))().getValue();
     const uint64_t microsecondsPerDay = 86400000000ull;
     const uint64_t startOfDayBAT =
             uint64_t(epochTAI.getDay()*microsecondsPerDay);
@@ -489,8 +489,8 @@ bool CorrelatorSimulatorADE::getNewBufferData()
         }
         //uint32_t descPolId = ddc.polarizationId()(dataDescId);
         //uint32_t nCorr = polc.numCorr()(descPolId);
-        casa::Matrix<casa::Complex> data = msc.data()(itsCurrentRow);
-        const casa::Vector<casa::Double> frequencies =
+        casacore::Matrix<casacore::Complex> data = msc.data()(itsCurrentRow);
+        const casacore::Vector<casacore::Double> frequencies =
                 spwc.chanFreq()(descSpwId);
         ASKAPCHECK(nChan == frequencies.size(),
                 "Disagreement in the number of channels in measurement set");
@@ -509,7 +509,7 @@ bool CorrelatorSimulatorADE::getNewBufferData()
 
         uint32_t descPolId = ddc.polarizationId()(dataDescId);
         uint32_t nCorr = polc.numCorr()(descPolId);
-        casa::Vector<casa::Int> stokesTypesInt = polc.corrType()(descPolId);
+        casacore::Vector<casacore::Int> stokesTypesInt = polc.corrType()(descPolId);
         //cout << "    antenna " << ant1 << ", " << ant2 << endl;
         uint32_t corr;
         for (uint32_t c = 0; c < nCorr; ++c) {
@@ -573,9 +573,9 @@ bool CorrelatorSimulatorADE::getBufferData()
     ROMSColumns msc(*itsMS);
 
     // Get reference to columns of interest
-    const casa::ROMSSpWindowColumns& spwc = msc.spectralWindow();
-    const casa::ROMSDataDescColumns& ddc = msc.dataDescription();
-    const casa::ROMSPolarizationColumns& polc = msc.polarization();
+    const casacore::ROMSSpWindowColumns& spwc = msc.spectralWindow();
+    const casacore::ROMSDataDescColumns& ddc = msc.dataDescription();
+    const casacore::ROMSPolarizationColumns& polc = msc.polarization();
 
     const uint32_t nRow = msc.nrow();
 
@@ -610,12 +610,12 @@ bool CorrelatorSimulatorADE::getBufferData()
     // Precision of a single double may not be enough in general, 
     // but should be fine for this emulator (ideally need to represent 
     // time as two doubles)
-    const casa::Double currentTime = msc.time()(itsCurrentRow);
-    const casa::MEpoch epoch(
-            casa::MVEpoch(casa::Quantity(currentTime,"s")),
-            casa::MEpoch::Ref(casa::MEpoch::UTC));
-    const casa::MVEpoch epochTAI = casa::MEpoch::Convert(epoch,
-            casa::MEpoch::Ref(casa::MEpoch::TAI))().getValue();
+    const casacore::Double currentTime = msc.time()(itsCurrentRow);
+    const casacore::MEpoch epoch(
+            casacore::MVEpoch(casacore::Quantity(currentTime,"s")),
+            casacore::MEpoch::Ref(casacore::MEpoch::UTC));
+    const casacore::MVEpoch epochTAI = casacore::MEpoch::Convert(epoch,
+            casacore::MEpoch::Ref(casacore::MEpoch::TAI))().getValue();
     const uint64_t microsecondsPerDay = 86400000000ull;
     const uint64_t startOfDayBAT = 
             uint64_t(epochTAI.getDay()*microsecondsPerDay);
@@ -643,8 +643,8 @@ bool CorrelatorSimulatorADE::getBufferData()
         uint32_t nChan = spwc.numChan()(descSpwId);
         uint32_t descPolId = ddc.polarizationId()(dataDescId);
         uint32_t nCorr = polc.numCorr()(descPolId);
-        casa::Matrix<casa::Complex> data = msc.data()(itsCurrentRow);
-        const casa::Vector<casa::Double> frequencies = 
+        casacore::Matrix<casacore::Complex> data = msc.data()(itsCurrentRow);
+        const casacore::Vector<casacore::Double> frequencies = 
                 spwc.chanFreq()(descSpwId);
 		ASKAPCHECK(nChan > 0, "nChan: " << nChan);
         ASKAPCHECK(nChan == frequencies.size(), 
@@ -666,7 +666,7 @@ bool CorrelatorSimulatorADE::getBufferData()
             std::swap(ant1,ant2);
         }
 
-        casa::Vector<casa::Int> stokesTypesInt = polc.corrType()(descPolId);
+        casacore::Vector<casacore::Int> stokesTypesInt = polc.corrType()(descPolId);
         //cout << "    antenna " << ant1 << ", " << ant2 << endl;
         uint32_t corr = 0;
         for (uint32_t c = 0; c < nCorr; ++c) {

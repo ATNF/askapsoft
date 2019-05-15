@@ -62,10 +62,10 @@ class AsciiTableAccessor : public IGlobalSkyModel {
 
         /// @see askap::cp::pipelinetasks::IGlobalSkyModel::coneSearch
         virtual askap::cp::sms::client::ComponentListPtr coneSearch(
-                const casa::Quantity& ra,
-                const casa::Quantity& dec,
-                const casa::Quantity& searchRadius,
-                const casa::Quantity& fluxLimit);
+                const casacore::Quantity& ra,
+                const casacore::Quantity& dec,
+                const casacore::Quantity& searchRadius,
+                const casacore::Quantity& fluxLimit);
 
     private:
 
@@ -85,11 +85,11 @@ class AsciiTableAccessor : public IGlobalSkyModel {
         /// (eg. RA, or Dec) with the first item in the pair being the (zero-based)
         /// column number of this field and the second item in the pair being
         /// the units the data for this field is represented in
-        typedef std::map< FieldEnum, std::pair< short, casa::Unit > > FieldDesc;
+        typedef std::map< FieldEnum, std::pair< short, casacore::Unit > > FieldDesc;
 
         /// Looks up the column and units keys in the parset and create a pair
         /// of column index (zero-based) and unit.
-        static std::pair< short, casa::Unit > makeFieldDescEntry(
+        static std::pair< short, casacore::Unit > makeFieldDescEntry(
                 const LOFAR::ParameterSet& parset,
                 const std::string& colkey,
                 const std::string& unitskey);
@@ -102,20 +102,20 @@ class AsciiTableAccessor : public IGlobalSkyModel {
         /// for each component which meets the search radius and flux limit
         /// criteria. The component is then added to the list.
         void processLine(const std::string& line,
-                const casa::Quantity& searchRA,
-                const casa::Quantity& searchDec,
-                const casa::Quantity& searchRadius,
-                const casa::Quantity& fluxLimit,
+                const casacore::Quantity& searchRA,
+                const casacore::Quantity& searchDec,
+                const casacore::Quantity& searchRadius,
+                const casacore::Quantity& fluxLimit,
                 std::list<askap::cp::sms::client::Component>& list);
 
         /// File stream from which components will be read
         boost::scoped_ptr<std::istream> itsFile;
 
         /// Count of components below the flux limit
-        casa::uLong itsBelowFluxLimit;
+        casacore::uLong itsBelowFluxLimit;
 
         /// Count of components outside of the search radius
-        casa::uLong itsOutsideSearchCone;
+        casacore::uLong itsOutsideSearchCone;
 
         /// Field descriptions from the parset
         FieldDesc itsFields;

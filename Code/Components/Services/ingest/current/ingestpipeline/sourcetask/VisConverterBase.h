@@ -85,17 +85,17 @@ public:
    /// @brief get expected number of datagrams
    /// @return the number of datagrams required to complete VisChunk
    /// @note it is initialised in derived classes together with VisChunk
-   inline casa::uInt datagramsExpected() const { return itsDatagramsExpected; }
+   inline casacore::uInt datagramsExpected() const { return itsDatagramsExpected; }
 
    /// @brief number of datagrams used
    /// @return the number of datagrams contributing to the current VisChunk
-   inline casa::uInt datagramsCount() const { return itsDatagramsCount; }
+   inline casacore::uInt datagramsCount() const { return itsDatagramsCount; }
 
    /// @brief number of datagrams ignored
    /// @return the number of successfully received datagrams which are
    /// ignored for some reason (e.g. mapping) and didn't contribute to
    /// the current VisChunk.
-   inline casa::uInt datagramsIgnored() const { return itsDatagramsIgnored; }
+   inline casacore::uInt datagramsIgnored() const { return itsDatagramsIgnored; }
 
    /// @brief check that all expected datagrams received
    /// @return true, if datagramsCount() + datagramsIgnored() == datagramsExpected()
@@ -113,10 +113,10 @@ public:
    inline const Configuration& config() const { return itsConfig;}
 
    /// @return maximum number of beams
-   inline casa::uInt maxNumberOfBeams() const { return itsMaxNBeams; } 
+   inline casacore::uInt maxNumberOfBeams() const { return itsMaxNBeams; } 
 
    /// @return number of beams to receive
-   inline casa::uInt nBeamsToReceive() const { return itsBeamsToReceive; }
+   inline casacore::uInt nBeamsToReceive() const { return itsBeamsToReceive; }
 
    /// @brief obtain channel manager
    /// @return const reference to the channel manager
@@ -131,12 +131,12 @@ public:
    /// By default (and after every call to initVisChunk) all antennas
    /// are unflagged.
    /// @param[in] antenna index for the antenna to flag as bad
-   void flagAntenna(casa::uInt antenna);
+   void flagAntenna(casacore::uInt antenna);
 
    /// @brief query whether given antenna produce good data
    /// @param[in] antenna index of antenna to check
    /// @return true if a given antenna is unflagged
-   bool isAntennaGood(casa::uInt antenna) const;
+   bool isAntennaGood(casacore::uInt antenna) const;
 
 protected:
 
@@ -159,7 +159,7 @@ protected:
    /// @brief set the number of expected datagrams
    /// @details This method is intended to be used in derived classes
    /// @param[in] number number of expected datagrams
-   inline void setNumberOfExpectedDatagrams(casa::uInt number) 
+   inline void setNumberOfExpectedDatagrams(casacore::uInt number) 
           { itsDatagramsExpected = number; }
 
    /// @brief map correlation product to the visibility chunk
@@ -173,7 +173,7 @@ protected:
    /// @param[in] beam beam ID to map (defined by the IOC)
    /// @return a pair of row and polarisation indices (guaranteed to
    /// be within VisChunk shape). Undefined value for unmapped products.
-   boost::optional<std::pair<casa::uInt, casa::uInt> > mapCorrProduct(uint32_t baseline, uint32_t beam) const;
+   boost::optional<std::pair<casacore::uInt, casacore::uInt> > mapCorrProduct(uint32_t baseline, uint32_t beam) const;
 
    /// @brief create a new VisChunk
    /// @details This method initialises itsVisChunk with a new buffer.
@@ -181,12 +181,12 @@ protected:
    /// integration is processed.
    /// @param[in] timestamp BAT corresponding to this new chunk
    /// @param[in] corrMode correlator mode parameters (determines shape, etc)
-   void initVisChunk(const casa::uLong timestamp, const CorrelatorMode &corrMode);
+   void initVisChunk(const casacore::uLong timestamp, const CorrelatorMode &corrMode);
 
 private:
    /// @brief helper method to build cached correlator product map
    /// @param[in] recordedStokes stokes vector of the accessor to be built
-   void buildCachedCorrelatorProductMap(const casa::Vector<casa::Stokes::StokesTypes> &recordedStokes);
+   void buildCachedCorrelatorProductMap(const casacore::Vector<casacore::Stokes::StokesTypes> &recordedStokes);
 
    /// @brief row for given baseline and beam
    /// @details We have a fixed layout of data in the VisChunk/measurement set.
@@ -221,19 +221,19 @@ private:
    /// @details This field is initialised at the time a new VisChunk 
    /// is created and contains the number of datagrams required to
    /// complete VisChunk. Exact value is determined in derived classes.
-   casa::uInt itsDatagramsExpected;
+   casacore::uInt itsDatagramsExpected;
 
    /// @brief number of datagrams used
    /// @details This counter is reset each time a new VisChunk is created.
    /// It is intended to count the number of datagrams contributing to the
    /// given chunk (i.e. excludes the datagrams which are ignored for some
    /// reason)
-   casa::uInt itsDatagramsCount;
+   casacore::uInt itsDatagramsCount;
 
    /// @brief This counter is reset each time a new VisChunk is created.
    /// It is intended to count the number of successfully received datagrams
    /// which are ignored for some reason.
-   casa::uInt itsDatagramsIgnored;
+   casacore::uInt itsDatagramsIgnored;
 
    /// @brief configuration
    const Configuration itsConfig;
@@ -258,7 +258,7 @@ private:
    /// method called from the constructor to set it equal to the
    /// configuration (i.e. to write everything, unless a specific mapping
    /// is configured in the parset)
-   casa::uInt itsMaxNBeams;
+   casacore::uInt itsMaxNBeams;
 
    /// @brief number of beams to expect in the data stream
    /// @details A larger number of beams can be received from the 
@@ -270,7 +270,7 @@ private:
    /// method called from the constructor to set it from
    /// configuration (i.e. to write everything, unless a specific mapping
    /// is configured via the parset)
-   casa::uInt itsBeamsToReceive;
+   casacore::uInt itsBeamsToReceive;
 
    /// @brief Channel Manager
    ChannelManager itsChannelManager;
@@ -285,17 +285,17 @@ private:
    std::vector<boost::tuple<int32_t, int32_t, int32_t> > itsCachedCorrelatorProductMap;
 
    /// @brief cached stokes vector for which itsCachedCorrelatorProductMap has been built
-   casa::Vector<casa::Stokes::StokesTypes> itsCachedStokesVector;
+   casacore::Vector<casacore::Stokes::StokesTypes> itsCachedStokesVector;
 
    /// @brief warning flag per unknown polarisation
    /// @details to avoid spitting out too much messages
-   mutable std::set<casa::Stokes::StokesTypes> itsIgnoredStokesWarned;
+   mutable std::set<casacore::Stokes::StokesTypes> itsIgnoredStokesWarned;
 
    /// @brief antenna-based flags
    /// @detail Zero length means all antennas are unflagged. Otherwise,
    /// it should always be of an appropriate size to handle all indices
    /// available in the chunk.
-   std::vector<casa::uInt> itsAntWithValidData;
+   std::vector<casacore::uInt> itsAntWithValidData;
 
    /// For unit testing
    friend class VisConverterBaseTest;

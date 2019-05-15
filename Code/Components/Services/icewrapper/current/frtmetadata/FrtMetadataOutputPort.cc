@@ -86,7 +86,7 @@ void FrtMetadataOutputPort::send(const std::map<std::string, int>& message)
 {
     TypedValueMap mapmessage; 
     TypedValueMapMapper mapper(mapmessage);
-    std::vector<casa::String> fields;
+    std::vector<casacore::String> fields;
     fields.reserve(message.size());
     for (std::map<std::string, int>::const_iterator ci = message.begin(); ci != message.end(); ++ci) {
          mapper.setInt(ci->first, ci->second);

@@ -62,7 +62,7 @@ int TypedValueMapConstMapper::getInt(const std::string& key) const
 
 long TypedValueMapConstMapper::getLong(const std::string& key) const
 {
-    // ::Ice::Long is 64-bit (even on 32-bit x86) whereas casa::Long will be 
+    // ::Ice::Long is 64-bit (even on 32-bit x86) whereas casacore::Long will be 
     // 32-bit. Using this mapper on such a system will likely lead to grief.
 #ifndef __LP64__
     ASKAPTHROW(AskapError, "This platform does not support 64-bit long");
@@ -71,45 +71,45 @@ long TypedValueMapConstMapper::getLong(const std::string& key) const
 #endif
 }
 
-casa::String TypedValueMapConstMapper::getString(const std::string& key) const
+casacore::String TypedValueMapConstMapper::getString(const std::string& key) const
 {
-    return get<casa::String, TypeString, TypedValueStringPtr>(key);
+    return get<casacore::String, TypeString, TypedValueStringPtr>(key);
 }
 
-casa::Bool TypedValueMapConstMapper::getBool(const std::string& key) const
+casacore::Bool TypedValueMapConstMapper::getBool(const std::string& key) const
 {
-    return get<casa::Bool, TypeBool, TypedValueBoolPtr>(key);
+    return get<casacore::Bool, TypeBool, TypedValueBoolPtr>(key);
 }
 
-casa::Float TypedValueMapConstMapper::getFloat(const std::string& key) const
+casacore::Float TypedValueMapConstMapper::getFloat(const std::string& key) const
 {
-    return get<casa::Float, TypeFloat, TypedValueFloatPtr>(key);
+    return get<casacore::Float, TypeFloat, TypedValueFloatPtr>(key);
 }
 
-casa::Double TypedValueMapConstMapper::getDouble(const std::string& key) const
+casacore::Double TypedValueMapConstMapper::getDouble(const std::string& key) const
 {
-    return get<casa::Double, TypeDouble, TypedValueDoublePtr>(key);
+    return get<casacore::Double, TypeDouble, TypedValueDoublePtr>(key);
 }
 
-casa::Complex TypedValueMapConstMapper::getFloatComplex(const std::string& key) const
-{
-    askap::interfaces::FloatComplex val =
-        get<askap::interfaces::FloatComplex, TypeFloatComplex,
-        TypedValueFloatComplexPtr>(key);
-
-    return casa::Complex(val.real, val.imag);
-}
-
-casa::DComplex TypedValueMapConstMapper::getDoubleComplex(const std::string& key) const
+casacore::Complex TypedValueMapConstMapper::getFloatComplex(const std::string& key) const
 {
     askap::interfaces::FloatComplex val =
         get<askap::interfaces::FloatComplex, TypeFloatComplex,
         TypedValueFloatComplexPtr>(key);
 
-    return casa::DComplex(val.real, val.imag);
+    return casacore::Complex(val.real, val.imag);
 }
 
-casa::MDirection TypedValueMapConstMapper::getDirection(const std::string& key) const
+casacore::DComplex TypedValueMapConstMapper::getDoubleComplex(const std::string& key) const
+{
+    askap::interfaces::FloatComplex val =
+        get<askap::interfaces::FloatComplex, TypeFloatComplex,
+        TypedValueFloatComplexPtr>(key);
+
+    return casacore::DComplex(val.real, val.imag);
+}
+
+casacore::MDirection TypedValueMapConstMapper::getDirection(const std::string& key) const
 {
     askap::interfaces::Direction val =
         get<askap::interfaces::Direction, TypeDirection,
@@ -118,90 +118,90 @@ casa::MDirection TypedValueMapConstMapper::getDirection(const std::string& key) 
     return convertDirection(val);
 }
 
-std::vector<casa::Int> TypedValueMapConstMapper::getIntSeq(const std::string& key) const
+std::vector<casacore::Int> TypedValueMapConstMapper::getIntSeq(const std::string& key) const
 {
-    return get<std::vector<casa::Int>, TypeIntSeq, TypedValueIntSeqPtr>(key);
+    return get<std::vector<casacore::Int>, TypeIntSeq, TypedValueIntSeqPtr>(key);
 }
 
-std::vector<casa::Long> TypedValueMapConstMapper::getLongSeq(const std::string& key) const
+std::vector<casacore::Long> TypedValueMapConstMapper::getLongSeq(const std::string& key) const
 {
-    // ::Ice::Long is 64-bit (even on 32-bit x86) whereas casa::Long will be 
+    // ::Ice::Long is 64-bit (even on 32-bit x86) whereas casacore::Long will be 
     // 32-bit. Using this mapper on such a system will likely lead to grief.
 #ifndef __LP64__
     ASKAPTHROW(AskapError, "This platform does not support 64-bit long");
 #else
-    //return get<std::vector<casa::Long>, TypeLongSeq, TypedValueLongSeqPtr>(key);
+    //return get<std::vector<casacore::Long>, TypeLongSeq, TypedValueLongSeqPtr>(key);
     LongSeq seq = get<LongSeq, TypeLongSeq, TypedValueLongSeqPtr>(key);
-    return std::vector<casa::Long>(seq.begin(), seq.end());
+    return std::vector<casacore::Long>(seq.begin(), seq.end());
 #endif
 }
 
-std::vector<casa::String> TypedValueMapConstMapper::getStringSeq(const std::string& key) const
+std::vector<casacore::String> TypedValueMapConstMapper::getStringSeq(const std::string& key) const
 {
     askap::interfaces::StringSeq val =
         get<askap::interfaces::StringSeq, TypeStringSeq,
         TypedValueStringSeqPtr>(key);
 
-    return std::vector<casa::String>(val.begin(), val.end());
+    return std::vector<casacore::String>(val.begin(), val.end());
 }
 
-std::vector<casa::Bool> TypedValueMapConstMapper::getBoolSeq(const std::string& key) const
+std::vector<casacore::Bool> TypedValueMapConstMapper::getBoolSeq(const std::string& key) const
 {
-    return get<std::vector<casa::Bool>, TypeBoolSeq, TypedValueBoolSeqPtr>(key);
+    return get<std::vector<casacore::Bool>, TypeBoolSeq, TypedValueBoolSeqPtr>(key);
 }
 
-std::vector<casa::Float> TypedValueMapConstMapper::getFloatSeq(const std::string& key) const
+std::vector<casacore::Float> TypedValueMapConstMapper::getFloatSeq(const std::string& key) const
 {
-    return get<std::vector<casa::Float>, TypeFloatSeq, TypedValueFloatSeqPtr>(key);
+    return get<std::vector<casacore::Float>, TypeFloatSeq, TypedValueFloatSeqPtr>(key);
 }
 
-std::vector<casa::Double> TypedValueMapConstMapper::getDoubleSeq(const std::string& key) const
+std::vector<casacore::Double> TypedValueMapConstMapper::getDoubleSeq(const std::string& key) const
 {
-    return get<std::vector<casa::Double>, TypeDoubleSeq, TypedValueDoubleSeqPtr>(key);
+    return get<std::vector<casacore::Double>, TypeDoubleSeq, TypedValueDoubleSeqPtr>(key);
 }
 
-std::vector<casa::Complex> TypedValueMapConstMapper::getFloatComplexSeq(const std::string& key) const
+std::vector<casacore::Complex> TypedValueMapConstMapper::getFloatComplexSeq(const std::string& key) const
 {
     askap::interfaces::FloatComplexSeq val =
         get<askap::interfaces::FloatComplexSeq, TypeFloatComplexSeq,
         TypedValueFloatComplexSeqPtr>(key);
 
     // Populate this vector before returning it
-    std::vector<casa::Complex> container;
+    std::vector<casacore::Complex> container;
 
     askap::interfaces::FloatComplexSeq::const_iterator it = val.begin();
     for (it = val.begin(); it != val.end(); ++it) {
-        container.push_back(casa::Complex(it->real, it->imag));
+        container.push_back(casacore::Complex(it->real, it->imag));
     }
 
     return container;
 }
 
-std::vector<casa::DComplex> TypedValueMapConstMapper::getDoubleComplexSeq(const std::string& key) const
+std::vector<casacore::DComplex> TypedValueMapConstMapper::getDoubleComplexSeq(const std::string& key) const
 {
     askap::interfaces::DoubleComplexSeq val =
         get<askap::interfaces::DoubleComplexSeq, TypeDoubleComplexSeq,
         TypedValueDoubleComplexSeqPtr>(key);
 
     // Populate this vector before returning it
-    std::vector<casa::DComplex> container;
+    std::vector<casacore::DComplex> container;
 
     askap::interfaces::DoubleComplexSeq::const_iterator it = val.begin();
     for (it = val.begin(); it != val.end(); ++it) {
-        container.push_back(casa::DComplex(it->real, it->imag));
+        container.push_back(casacore::DComplex(it->real, it->imag));
     }
 
     return container;
 }
 
-std::vector<casa::MDirection> TypedValueMapConstMapper::getDirectionSeq(const std::string& key) const
+std::vector<casacore::MDirection> TypedValueMapConstMapper::getDirectionSeq(const std::string& key) const
 {
     askap::interfaces::DirectionSeq val =
         get<askap::interfaces::DirectionSeq, TypeDirectionSeq,
         TypedValueDirectionSeqPtr>(key);
 
     // Populate this vector before returning it
-    std::vector<casa::MDirection> container;
+    std::vector<casacore::MDirection> container;
 
     askap::interfaces::DirectionSeq::const_iterator it = val.begin();
     for (it = val.begin(); it != val.end(); ++it) {
@@ -225,18 +225,18 @@ T TypedValueMapConstMapper::get(const std::string& key) const
     return TVPtr::dynamicCast(tv)->value;
 }
 
-casa::MDirection TypedValueMapConstMapper::convertDirection(const askap::interfaces::Direction& dir) const
+casacore::MDirection TypedValueMapConstMapper::convertDirection(const askap::interfaces::Direction& dir) const
 {
     switch (dir.sys) {
         case J2000 :
-            return casa::MDirection(casa::Quantity(dir.coord1, "deg"),
-                    casa::Quantity(dir.coord2, "deg"),
-                    casa::MDirection::Ref(casa::MDirection::J2000));
+            return casacore::MDirection(casacore::Quantity(dir.coord1, "deg"),
+                    casacore::Quantity(dir.coord2, "deg"),
+                    casacore::MDirection::Ref(casacore::MDirection::J2000));
             break;
         case AZEL :
-            return casa::MDirection(casa::Quantity(dir.coord1, "deg"),
-                    casa::Quantity(dir.coord2, "deg"),
-                    casa::MDirection::Ref(casa::MDirection::AZEL));
+            return casacore::MDirection(casacore::Quantity(dir.coord1, "deg"),
+                    casacore::Quantity(dir.coord2, "deg"),
+                    casacore::MDirection::Ref(casacore::MDirection::AZEL));
             break;
     }
 

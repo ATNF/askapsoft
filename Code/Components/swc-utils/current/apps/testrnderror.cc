@@ -48,9 +48,9 @@ struct Worker {
  void run();
 
 protected:
- casa::Complex oneSample() const;
- void acquire(casa::Vector<casa::Complex> &buf1, casa::Vector<casa::Complex> &buf2, const int nSamples) const;
- void storeArray(const std::string &name, const casa::Vector<casa::Complex> &buf) const; 
+ casacore::Complex oneSample() const;
+ void acquire(casacore::Vector<casacore::Complex> &buf1, casacore::Vector<casacore::Complex> &buf2, const int nSamples) const;
+ void storeArray(const std::string &name, const casacore::Vector<casacore::Complex> &buf) const; 
  static float clip(float in);
 private:
  scimath::ComplexGaussianNoise itsGen;
@@ -64,15 +64,15 @@ float Worker::clip(float in) {
 }
 
 
-casa::Complex Worker::oneSample() const
+casacore::Complex Worker::oneSample() const
 {
-  const casa::Complex value = itsGen();
+  const casacore::Complex value = itsGen();
   
   //return value;
-  return casa::Complex(clip(real(value)), clip(imag(value)));
+  return casacore::Complex(clip(real(value)), clip(imag(value)));
 }
 
-void Worker::acquire(casa::Vector<casa::Complex> &buf1, casa::Vector<casa::Complex> &buf2, const int nSamples) const
+void Worker::acquire(casacore::Vector<casacore::Complex> &buf1, casacore::Vector<casacore::Complex> &buf2, const int nSamples) const
 {
   buf1.resize(nSamples);
   buf2.resize(nSamples);
@@ -82,21 +82,21 @@ void Worker::acquire(casa::Vector<casa::Complex> &buf1, casa::Vector<casa::Compl
   }
 }
 
-void Worker::storeArray(const std::string &name, const casa::Vector<casa::Complex> &buf) const {
+void Worker::storeArray(const std::string &name, const casacore::Vector<casacore::Complex> &buf) const {
   ofstream os(name.c_str());
   for (int i=0; i<int(buf.nelements()); ++i) {
-     os<<i<<" "<<real(buf[i])<<" "<<imag(buf[i])<<" "<<abs(buf[i])<<" "<<arg(buf[i])/casa::C::pi*180<<std::endl;
+     os<<i<<" "<<real(buf[i])<<" "<<imag(buf[i])<<" "<<abs(buf[i])<<" "<<arg(buf[i])/casacore::C::pi*180<<std::endl;
   }
 }
 
 void Worker::run() {
-  casa::Vector<casa::Complex> buf1;
-  casa::Vector<casa::Complex> buf2;
+  casacore::Vector<casacore::Complex> buf1;
+  casacore::Vector<casacore::Complex> buf2;
 
   const size_t nChan = 1024;
   const size_t nBlocks = 200000; 
 
-  casa::Vector<casa::Complex> resBuffer(nChan,casa::Complex(0.,0.));
+  casacore::Vector<casacore::Complex> resBuffer(nChan,casacore::Complex(0.,0.));
   for (size_t block = 0; block < nBlocks; ++block) {
        acquire(buf1, buf2, int(nChan));
 
@@ -118,7 +118,7 @@ void Worker::run() {
 int main(int, const char** argv)
 {
     try {
-       casa::Timer timer;
+       casacore::Timer timer;
        timer.mark();
 
        Worker wrk;

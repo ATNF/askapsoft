@@ -96,15 +96,15 @@ unsigned int ChannelManager::localNChannels(const int rank) const
 
 }
 
-casa::Vector<casa::Double> ChannelManager::localFrequencies(const int rank,
-        const casa::Double centreFreq,
-        const casa::Double chanWidth,
-        const casa::uInt totalNChan) const
+casacore::Vector<casacore::Double> ChannelManager::localFrequencies(const int rank,
+        const casacore::Double centreFreq,
+        const casacore::Double chanWidth,
+        const casacore::uInt totalNChan) const
 {
-    casa::Vector<casa::Double> frequencies(localNChannels(rank));;
+    casacore::Vector<casacore::Double> frequencies(localNChannels(rank));;
 
     // 1: Find the first frequency (freq of lowest channel) for this rank
-    casa::Double firstFreq = centreFreqToStartFreq(centreFreq, chanWidth, totalNChan) + itsFreqOffset;
+    casacore::Double firstFreq = centreFreqToStartFreq(centreFreq, chanWidth, totalNChan) + itsFreqOffset;
 
     for (int i = 0; i < rank; ++i) {
         firstFreq += localNChannels(i) * chanWidth;
@@ -119,10 +119,10 @@ casa::Vector<casa::Double> ChannelManager::localFrequencies(const int rank,
     return frequencies;
 }
 
-casa::Double ChannelManager::centreFreqToStartFreq(const casa::Double centreFreq,
-                                                   const casa::Double chanWidth,
-                                                   const casa::uInt totalNChan)
+casacore::Double ChannelManager::centreFreqToStartFreq(const casacore::Double centreFreq,
+                                                   const casacore::Double chanWidth,
+                                                   const casacore::uInt totalNChan)
 {
-    const casa::Double total = static_cast<casa::Double>(totalNChan);
+    const casacore::Double total = static_cast<casacore::Double>(totalNChan);
     return centreFreq - (chanWidth * (total / 2.0)) + (chanWidth / 2.0);
 }

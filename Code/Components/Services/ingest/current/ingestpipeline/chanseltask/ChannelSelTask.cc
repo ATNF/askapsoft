@@ -69,7 +69,7 @@ ChannelSelTask::~ChannelSelTask()
 void ChannelSelTask::process(VisChunk::ShPtr& chunk)
 {
     ASKAPDEBUGASSERT(chunk);
-    const casa::uInt nChanOriginal = chunk->nChannel();
+    const casacore::uInt nChanOriginal = chunk->nChannel();
 
     if (itsStart + itsNChan > nChanOriginal) {
         ASKAPLOG_WARN_STR(logger, "Channel selection task got chunk with " << nChanOriginal
@@ -81,21 +81,21 @@ void ChannelSelTask::process(VisChunk::ShPtr& chunk)
 
     // extract required frequencies - don't take const reference to be able to
     // take slice (although we don't change the chunk yet)
-    casa::Vector<casa::Double>& origFreq = chunk->frequency();
-    casa::Vector<casa::Double> newFreq = origFreq(casa::Slice(itsStart,itsNChan));
+    casacore::Vector<casacore::Double>& origFreq = chunk->frequency();
+    casacore::Vector<casacore::Double> newFreq = origFreq(casacore::Slice(itsStart,itsNChan));
     ASKAPDEBUGASSERT(newFreq.nelements() == itsNChan);
 
     // Extract slices from vis and flag cubes
-    const casa::uInt nRow = chunk->nRow();
-    const casa::uInt nPol = chunk->nPol();
-    casa::Cube<casa::Complex>& origVis = chunk->visibility();
-    casa::Cube<casa::Bool>& origFlag = chunk->flag();
-    const casa::IPosition start(3, 0, itsStart, 0);
-    const casa::IPosition length(3, nRow, itsNChan, nPol);
-    const casa::Slicer slicer(start,length);
+    const casacore::uInt nRow = chunk->nRow();
+    const casacore::uInt nPol = chunk->nPol();
+    casacore::Cube<casacore::Complex>& origVis = chunk->visibility();
+    casacore::Cube<casacore::Bool>& origFlag = chunk->flag();
+    const casacore::IPosition start(3, 0, itsStart, 0);
+    const casacore::IPosition length(3, nRow, itsNChan, nPol);
+    const casacore::Slicer slicer(start,length);
 
-    casa::Cube<casa::Complex> newVis = origVis(slicer);
-    casa::Cube<casa::Bool> newFlag = origFlag(slicer);
+    casacore::Cube<casacore::Complex> newVis = origVis(slicer);
+    casacore::Cube<casacore::Bool> newFlag = origFlag(slicer);
     ASKAPDEBUGASSERT(newVis.shape() == length);
     ASKAPDEBUGASSERT(newFlag.shape() == length);
 

@@ -243,8 +243,8 @@ void ServiceCalSolutionSource::addDefaultGainSolution(const long id,
     // Create a map entry for each antenna/beam combination
     for (short  antenna = 0; antenna < nAntenna; ++antenna) {
         for (short beam = 0; beam < nBeam; ++beam) {
-            JonesJTerm jterm(casa::Complex(1.0, 1.0), true,
-                    casa::Complex(1.0, 1.0), true);
+            JonesJTerm jterm(casacore::Complex(1.0, 1.0), true,
+                    casacore::Complex(1.0, 1.0), true);
             sol.map()[askap::accessors::JonesIndex(antenna, beam)] = jterm;
         }
     }
@@ -265,7 +265,7 @@ void ServiceCalSolutionSource::addDefaultLeakageSolution( const long id,
     for (short antenna = 0; antenna < nAntenna; ++antenna) {
         for (short beam = 0; beam < nBeam; ++beam) {
             sol.map()[askap::accessors::JonesIndex(antenna, beam)] = askap::accessors::JonesDTerm(
-                    casa::Complex(1.0, 1.0), casa::Complex(1.0, 1.0));
+                    casacore::Complex(1.0, 1.0), casacore::Complex(1.0, 1.0));
         }
     }
 
@@ -283,8 +283,8 @@ void ServiceCalSolutionSource::addDefaultBandpassSolution(const long id,
     // Create a map entry for each antenna/beam combination
     for (short antenna = 0; antenna < nAntenna; ++antenna) {
         for (short beam = 0; beam < nBeam; ++beam) {
-            JonesJTerm jterm(casa::Complex(1.0, 1.0), true,
-                    casa::Complex(1.0, 1.0), true);
+            JonesJTerm jterm(casacore::Complex(1.0, 1.0), true,
+                    casacore::Complex(1.0, 1.0), true);
             std::vector<askap::accessors::JonesJTerm> jterms(nChan, jterm);
             sol.map()[askap::accessors::JonesIndex(antenna, beam)] = jterms;
         }

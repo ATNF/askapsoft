@@ -54,16 +54,16 @@ class SubThresholder {
         // SubThresholder& operator=(const SubThresholder &s);
 
         void define(RadioSource &r,
-                    casa::Matrix<casa::Double> pos,
-                    casa::Vector<casa::Double> &array);
+                    casacore::Matrix<casacore::Double> pos,
+                    casacore::Vector<casacore::Double> &array);
         void define(RadioSource &r);
         void setFirstGuess(RadioSource &src);
         std::vector<SubComponent> find();
         void incrementThreshold();
 
         void saveArray(RadioSource &src,
-                       casa::Matrix<casa::Double> pos,
-                       casa::Vector<casa::Double> &f);
+                       casacore::Matrix<casacore::Double> pos,
+                       casacore::Vector<casacore::Double> &f);
         void keepObject(PixelInfo::Object2D &obj);
 
 
@@ -71,7 +71,7 @@ class SubThresholder {
         SubComponent itsFirstGuess;
         std::vector<float> itsFluxArray;
         std::vector<size_t> itsDim;
-        casa::Slicer itsSourceBox;
+        casacore::Slicer itsSourceBox;
         float itsBaseThreshold;
         float itsThreshIncrement;
         float itsPeakFlux;

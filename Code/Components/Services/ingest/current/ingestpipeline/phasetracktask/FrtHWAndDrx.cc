@@ -89,10 +89,10 @@ FrtHWAndDrx::FrtHWAndDrx(const LOFAR::ParameterSet& parset, const Configuration&
 
    const std::vector<Antenna> antennas = config.antennas();
    const size_t nAnt = antennas.size();
-   const casa::String refName = casa::downcase(parset.getString("refant"));
+   const casacore::String refName = casacore::downcase(parset.getString("refant"));
    itsRefAntIndex = nAnt;
-   for (casa::uInt ant=0; ant<nAnt; ++ant) {
-        if (casa::downcase(antennas.at(ant).name()) == refName) {
+   for (casacore::uInt ant=0; ant<nAnt; ++ant) {
+        if (casacore::downcase(antennas.at(ant).name()) == refName) {
             itsRefAntIndex = ant;
             break;
         }
@@ -117,7 +117,7 @@ FrtHWAndDrx::FrtHWAndDrx(const LOFAR::ParameterSet& parset, const Configuration&
 ///                  beams (columns) in radians per second
 /// @param[in] effLO effective LO frequency in Hz
 void FrtHWAndDrx::process(const askap::cp::common::VisChunk::ShPtr& chunk, 
-              const casa::Matrix<double> &delays, const casa::Matrix<double> &rates, const double effLO)
+              const casacore::Matrix<double> &delays, const casacore::Matrix<double> &rates, const double effLO)
 {
   ASKAPDEBUGASSERT(delays.ncolumn() > 0);
   ASKAPDEBUGASSERT(itsRefAntIndex < delays.nrow());
@@ -129,7 +129,7 @@ void FrtHWAndDrx::process(const askap::cp::common::VisChunk::ShPtr& chunk,
 
   const double samplePeriod = 1./768e6; // sample rate is 768 MHz
   // HW phase rate units are 2^{-28} turns per FFB sample of 54 microseconds
-  const double phaseRateUnit = 2. * casa::C::pi / 268435456. / 54e-6;
+  const double phaseRateUnit = 2. * casacore::C::pi / 268435456. / 54e-6;
 
   const double integrationTime = chunk->interval();
   ASKAPASSERT(integrationTime > 0);
@@ -137,14 +137,14 @@ void FrtHWAndDrx::process(const askap::cp::common::VisChunk::ShPtr& chunk,
   // flags that HW (DRx or FR) setting is in range
   std::vector<bool> hwInRange(delays.nrow(),true);
 
-  for (casa::uInt ant = 0; ant < delays.nrow(); ++ant) {
+  for (casacore::uInt ant = 0; ant < delays.nrow(); ++ant) {
        bool outOfRange = false;
        // negate the sign here because we want to compensate the delay
        const double diffDelay = (delays(itsRefAntIndex,0) - delays(ant,0))/samplePeriod;
        // ideal delay
        ASKAPLOG_INFO_STR(logger, "delays between "<<ant<<" and ref="<<itsRefAntIndex<<" are "
                <<diffDelay*samplePeriod*1e9<<" ns");
-       casa::Int drxDelay = static_cast<casa::Int>(itsDRxMidPoint + diffDelay);
+       casacore::Int drxDelay = static_cast<casacore::Int>(itsDRxMidPoint + diffDelay);
        if (drxDelay < 0) {
            ASKAPLOG_WARN_STR(logger, "DRx delay for antenna "<<ant<<" is out of range (below 0)");
            drxDelay = 0;
@@ -156,13 +156,13 @@ void FrtHWAndDrx::process(const askap::cp::common::VisChunk::ShPtr& chunk,
            outOfRange = true;
        }
        // differential rate, negate the sign because we want to compensate here
-       casa::Int diffRate = static_cast<casa::Int>((rates(itsRefAntIndex,0) - rates(ant,0))/phaseRateUnit);
+       casacore::Int diffRate = static_cast<casacore::Int>((rates(itsRefAntIndex,0) - rates(ant,0))/phaseRateUnit);
        
        /*
        if (ant == 0) {
            const double interval = itsTm[ant]>0 ? (chunk->time().getTime("s").getValue() - itsTm[ant]) : 0;
-           //diffRate = (int(interval/240) % 2 == 0 ? +1. : -1) * static_cast<casa::Int>(casa::C::pi / 100. / phaseRateUnit);
-           const casa::Int rates[11] = {-10, -8, -6, -4, -2, 0, 2, 4, 6, 8,10}; 
+           //diffRate = (int(interval/240) % 2 == 0 ? +1. : -1) * static_cast<casacore::Int>(casacore::C::pi / 100. / phaseRateUnit);
+           const casacore::Int rates[11] = {-10, -8, -6, -4, -2, 0, 2, 4, 6, 8,10}; 
            const double addRate = rates[int(interval/180) % 11];
            diffRate = addRate;
            if (int((interval - 5.)/180) % 11 != int(interval/180) % 11) {
@@ -223,7 +223,7 @@ void FrtHWAndDrx::process(const askap::cp::common::VisChunk::ShPtr& chunk,
            ASKAPCHECK(static_cast<int64_t>(lastReportedFRUpdateBAT) > static_cast<int64_t>(triggerOffset), "The FR trigger offset "<<triggerOffset<<
                   " microseconds is supposed to be small compared to BAT="<<lastReportedFRUpdateBAT<<", ant="<<ant);
            const uint64_t lastFRUpdateBAT = lastReportedFRUpdateBAT + triggerOffset;
-           const uint64_t currentBAT = epoch2bat(casa::MEpoch(chunk->time(),casa::MEpoch::UTC));
+           const uint64_t currentBAT = epoch2bat(casacore::MEpoch(chunk->time(),casacore::MEpoch::UTC));
            if (currentBAT > lastFRUpdateBAT) {
                const uint64_t elapsedTime = currentBAT - lastFRUpdateBAT; 
                const double etInCycles = double(elapsedTime + itsUpdateTimeOffset) / integrationTime / 1e6;
@@ -237,22 +237,22 @@ void FrtHWAndDrx::process(const askap::cp::common::VisChunk::ShPtr& chunk,
        } // if FR had an update for a given antenna
   } // loop over antennas
   //
-  for (casa::uInt row = 0; row < chunk->nRow(); ++row) {
+  for (casacore::uInt row = 0; row < chunk->nRow(); ++row) {
        // slice to get this row of data
-       const casa::uInt ant1 = chunk->antenna1()[row];
-       const casa::uInt ant2 = chunk->antenna2()[row];
+       const casacore::uInt ant1 = chunk->antenna1()[row];
+       const casacore::uInt ant2 = chunk->antenna2()[row];
        ASKAPDEBUGASSERT(ant1 < delays.nrow());
        ASKAPDEBUGASSERT(ant2 < delays.nrow());
        ASKAPDEBUGASSERT(ant1 < hwInRange.size());
        ASKAPDEBUGASSERT(ant2 < hwInRange.size());
        if (itsFrtComm.isValid(ant1) && itsFrtComm.isValid(ant2) && hwInRange[ant1] && hwInRange[ant2]) {
            // desired delays are set and applied, do phase rotation
-           casa::Matrix<casa::Complex> thisRow = chunk->visibility().yzPlane(row);
+           casacore::Matrix<casacore::Complex> thisRow = chunk->visibility().yzPlane(row);
            const double appliedDelay = samplePeriod * (itsFrtComm.requestedDRxDelay(ant2)-itsFrtComm.requestedDRxDelay(ant1));
 
            // attempt to correct for residual delays in software
-           const casa::uInt beam1 = chunk->beam1()[row];
-           const casa::uInt beam2 = chunk->beam2()[row];
+           const casacore::uInt beam1 = chunk->beam1()[row];
+           const casacore::uInt beam2 = chunk->beam2()[row];
            ASKAPDEBUGASSERT(beam1 < delays.ncolumn());
            ASKAPDEBUGASSERT(beam2 < delays.ncolumn());
            // actual delay, note the sign is flipped because we're correcting the delay here
@@ -263,18 +263,18 @@ void FrtHWAndDrx::process(const askap::cp::common::VisChunk::ShPtr& chunk,
            //const double thisRowRate = rates(ant1,beam1) - rates(ant2,beam2);
               
            
-           const double phaseDueToAppliedDelay = 2. * casa::C::pi * effLO * appliedDelay;
+           const double phaseDueToAppliedDelay = 2. * casacore::C::pi * effLO * appliedDelay;
            const double phaseDueToAppliedRate = itsPhases[ant1] - itsPhases[ant2];
-           const casa::Vector<casa::Double>& freq = chunk->frequency();
+           const casacore::Vector<casacore::Double>& freq = chunk->frequency();
            ASKAPDEBUGASSERT(freq.nelements() == thisRow.nrow());
-           for (casa::uInt chan = 0; chan < thisRow.nrow(); ++chan) {
-                //casa::Vector<casa::Complex> thisChan = thisRow.row(chan);
+           for (casacore::uInt chan = 0; chan < thisRow.nrow(); ++chan) {
+                //casacore::Vector<casacore::Complex> thisChan = thisRow.row(chan);
                 const float phase = static_cast<float>(phaseDueToAppliedDelay + phaseDueToAppliedRate +
-                             2. * casa::C::pi * freq[chan] * residualDelay);
-                const casa::Complex phasor(cos(phase), sin(phase));
+                             2. * casacore::C::pi * freq[chan] * residualDelay);
+                const casacore::Complex phasor(cos(phase), sin(phase));
 
                 // actual rotation (same for all polarisations)
-                for (casa::uInt pol = 0; pol < thisRow.ncolumn(); ++pol) {
+                for (casacore::uInt pol = 0; pol < thisRow.ncolumn(); ++pol) {
                      thisRow(chan,pol) *= phasor;
                 }
                 //thisChan *= phasor;
@@ -282,8 +282,8 @@ void FrtHWAndDrx::process(const askap::cp::common::VisChunk::ShPtr& chunk,
            
        } else {
          // the parameters for these antennas are being changed, flag the data
-         casa::Matrix<casa::Bool> thisFlagRow = chunk->flag().yzPlane(row);
-         thisFlagRow.set(casa::True); 
+         casacore::Matrix<casacore::Bool> thisFlagRow = chunk->flag().yzPlane(row);
+         thisFlagRow.set(casacore::True); 
        }
   }
 }

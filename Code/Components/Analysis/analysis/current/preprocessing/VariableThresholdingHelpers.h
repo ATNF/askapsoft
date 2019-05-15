@@ -34,25 +34,25 @@ namespace askap {
 
 namespace analysis {
 
-void slidingBoxStats(casa::Array<Float> &input,
-                     casa::Array<Float> &middle,
-                     casa::Array<Float> &spread,
-                     casa::IPosition &box,
+void slidingBoxStats(casacore::Array<Float> &input,
+                     casacore::Array<Float> &middle,
+                     casacore::Array<Float> &spread,
+                     casacore::IPosition &box,
                      bool useRobust);
 
-casa::Array<Float> calcSNR(casa::Array<Float> &input,
-                           casa::Array<Float> &middle,
-                           casa::Array<Float> &spread);
+casacore::Array<Float> calcSNR(casacore::Array<Float> &input,
+                           casacore::Array<Float> &middle,
+                           casacore::Array<Float> &spread);
 
-void slidingBoxMaskedStats(casa::MaskedArray<Float> &input,
-                           casa::Array<Float> &middle,
-                           casa::Array<Float> &spread,
-                           casa::IPosition &box,
+void slidingBoxMaskedStats(casacore::MaskedArray<Float> &input,
+                           casacore::Array<Float> &middle,
+                           casacore::Array<Float> &spread,
+                           casacore::IPosition &box,
                            bool useRobust);
 
-casa::Array<Float> calcMaskedSNR(casa::MaskedArray<Float> &input,
-                                 casa::Array<Float> &middle,
-                                 casa::Array<Float> &spread);
+casacore::Array<Float> calcMaskedSNR(casacore::MaskedArray<Float> &input,
+                                 casacore::Array<Float> &middle,
+                                 casacore::Array<Float> &spread);
 
 
 }

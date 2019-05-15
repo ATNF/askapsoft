@@ -78,7 +78,7 @@ askap::cp::TosMetadata MetadataConverter::convert(const askap::interfaces::TimeT
 
     // Centre frequency
     const double centreFreqInMHz = srcMapper.getDouble("sky_frequency");
-    dest.centreFreq(casa::Quantity(centreFreqInMHz, "MHz"));
+    dest.centreFreq(casacore::Quantity(centreFreqInMHz, "MHz"));
 
     // Target name
     dest.targetName(srcMapper.getString("target_name"));
@@ -95,15 +95,15 @@ askap::cp::TosMetadata MetadataConverter::convert(const askap::interfaces::TimeT
     // beam offsets - treat it as an optional field
     if (srcMapper.has("beams_offsets")) {
         // we probably need to change the type as the offsets dealt with here are not the directions!
-        const std::vector<casa::MDirection> offsetDirs = srcMapper.getDirectionSeq("beams_offsets");
+        const std::vector<casacore::MDirection> offsetDirs = srcMapper.getDirectionSeq("beams_offsets");
         ASKAPLOG_DEBUG_STR(logger, "Received beams_offsets with "<<offsetDirs.size()<<" elements");
         if (offsetDirs.size() > 0) {
-            casa::Matrix<casa::Double> beamOffsets(2, offsetDirs.size());
-            for (casa::uInt beam = 0; beam < beamOffsets.ncolumn(); ++beam) {
+            casacore::Matrix<casacore::Double> beamOffsets(2, offsetDirs.size());
+            for (casacore::uInt beam = 0; beam < beamOffsets.ncolumn(); ++beam) {
                  beamOffsets(0, beam) = offsetDirs[beam].getValue().getLong();
                  beamOffsets(1, beam) = offsetDirs[beam].getValue().getLat();
                  if (beam < 1) {
-                     ASKAPLOG_DEBUG_STR(logger, "Beam "<<beam<<": "<<offsetDirs[beam]<<" or ( "<<beamOffsets(0,beam)*180./casa::C::pi<<" , "<<beamOffsets(1,beam)*180./casa::C::pi<<" ) degrees");
+                     ASKAPLOG_DEBUG_STR(logger, "Beam "<<beam<<": "<<offsetDirs[beam]<<" or ( "<<beamOffsets(0,beam)*180./casacore::C::pi<<" , "<<beamOffsets(1,beam)*180./casacore::C::pi<<" ) degrees");
                  }
             }
             dest.beamOffsets(beamOffsets);
@@ -111,7 +111,7 @@ askap::cp::TosMetadata MetadataConverter::convert(const askap::interfaces::TimeT
     }
 
     // antenna_names
-    const std::vector<casa::String> antennaNames = srcMapper.getStringSeq("antennas");
+    const std::vector<casacore::String> antennaNames = srcMapper.getStringSeq("antennas");
 
     /////////////////////////
     // Metadata per antenna
@@ -154,22 +154,22 @@ askap::interfaces::TimeTaggedTypedValueMap MetadataConverter::convert(const aska
     destMapper.setString("corrmode", source.corrMode());
 
     // Beam offsets - treat it as an optional field - only convert if matrix is not empty
-    const casa::Matrix<casa::Double>& beamOffsets = source.beamOffsets();
+    const casacore::Matrix<casacore::Double>& beamOffsets = source.beamOffsets();
     if (beamOffsets.ncolumn() > 0) {
         ASKAPASSERT(beamOffsets.nrow() == 2u);
         // we probably need a different type for beam offsets as conceptually they are not directions
-        std::vector<casa::MDirection> beamOffsetsAsDir(beamOffsets.ncolumn());
-        for (casa::uInt beam = 0; beam < beamOffsets.ncolumn(); ++beam) {
-             const casa::MVDirection mvDir(casa::Quantity(beamOffsets(0, beam), "rad"), casa::Quantity(beamOffsets(1,beam), "rad"));
+        std::vector<casacore::MDirection> beamOffsetsAsDir(beamOffsets.ncolumn());
+        for (casacore::uInt beam = 0; beam < beamOffsets.ncolumn(); ++beam) {
+             const casacore::MVDirection mvDir(casacore::Quantity(beamOffsets(0, beam), "rad"), casacore::Quantity(beamOffsets(1,beam), "rad"));
              // note, frame doesn't make sense here at all, use J200 as it is supported by the sequence converter
-             beamOffsetsAsDir[beam] = casa::MDirection(mvDir, casa::MDirection::J2000);
+             beamOffsetsAsDir[beam] = casacore::MDirection(mvDir, casacore::MDirection::J2000);
         }
         destMapper.setDirectionSeq("beams_offsets", beamOffsetsAsDir);
     }
 
     // antenna_names
     const std::vector<std::string> stdnames =  source.antennaNames();
-    std::vector<casa::String> antennaNames;
+    std::vector<casacore::String> antennaNames;
     for (size_t i = 0; i < stdnames.size(); ++i) {
         antennaNames.push_back(stdnames[i]);
     }

@@ -107,12 +107,12 @@ void BeamCorrector::findBeam()
 {
     const boost::shared_ptr<ImageInterface<Float> > imagePtr = openImage(itsFilename);
 
-    casa::Vector<casa::Quantum<casa::Double> > beam = imagePtr->imageInfo().restoringBeam().toVector();
+    casacore::Vector<casacore::Quantum<casacore::Double> > beam = imagePtr->imageInfo().restoringBeam().toVector();
     ASKAPLOG_DEBUG_STR(logger, "Read beam from " << itsFilename << " of " << beam);
-    casa::CoordinateSystem csys = imagePtr->coordinates();
-    int dirCoord = csys.findCoordinate(casa::Coordinate::DIRECTION);
-    casa::Vector<casa::Double> increment = csys.directionCoordinate(dirCoord).increment();
-    casa::Vector<casa::String> dirUnits = csys.directionCoordinate(dirCoord).worldAxisUnits();
+    casacore::CoordinateSystem csys = imagePtr->coordinates();
+    int dirCoord = csys.findCoordinate(casacore::Coordinate::DIRECTION);
+    casacore::Vector<casacore::Double> increment = csys.directionCoordinate(dirCoord).increment();
+    casacore::Vector<casacore::String> dirUnits = csys.directionCoordinate(dirCoord).worldAxisUnits();
     ASKAPASSERT(increment.size() == 2);
     itsPixelScale = sqrt(fabs(increment[0] * increment[1]));
     ASKAPLOG_DEBUG_STR(logger, "Read direction axis increment of " << increment <<
@@ -148,9 +148,9 @@ std::vector<float> BeamCorrector::beam()
 {
 
     std::vector<float> outputbeam(3);
-    outputbeam[0] = casa::Quantity(itsBeam.maj() * itsPixelScale,
+    outputbeam[0] = casacore::Quantity(itsBeam.maj() * itsPixelScale,
                                    itsDirUnits).getValue("deg");
-    outputbeam[1] = casa::Quantity(itsBeam.min() * itsPixelScale,
+    outputbeam[1] = casacore::Quantity(itsBeam.min() * itsPixelScale,
                                    itsDirUnits).getValue("deg");
     outputbeam[2] = itsBeam.pa();
     return outputbeam;

@@ -193,7 +193,7 @@ class FITSfile {
         /// used to convert the ra/dec positions to pixel positions.
         void processSources();
         void processSource(std::string line) {};
-        casa::Slicer getFootprint(std::string line) {return casa::Slicer();};
+        casacore::Slicer getFootprint(std::string line) {return casacore::Slicer();};
 
         /// @brief Convolve the flux array with a beam
         /// @brief The array is convolved with the Gaussian beam
@@ -213,9 +213,9 @@ class FITSfile {
         /// converted to a casa-format coordinate system using
         /// the analysis package function, the brightness units
         /// and restoring beam are saved to the image, and the
-        /// data array is written using a casa::Array class. No
+        /// data array is written using a casacore::Array class. No
         /// additional memory allocation is done in saving the
-        /// data array (the casa::SHARE flag is used in the
+        /// data array (the casacore::SHARE flag is used in the
         /// array constructor). The name of the casa image is
         /// determined by the casafy() function.
         void writeCASAimage(bool creatFile = true, bool saveData = true, bool useOffset = true);
@@ -225,13 +225,13 @@ class FITSfile {
 
         bool createTaylorTerms() {return itsCreateTaylorTerms;};
         void createTaylorTermImages(std::string nameBase,
-                                    casa::CoordinateSystem csys,
-                                    casa::IPosition shape,
-                                    casa::IPosition tileshape,
-                                    casa::Unit bunit,
-                                    casa::ImageInfo iinfo);
+                                    casacore::CoordinateSystem csys,
+                                    casacore::IPosition shape,
+                                    casacore::IPosition tileshape,
+                                    casacore::Unit bunit,
+                                    casacore::ImageInfo iinfo);
         void defineTaylorTerms();
-        void writeTaylorTermImages(std::string nameBase, casa::IPosition location);
+        void writeTaylorTermImages(std::string nameBase, casacore::IPosition location);
 
 
     protected:
@@ -277,11 +277,11 @@ class FITSfile {
         float itsMinMinorAxis;
         /// @brief The units of the position angle for the sources in
         /// the catalogue: either "rad" or "deg"
-        casa::Unit itsPAunits;
+        casacore::Unit itsPAunits;
         /// @brief The flux units for the sources in the catalogue
-        casa::Unit itsSourceFluxUnits;
+        casacore::Unit itsSourceFluxUnits;
         /// @brief The units of the major & minor axes for the sources in the catalogue
-        casa::Unit itsAxisUnits;
+        casacore::Unit itsAxisUnits;
         /// @brief Whether to integrate gaussians over pixels to find the flux in a pixel
         bool itsFlagIntegrateGaussians;
 
@@ -289,7 +289,7 @@ class FITSfile {
         //std::vector<float> itsArray;
         boost::shared_ptr<float[]> itsArray;
         /// @brief The arrays holding the Taylor term maps
-        std::vector<casa::Array<float> > itsTTmaps;
+        std::vector<casacore::Array<float> > itsTTmaps;
         /// @brief The RMS of the noise distribution
         float itsNoiseRMS;
 
@@ -326,7 +326,7 @@ class FITSfile {
         /// @brief The EQUINOX keyword
         float itsEquinox;
         /// @brief The BUNIT keyword: units of flux
-        casa::Unit itsBunit;
+        casacore::Unit itsBunit;
 
         /// @brief How to convert source fluxes to the correct units
         /// for the image

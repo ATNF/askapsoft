@@ -92,12 +92,12 @@ class ChannelManagerTest : public CppUnit::TestFixture {
             const double tolerance = 1e-15;
 
             ChannelManager cman(params);
-            casa::Vector<casa::Double> f0 = cman.localFrequencies(0, centreFreq, chanWidth, totalNChan);
+            casacore::Vector<casacore::Double> f0 = cman.localFrequencies(0, centreFreq, chanWidth, totalNChan);
             CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(2), f0.size());
             CPPUNIT_ASSERT_DOUBLES_EQUAL(1.1, f0(0), tolerance);
             CPPUNIT_ASSERT_DOUBLES_EQUAL(1.3, f0(1), tolerance);
 
-            casa::Vector<casa::Double> f1 = cman.localFrequencies(1, centreFreq, chanWidth, totalNChan);
+            casacore::Vector<casacore::Double> f1 = cman.localFrequencies(1, centreFreq, chanWidth, totalNChan);
             CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(4), f1.size());
             CPPUNIT_ASSERT_DOUBLES_EQUAL(1.5, f1(0), tolerance);
             CPPUNIT_ASSERT_DOUBLES_EQUAL(1.7, f1(1), tolerance);
@@ -118,7 +118,7 @@ class ChannelManagerTest : public CppUnit::TestFixture {
             const double tolerance = 1e-2;
 
             ChannelManager cman(params);
-            casa::Vector<casa::Double> f0 = cman.localFrequencies(0, centreFreq, chanWidth, nChan);
+            casacore::Vector<casacore::Double> f0 = cman.localFrequencies(0, centreFreq, chanWidth, nChan);
             CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(16416), f0.size());
             CPPUNIT_ASSERT_DOUBLES_EQUAL(1015.99, f0(0), tolerance);
             CPPUNIT_ASSERT_DOUBLES_EQUAL(712.009, f0(16415), tolerance);

@@ -106,21 +106,21 @@ int CasdaUploadApp::run(int argc, char* argv[])
             const MeasurementSetElement& firstMs = ms[0];
             obs.setObsTimeRange(firstMs.getObsStart(), firstMs.getObsEnd());
         } else {
-            casa::MEpoch start, end;
+            casacore::MEpoch start, end;
 
             if (itsParset.isDefined("obsStart")) {
                 std::string obsStart = itsParset.getString("obsStart");
-                casa::Quantity qStart;
-                casa::MVTime::read(qStart, obsStart);
-                start = casa::MEpoch(qStart);
+                casacore::Quantity qStart;
+                casacore::MVTime::read(qStart, obsStart);
+                start = casacore::MEpoch(qStart);
             } else {
                 ASKAPTHROW(AskapError, "Unknown observation start time - please use \"obsStart\" to specify the start time in the absence of measurement sets.");
             }
             if (itsParset.isDefined("obsEnd")) {
                 std::string obsEnd = itsParset.getString("obsEnd");
-                casa::Quantity qEnd;
-                casa::MVTime::read(qEnd, obsEnd);
-                end = casa::MEpoch(qEnd);
+                casacore::Quantity qEnd;
+                casacore::MVTime::read(qEnd, obsEnd);
+                end = casacore::MEpoch(qEnd);
             } else {
                 ASKAPTHROW(AskapError, "Unknown observation end time - please use \"obsStart\" to specify the end time in the absence of measurement sets.");
             }

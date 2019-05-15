@@ -1,5 +1,5 @@
 # This file lists the external dependencies
 # use pkgname=askapsoft_relative_path
 boost=/usr/local
-casacore=3rdParty/casacore/casacore-2.0.3
+casacore=/usr/local
 wcslib=3rdParty/wcslib/wcslib-4.18

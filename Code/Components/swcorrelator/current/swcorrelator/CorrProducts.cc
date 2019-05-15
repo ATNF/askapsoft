@@ -41,7 +41,7 @@ namespace swcorrelator {
 /// @param[in] beam beam number corresponding to this buffer
 /// @param[in] nant number of antennas  
 CorrProducts::CorrProducts(const int nchan, const int beam, const int nant) : 
-      itsVisibility(nant * (nant - 1) / 2, nchan, casa::Complex(0.,0.)), 
+      itsVisibility(nant * (nant - 1) / 2, nchan, casacore::Complex(0.,0.)), 
       itsFlag(nant * (nant - 1) / 2, nchan, true), itsBeam(beam),
       itsBAT(0), itsUVW(nant * (nant - 1) / 2, 3, 0.), itsDelays(nant * (nant - 1) / 2,0.), 
       itsUVWValid(false), itsControl(nant,0u)
@@ -60,20 +60,20 @@ void CorrProducts::init(const uint64_t bat)
   itsDelays.set(0.);
   itsUVWValid = false;
   itsFlag.set(true);
-  itsVisibility.set(casa::Complex(0.,0.));
+  itsVisibility.set(casacore::Complex(0.,0.));
   itsControl.set(0u);
 }
 
 /// @brief obtain the number of antennas
 /// @return number of antennas handled by this buffer
-casa::uInt CorrProducts::nAnt() const 
+casacore::uInt CorrProducts::nAnt() const 
 {
   return itsControl.nelements();
 }
   
 /// @brief obtain the number of baselines
 /// @return number of baselines handled by this buffer
-casa::uInt CorrProducts::nBaseline() const
+casacore::uInt CorrProducts::nBaseline() const
 {
   return itsVisibility.nrow();
 }

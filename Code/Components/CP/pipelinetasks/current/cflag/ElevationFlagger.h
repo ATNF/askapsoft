@@ -57,47 +57,47 @@ class ElevationFlagger : public IFlagger {
         /// zero or more instances of itself, depending on the configuration.
         static vector< boost::shared_ptr<IFlagger> > build(
                 const LOFAR::ParameterSet& parset,
-                const casa::MeasurementSet& ms);
+                const casacore::MeasurementSet& ms);
 
         /// @brief Constructor
         ElevationFlagger(const LOFAR::ParameterSet& parset);
 
         /// @see IFlagger::processRow()
-        virtual void processRow(casa::MSColumns& msc, const casa::uInt pass,
-                                const casa::uInt row, const bool dryRun);
+        virtual void processRow(casacore::MSColumns& msc, const casacore::uInt pass,
+                                const casacore::uInt row, const bool dryRun);
 
         /// @see IFlagger::stats()
         virtual FlaggingStats stats(void) const;
 
         /// @see IFlagger::stats()
-        virtual casa::Bool processingRequired(const casa::uInt pass);
+        virtual casacore::Bool processingRequired(const casacore::uInt pass);
 
     private:
 
         // Elevations are cached in "itsAntennaElevations" for a given timestamp
         // (itsTimeElevCalculated). This method updates the
-        void updateElevations(casa::MSColumns& msc, const casa::uInt row);
+        void updateElevations(casacore::MSColumns& msc, const casacore::uInt row);
 
         // Utility method to flag the current row. Both the ROWFLAG and FLAG
         // data are set.
-        void flagRow(casa::MSColumns& msc, const casa::uInt row, const bool dryRun);
+        void flagRow(casacore::MSColumns& msc, const casacore::uInt row, const bool dryRun);
 
         // Flagging statistics
         FlaggingStats itsStats;
 
         // Flagging threshold. If the elevation of an antenna is
         // larger than this then the row will be flagged.
-        casa::Quantity itsHighLimit;
+        casacore::Quantity itsHighLimit;
 
         // Flagging threshold. If the elevation of an antenna is
         // less than this then the row will be flagged.
-        casa::Quantity itsLowLimit;
+        casacore::Quantity itsLowLimit;
 
         // Timestamp that the antenna elevations vector was updated
-        casa::Double itsTimeElevCalculated;
+        casacore::Double itsTimeElevCalculated;
 
         // Antenna elevations, as calculated at time "itsTimeElevCalculated"
-        casa::Vector<casa::Quantity> itsAntennaElevations;
+        casacore::Vector<casacore::Quantity> itsAntennaElevations;
 };
 
 }

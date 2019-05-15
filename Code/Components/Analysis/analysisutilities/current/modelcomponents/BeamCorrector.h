@@ -114,7 +114,7 @@ class BeamCorrector {
         /// @brief The pixel scale in the image
         float itsPixelScale;
         /// @brief The units of the spatial axes
-        casa::String itsDirUnits;
+        casacore::String itsDirUnits;
 
 };
 

@@ -75,10 +75,10 @@ class StokesImodel {
         void initialise(StokesSpectrum &I, CasdaComponent *comp);
 
         /// @brief Return all fitted coefficients
-        casa::Vector<float> coeffs() {return itsCoeffs;};
+        casacore::Vector<float> coeffs() {return itsCoeffs;};
 
         /// @brief Return all errors on fitted coefficients
-        casa::Vector<float> coeffErrs() {return itsCoeffErrs;};
+        casacore::Vector<float> coeffErrs() {return itsCoeffErrs;};
 
         /// @brief Return a single fitted coefficient.
         /// @details Return a single coefficient, where i is the index to the
@@ -99,16 +99,16 @@ class StokesImodel {
         float flux(float frequency);
 
         /// @brief Return the model spectrum for the same frequency values as the input Stokes I spectrum
-        casa::Vector<float> modelSpectrum() {return itsModelSpectrum;};
+        casacore::Vector<float> modelSpectrum() {return itsModelSpectrum;};
 
         /// @brief Set the model spectrum directly
-        void setModel(casa::Vector<float> model) {itsModelSpectrum = model; };
+        void setModel(casacore::Vector<float> model) {itsModelSpectrum = model; };
 
         /// @brief Set the fitted coefficients directly
-        void setCoeffs(casa::Vector<float> coeffs) {itsCoeffs = coeffs;};
+        void setCoeffs(casacore::Vector<float> coeffs) {itsCoeffs = coeffs;};
 
         /// @brief Set the errors on the fitted coefficients directly
-        void setCoeffErrs(casa::Vector<float> coeffErrs) {itsCoeffErrs = coeffErrs;};
+        void setCoeffErrs(casacore::Vector<float> coeffErrs) {itsCoeffErrs = coeffErrs;};
 
         /// @brief Set the type of model fit
         void setType(std::string type) {itsType = type;};
@@ -122,9 +122,9 @@ class StokesImodel {
 
         /// @brief The coefficients describing the model fit - either
         /// polynomial or Taylor-expansion coefficients
-        casa::Vector<float> itsCoeffs;
+        casacore::Vector<float> itsCoeffs;
         /// @brief The errors on the coefficients that describe the model fit
-        casa::Vector<float> itsCoeffErrs;
+        casacore::Vector<float> itsCoeffErrs;
 
         /// @brief The reference frequency used in the Taylor expansion
         float               itsRefFreq;
@@ -140,13 +140,13 @@ class StokesImodel {
         unsigned int         itsTaylorNterms;
 
         /// @brief The list of channel frequency values
-        casa::Vector<float> itsFreqs;
+        casacore::Vector<float> itsFreqs;
         /// @brief The input Stokes I spectrum
-        casa::Vector<float> itsIspectrum;
+        casacore::Vector<float> itsIspectrum;
         /// @brief The noise associated with the input Stokes I spectrum
-        casa::Vector<float> itsInoise;
+        casacore::Vector<float> itsInoise;
         /// @brief The model spectrum with the same channel sampling
-        casa::Vector<float> itsModelSpectrum;
+        casacore::Vector<float> itsModelSpectrum;
 
 
 };

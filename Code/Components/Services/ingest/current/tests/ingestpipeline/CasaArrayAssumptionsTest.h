@@ -60,20 +60,20 @@ class CasaArrayAssumptionsTest : public CppUnit::TestFixture {
     public:
 
         void testTypeSizes() {
-           CPPUNIT_ASSERT_EQUAL(sizeof(char), sizeof(casa::Bool));
-           CPPUNIT_ASSERT_EQUAL(2 * sizeof(uint32_t), sizeof(std::pair<casa::uInt, casa::uInt>));
-           CPPUNIT_ASSERT_EQUAL(2 * sizeof(float), sizeof(casa::Complex));
+           CPPUNIT_ASSERT_EQUAL(sizeof(char), sizeof(casacore::Bool));
+           CPPUNIT_ASSERT_EQUAL(2 * sizeof(uint32_t), sizeof(std::pair<casacore::uInt, casacore::uInt>));
+           CPPUNIT_ASSERT_EQUAL(2 * sizeof(float), sizeof(casacore::Complex));
         };
  
         void testCubeAxes() {
-           casa::Cube<casa::Int> buffer(5,3,2,-1);
+           casacore::Cube<casacore::Int> buffer(5,3,2,-1);
            const size_t size = buffer.nelements();
            // populate with unique value
-           for (casa::uInt row = 0; row<buffer.nrow(); ++row) {
-                for (casa::uInt column = 0; column<buffer.ncolumn(); ++column) {
-                     for (casa::uInt plane = 0; plane<buffer.nplane(); ++plane) {
-                          const casa::uInt val = (row * buffer.ncolumn() + column)* buffer.nplane() + plane;
-                          //buffer(row,column,plane) = static_cast<casa::Int>(val);
+           for (casacore::uInt row = 0; row<buffer.nrow(); ++row) {
+                for (casacore::uInt column = 0; column<buffer.ncolumn(); ++column) {
+                     for (casacore::uInt plane = 0; plane<buffer.nplane(); ++plane) {
+                          const casacore::uInt val = (row * buffer.ncolumn() + column)* buffer.nplane() + plane;
+                          //buffer(row,column,plane) = static_cast<casacore::Int>(val);
                           // row is the fastest changing coordinate
                           const size_t index = (plane * buffer.ncolumn() + column)* buffer.nrow() + row;
                           CPPUNIT_ASSERT(index < size);
@@ -82,21 +82,21 @@ class CasaArrayAssumptionsTest : public CppUnit::TestFixture {
                 }
            }
            // test values
-           for (casa::uInt row = 0; row<buffer.nrow(); ++row) {
-                for (casa::uInt column = 0; column<buffer.ncolumn(); ++column) {
-                     for (casa::uInt plane = 0; plane<buffer.nplane(); ++plane) {
-                          const casa::uInt val = (row * buffer.ncolumn() + column )* buffer.nplane() + plane;
-                          CPPUNIT_ASSERT_EQUAL(static_cast<casa::Int>(val), buffer(row,column,plane));
+           for (casacore::uInt row = 0; row<buffer.nrow(); ++row) {
+                for (casacore::uInt column = 0; column<buffer.ncolumn(); ++column) {
+                     for (casacore::uInt plane = 0; plane<buffer.nplane(); ++plane) {
+                          const casacore::uInt val = (row * buffer.ncolumn() + column )* buffer.nplane() + plane;
+                          CPPUNIT_ASSERT_EQUAL(static_cast<casacore::Int>(val), buffer(row,column,plane));
                      }
                 }
            }
         }
 
         void testTrimVector() {
-             casa::Vector<casa::Int> buffer(100);
+             casacore::Vector<casacore::Int> buffer(100);
              std::vector<int> stlBuffer(100);
              for (size_t i = 0; i < buffer.nelements(); ++i) {
-                  buffer[i] = static_cast<casa::Int>(i);
+                  buffer[i] = static_cast<casacore::Int>(i);
                   stlBuffer[i] = static_cast<int>(i);
              }
              // the following doesn't seem to work without explicit copy (second argument set to true) -
@@ -106,7 +106,7 @@ class CasaArrayAssumptionsTest : public CppUnit::TestFixture {
              stlBuffer.resize(30);
              CPPUNIT_ASSERT(stlBuffer.size() == buffer.nelements());
              for (size_t i = 0; i < buffer.nelements(); ++i) {
-                  CPPUNIT_ASSERT_EQUAL(static_cast<casa::Int>(i), buffer[i]);
+                  CPPUNIT_ASSERT_EQUAL(static_cast<casacore::Int>(i), buffer[i]);
                   CPPUNIT_ASSERT_EQUAL(static_cast<int>(i), stlBuffer[i]);
              }
         }

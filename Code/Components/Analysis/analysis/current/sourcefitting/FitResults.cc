@@ -135,7 +135,7 @@ void FitResults::saveGuess(std::vector<SubComponent> cmpntList)
 
     for (; rfit != fitMap.rend(); rfit++) {
         itsGaussFitSet.push_back(cmpntList[rfit->second].asGauss());
-        itsGaussFitErrorSet.push_back(casa::Vector<casa::Double>(6,0.));
+        itsGaussFitErrorSet.push_back(casacore::Vector<casacore::Double>(6,0.));
     }
 }
 
@@ -144,7 +144,7 @@ void FitResults::saveGuess(std::vector<SubComponent> cmpntList)
 std::vector<SubComponent> FitResults::getCmpntList()
 {
     std::vector<SubComponent> output(itsGaussFitSet.size());
-    std::vector<casa::Gaussian2D<Double> >::iterator gauss = itsGaussFitSet.begin();
+    std::vector<casacore::Gaussian2D<Double> >::iterator gauss = itsGaussFitSet.begin();
     int comp = 0;
 
     for (; gauss < itsGaussFitSet.end(); gauss++) {
@@ -163,7 +163,7 @@ std::vector<SubComponent> FitResults::getCmpntList()
 
 void FitResults::logIt(std::string loc)
 {
-    std::vector<casa::Gaussian2D<Double> >::iterator gauss;
+    std::vector<casacore::Gaussian2D<Double> >::iterator gauss;
     unsigned int i=0;
     for (gauss = itsGaussFitSet.begin(); gauss < itsGaussFitSet.end(); gauss++) {
         std::stringstream outmsg;
@@ -202,7 +202,7 @@ LOFAR::BlobOStream& operator<<(LOFAR::BlobOStream &blob, FitResults& result)
     blob << result.itsNumGauss;
     blob << result.itsFlagFitIsGuess;
     uint32 i = result.itsGaussFitSet.size(); blob << i;
-    std::vector<casa::Gaussian2D<Double> >::iterator fit = result.itsGaussFitSet.begin();
+    std::vector<casacore::Gaussian2D<Double> >::iterator fit = result.itsGaussFitSet.begin();
 
     for (; fit < result.itsGaussFitSet.end(); fit++) {
         blob << fit->height();
@@ -246,13 +246,13 @@ LOFAR::BlobIStream& operator>>(LOFAR::BlobIStream &blob, FitResults& result)
         blob >> d4;
         blob >> d5;
         blob >> d6;
-        casa::Gaussian2D<Double> fit(d1, d2, d3, d4, d5, d6);
+        casacore::Gaussian2D<Double> fit(d1, d2, d3, d4, d5, d6);
         result.itsGaussFitSet.push_back(fit);
     }
 
     result.itsGaussFitErrorSet.clear();
     for(i=0;i<size;i++){
-        casa::Vector<casa::Double> err(6);
+        casacore::Vector<casacore::Double> err(6);
         for(size_t j=0;j<6;j++){
             Double val;
             blob >> val;

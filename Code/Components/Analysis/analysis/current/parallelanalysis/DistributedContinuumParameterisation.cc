@@ -68,10 +68,10 @@ DistributedContinuumParameterisation::DistributedContinuumParameterisation(askap
     itsInputSlicer = analysisutilities::subsectionToSlicer(dp.cube().pars().section());
     analysisutilities::fixSlicer(itsInputSlicer, dp.cube().header().getWCS());
     
-    casa::IPosition arrshape = itsInputSlicer.end();
+    casacore::IPosition arrshape = itsInputSlicer.end();
     arrshape -= itsInputSlicer.start();
     arrshape += 1;
-    itsComponentImage = casa::Array<float>(arrshape,0.);
+    itsComponentImage = casacore::Array<float>(arrshape,0.);
 }
 
 DistributedContinuumParameterisation::~DistributedContinuumParameterisation()
@@ -90,7 +90,7 @@ void DistributedContinuumParameterisation::parameterise()
         for (obj = itsInputList.begin(); obj != itsInputList.end(); obj++) {
             CasdaIsland island(*obj, itsReferenceParset);
             itsIslandList.push_back(island);
-            std::vector<casa::Gaussian2D<Double> > gaussians = obj->gaussFitSet(casda::componentFitType);
+            std::vector<casacore::Gaussian2D<Double> > gaussians = obj->gaussFitSet(casda::componentFitType);
             ASKAPASSERT(gaussians.size() == obj->numFits());
             for (size_t i = 0; i < obj->numFits(); i++) {
                 CasdaComponent component(*obj, itsReferenceParset, i, casda::componentFitType);
@@ -106,7 +106,7 @@ void DistributedContinuumParameterisation::parameterise()
 
 }
 
-void DistributedContinuumParameterisation::addToComponentImage(casa::Gaussian2D<Double> &gauss)
+void DistributedContinuumParameterisation::addToComponentImage(casacore::Gaussian2D<Double> &gauss)
 {
 
     // Calculate region of influence for Gaussian - where is its flux >0?
@@ -118,8 +118,8 @@ void DistributedContinuumParameterisation::addToComponentImage(casa::Gaussian2D<
     int ymin = std::max(lround(gauss.yCenter() - zeroPoint), 0L);
     int ymax = std::min(lround(gauss.yCenter() + zeroPoint), long(itsComponentImage.shape()[1] - 1));
 
-    casa::Vector<double> pos(2);
-    casa::IPosition loc(itsComponentImage.ndim(),0);
+    casacore::Vector<double> pos(2);
+    casacore::IPosition loc(itsComponentImage.ndim(),0);
     for (int y=ymin; y<=ymax; y++){
         for (int x=xmin; x<=xmax; x++){
             loc[0]=x;
@@ -168,7 +168,7 @@ void DistributedContinuumParameterisation::gather()
                     int nelements;
                     int val;
                     in >> nelements;
-                    casa::IPosition shape(nelements);
+                    casacore::IPosition shape(nelements);
                     for(int i=0;i<nelements;i++){
                         in >> val;
                         shape[i] = val;
@@ -177,7 +177,7 @@ void DistributedContinuumParameterisation::gather()
                     for(int i=0;i<shape.product();i++){
                         in >> imageAsVector[i];
                     }
-                    itsComponentImage += casa::Array<float>(shape,imageAsVector.data());
+                    itsComponentImage += casacore::Array<float>(shape,imageAsVector.data());
                         
                     in.getEnd();
                 }
@@ -207,7 +207,7 @@ void DistributedContinuumParameterisation::gather()
                 }
 
                 // send image
-                casa::IPosition shape = itsComponentImage.shape();
+                casacore::IPosition shape = itsComponentImage.shape();
                 out << shape.nelements();
                 for(size_t i=0;i<shape.nelements();i++){
                     int val = shape[i];

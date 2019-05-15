@@ -113,7 +113,7 @@ public:
       //
       // unflag samples to avoid possible confusion due to large reported number of flagged visibilities
       chunk->flag().set(false);
-      casa::Timer timer;
+      casacore::Timer timer;
       float processingTime = 0.;
       float totalSyncTime = 0.;
       size_t actualCount = 0;
@@ -139,7 +139,7 @@ public:
                const int response = MPI_Bcast(timeRecvBuf, 2, MPI_DOUBLE, 0, MPI_COMM_WORLD);
                ASKAPCHECK(response == MPI_SUCCESS, "Error gathering times, response from MPI_Bcast = "<<response);
                if (rank() != 0) {
-                   const casa::MVEpoch receivedTime(timeRecvBuf[0], timeRecvBuf[1]);
+                   const casacore::MVEpoch receivedTime(timeRecvBuf[0], timeRecvBuf[1]);
                    chunk->time() = receivedTime;
                }
            }
@@ -147,7 +147,7 @@ public:
            totalSyncTime += syncTime;
 
            //uncomment this to trigger FEED table update every cycle (with junk values)
-           //chunk->beamOffsets().set(float(count)/180.*casa::C::pi);
+           //chunk->beamOffsets().set(float(count)/180.*casacore::C::pi);
 
            ASKAPLOG_INFO_STR(logger, "Received "<<count + 1<<" integration(s) for rank="<<rank());
            timer.mark();
@@ -157,7 +157,7 @@ public:
            processingTime += runTime;
            ++actualCount;
            if (rank() == 0 || !doSync) {
-               chunk->time() += casa::Quantity(corrInterval > 0 ? corrInterval : 5.,"s");
+               chunk->time() += casacore::Quantity(corrInterval > 0 ? corrInterval : 5.,"s");
                if (runTime + syncTime < corrInterval) {
                    sleep(corrInterval - runTime - syncTime);
                } else {

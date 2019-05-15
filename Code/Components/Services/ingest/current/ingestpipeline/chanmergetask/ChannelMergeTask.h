@@ -105,7 +105,7 @@ class ChannelMergeTask : public askap::cp::ingest::ITask {
         /// @param[in] invalidFlags if this vector has non-zero length, slices corresponding to 
         ///                 'true' are not copied
         template<typename T>
-        void fillCube(const T* buf, casa::Cube<T> &out, const std::vector<bool> &invalidFlags) const;
+        void fillCube(const T* buf, casacore::Cube<T> &out, const std::vector<bool> &invalidFlags) const;
 
 
         /// @brief send chunks to the rank 0 process
@@ -151,13 +151,13 @@ class ChannelMergeTask : public askap::cp::ingest::ITask {
         /// @param[in] vec vector to send
         /// @param[in] tag optional tag for the message
         template<typename T>
-        void sendVector(const casa::Vector<T>& vec, int tag = 0) const;
+        void sendVector(const casacore::Vector<T>& vec, int tag = 0) const;
 
         /// @brief helper method to receive casa vector from rank 1
         /// @param[in] vec vector to populate (should already be correct size)
         /// @param[in] tag optional tag for the message
         template<typename T>
-        void receiveVector(casa::Vector<T>& vec, int tag = 0) const;
+        void receiveVector(casacore::Vector<T>& vec, int tag = 0) const;
 
         /// @brief local rank in the group
         /// @details Returns the rank against the local communicator, i.e.

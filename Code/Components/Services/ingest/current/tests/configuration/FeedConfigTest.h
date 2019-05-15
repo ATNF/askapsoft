@@ -60,99 +60,99 @@ class FeedConfigTest : public CppUnit::TestFixture {
         }
 
         void testAll() {
-            const casa::Double dblTolerance = 1e-15;
+            const casacore::Double dblTolerance = 1e-15;
 
             // Create an instance to test
-            const casa::Int nFeeds = 3;
-            casa::Matrix<casa::Quantity> offsets(nFeeds, 2);
-            casa::Vector<casa::String> pols(nFeeds);
-            for (casa::Int i = 0; i < nFeeds; ++i) {
+            const casacore::Int nFeeds = 3;
+            casacore::Matrix<casacore::Quantity> offsets(nFeeds, 2);
+            casacore::Vector<casacore::String> pols(nFeeds);
+            for (casacore::Int i = 0; i < nFeeds; ++i) {
                 pols[i] = "XX YY";
-                offsets(i, 0) = casa::Quantity((1.0 * i), "deg"); // X
-                offsets(i, 1) = casa::Quantity((2.0 * i), "deg"); // Y
+                offsets(i, 0) = casacore::Quantity((1.0 * i), "deg"); // X
+                offsets(i, 1) = casacore::Quantity((2.0 * i), "deg"); // Y
             }
             FeedConfig instance(offsets, pols);
 
             // Test instance
-            casa::Matrix<casa::Double> extractedOffsets;
+            casacore::Matrix<casacore::Double> extractedOffsets;
             instance.fillMatrix(extractedOffsets);
-            CPPUNIT_ASSERT_EQUAL(static_cast<casa::uInt>(2u), static_cast<casa::uInt>(extractedOffsets.nrow()));
-            CPPUNIT_ASSERT_EQUAL(static_cast<casa::uInt>(nFeeds), static_cast<casa::uInt>(extractedOffsets.ncolumn()));
-            for (casa::Int i = 0; i < nFeeds; ++i) {
+            CPPUNIT_ASSERT_EQUAL(static_cast<casacore::uInt>(2u), static_cast<casacore::uInt>(extractedOffsets.nrow()));
+            CPPUNIT_ASSERT_EQUAL(static_cast<casacore::uInt>(nFeeds), static_cast<casacore::uInt>(extractedOffsets.ncolumn()));
+            for (casacore::Int i = 0; i < nFeeds; ++i) {
                 CPPUNIT_ASSERT_DOUBLES_EQUAL(1.0 * i, instance.offsetX(i).getValue("deg"), dblTolerance);
                 CPPUNIT_ASSERT_DOUBLES_EQUAL(2.0 * i, instance.offsetY(i).getValue("deg"), dblTolerance);
-                CPPUNIT_ASSERT_DOUBLES_EQUAL(1.0 * i, extractedOffsets(0, i) * 180. / casa::C::pi, dblTolerance);
-                CPPUNIT_ASSERT_DOUBLES_EQUAL(2.0 * i, extractedOffsets(1, i) * 180. / casa::C::pi, dblTolerance);
-                CPPUNIT_ASSERT(casa::String("XX YY") == instance.pol(i));
+                CPPUNIT_ASSERT_DOUBLES_EQUAL(1.0 * i, extractedOffsets(0, i) * 180. / casacore::C::pi, dblTolerance);
+                CPPUNIT_ASSERT_DOUBLES_EQUAL(2.0 * i, extractedOffsets(1, i) * 180. / casacore::C::pi, dblTolerance);
+                CPPUNIT_ASSERT(casacore::String("XX YY") == instance.pol(i));
             }
 
         }
         void testCopy() {
-            const casa::Double dblTolerance = 1e-15;
+            const casacore::Double dblTolerance = 1e-15;
 
             // Create an instance to test
-            const casa::Int nFeeds = 36;
-            casa::Matrix<casa::Quantity> offsets1(nFeeds, 2);
-            casa::Matrix<casa::Quantity> offsets2(nFeeds, 2);
-            casa::Vector<casa::String> pols1(nFeeds);
-            casa::Vector<casa::String> pols2(nFeeds);
-            for (casa::Int i = 0; i < nFeeds; ++i) {
+            const casacore::Int nFeeds = 36;
+            casacore::Matrix<casacore::Quantity> offsets1(nFeeds, 2);
+            casacore::Matrix<casacore::Quantity> offsets2(nFeeds, 2);
+            casacore::Vector<casacore::String> pols1(nFeeds);
+            casacore::Vector<casacore::String> pols2(nFeeds);
+            for (casacore::Int i = 0; i < nFeeds; ++i) {
                 pols1[i] = "XX YY";
                 pols2[i] = "RR LL";
-                offsets1(i, 0) = casa::Quantity((1.0 * i), "deg"); // X
-                offsets1(i, 1) = casa::Quantity((2.0 * i), "deg"); // Y
-                offsets2(i, 0) = casa::Quantity((3.0 * i), "deg"); // R
-                offsets2(i, 1) = casa::Quantity((4.0 * i), "deg"); // L
+                offsets1(i, 0) = casacore::Quantity((1.0 * i), "deg"); // X
+                offsets1(i, 1) = casacore::Quantity((2.0 * i), "deg"); // Y
+                offsets2(i, 0) = casacore::Quantity((3.0 * i), "deg"); // R
+                offsets2(i, 1) = casacore::Quantity((4.0 * i), "deg"); // L
             }
             FeedConfig instance1(offsets1, pols1);
             FeedConfig instance2(offsets2, pols2);
             const FeedConfig instance3(instance1);
 
             // Test 
-            for (casa::Int i = 0; i < nFeeds; ++i) {
+            for (casacore::Int i = 0; i < nFeeds; ++i) {
                 CPPUNIT_ASSERT_DOUBLES_EQUAL(instance3.offsetX(i).getValue("deg"), instance1.offsetX(i).getValue("deg"), dblTolerance);
                 CPPUNIT_ASSERT_DOUBLES_EQUAL(instance3.offsetY(i).getValue("deg"),instance1.offsetY(i).getValue("deg"), dblTolerance);
                 CPPUNIT_ASSERT(instance3.pol(i) == instance1.pol(i));
                 CPPUNIT_ASSERT_DOUBLES_EQUAL(1.0 * i, instance1.offsetX(i).getValue("deg"), dblTolerance);
                 CPPUNIT_ASSERT_DOUBLES_EQUAL(2.0 * i, instance1.offsetY(i).getValue("deg"), dblTolerance);
-                CPPUNIT_ASSERT(casa::String("XX YY") == instance1.pol(i));
+                CPPUNIT_ASSERT(casacore::String("XX YY") == instance1.pol(i));
                 CPPUNIT_ASSERT_DOUBLES_EQUAL(3.0 * i, instance2.offsetX(i).getValue("deg"), dblTolerance);
                 CPPUNIT_ASSERT_DOUBLES_EQUAL(4.0 * i, instance2.offsetY(i).getValue("deg"), dblTolerance);
-                CPPUNIT_ASSERT(casa::String("RR LL") == instance2.pol(i));
+                CPPUNIT_ASSERT(casacore::String("RR LL") == instance2.pol(i));
             }
             instance1 = instance2;
             instance2 = instance3;
             // Test
-            for (casa::Int i = 0; i < nFeeds; ++i) {
+            for (casacore::Int i = 0; i < nFeeds; ++i) {
                 CPPUNIT_ASSERT_DOUBLES_EQUAL(instance3.offsetX(i).getValue("deg"), instance2.offsetX(i).getValue("deg"), dblTolerance);
                 CPPUNIT_ASSERT_DOUBLES_EQUAL(instance3.offsetY(i).getValue("deg"),instance2.offsetY(i).getValue("deg"), dblTolerance);
                 CPPUNIT_ASSERT(instance3.pol(i) == instance2.pol(i));
                 CPPUNIT_ASSERT_DOUBLES_EQUAL(3.0 * i, instance1.offsetX(i).getValue("deg"), dblTolerance);
                 CPPUNIT_ASSERT_DOUBLES_EQUAL(4.0 * i, instance1.offsetY(i).getValue("deg"), dblTolerance);
-                CPPUNIT_ASSERT(casa::String("RR LL") == instance1.pol(i));
+                CPPUNIT_ASSERT(casacore::String("RR LL") == instance1.pol(i));
                 CPPUNIT_ASSERT_DOUBLES_EQUAL(1.0 * i, instance2.offsetX(i).getValue("deg"), dblTolerance);
                 CPPUNIT_ASSERT_DOUBLES_EQUAL(2.0 * i, instance2.offsetY(i).getValue("deg"), dblTolerance);
-                CPPUNIT_ASSERT(casa::String("XX YY") == instance2.pol(i));
+                CPPUNIT_ASSERT(casacore::String("XX YY") == instance2.pol(i));
             }
         }
 
         void testExceptions() {
-            const casa::Int nFeeds = 3;
+            const casacore::Int nFeeds = 3;
             {
-                casa::Matrix<casa::Quantity> offsets(nFeeds, 2);
-                casa::Vector<casa::String> pols(nFeeds+1);
+                casacore::Matrix<casacore::Quantity> offsets(nFeeds, 2);
+                casacore::Vector<casacore::String> pols(nFeeds+1);
                 CPPUNIT_ASSERT_THROW(FeedConfig(offsets, pols), askap::AskapError);
             }
 
             {
-                casa::Matrix<casa::Quantity> offsets(nFeeds, 1);
-                casa::Vector<casa::String> pols(nFeeds);
+                casacore::Matrix<casacore::Quantity> offsets(nFeeds, 1);
+                casacore::Vector<casacore::String> pols(nFeeds);
                 CPPUNIT_ASSERT_THROW(FeedConfig(offsets, pols), askap::AskapError);
             }
 
             {
-                casa::Matrix<casa::Quantity> offsets(0, 2);
-                casa::Vector<casa::String> pols(0);
+                casacore::Matrix<casacore::Quantity> offsets(0, 2);
+                casacore::Vector<casacore::String> pols(0);
                 CPPUNIT_ASSERT_THROW(FeedConfig(offsets, pols), askap::AskapError);
             }
         }

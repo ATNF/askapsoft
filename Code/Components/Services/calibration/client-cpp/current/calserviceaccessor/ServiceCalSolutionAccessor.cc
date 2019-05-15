@@ -63,7 +63,7 @@ namespace accessors {
 /// @param[in] parset parset file name
 /// @param[in] the iD of the solution to get - or to make
 /// @param[in] readonly if true, additional checks are done that file exists
-ServiceCalSolutionAccessor::ServiceCalSolutionAccessor(const LOFAR::ParameterSet &parset, casa::Long iD, bool readonly) : itsGainSolution(0), itsLeakageSolution(0), itsBandpassSolution(0), itsReadOnly(readonly), pushGains(false),pushLeakages(false),pushBandpass(false)
+ServiceCalSolutionAccessor::ServiceCalSolutionAccessor(const LOFAR::ParameterSet &parset, casacore::Long iD, bool readonly) : itsGainSolution(0), itsLeakageSolution(0), itsBandpassSolution(0), itsReadOnly(readonly), pushGains(false),pushLeakages(false),pushBandpass(false)
 
 {
 
@@ -94,7 +94,7 @@ ServiceCalSolutionAccessor::ServiceCalSolutionAccessor(const LOFAR::ParameterSet
 
 }
 
-ServiceCalSolutionAccessor::ServiceCalSolutionAccessor(boost::shared_ptr<askap::cp::caldataservice::CalibrationDataServiceClient> inClient, casa::Long iD, bool readonly) : itsGainSolution(0), itsLeakageSolution(0), itsBandpassSolution(0),itsReadOnly(readonly),pushGains(false),pushLeakages(false),pushBandpass(false)
+ServiceCalSolutionAccessor::ServiceCalSolutionAccessor(boost::shared_ptr<askap::cp::caldataservice::CalibrationDataServiceClient> inClient, casacore::Long iD, bool readonly) : itsGainSolution(0), itsLeakageSolution(0), itsBandpassSolution(0),itsReadOnly(readonly),pushGains(false),pushLeakages(false),pushBandpass(false)
 
 {
   ASKAPLOG_INFO_STR(logger,"Constructed with CalibrationDataServiceClient");
@@ -158,7 +158,7 @@ accessors::JonesDTerm ServiceCalSolutionAccessor::leakage(const accessors::Jones
 /// @param[in] index ant/beam index
 /// @param[in] chan spectral channel of interest
 /// @return JonesJTerm object with gains and validity flags
-accessors::JonesJTerm ServiceCalSolutionAccessor::bandpass(const accessors::JonesIndex &index, const casa::uInt chan) const
+accessors::JonesJTerm ServiceCalSolutionAccessor::bandpass(const accessors::JonesIndex &index, const casacore::uInt chan) const
 {
 
   ASKAPASSERT(this->solutionsValid);
@@ -221,7 +221,7 @@ void ServiceCalSolutionAccessor::setLeakage(const accessors::JonesIndex &index, 
 /// @note We may add later variants of this method assuming that the bandpass is
 /// approximated somehow, e.g. by a polynomial. For simplicity, for now we deal with
 /// gains set explicitly for each channel.
-void ServiceCalSolutionAccessor::setBandpass(const accessors::JonesIndex &index, const accessors::JonesJTerm &bp, const casa::uInt chan)
+void ServiceCalSolutionAccessor::setBandpass(const accessors::JonesIndex &index, const accessors::JonesJTerm &bp, const casacore::uInt chan)
 {
     itsBandpassSolution.map()[index][chan] = bp;
 }

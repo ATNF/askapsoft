@@ -48,8 +48,8 @@ ParsetAccessor::ParsetAccessor(const LOFAR::ParameterSet& parset)
 {
 }
 
-casa::Complex ParsetAccessor::getGain(casa::uInt ant, casa::uInt beam,
-                                      ISolutionAccessor::Pol pol, casa::Bool& valid) const
+casacore::Complex ParsetAccessor::getGain(casacore::uInt ant, casacore::uInt beam,
+                                      ISolutionAccessor::Pol pol, casacore::Bool& valid) const
 {
     std::string name("gain.");
 
@@ -59,7 +59,7 @@ casa::Complex ParsetAccessor::getGain(casa::uInt ant, casa::uInt beam,
         name += "g22.";
     }
 
-    name += askap::utility::toString<casa::uInt>(ant) + "." + askap::utility::toString<casa::uInt>(beam);
+    name += askap::utility::toString<casacore::uInt>(ant) + "." + askap::utility::toString<casacore::uInt>(beam);
 
     // An exception is thrown in readComplex in the case the gain is not found,
     // so just set valid <- true here
@@ -67,15 +67,15 @@ casa::Complex ParsetAccessor::getGain(casa::uInt ant, casa::uInt beam,
     return readComplex(name);
 }
 
-casa::Complex ParsetAccessor::getLeakage(casa::uInt ant, casa::uInt beam,
-        ISolutionAccessor::LeakageTerm term, casa::Bool& valid) const
+casacore::Complex ParsetAccessor::getLeakage(casacore::uInt ant, casacore::uInt beam,
+        ISolutionAccessor::LeakageTerm term, casacore::Bool& valid) const
 {
     ASKAPTHROW(AskapError, "ParsetAccessor::getLeakage() not implemented");
 }
 
-casa::Complex ParsetAccessor::getBandpass(casa::uInt ant, casa::uInt beam,
-        casa::uInt chan, ISolutionAccessor::Pol pol,
-        casa::Bool& valid) const
+casacore::Complex ParsetAccessor::getBandpass(casacore::uInt ant, casacore::uInt beam,
+        casacore::uInt chan, ISolutionAccessor::Pol pol,
+        casacore::Bool& valid) const
 {
     ASKAPTHROW(AskapError, "ParsetAccessor::getBandpass() not implemented");
 }
@@ -85,9 +85,9 @@ casa::Complex ParsetAccessor::getBandpass(casa::uInt ant, casa::uInt beam,
 /// forms a complex number.
 /// @param[in] name parameter name
 /// @return complex number
-casa::Complex ParsetAccessor::readComplex(const std::string& name) const
+casacore::Complex ParsetAccessor::readComplex(const std::string& name) const
 {
-    casa::Vector<casa::Float> val = itsParset.getFloatVector(name);
+    casacore::Vector<casacore::Float> val = itsParset.getFloatVector(name);
     ASKAPCHECK(val.nelements() > 0, "Expect at least one element for " << name << " gain parameter");
 
     if (val.nelements() == 1) {
@@ -95,5 +95,5 @@ casa::Complex ParsetAccessor::readComplex(const std::string& name) const
     }
 
     ASKAPCHECK(val.nelements() == 2, "Expect either one or two elements to define complex value, you have: " << val);
-    return casa::Complex(val[0], val[1]);
+    return casacore::Complex(val[0], val[1]);
 }

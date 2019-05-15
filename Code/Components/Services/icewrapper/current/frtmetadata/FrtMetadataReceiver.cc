@@ -115,9 +115,9 @@ void FrtMetadataReceiver::publish(
     TypedValueMapConstMapper mapper(msg);
     // we use the special map item called 'fields_list' to get all fields we're supposed to extract
     // (a bit ugly, but works; may be there is a more elegant way to do the same in ICE)
-    const std::vector<casa::String> fields = mapper.getStringSeq("fields_list");
+    const std::vector<casacore::String> fields = mapper.getStringSeq("fields_list");
     std::map<std::string, int> convertedMap;
-    for (std::vector<casa::String>::const_iterator ci = fields.begin(); ci != fields.end(); ++ci) {
+    for (std::vector<casacore::String>::const_iterator ci = fields.begin(); ci != fields.end(); ++ci) {
          convertedMap[*ci] = mapper.getInt(*ci);
     }
     

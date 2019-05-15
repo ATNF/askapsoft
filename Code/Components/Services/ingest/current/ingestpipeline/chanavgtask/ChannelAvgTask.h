@@ -73,7 +73,7 @@ class ChannelAvgTask : public askap::cp::ingest::ITask {
         const LOFAR::ParameterSet itsParset;
 
         // Number of channels to average to one
-        casa::uInt itsAveraging;
+        casacore::uInt itsAveraging;
 };
 
 }

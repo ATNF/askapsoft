@@ -45,11 +45,11 @@ CorrelatorMode::CorrelatorMode()
 }
 
 CorrelatorMode::CorrelatorMode(const std::string& modeName,
-        const casa::Quantity& chanWidth,
-        const casa::uInt nChan,
-        const std::vector<casa::Stokes::StokesTypes>& stokes,
-        const casa::uInt interval,
-        const casa::Quantity& freqOffset)
+        const casacore::Quantity& chanWidth,
+        const casacore::uInt nChan,
+        const std::vector<casacore::Stokes::StokesTypes>& stokes,
+        const casacore::uInt interval,
+        const casacore::Quantity& freqOffset)
         : itsModeName(modeName), itsChanWidth(chanWidth), itsNChan(nChan),
         itsStokes(stokes), itsInterval(interval), itsFreqOffset(freqOffset)
 {
@@ -63,29 +63,29 @@ const std::string& CorrelatorMode::name(void) const
     return itsModeName;
 }
 
-casa::uInt CorrelatorMode::nChan(void) const
+casacore::uInt CorrelatorMode::nChan(void) const
 {
         return itsNChan;
 }
 
-const casa::Quantity& CorrelatorMode::chanWidth(void) const
+const casacore::Quantity& CorrelatorMode::chanWidth(void) const
 {
         return itsChanWidth;
 }
 
 /// @brief Frequency offset
 /// @return bulk offset in frequency for the current configuration
-const casa::Quantity& CorrelatorMode::freqOffset() const
+const casacore::Quantity& CorrelatorMode::freqOffset() const
 {
    return itsFreqOffset;
 }
 
-const std::vector<casa::Stokes::StokesTypes>& CorrelatorMode::stokes(void) const
+const std::vector<casacore::Stokes::StokesTypes>& CorrelatorMode::stokes(void) const
 {
         return itsStokes;
 }
 
-casa::uInt CorrelatorMode::interval(void) const
+casacore::uInt CorrelatorMode::interval(void) const
 {
     return itsInterval;
 }

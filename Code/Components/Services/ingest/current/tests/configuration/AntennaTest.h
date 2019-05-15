@@ -56,16 +56,16 @@ class AntennaTest : public CppUnit::TestFixture {
         }
 
         void testAll() {
-            casa::Double dblTolerance = 1e-15;
+            casacore::Double dblTolerance = 1e-15;
 
-            const casa::String name = "ak01";
-            const casa::String mount = "equatorial";
-            casa::Vector<casa::Double> position(3);
+            const casacore::String name = "ak01";
+            const casacore::String mount = "equatorial";
+            casacore::Vector<casacore::Double> position(3);
             position(0) = -2556084.669;
             position(1) = 5097398.337;
             position(2) = -2848424.133;
-            const casa::Quantity diameter(12, "m");
-            const casa::Quantity delay(-2.2, "ns");
+            const casacore::Quantity diameter(12, "m");
+            const casacore::Quantity delay(-2.2, "ns");
 
             // Create instance
             Antenna instance(name, mount, position, diameter, delay);
@@ -81,13 +81,13 @@ class AntennaTest : public CppUnit::TestFixture {
             CPPUNIT_ASSERT(delay == instance.delay());
 
             // Check exceptional inputs
-            const casa::Quantity badDiameter(12, "rad");
+            const casacore::Quantity badDiameter(12, "rad");
             CPPUNIT_ASSERT_THROW(Antenna(name, mount, position, badDiameter, delay), 
                     askap::AskapError);
-            casa::Vector<casa::Double> badPosition(2);
+            casacore::Vector<casacore::Double> badPosition(2);
             CPPUNIT_ASSERT_THROW(Antenna(name, mount, badPosition, diameter, delay),
                     askap::AskapError);
-            const casa::Quantity badDelay(12, "rad");
+            const casacore::Quantity badDelay(12, "rad");
             CPPUNIT_ASSERT_THROW(Antenna(name, mount, position, diameter, badDelay), 
                     askap::AskapError);
         }

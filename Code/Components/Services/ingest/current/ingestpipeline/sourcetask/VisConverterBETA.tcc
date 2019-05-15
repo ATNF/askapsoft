@@ -58,16 +58,16 @@ VisConverter<VisDatagramBETA>::VisConverter(const LOFAR::ParameterSet& params,
 /// integration is processed.
 /// @param[in] timestamp BAT corresponding to this new chunk
 /// @param[in] corrMode correlator mode parameters (determines shape, etc)
-void VisConverter<VisDatagramBETA>::initVisChunk(const casa::uLong timestamp, 
+void VisConverter<VisDatagramBETA>::initVisChunk(const casacore::uLong timestamp, 
                const CorrelatorMode &corrMode)
 {
    itsReceivedDatagrams.clear();
    VisConverterBase::initVisChunk(timestamp, corrMode);
-   const casa::uInt nChannels = channelManager().localNChannels(config().receiverId());
+   const casacore::uInt nChannels = channelManager().localNChannels(config().receiverId());
     
    ASKAPCHECK(nChannels % VisDatagramTraits<VisDatagramBETA>::N_CHANNELS_PER_SLICE == 0,
         "Number of channels must be divisible by N_CHANNELS_PER_SLICE");
-   const casa::uInt datagramsExpected = nCorrProducts() * nBeamsToReceive() * 
+   const casacore::uInt datagramsExpected = nCorrProducts() * nBeamsToReceive() * 
           (nChannels / VisDatagramTraits<VisDatagramBETA>::N_CHANNELS_PER_SLICE);
    setNumberOfExpectedDatagrams(datagramsExpected);
 }
@@ -82,7 +82,7 @@ void VisConverter<VisDatagramBETA>::add(const VisDatagramBETA &vis)
    ASKAPASSERT(chunk);
 
    // map correlator product to the row and polarisation index
-   const boost::optional<std::pair<casa::uInt, casa::uInt> > prod = 
+   const boost::optional<std::pair<casacore::uInt, casacore::uInt> > prod = 
           mapCorrProduct(vis.baselineid, vis.beamid);
 
    if (!prod) {
@@ -93,8 +93,8 @@ void VisConverter<VisDatagramBETA>::add(const VisDatagramBETA &vis)
 
    ASKAPCHECK(vis.slice < 16, "Slice index is invalid");
 
-   const casa::uInt row = prod->first;
-   const casa::uInt polidx = prod->second;
+   const casacore::uInt row = prod->first;
+   const casacore::uInt polidx = prod->second;
    ASKAPDEBUGASSERT(row < chunk->nRow());
    ASKAPDEBUGASSERT(polidx < chunk->nPol());
    ASKAPCHECK(chunk->nPol() == 4, "Currently only support full polarisation case");
@@ -111,13 +111,13 @@ void VisConverter<VisDatagramBETA>::add(const VisDatagramBETA &vis)
    itsReceivedDatagrams.insert(identity);
 
    // insert data into accessor, unflag if good
-   const casa::uInt antenna1 = chunk->antenna1()(row);
-   const casa::uInt antenna2 = chunk->antenna2()(row);
+   const casacore::uInt antenna1 = chunk->antenna1()(row);
+   const casacore::uInt antenna2 = chunk->antenna2()(row);
    const bool rowIsValid = isAntennaGood(antenna1) && isAntennaGood(antenna2);
    const bool isAutoCorr = antenna1 == antenna2;
-   const casa::uInt chanOffset = (vis.slice) * VisDatagramTraits<VisDatagramBETA>::N_CHANNELS_PER_SLICE;
-   for (casa::uInt chan = 0; chan < VisDatagramTraits<VisDatagramBETA>::N_CHANNELS_PER_SLICE; ++chan) {
-        casa::Complex sample(vis.vis[chan].real, vis.vis[chan].imag);
+   const casacore::uInt chanOffset = (vis.slice) * VisDatagramTraits<VisDatagramBETA>::N_CHANNELS_PER_SLICE;
+   for (casacore::uInt chan = 0; chan < VisDatagramTraits<VisDatagramBETA>::N_CHANNELS_PER_SLICE; ++chan) {
+        casacore::Complex sample(vis.vis[chan].real, vis.vis[chan].imag);
         ASKAPCHECK((chanOffset + chan) <= chunk->nChannel(), "Channel index overflow");
 
         // note, always copy the data even if the row is flagged -

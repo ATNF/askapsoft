@@ -156,7 +156,7 @@ void ResultsWriter::writeContinuumCatalogues()
 void ResultsWriter::writeComponentMaps(DistributedContinuumParameterisation &dcp)
 {
 
-    casa::Array<float> componentImage = dcp.componentImage();
+    casacore::Array<float> componentImage = dcp.componentImage();
     
     std::string inputImageName = itsParset.getString("image", "");
     const boost::filesystem::path infile(inputImageName);
@@ -165,16 +165,16 @@ void ResultsWriter::writeComponentMaps(DistributedContinuumParameterisation &dcp
     DuchampParallel dp(itsComms,itsParset);
     ASKAPCHECK(dp.getCASA(IMAGE) == duchamp::SUCCESS, "Reading data from input image failed");
     
-    casa::Slicer theSlicer = analysisutilities::subsectionToSlicer(dp.cube().pars().section());
+    casacore::Slicer theSlicer = analysisutilities::subsectionToSlicer(dp.cube().pars().section());
     
-    casa::Array<float> inputImage(componentImage.shape(),dp.cube().getArray(),SHARE);
-    casa::Vector<bool> maskVec(dp.cube().makeBlankMask());
-    casa::Array<bool> mask(componentImage.shape(),maskVec.data(),SHARE);
+    casacore::Array<float> inputImage(componentImage.shape(),dp.cube().getArray(),SHARE);
+    casacore::Vector<bool> maskVec(dp.cube().makeBlankMask());
+    casacore::Array<bool> mask(componentImage.shape(),maskVec.data(),SHARE);
 
     ASKAPLOG_INFO_STR(logger, "mask shapes: maskVec->"<<maskVec.shape()<<", mask->"<<mask.shape());
     
     int nstokes=1;
-    casa::CoordinateSystem coords = analysisutilities::wcsToCASAcoord(dp.cube().header().getWCS(), nstokes);
+    casacore::CoordinateSystem coords = analysisutilities::wcsToCASAcoord(dp.cube().header().getWCS(), nstokes);
     
     LOFAR::ParameterSet fitParset = itsParset.makeSubset("Fitter.");
     if (!fitParset.isDefined("imagetype")){
@@ -189,7 +189,7 @@ void ResultsWriter::writeComponentMaps(DistributedContinuumParameterisation &dcp
                 image_no_ext.erase(image_no_ext.rfind("."), std::string::npos);
             }
         }
-    casa::Vector<casa::Quantum<double> > beam = inputImageAcc->beamInfo(image_no_ext);
+    casacore::Vector<casacore::Quantum<double> > beam = inputImageAcc->beamInfo(image_no_ext);
 
     bool doComponentMap = fitParset.getBool("writeComponentMap", true);
     if (doComponentMap) {
@@ -200,11 +200,11 @@ void ResultsWriter::writeComponentMaps(DistributedContinuumParameterisation &dcp
                 componentMap.erase(componentMap.rfind("."), std::string::npos);
             }
         }
-        casa::IPosition blc(componentImage.ndim(),0);
+        casacore::IPosition blc(componentImage.ndim(),0);
         imageAcc->create(componentMap, componentImage.shape(), coords);
         imageAcc->write(componentMap, componentImage);
         imageAcc->makeDefaultMask(componentMap);
-        imageAcc->writeMask(componentMap, mask, casa::IPosition(componentImage.shape().nelements(),0));
+        imageAcc->writeMask(componentMap, mask, casacore::IPosition(componentImage.shape().nelements(),0));
         imageAcc->setBeamInfo(componentMap, beam[0].getValue("rad"), beam[1].getValue("rad"), beam[2].getValue("rad"));
         imageAcc->addHistory(componentMap, "Map of fitted components, made by Selavy");
         imageAcc->addHistory(componentMap, "Original image: " + inputImageName);
@@ -226,11 +226,11 @@ void ResultsWriter::writeComponentMaps(DistributedContinuumParameterisation &dcp
                 componentResidualMap.erase(componentResidualMap.rfind("."), std::string::npos);
             }
         }
-        casa::Array<float> residual = inputImage - componentImage;
+        casacore::Array<float> residual = inputImage - componentImage;
         imageAcc->create(componentResidualMap, residual.shape(), coords);
         imageAcc->write(componentResidualMap, residual);
         imageAcc->makeDefaultMask(componentResidualMap);
-        imageAcc->writeMask(componentResidualMap, mask, casa::IPosition(componentImage.shape().nelements(),0));
+        imageAcc->writeMask(componentResidualMap, mask, casacore::IPosition(componentImage.shape().nelements(),0));
         imageAcc->setBeamInfo(componentResidualMap, beam[0].getValue("rad"), beam[1].getValue("rad"), beam[2].getValue("rad"));
         imageAcc->addHistory(componentResidualMap, "Residual after subtracting fitted components, made by Selavy");
         imageAcc->addHistory(componentResidualMap, "Original image: " + inputImageName);

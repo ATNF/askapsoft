@@ -95,8 +95,8 @@ void Weighter::readWeights()
     ASKAPLOG_INFO_STR(logger, "Reading weights from " << itsImage <<
                       ", section " << itsCube->pars().section().getSection());
 
-    casa::Slicer theSlicer = subsectionToSlicer(itsCube->pars().section());
-    ASKAPLOG_INFO_STR(logger, "Using casa::Slicer " << theSlicer);
+    casacore::Slicer theSlicer = subsectionToSlicer(itsCube->pars().section());
+    ASKAPLOG_INFO_STR(logger, "Using casacore::Slicer " << theSlicer);
 
     itsWeights = getPixelsInBox(itsImage, theSlicer, false);
 }
@@ -181,7 +181,7 @@ float Weighter::weight(size_t i)
     }
 }
 
-casa::LogicalArray Weighter::cutoffMask()
+casacore::LogicalArray Weighter::cutoffMask()
 {
     return (itsWeights.getMask() && (itsWeights.getArray() / itsNorm > itsWeightCutoff));
 }

@@ -60,11 +60,11 @@ HIdata::HIdata(const LOFAR::ParameterSet &parset):
 
     itsBeamLog = parset.getString("beamLog", "");
 
-    itsBFparams = casa::Vector<double>(BUSYFIT_FREE_PARAM, 0.);
-    itsBFerrors = casa::Vector<double>(BUSYFIT_FREE_PARAM, 0.);
+    itsBFparams = casacore::Vector<double>(BUSYFIT_FREE_PARAM, 0.);
+    itsBFerrors = casacore::Vector<double>(BUSYFIT_FREE_PARAM, 0.);
 
-    itsMom0Fit = casa::Vector<double>(3, 0.);
-    itsMom0FitError = casa::Vector<double>(3, 0.);
+    itsMom0Fit = casacore::Vector<double>(3, 0.);
+    itsMom0FitError = casacore::Vector<double>(3, 0.);
 
     // Define and create (if need be) the directories to hold the extracted data products
     std::stringstream cmd;
@@ -153,8 +153,8 @@ void HIdata::findVoxelStats()
 {
 
     itsFluxMax = itsSource->getPeakFlux();
-    casa::IPosition start = itsCubeletExtractor->slicer().start();
-    casa::Array<float> cubelet = itsCubeletExtractor->array();
+    casacore::IPosition start = itsCubeletExtractor->slicer().start();
+    casacore::Array<float> cubelet = itsCubeletExtractor->array();
     std::vector<PixelInfo::Voxel> voxelList = itsSource->getPixelSet();
     float min, sumf = 0., sumff = 0.;
     std::vector<PixelInfo::Voxel>::iterator vox = voxelList.begin();
@@ -162,16 +162,16 @@ void HIdata::findVoxelStats()
         //float flux = vox->getF();
         if (itsSource->isInObject(*vox)) {
             // The Stokes axis, if present, will be of length 1, and will be either location 2 or 3 in the IPosition
-            casa::IPosition loc;
+            casacore::IPosition loc;
             if (start.size() == 2) {
-                loc = casa::IPosition(start.size(), vox->getX(), vox->getY());
+                loc = casacore::IPosition(start.size(), vox->getX(), vox->getY());
             } else if (start.size() == 3) {
-                loc = casa::IPosition(start.size(), vox->getX(), vox->getY(), vox->getZ());
+                loc = casacore::IPosition(start.size(), vox->getX(), vox->getY(), vox->getZ());
             } else {
                 if (itsCubeletExtractor->slicer().length()[2] == 1) {
-                    loc = casa::IPosition(start.size(), vox->getX(), vox->getY(), 0, vox->getZ());
+                    loc = casacore::IPosition(start.size(), vox->getX(), vox->getY(), 0, vox->getZ());
                 } else {
-                    loc = casa::IPosition(start.size(), vox->getX(), vox->getY(), vox->getZ(), 0);
+                    loc = casacore::IPosition(start.size(), vox->getX(), vox->getY(), vox->getZ(), 0);
                 }
             }
             float flux = cubelet(loc - start);
@@ -271,20 +271,20 @@ int HIdata::busyFunctionFit()
 
 void HIdata::fitToMom0()
 {
-    casa::Array<float> mom0 = itsMomentExtractor->mom0();
-    casa::IPosition start = itsMomentExtractor->slicer().start().nonDegenerate();
-    casa::LogicalArray mom0mask = itsMomentExtractor->mom0mask();
-    casa::MaskedArray<float> momWithMask(mom0,mom0mask);
+    casacore::Array<float> mom0 = itsMomentExtractor->mom0();
+    casacore::IPosition start = itsMomentExtractor->slicer().start().nonDegenerate();
+    casacore::LogicalArray mom0mask = itsMomentExtractor->mom0mask();
+    casacore::MaskedArray<float> momWithMask(mom0,mom0mask);
     size_t momSize = mom0.size();
-    casa::IPosition momShape = mom0.shape();
+    casacore::IPosition momShape = mom0.shape();
 
-    casa::Matrix<casa::Double> pos;
-    casa::Vector<casa::Double> f;
-    casa::Vector<casa::Double> sigma;
+    casacore::Matrix<casacore::Double> pos;
+    casacore::Vector<casacore::Double> f;
+    casacore::Vector<casacore::Double> sigma;
     pos.resize(momSize, 2);
     f.resize(momSize);
     sigma.resize(momSize);
-    casa::Vector<casa::Double> curpos(2);
+    casacore::Vector<casacore::Double> curpos(2);
     curpos = 0;
 
     for (size_t y = 0; y < momShape[1]; y++) {
@@ -304,12 +304,12 @@ void HIdata::fitToMom0()
     }
 
     // Get the restoring beam, to use as the initial guess
-    casa::Vector<Quantum<Double> > beam = itsMomentExtractor->inputBeam();
+    casacore::Vector<Quantum<Double> > beam = itsMomentExtractor->inputBeam();
     double cellsize = fabs(itsMomentExtractor->inputCoordSys().directionCoordinate().increment()[0]);
     std::vector<SubComponent> initial(1);
     initial[0].setX(itsSource->getXcentre() - start[0]);
     initial[0].setY(itsSource->getYcentre() - start[1]);
-    initial[0].setPeak(casa::max(momWithMask));
+    initial[0].setPeak(casacore::max(momWithMask));
     initial[0].setMajor(beam[0].getValue("rad") / cellsize);
     initial[0].setMinor(beam[1].getValue("rad") / cellsize);
     initial[0].setPA(beam[2].getValue());
@@ -336,8 +336,8 @@ void HIdata::fitToMom0()
 
     FitResults fullres;
     fullres.saveResults(fullfit);
-    casa::Gaussian2D<casa::Double> full = fullres.gaussian(0);
-    casa::Vector<casa::Double> fullErrors = fullfit.error(0);
+    casacore::Gaussian2D<casacore::Double> full = fullres.gaussian(0);
+    casacore::Vector<casacore::Double> fullErrors = fullfit.error(0);
     itsMom0Fit[0] = full.majorAxis() * cellsize;
     itsMom0Fit[1] = full.minorAxis() * cellsize;
     itsMom0Fit[2] = full.PA();

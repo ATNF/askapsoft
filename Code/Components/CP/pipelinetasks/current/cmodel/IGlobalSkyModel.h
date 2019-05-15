@@ -51,10 +51,10 @@ class IGlobalSkyModel {
         /// @param[in] fluxLimit    low limit on flux on sources returned (units: Jy)
         //                          all returned sources shall have flux >= fluxLimit
         virtual askap::cp::sms::client::ComponentListPtr coneSearch(
-                const casa::Quantity& ra,
-                const casa::Quantity& dec,
-                const casa::Quantity& searchRadius,
-                const casa::Quantity& fluxLimit) = 0;
+                const casacore::Quantity& ra,
+                const casacore::Quantity& dec,
+                const casacore::Quantity& searchRadius,
+                const casacore::Quantity& fluxLimit) = 0;
 };
 
 }

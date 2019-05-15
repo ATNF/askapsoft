@@ -123,24 +123,24 @@ void ChannelMergeTask::receiveVisChunks(askap::cp::common::VisChunk::ShPtr chunk
 
    // 1) create new frequency vector, visibilities and flags
 
-   const casa::uInt nChanOriginal = 
+   const casacore::uInt nChanOriginal = 
            itsGroupWithActivatedRank ? chunk->nChannel() / itsRanksToMerge : chunk->nChannel();
    // buffers or references to the new chunk
-   casa::Vector<casa::Double> newFreq;
-   casa::Cube<casa::Complex> newVis;
-   casa::Cube<casa::Bool> newFlag;
+   casacore::Vector<casacore::Double> newFreq;
+   casacore::Cube<casacore::Complex> newVis;
+   casacore::Cube<casacore::Bool> newFlag;
    if (itsGroupWithActivatedRank) {
        ASKAPDEBUGASSERT(nChanOriginal * itsRanksToMerge == chunk->nChannel());
        newFreq.reference(chunk->frequency());
        newVis.reference(chunk->visibility());
-       newVis.set(casa::Complex(0.,0.));
+       newVis.set(casacore::Complex(0.,0.));
        newFlag.reference(chunk->flag());
        newFlag.set(true);
    } else {
-       newFreq.reference(casa::Vector<casa::Double>(nChanOriginal * itsRanksToMerge));
-       newVis.reference(casa::Cube<casa::Complex>(chunk->nRow(), nChanOriginal * itsRanksToMerge, 
-                                    chunk->nPol(), casa::Complex(0.,0.)));
-       newFlag.reference(casa::Cube<casa::Bool>(chunk->nRow(), nChanOriginal * itsRanksToMerge, 
+       newFreq.reference(casacore::Vector<casacore::Double>(nChanOriginal * itsRanksToMerge));
+       newVis.reference(casacore::Cube<casacore::Complex>(chunk->nRow(), nChanOriginal * itsRanksToMerge, 
+                                    chunk->nPol(), casacore::Complex(0.,0.)));
+       newFlag.reference(casacore::Cube<casacore::Bool>(chunk->nRow(), nChanOriginal * itsRanksToMerge, 
                                     chunk->nPol(), true));
    }
 
@@ -157,7 +157,7 @@ void ChannelMergeTask::receiveVisChunks(askap::cp::common::VisChunk::ShPtr chunk
                 2, MPI_DOUBLE, 0, itsCommunicator);
    ASKAPCHECK(response == MPI_SUCCESS, "Error gathering times, response from MPI_Gather = "<<response);
 
-   casa::Timer timer;
+   casacore::Timer timer;
    // marking timer in this place allows to time data transfer as opposed to synchronisation cost
    // due to collective call above, processes should be synchronised by this point
    timer.mark();
@@ -165,18 +165,18 @@ void ChannelMergeTask::receiveVisChunks(askap::cp::common::VisChunk::ShPtr chunk
    // 3) find the best time for merged chunk - we ignore all chunks which are from other times
    // The best time corresponds to the largest chunk of data to retain
 
-   casa::MVEpoch timeWithMostData;
+   casacore::MVEpoch timeWithMostData;
 
 
    // as nLocalRanks > 1, zero means it is uninitialised
    unsigned int largestNumberOfChunks = 0;
    for (int rank = rankOffset; rank < nLocalRanks; ++rank) {
-        const casa::MVEpoch currentTime(timeRecvBuf[2 * rank], timeRecvBuf[2 *  rank + 1]);
+        const casacore::MVEpoch currentTime(timeRecvBuf[2 * rank], timeRecvBuf[2 *  rank + 1]);
         // compare how many matches currentTime gives. It is possible to implement the same with less comparisons
         // but straight forward approach sounds preferable for now
         unsigned int numberOfMatches = 0;
         for (int testRank = rankOffset; testRank < nLocalRanks; ++testRank) {
-             const casa::MVEpoch testTime(timeRecvBuf[2 * testRank], timeRecvBuf[2 *  testRank + 1]);
+             const casacore::MVEpoch testTime(timeRecvBuf[2 * testRank], timeRecvBuf[2 *  testRank + 1]);
              if (currentTime.nearAbs(testTime)) {
                  ++numberOfMatches;
              }
@@ -189,7 +189,7 @@ void ChannelMergeTask::receiveVisChunks(askap::cp::common::VisChunk::ShPtr chunk
         }
    }
    ASKAPASSERT(largestNumberOfChunks > 0);
-   if (timeWithMostData.nearAbs(casa::MVEpoch())) {
+   if (timeWithMostData.nearAbs(casacore::MVEpoch())) {
        ASKAPLOG_ERROR_STR(logger, "The majority ("<<largestNumberOfChunks<<") of the data streams are likely to be idle, check correlator.");
    }
 
@@ -212,7 +212,7 @@ void ChannelMergeTask::receiveVisChunks(askap::cp::common::VisChunk::ShPtr chunk
 
        int counter = 0;
        for (size_t rank = 0; rank < invalidFlags.size(); ++rank) {
-            const casa::MVEpoch currentTime(timeRecvBuf[2 * (rank + rankOffset)], timeRecvBuf[2 *  (rank + rankOffset) + 1]);
+            const casacore::MVEpoch currentTime(timeRecvBuf[2 * (rank + rankOffset)], timeRecvBuf[2 *  (rank + rankOffset) + 1]);
             if (timeWithMostData.nearAbs(currentTime)) {
                 invalidFlags[rank] = false;
                 ++counter;
@@ -242,16 +242,16 @@ void ChannelMergeTask::receiveVisChunks(askap::cp::common::VisChunk::ShPtr chunk
       
       for (int rank = 0; rank < itsRanksToMerge; ++rank) {
            // always merge frequencies, even if the data are not valid
-           casa::Vector<double> thisFreq;
-           thisFreq.takeStorage(casa::IPosition(1,nChanOriginal), freqRecvBuf.get() + (rank + rankOffset) * nChanOriginal, casa::SHARE);
-           newFreq(casa::Slice(rank * nChanOriginal, nChanOriginal)) = thisFreq;
+           casacore::Vector<double> thisFreq;
+           thisFreq.takeStorage(casacore::IPosition(1,nChanOriginal), freqRecvBuf.get() + (rank + rankOffset) * nChanOriginal, casacore::SHARE);
+           newFreq(casacore::Slice(rank * nChanOriginal, nChanOriginal)) = thisFreq;
       }
    }
   
    // for a rank without input (i.e. brand new chunk is created) the number of channels is the total number of channels, othewise it is 
    // the original number of channels, other dimensions should match
    // the following qquantity is easy to get directly rather than from nChanOriginal
-   const casa::uInt chanScaleFactor = itsGroupWithActivatedRank ? itsRanksToMerge : 1;
+   const casacore::uInt chanScaleFactor = itsGroupWithActivatedRank ? itsRanksToMerge : 1;
    // 5) receive and merge visibilities (each is two floats)
    {
       ASKAPDEBUGASSERT(chunk->visibility().nelements() % chanScaleFactor == 0);
@@ -261,22 +261,22 @@ void ChannelMergeTask::receiveVisChunks(askap::cp::common::VisChunk::ShPtr chunk
             MPI_FLOAT, visRecvBuf.get(), chunk->visibility().nelements() * 2 / chanScaleFactor, MPI_FLOAT, 0, itsCommunicator);
       ASKAPCHECK(response == MPI_SUCCESS, "Error gathering visibilities, response from MPI_Gather = "<<response);
      
-      // it is a bit ugly to rely on actual representation of casa::Complex, but this is done
+      // it is a bit ugly to rely on actual representation of casacore::Complex, but this is done
       // to benefit from optimised MPI routines
-      fillCube((casa::Complex*)visRecvBuf.get(), newVis, invalidFlags);
+      fillCube((casacore::Complex*)visRecvBuf.get(), newVis, invalidFlags);
    }
     
-   // 6) receive flags (each is casa::Bool)
+   // 6) receive flags (each is casacore::Bool)
    {
       ASKAPASSERT(chunk->flag().contiguousStorage());
-      ASKAPDEBUGASSERT(sizeof(casa::Bool) == sizeof(char));
+      ASKAPDEBUGASSERT(sizeof(casacore::Bool) == sizeof(char));
       ASKAPDEBUGASSERT(chunk->flag().nelements() % chanScaleFactor == 0);
-      boost::shared_array<casa::Bool> flagRecvBuf(new casa::Bool[chunk->flag().nelements() * nLocalRanks / chanScaleFactor]);
+      boost::shared_array<casacore::Bool> flagRecvBuf(new casacore::Bool[chunk->flag().nelements() * nLocalRanks / chanScaleFactor]);
       const int response = MPI_Gather((char*)chunk->flag().data(), chunk->flag().nelements() / chanScaleFactor, 
             MPI_CHAR, (char*)flagRecvBuf.get(), chunk->flag().nelements() / chanScaleFactor, MPI_CHAR, 0, itsCommunicator);
       ASKAPCHECK(response == MPI_SUCCESS, "Error gathering flags, response from MPI_Gather = "<<response);
 
-      // it is a bit ugly to rely on actual representation of casa::Bool, but this is done
+      // it is a bit ugly to rely on actual representation of casacore::Bool, but this is done
       // to benefit from optimised MPI routines
       fillCube(flagRecvBuf.get(), newFlag, invalidFlags);
    }
@@ -289,7 +289,7 @@ void ChannelMergeTask::receiveVisChunks(askap::cp::common::VisChunk::ShPtr chunk
    // 8) check that the resulting frequency axis is contiguous
    if (newFreq.nelements() > 1) {
        const double resolution = (newFreq[newFreq.nelements() - 1] - newFreq[0]) / (newFreq.nelements() - 1);
-       for (casa::uInt chan = 0; chan < newFreq.nelements(); ++chan) {
+       for (casacore::uInt chan = 0; chan < newFreq.nelements(); ++chan) {
             const double expected = newFreq[0] + resolution * chan;
             // 1 kHz tolerance should be sufficient for practical purposes
             if (fabs(expected - newFreq[chan]) > 1e3) {
@@ -313,12 +313,12 @@ void ChannelMergeTask::receiveVisChunks(askap::cp::common::VisChunk::ShPtr chunk
 /// @param[in] invalidFlags if this vector has non-zero length, slices corresponding to 
 ///                 'true' are not copied
 template<typename T>
-void ChannelMergeTask::fillCube(const T* buf, casa::Cube<T> &out, 
+void ChannelMergeTask::fillCube(const T* buf, casacore::Cube<T> &out, 
                        const std::vector<bool> &invalidFlags) const
 {
    ASKAPDEBUGASSERT(out.ncolumn() % itsRanksToMerge == 0);
    const int rankOffset = itsGroupWithActivatedRank ? 1 : 0;
-   const casa::IPosition sliceShape(3, out.nrow(), out.ncolumn() / itsRanksToMerge, out.nplane());
+   const casacore::IPosition sliceShape(3, out.nrow(), out.ncolumn() / itsRanksToMerge, out.nplane());
 
    for (int rank = 0; rank < itsRanksToMerge; ++rank) {
         if (invalidFlags.size() > 0) {
@@ -326,17 +326,17 @@ void ChannelMergeTask::fillCube(const T* buf, casa::Cube<T> &out,
                 continue;
             }
         }
-        casa::Cube<T> currentSlice;
+        casacore::Cube<T> currentSlice;
 
-        // it is a bit ugly to rely on exact representation of the casa::Cube, but
+        // it is a bit ugly to rely on exact representation of the casacore::Cube, but
         // this is the only way to benefit from optimised MPI routines
         // const_cast is required due to the generic interface,
         // we don't actually change data using the cast pointer
         currentSlice.takeStorage(sliceShape, const_cast<T*>(buf) + 
-                                 (rank + rankOffset) * sliceShape.product(), casa::SHARE);
+                                 (rank + rankOffset) * sliceShape.product(), casacore::SHARE);
 
-        const casa::IPosition start(3, 0, rank * sliceShape(1), 0);
-        const casa::Slicer slicer(start,sliceShape);
+        const casacore::IPosition start(3, 0, rank * sliceShape(1), 0);
+        const casacore::Slicer slicer(start,sliceShape);
         ASKAPDEBUGASSERT(start(1) < static_cast<int>(out.ncolumn()));
               
         out(slicer) = currentSlice;
@@ -355,7 +355,7 @@ void ChannelMergeTask::sendVisChunk(askap::cp::common::VisChunk::ShPtr chunk) co
    int response = MPI_Gather(const_cast<double*>(timeSendBuf), 2, MPI_DOUBLE, NULL, 2, MPI_DOUBLE, 0, itsCommunicator);
    ASKAPCHECK(response == MPI_SUCCESS, "Error gathering times, response from MPI_Gather = "<<response);
 
-   casa::Timer timer;
+   casacore::Timer timer;
    timer.mark(); // marking timer here excludes synchronisation waiting time
 
    // 2) send frequencies corresponding to the current chunk
@@ -376,7 +376,7 @@ void ChannelMergeTask::sendVisChunk(askap::cp::common::VisChunk::ShPtr chunk) co
 
    ASKAPASSERT(chunk->flag().contiguousStorage());
    
-   ASKAPDEBUGASSERT(sizeof(casa::Bool) == sizeof(char));
+   ASKAPDEBUGASSERT(sizeof(casacore::Bool) == sizeof(char));
    response = MPI_Gather((char*)chunk->flag().data(), chunk->flag().nelements(), 
             MPI_CHAR, NULL, chunk->flag().nelements(), MPI_CHAR, 0, itsCommunicator);
    ASKAPCHECK(response == MPI_SUCCESS, "Error gathering flags, response from MPI_Gather = "<<response);
@@ -566,12 +566,12 @@ void ChannelMergeTask::checkRanksToMerge(bool beingActivated) const
 /// @param[in] vec vector to send
 /// @param[in] tag optional tag for the message
 template<typename T>
-void ChannelMergeTask::sendVector(const casa::Vector<T>& vec, int tag) const
+void ChannelMergeTask::sendVector(const casacore::Vector<T>& vec, int tag) const
 {
    const int root = 0;
 
    ASKAPASSERT(vec.contiguousStorage());
-   const int response = MPI_Send(const_cast<casa::Vector<T>&>(vec).data(), vec.nelements() * MPITraitsHelper<T>::size, 
+   const int response = MPI_Send(const_cast<casacore::Vector<T>&>(vec).data(), vec.nelements() * MPITraitsHelper<T>::size, 
                                  MPITraitsHelper<T>::datatype(), root, tag, itsCommunicator);
    ASKAPCHECK(response == MPI_SUCCESS, "Error sending vector (message tag="<<tag<<"), response from MPI_Send = "<<response);
 }
@@ -580,7 +580,7 @@ void ChannelMergeTask::sendVector(const casa::Vector<T>& vec, int tag) const
 /// @param[in] vec vector to populate (should already be correct size)
 /// @param[in] tag optional tag for the message
 template<typename T>
-void ChannelMergeTask::receiveVector(casa::Vector<T>& vec, int tag) const
+void ChannelMergeTask::receiveVector(casacore::Vector<T>& vec, int tag) const
 {
    const int source = 1;
 
@@ -614,10 +614,10 @@ void ChannelMergeTask::sendBasicMetadata(const askap::cp::common::VisChunk::ShPt
    sendVector(chunk->beam2PA(),++tag);
    sendVector(chunk->uvw(),++tag);
    // all fields of the chunk should be resized to the correct size on all ranks
-   casa::Matrix<double> beamOffsets = chunk->beamOffsets();
+   casacore::Matrix<double> beamOffsets = chunk->beamOffsets();
    if (beamOffsets.ncolumn() > 0) {
        ASKAPDEBUGASSERT(beamOffsets.nelements() == 2 * beamOffsets.ncolumn());
-       casa::Vector<double> offsetsVec = beamOffsets.reform(casa::IPosition(1, beamOffsets.nelements()));
+       casacore::Vector<double> offsetsVec = beamOffsets.reform(casacore::IPosition(1, beamOffsets.nelements()));
        sendVector(offsetsVec, ++tag);
    }
 
@@ -641,12 +641,12 @@ void ChannelMergeTask::sendBasicMetadata(const askap::cp::common::VisChunk::ShPt
 
    // send size first
    //ASKAPLOG_DEBUG_STR(logger, "     -- message size "<<buf.size());
-   casa::Vector<unsigned long> sndBufForSize(1, buf.size());
+   casacore::Vector<unsigned long> sndBufForSize(1, buf.size());
    ASKAPDEBUGASSERT(sndBufForSize.size() == 1);
    sendVector(sndBufForSize,++tag);
    
    // now send the message - referencing same storage from a casa vector for convenience
-   casa::Vector<int8_t>  sndBufForData(casa::IPosition(1,buf.size()), buf.data(), casa::SHARE);
+   casacore::Vector<int8_t>  sndBufForData(casacore::IPosition(1,buf.size()), buf.data(), casacore::SHARE);
 
    sendVector(sndBufForData,tag);
    //ASKAPLOG_DEBUG_STR(logger, "Finished sending basic metadata to the service rank");
@@ -678,10 +678,10 @@ void ChannelMergeTask::receiveBasicMetadata(const askap::cp::common::VisChunk::S
    receiveVector(chunk->uvw(),++tag);
 
    // all fields of the chunk should be resized to the correct size on all ranks
-   casa::Matrix<double> beamOffsets = chunk->beamOffsets();
+   casacore::Matrix<double> beamOffsets = chunk->beamOffsets();
    if (beamOffsets.ncolumn() > 0) {
        ASKAPDEBUGASSERT(beamOffsets.nelements() == 2 * beamOffsets.ncolumn());
-       casa::Vector<double> offsetsVec = beamOffsets.reform(casa::IPosition(1, beamOffsets.nelements()));
+       casacore::Vector<double> offsetsVec = beamOffsets.reform(casacore::IPosition(1, beamOffsets.nelements()));
        receiveVector(offsetsVec, ++tag);
    }
 
@@ -691,7 +691,7 @@ void ChannelMergeTask::receiveBasicMetadata(const askap::cp::common::VisChunk::S
    // Quick and dirty for now.
 
    // receive the size first
-   casa::Vector<unsigned long> receiveBufForSize(1);
+   casacore::Vector<unsigned long> receiveBufForSize(1);
    ASKAPDEBUGASSERT(receiveBufForSize.size() == 1);
    receiveVector(receiveBufForSize,++tag);
 
@@ -700,7 +700,7 @@ void ChannelMergeTask::receiveBasicMetadata(const askap::cp::common::VisChunk::S
    std::vector<int8_t> buf(receiveBufForSize[0]);
 
    // actual receive - referencing array by a casa vector for convenience
-   casa::Vector<int8_t>  receiveBufForData(casa::IPosition(1,buf.size()), buf.data(), casa::SHARE);
+   casacore::Vector<int8_t>  receiveBufForData(casacore::IPosition(1,buf.size()), buf.data(), casacore::SHARE);
    receiveVector(receiveBufForData, tag);
 
    // decode

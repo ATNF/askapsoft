@@ -95,7 +95,7 @@ class TosSimulator : public ISimulator {
         RandomReal<double> itsRandom;
 
         // Measurement set
-        boost::scoped_ptr<casa::MeasurementSet> itsMS;
+        boost::scoped_ptr<casacore::MeasurementSet> itsMS;
 
         // Port for output of metadata
         boost::scoped_ptr<askap::cp::icewrapper::MetadataOutputPort> itsPort;

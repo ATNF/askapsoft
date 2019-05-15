@@ -64,8 +64,8 @@ class AskapComponentImager {
         /// @param[in] list the list of components to project.
         /// @param[in] term the taylor term to image.
         template <class T>
-        static void project(casa::ImageInterface<T>& image,
-                            const casa::ComponentList& list,
+        static void project(casacore::ImageInterface<T>& image,
+                            const casacore::ComponentList& list,
                             const unsigned int term = 0);
 
 
@@ -75,31 +75,31 @@ class AskapComponentImager {
         /// @param[in] xpix        the x-coordinate of the pixel
         /// @param[in] ypix        the y-coordinate of the pixel
         template <class T>
-        static double evaluateGaussian(const casa::Gaussian2D<T> &gauss,
+        static double evaluateGaussian(const casacore::Gaussian2D<T> &gauss,
                                        const int xpix, const int ypix);
 
     private:
         /// Project a point shape on to the image
         template <class T>
-        static void projectPointShape(casa::ImageInterface<T>& image,
-                                      const casa::SkyComponent& c,
-                                      const casa::Int latAxis, const casa::Int longAxis,
-                                      const casa::DirectionCoordinate& dirCoord,
-                                      const casa::Int freqAxis, const casa::uInt freqIdx,
-                                      const casa::Flux<casa::Double>& flux,
-                                      const casa::Int polAxis, const casa::uInt polIdx,
-                                      const casa::Stokes::StokesTypes& stokes);
+        static void projectPointShape(casacore::ImageInterface<T>& image,
+                                      const casacore::SkyComponent& c,
+                                      const casacore::Int latAxis, const casacore::Int longAxis,
+                                      const casacore::DirectionCoordinate& dirCoord,
+                                      const casacore::Int freqAxis, const casacore::uInt freqIdx,
+                                      const casacore::Flux<casacore::Double>& flux,
+                                      const casacore::Int polAxis, const casacore::uInt polIdx,
+                                      const casacore::Stokes::StokesTypes& stokes);
 
         /// Project a gaussian shape on to the image
         template <class T>
-        static void projectGaussianShape(casa::ImageInterface<T>& image,
-                                         const casa::SkyComponent& c,
-                                         const casa::Int latAxis, const casa::Int longAxis,
-                                         const casa::DirectionCoordinate& dirCoord,
-                                         const casa::Int freqAxis, const casa::uInt freqIdx,
-                                         const casa::Flux<casa::Double>& flux,
-                                         const casa::Int polAxis, const casa::uInt polIdx,
-                                         const casa::Stokes::StokesTypes& stokes);
+        static void projectGaussianShape(casacore::ImageInterface<T>& image,
+                                         const casacore::SkyComponent& c,
+                                         const casacore::Int latAxis, const casacore::Int longAxis,
+                                         const casacore::DirectionCoordinate& dirCoord,
+                                         const casacore::Int freqAxis, const casacore::uInt freqIdx,
+                                         const casacore::Flux<casacore::Double>& flux,
+                                         const casacore::Int polAxis, const casacore::uInt polIdx,
+                                         const casacore::Stokes::StokesTypes& stokes);
 
         /// Make an IPosition given the passed axis information.
         /// The returned IPosition will have one dimension for each of latAxis,
@@ -129,10 +129,10 @@ class AskapComponentImager {
         ///                     returned IPosition instance.
         ///
         /// @return an IPosition object which represents all in the input parameters.
-        static casa::IPosition makePosition(const casa::Int latAxis, const casa::Int longAxis,
-                                            const casa::Int spectralAxis, const casa::Int polAxis,
-                                            const casa::uInt latIdx, const casa::uInt longIdx,
-                                            const casa::uInt spectralIdx, const casa::uInt polIdx);
+        static casacore::IPosition makePosition(const casacore::Int latAxis, const casacore::Int longAxis,
+                                            const casacore::Int spectralAxis, const casacore::Int polAxis,
+                                            const casacore::uInt latIdx, const casacore::uInt longIdx,
+                                            const casacore::uInt spectralIdx, const casacore::uInt polIdx);
 
         /// Given a SkyComponent, determine the flux value (or appropriate
         /// value for talylor terms > 0) for the given channel frequency.
@@ -142,8 +142,8 @@ class AskapComponentImager {
         /// @param[in] chanFrequency    the channel frequency for which the flux
         ///                             is to be calculated.
         /// @param[in] term the taylor term to calculate the value for.
-        static casa::Flux<casa::Double> makeFlux(const casa::SkyComponent& c,
-                const casa::MFrequency& chanFrequency,
+        static casacore::Flux<casacore::Double> makeFlux(const casacore::SkyComponent& c,
+                const casacore::MFrequency& chanFrequency,
                 const unsigned int term);
 
         /// Determine the number of pixels to sample before the gaussian tapers
@@ -163,7 +163,7 @@ class AskapComponentImager {
         /// @return the number of pixels from the centre of the gaussian at which point
         ///         the power is < flux limit.
         template <class T>
-        static int findCutoff(const casa::Gaussian2D<T>& gauss, const int spatialLimit,
+        static int findCutoff(const casacore::Gaussian2D<T>& gauss, const int spatialLimit,
                               const double fluxLimit);
 
         /// @brief Calculate the flux in a single pixel due to a 2D
@@ -177,7 +177,7 @@ class AskapComponentImager {
         /// @param[in] xpix        the x-coordinate of the pixel
         /// @param[in] ypix        the y-coordinate of the pixel
         template <class T>
-        static double evaluateGaussian2D(const casa::Gaussian2D<T> &gauss,
+        static double evaluateGaussian2D(const casacore::Gaussian2D<T> &gauss,
                                          const int xpix, const int ypix);
 
         /// @brief Calculate the flux in a single pixel due to a
@@ -191,23 +191,23 @@ class AskapComponentImager {
         /// @param[in] xpix        the x-coordinate of the pixel
         /// @param[in] ypix        the y-coordinate of the pixel
         template <class T>
-        static double evaluateGaussian1D(const casa::Gaussian2D<T> &gauss,
+        static double evaluateGaussian1D(const casacore::Gaussian2D<T> &gauss,
                                          const int xpix, const int ypix);
 
 };
 
 // Explicit instantiations exist for float and double types only
 extern template void
-AskapComponentImager::project(casa::ImageInterface<float>&,
-                              const casa::ComponentList&, const unsigned int);
+AskapComponentImager::project(casacore::ImageInterface<float>&,
+                              const casacore::ComponentList&, const unsigned int);
 extern template void
-AskapComponentImager::project(casa::ImageInterface<double>&,
-                              const casa::ComponentList&, const unsigned int);
+AskapComponentImager::project(casacore::ImageInterface<double>&,
+                              const casacore::ComponentList&, const unsigned int);
 extern template double
-AskapComponentImager::evaluateGaussian(const casa::Gaussian2D<float> &gauss,
+AskapComponentImager::evaluateGaussian(const casacore::Gaussian2D<float> &gauss,
                                        const int xpix, const int ypix);
 extern template double
-AskapComponentImager::evaluateGaussian(const casa::Gaussian2D<double> &gauss,
+AskapComponentImager::evaluateGaussian(const casacore::Gaussian2D<double> &gauss,
                                        const int xpix, const int ypix);
 
 }

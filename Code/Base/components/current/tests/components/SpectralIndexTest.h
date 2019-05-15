@@ -55,22 +55,22 @@ class SpectralIndexTest : public CppUnit::TestFixture {
         }
 
         void testConstructorInvalidFreq() {
-            const casa::MFrequency zero(casa::Quantity(0.0, "Hz"));
+            const casacore::MFrequency zero(casacore::Quantity(0.0, "Hz"));
             CPPUNIT_ASSERT_THROW(SpectralIndex(zero, 0.5), AskapError);
 
-            const casa::MFrequency negative(casa::Quantity(-10.0, "Hz"));
+            const casacore::MFrequency negative(casacore::Quantity(-10.0, "Hz"));
             CPPUNIT_ASSERT_THROW(SpectralIndex(negative, 0.5), AskapError);
         }
 
         void testType() {
-            const casa::MFrequency freq(casa::Quantity(1400, "MHz"));
+            const casacore::MFrequency freq(casacore::Quantity(1400, "MHz"));
             const SpectralIndex instance(freq, 0.5);
             CPPUNIT_ASSERT_EQUAL(ComponentType::SPECTRAL_INDEX, instance.type());
         }
 
         void testSample() {
-            const casa::MFrequency refFreq(casa::Quantity(1400, "MHz"));
-            const casa::MFrequency userFreq(casa::Quantity(850, "Hz"));
+            const casacore::MFrequency refFreq(casacore::Quantity(1400, "MHz"));
+            const casacore::MFrequency userFreq(casacore::Quantity(850, "Hz"));
 
             const SpectralIndex positive(refFreq, 0.05);
             CPPUNIT_ASSERT_DOUBLES_EQUAL(0.48883753, positive.sample(userFreq), 10e-6);
@@ -83,13 +83,13 @@ class SpectralIndexTest : public CppUnit::TestFixture {
         }
 
         void testSampleInvalidArguments() {
-            const casa::MFrequency refFreq(casa::Quantity(1400, "MHz"));
+            const casacore::MFrequency refFreq(casacore::Quantity(1400, "MHz"));
             const SpectralIndex instance(refFreq, 0.5);
 
-            const casa::MFrequency zero(casa::Quantity(0.0, "Hz"));
+            const casacore::MFrequency zero(casacore::Quantity(0.0, "Hz"));
             CPPUNIT_ASSERT_THROW(instance.sample(zero), AskapError);
 
-            const casa::MFrequency negative(casa::Quantity(-10.0, "Hz"));
+            const casacore::MFrequency negative(casacore::Quantity(-10.0, "Hz"));
             CPPUNIT_ASSERT_THROW(instance.sample(negative), AskapError);
         }
 };

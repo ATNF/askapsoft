@@ -70,7 +70,7 @@ class ShadowFlagTask : public askap::cp::ingest::ITask {
     private:
 
         /// @brief set of shadowed antennas
-        std::set<casa::uInt> itsShadowedAntennas;
+        std::set<casacore::uInt> itsShadowedAntennas;
 
         /// @brief dish diameter in metres for shadowing calculations
         /// @note Effective size is probably larger than geometric as antennas

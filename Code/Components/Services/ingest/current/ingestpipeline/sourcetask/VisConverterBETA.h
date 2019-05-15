@@ -66,7 +66,7 @@ public:
    /// integration is processed.
    /// @param[in] timestamp BAT corresponding to this new chunk
    /// @param[in] corrMode correlator mode parameters (determines shape, etc)
-   void initVisChunk(const casa::uLong timestamp, const CorrelatorMode &corrMode);
+   void initVisChunk(const casacore::uLong timestamp, const CorrelatorMode &corrMode);
 
    /// @brief main method add datagram to the current chunk
    /// @details This method processes one datagram and adds it to 

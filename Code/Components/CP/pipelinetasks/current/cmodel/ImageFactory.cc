@@ -61,10 +61,10 @@ using namespace casa;
 
 ASKAP_LOGGER(logger, ".ImageFactory");
 
-casa::TempImage<casa::Float> ImageFactory::createTempImage(const LOFAR::ParameterSet& parset)
+casacore::TempImage<casacore::Float> ImageFactory::createTempImage(const LOFAR::ParameterSet& parset)
 {
-    const casa::uInt nx = parset.getUintVector("shape").at(0);
-    const casa::uInt ny = parset.getUintVector("shape").at(1);
+    const casacore::uInt nx = parset.getUintVector("shape").at(0);
+    const casacore::uInt ny = parset.getUintVector("shape").at(1);
     const std::string units = parset.getString("bunit");
 
     // Create the Coordinate System
@@ -72,19 +72,19 @@ casa::TempImage<casa::Float> ImageFactory::createTempImage(const LOFAR::Paramete
 
     // Open the image
     IPosition shape(4, nx, ny, getNumStokes(coordsys), 1);
-    casa::TempImage<casa::Float> image(TiledShape(shape), coordsys);
+    casacore::TempImage<casacore::Float> image(TiledShape(shape), coordsys);
     image.set(0.0);
 
     // Set brightness units
-    image.setUnits(casa::Unit(units));
+    image.setUnits(casacore::Unit(units));
     return image;
 }
 
-casa::PagedImage<casa::Float> ImageFactory::createPagedImage(const LOFAR::ParameterSet& parset,
+casacore::PagedImage<casacore::Float> ImageFactory::createPagedImage(const LOFAR::ParameterSet& parset,
         const std::string& filename)
 {
-    const casa::uInt nx = parset.getUintVector("shape").at(0);
-    const casa::uInt ny = parset.getUintVector("shape").at(1);
+    const casacore::uInt nx = parset.getUintVector("shape").at(0);
+    const casacore::uInt ny = parset.getUintVector("shape").at(1);
     const std::string units = parset.getString("bunit");
 
     // Create the Coordinate System
@@ -92,15 +92,15 @@ casa::PagedImage<casa::Float> ImageFactory::createPagedImage(const LOFAR::Parame
 
     // Open the image
     IPosition shape(4, nx, ny, getNumStokes(coordsys), 1);
-    casa::PagedImage<casa::Float> image(TiledShape(shape), coordsys, filename);
+    casacore::PagedImage<casacore::Float> image(TiledShape(shape), coordsys, filename);
     image.set(0.0);
 
     // Set brightness units
-    image.setUnits(casa::Unit(units));
+    image.setUnits(casacore::Unit(units));
     return image;
 }
 
-casa::CoordinateSystem ImageFactory::createCoordinateSystem(casa::uInt nx, casa::uInt ny,
+casacore::CoordinateSystem ImageFactory::createCoordinateSystem(casacore::uInt nx, casacore::uInt ny,
         const LOFAR::ParameterSet& parset)
 {
     CoordinateSystem coordsys;
@@ -122,8 +122,8 @@ casa::CoordinateSystem ImageFactory::createCoordinateSystem(casa::uInt nx, casa:
         ASKAPLOG_DEBUG_STR(logger, "Cellsize: " << xcellsize.getValue()
                 << " arcsec, " << ycellsize.getValue() << " arcsec");
 
-        casa::MDirection::Types type;
-        casa::MDirection::getType(type, dirVector.at(2));
+        casacore::MDirection::Types type;
+        casacore::MDirection::getType(type, dirVector.at(2));
         const DirectionCoordinate radec(type, Projection(Projection::SIN),
                                         ra, dec, xcellsize, ycellsize, xform, nx / 2, ny / 2);
 
@@ -157,7 +157,7 @@ casa::CoordinateSystem ImageFactory::createCoordinateSystem(casa::uInt nx, casa:
     return coordsys;
 }
 
-Vector<casa::Int> ImageFactory::parseStokes(const std::vector<std::string>& input)
+Vector<casacore::Int> ImageFactory::parseStokes(const std::vector<std::string>& input)
 {
     const size_t size = input.size();
     Vector<Int> stokes(size);
@@ -179,7 +179,7 @@ Vector<casa::Int> ImageFactory::parseStokes(const std::vector<std::string>& inpu
     return stokes;
 }
 
-casa::uInt ImageFactory::getNumStokes(const casa::CoordinateSystem& coordsys)
+casacore::uInt ImageFactory::getNumStokes(const casacore::CoordinateSystem& coordsys)
 {
     Vector<Stokes::StokesTypes> stokes;
     CoordinateUtil::findStokesAxis(stokes, coordsys);

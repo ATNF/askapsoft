@@ -67,20 +67,20 @@ void ChannelAvgTask::process(VisChunk::ShPtr& chunk)
         return;
     }
 
-    const casa::uInt nChanOriginal = chunk->nChannel();
+    const casacore::uInt nChanOriginal = chunk->nChannel();
     if (nChanOriginal % itsAveraging != 0) {
         ASKAPTHROW(AskapError, "Number of channels not a multiple of averaging number");
     }
-    const casa::uInt nChanNew = nChanOriginal / itsAveraging;
+    const casacore::uInt nChanNew = nChanOriginal / itsAveraging;
 
     // Average frequencies vector
-    const casa::Vector<casa::Double>& origFreq = chunk->frequency();
-    casa::Vector<casa::Double> newFreq(nChanNew);
+    const casacore::Vector<casacore::Double>& origFreq = chunk->frequency();
+    casacore::Vector<casacore::Double> newFreq(nChanNew);
 
-    for (casa::uInt newIdx = 0; newIdx < nChanNew; ++newIdx) {
-        const casa::uInt origIdx = itsAveraging * newIdx;
-        casa::Double sum = 0.0;
-        for (casa::uInt i = 0; i < itsAveraging; ++i) {
+    for (casacore::uInt newIdx = 0; newIdx < nChanNew; ++newIdx) {
+        const casacore::uInt origIdx = itsAveraging * newIdx;
+        casacore::Double sum = 0.0;
+        for (casacore::uInt i = 0; i < itsAveraging; ++i) {
             sum += origFreq(origIdx + i);
         }
         newFreq(newIdx) = sum / itsAveraging;
@@ -90,25 +90,25 @@ void ChannelAvgTask::process(VisChunk::ShPtr& chunk)
     chunk->channelWidth() = chunk->channelWidth() * itsAveraging;
 
     // Average vis and flag cubes
-    const casa::uInt nRow = chunk->nRow();
-    const casa::uInt nPol = chunk->nPol();
-    const casa::Cube<casa::Complex>& origVis = chunk->visibility();
-    const casa::Cube<casa::Bool>& origFlag = chunk->flag();
-    casa::Cube<casa::Complex> newVis(nRow, nChanNew, nPol);
-    casa::Cube<casa::Bool> newFlag(nRow, nChanNew, nPol);
+    const casacore::uInt nRow = chunk->nRow();
+    const casacore::uInt nPol = chunk->nPol();
+    const casacore::Cube<casacore::Complex>& origVis = chunk->visibility();
+    const casacore::Cube<casacore::Bool>& origFlag = chunk->flag();
+    casacore::Cube<casacore::Complex> newVis(nRow, nChanNew, nPol);
+    casacore::Cube<casacore::Bool> newFlag(nRow, nChanNew, nPol);
 
-    for (casa::uInt row = 0; row < nRow; ++row) {
-        for (casa::uInt newIdx = 0; newIdx < nChanNew; ++newIdx) {
-            for (casa::uInt pol = 0; pol < nPol; ++pol) {
+    for (casacore::uInt row = 0; row < nRow; ++row) {
+        for (casacore::uInt newIdx = 0; newIdx < nChanNew; ++newIdx) {
+            for (casacore::uInt pol = 0; pol < nPol; ++pol) {
 
                 // Track the samples added, since those flagged are not
-                casa::uInt numGoodSamples = 0;
+                casacore::uInt numGoodSamples = 0;
 
                 // Calculate the average over the number of samples to
                 // be averaged together (itsAveraging)
-                const casa::uInt origIdx = itsAveraging * newIdx;
-                casa::Complex sum(0.0, 0.0);
-                for (casa::uInt i = 0; i < itsAveraging; ++i) {
+                const casacore::uInt origIdx = itsAveraging * newIdx;
+                casacore::Complex sum(0.0, 0.0);
+                for (casacore::uInt i = 0; i < itsAveraging; ++i) {
                     // Only sum if not flagged
                     if (!origFlag(row, origIdx + i, pol)) {
                         sum += origVis(row, origIdx + i, pol);
@@ -117,11 +117,11 @@ void ChannelAvgTask::process(VisChunk::ShPtr& chunk)
                 }
 
                 if (numGoodSamples > 0) {
-                    newVis(row, newIdx, pol) = casa::Complex(sum.real() / numGoodSamples,
+                    newVis(row, newIdx, pol) = casacore::Complex(sum.real() / numGoodSamples,
                                                              sum.imag() / numGoodSamples);
                     newFlag(row, newIdx, pol) = false;
                 } else {
-                    newVis(row, newIdx, pol) = casa::Complex(0.0, 0.0);
+                    newVis(row, newIdx, pol) = casacore::Complex(0.0, 0.0);
                     newFlag(row, newIdx, pol) = true;
                 }
 

@@ -80,7 +80,7 @@ class Weighter {
         /// @brief The value of the weights cutoff.
         float cutoff() {return itsWeightCutoff;};
 
-        casa::LogicalArray cutoffMask();
+        casacore::LogicalArray cutoffMask();
 
 
         /// @brief Is the weights image defined?
@@ -99,10 +99,10 @@ class Weighter {
         bool isValid() {return fileOK() && (doScaling() || doApplyCutoff());};
 
         /// @brief Return the mask used with the weights array
-        const casa::LogicalArray mask() {return itsWeights.getMask();};
+        const casacore::LogicalArray mask() {return itsWeights.getMask();};
 
         /// @brief Return the shape of the weights array
-        const casa::IPosition shape() {return itsWeights.shape();};
+        const casacore::IPosition shape() {return itsWeights.shape();};
 
     protected:
         /// @brief Find the overall weights normalisation (the maximum value across the weights image).
@@ -134,7 +134,7 @@ class Weighter {
         bool itsFlagDoScaling;
 
         /// @brief Array of weights values - able to have a mask.
-        casa::MaskedArray<casa::Float> itsWeights;
+        casacore::MaskedArray<casacore::Float> itsWeights;
 
 };
 

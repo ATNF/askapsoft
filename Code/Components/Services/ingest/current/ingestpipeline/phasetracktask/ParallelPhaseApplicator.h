@@ -59,7 +59,7 @@ public:
       /// with via reference. The user should ensure that these references continue to be valid until this object
       /// goes out of scope or complete method is called.
       /// @param[in] freq reference to the frequency vector (number of elements is the number of channels
-      ParallelPhaseApplicator(const casa::Vector<double> &freq, casa::Cube<casa::Complex> &vis, size_t nThreads);
+      ParallelPhaseApplicator(const casacore::Vector<double> &freq, casacore::Cube<casacore::Complex> &vis, size_t nThreads);
 
       /// @brief destructor - stops and joins parallel threads
       /// @note The user has to call complete method to ensure all work is finished. Destructor just terminates the 
@@ -74,20 +74,20 @@ public:
       /// @param[in] row row number to work with
       /// @param[in] phaseOffset constant additive term for the phase gradient to be applied to this row
       /// @param[in] residualDelay the slope of the phase gradient to be applied to this row
-      void add(casa::uInt row, double phaseOffset, double residualDelay);
+      void add(casacore::uInt row, double phaseOffset, double residualDelay);
 
       /// @brief Wait until all submitted jobs are finished
       void complete();
 
 private:
       /// @brief reference to the frequency vector
-      const casa::Vector<double> &itsFreq;
+      const casacore::Vector<double> &itsFreq;
       /// @brief reference to the cube to work with
-      casa::Cube<casa::Complex> &itsCube;
+      casacore::Cube<casacore::Complex> &itsCube;
       /// @brief thread group
       boost::thread_group itsThreadGroup;
       /// @brief buffer to hold submitted work units
-      utility::CircularBuffer<boost::tuple<casa::uInt, double, double> > itsBuffer;
+      utility::CircularBuffer<boost::tuple<casacore::uInt, double, double> > itsBuffer;
       /// @brief true of interruption is requested
       bool itsInterrupted;
 };

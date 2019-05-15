@@ -73,7 +73,7 @@ protected:
 private:
    
    /// @brief frequency of the first channel in Hz for this rank for cross-checks
-   casa::Double itsFreq;
+   casacore::Double itsFreq;
 };
 
 

@@ -129,7 +129,7 @@ class CalcUVWTaskTest : public CppUnit::TestFixture {
 
             CPPUNIT_ASSERT_EQUAL(1u, chunk->nRow());
             CPPUNIT_ASSERT(chunk->uvw().size() == 1);
-            casa::RigidVector<casa::Double, 3> uvw = chunk->uvw()(row);
+            casacore::RigidVector<casacore::Double, 3> uvw = chunk->uvw()(row);
 
             // Tolerance for uvw equality
             const double tol = 1.0E-1;

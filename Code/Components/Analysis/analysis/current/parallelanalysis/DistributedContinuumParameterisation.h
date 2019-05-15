@@ -60,7 +60,7 @@ class DistributedContinuumParameterisation : public DistributedParameteriserBase
         void parameterise();
 
     /// @brief Add the given Gaussian component to the component image, pixel-by-pixel.
-    void addToComponentImage(casa::Gaussian2D<Double> &gauss);
+    void addToComponentImage(casacore::Gaussian2D<Double> &gauss);
 
         /// @brief The workers' objects are returned to the master
         void gather();
@@ -71,10 +71,10 @@ class DistributedContinuumParameterisation : public DistributedParameteriserBase
         const std::vector<CasdaComponent> finalComponentList() {return itsComponentList;};
 
     /// @brief Return the array of imaged components
-    const casa::Array<float> componentImage() {return itsComponentImage;};
+    const casacore::Array<float> componentImage() {return itsComponentImage;};
 
     /// @brief Return the slicer applied to the input image
-    const casa::Slicer inputSlicer() {return itsInputSlicer;};
+    const casacore::Slicer inputSlicer() {return itsInputSlicer;};
 
     protected:
 
@@ -85,10 +85,10 @@ class DistributedContinuumParameterisation : public DistributedParameteriserBase
         std::vector<CasdaComponent> itsComponentList;
 
     /// @brief The shape of the input image as used
-    casa::Slicer itsInputSlicer;
+    casacore::Slicer itsInputSlicer;
     
     /// @brief The array showing imaged components
-    casa::Array<float> itsComponentImage;
+    casacore::Array<float> itsComponentImage;
 
     
 };

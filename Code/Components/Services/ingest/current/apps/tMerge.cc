@@ -75,7 +75,7 @@ public:
           ASKAPASSERT(chunk);
       }
       boost::shared_ptr<common::VisChunk> workChunk;
-      casa::Timer timer;
+      casacore::Timer timer;
       float processingTime = 0.;
       float maxProcessingTime = 0.;
       size_t actualCount = 0;
@@ -109,7 +109,7 @@ public:
                maxProcessingTime = runTime;
            }
            if (chunk) {
-               chunk->time() += casa::Quantity(5.,"s");
+               chunk->time() += casacore::Quantity(5.,"s");
            }
            if (workChunk) {
                ASKAPLOG_INFO_STR(logger, "This rank ("<<rank()<<") handles the output");

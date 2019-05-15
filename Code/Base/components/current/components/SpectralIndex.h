@@ -41,7 +41,7 @@ namespace components {
 /// frequency varies) with a spectral index.
 ///
 /// Thread Safety:
-/// While this class is immutable, it encapsulates an instance of casa::MFrequency
+/// While this class is immutable, it encapsulates an instance of casacore::MFrequency
 /// that is not known to be thread safe.
 class SpectralIndex : public SpectralModel {
     public:
@@ -53,7 +53,7 @@ class SpectralIndex : public SpectralModel {
         ///
         /// @throws AskapError  if the "refFreq" parameter is zero or
         ///                     negative
-        SpectralIndex(const casa::MFrequency& refFreq, double index);
+        SpectralIndex(const casacore::MFrequency& refFreq, double index);
 
         /// Returns the type of the component
         virtual ComponentType::SpectralShape type(void) const;
@@ -69,16 +69,16 @@ class SpectralIndex : public SpectralModel {
         ///                     returned by getRef())
         /// @throws AskapError  if the "centerFrequency" parameter is zero or
         ///                     negative
-        virtual double sample(const casa::MFrequency& centerFrequency) const;
+        virtual double sample(const casacore::MFrequency& centerFrequency) const;
 
         /// Returns the reference frequency
-        virtual const casa::MFrequency& getRefFreq(void) const;
+        virtual const casacore::MFrequency& getRefFreq(void) const;
 
         /// Returns the spectral index (i.e. exponent) value
         virtual double getIndex(void) const;
 
     private:
-        const casa::MFrequency itsReferenceFreq;
+        const casacore::MFrequency itsReferenceFreq;
         const double itsSpectralIndex;
 };
 

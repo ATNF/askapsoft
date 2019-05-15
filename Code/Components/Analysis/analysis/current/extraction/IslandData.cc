@@ -109,8 +109,8 @@ void IslandData::findBackground()
         // mean map is defined, so extract array
         itsMeanExtractor->setSource(itsSource);
         itsMeanExtractor->extract();
-        casa::IPosition start = itsMeanExtractor->slicer().start();
-        casa::Array<float> meanArray = itsMeanExtractor->array();
+        casacore::IPosition start = itsMeanExtractor->slicer().start();
+        casacore::Array<float> meanArray = itsMeanExtractor->array();
         std::vector<PixelInfo::Voxel> voxelList = itsSource->getPixelSet();
         itsBackground = 0.;
         std::vector<PixelInfo::Voxel>::iterator vox = voxelList.begin();
@@ -118,16 +118,16 @@ void IslandData::findBackground()
             //float flux = vox->getF();
             if (itsSource->isInObject(*vox)) {
                 // The Stokes axis, if present, will be of length 1, and will be either location 2 or 3 in the IPosition
-                casa::IPosition loc;
+                casacore::IPosition loc;
                 if (start.size() == 2) {
-                    loc = casa::IPosition(start.size(), vox->getX(), vox->getY());
+                    loc = casacore::IPosition(start.size(), vox->getX(), vox->getY());
                 } else if (start.size() == 3) {
-                    loc = casa::IPosition(start.size(), vox->getX(), vox->getY(), vox->getZ());
+                    loc = casacore::IPosition(start.size(), vox->getX(), vox->getY(), vox->getZ());
                 } else {
                     if (itsMeanExtractor->slicer().length()[2] == 1) {
-                        loc = casa::IPosition(start.size(), vox->getX(), vox->getY(), 0, vox->getZ());
+                        loc = casacore::IPosition(start.size(), vox->getX(), vox->getY(), 0, vox->getZ());
                     } else {
-                        loc = casa::IPosition(start.size(), vox->getX(), vox->getY(), vox->getZ(), 0);
+                        loc = casacore::IPosition(start.size(), vox->getX(), vox->getY(), vox->getZ(), 0);
                     }
                 }
                 itsBackground += meanArray(loc - start);
@@ -148,8 +148,8 @@ void IslandData::findNoise()
         // noise map is defined, so extract array
         itsNoiseExtractor->setSource(itsSource);
         itsNoiseExtractor->extract();
-        casa::IPosition start = itsNoiseExtractor->slicer().start();
-        casa::Array<float> noiseArray = itsNoiseExtractor->array();
+        casacore::IPosition start = itsNoiseExtractor->slicer().start();
+        casacore::Array<float> noiseArray = itsNoiseExtractor->array();
         std::vector<PixelInfo::Voxel> voxelList = itsSource->getPixelSet();
         itsNoise = 0.;
         std::vector<PixelInfo::Voxel>::iterator vox = voxelList.begin();
@@ -157,16 +157,16 @@ void IslandData::findNoise()
             //float flux = vox->getF();
             if (itsSource->isInObject(*vox)) {
                 // The Stokes axis, if present, will be of length 1, and will be either location 2 or 3 in the IPosition
-                casa::IPosition loc;
+                casacore::IPosition loc;
                 if (start.size() == 2) {
-                    loc = casa::IPosition(start.size(), vox->getX(), vox->getY());
+                    loc = casacore::IPosition(start.size(), vox->getX(), vox->getY());
                 } else if (start.size() == 3) {
-                    loc = casa::IPosition(start.size(), vox->getX(), vox->getY(), vox->getZ());
+                    loc = casacore::IPosition(start.size(), vox->getX(), vox->getY(), vox->getZ());
                 } else {
                     if (itsNoiseExtractor->slicer().length()[2] == 1) {
-                        loc = casa::IPosition(start.size(), vox->getX(), vox->getY(), 0, vox->getZ());
+                        loc = casacore::IPosition(start.size(), vox->getX(), vox->getY(), 0, vox->getZ());
                     } else {
-                        loc = casa::IPosition(start.size(), vox->getX(), vox->getY(), vox->getZ(), 0);
+                        loc = casacore::IPosition(start.size(), vox->getX(), vox->getY(), vox->getZ(), 0);
                     }
                 }
                 itsNoise += noiseArray(loc - start);
@@ -191,30 +191,30 @@ void IslandData::findResidualStats()
     ASKAPLOG_DEBUG_STR(logger, "Extracting");
     itsImageExtractor->extract();
     ASKAPLOG_DEBUG_STR(logger, "Starting to find stats");
-    casa::IPosition start = itsImageExtractor->slicer().start();
-    casa::Array<float> array = itsImageExtractor->array();
+    casacore::IPosition start = itsImageExtractor->slicer().start();
+    casacore::Array<float> array = itsImageExtractor->array();
     std::vector<PixelInfo::Voxel> voxelList = itsSource->getPixelSet();
     float max, min, sumf = 0., sumff = 0.;
-    casa::Vector<double> pos(2);
+    casacore::Vector<double> pos(2);
     std::vector<PixelInfo::Voxel>::iterator vox = voxelList.begin();
     for (; vox < voxelList.end(); vox++) {
         //float flux = vox->getF();
         if (itsSource->isInObject(*vox)) {
             // The Stokes axis, if present, will be of length 1, and will be either location 2 or 3 in the IPosition
-            casa::IPosition loc;
+            casacore::IPosition loc;
             if (start.size() == 2) {
-                loc = casa::IPosition(start.size(), vox->getX(), vox->getY());
+                loc = casacore::IPosition(start.size(), vox->getX(), vox->getY());
             } else if (start.size() == 3) {
-                loc = casa::IPosition(start.size(), vox->getX(), vox->getY(), vox->getZ());
+                loc = casacore::IPosition(start.size(), vox->getX(), vox->getY(), vox->getZ());
             } else {
                 if (itsImageExtractor->slicer().length()[2] == 1) {
-                    loc = casa::IPosition(start.size(), vox->getX(), vox->getY(), 0, vox->getZ());
+                    loc = casacore::IPosition(start.size(), vox->getX(), vox->getY(), 0, vox->getZ());
                 } else {
-                    loc = casa::IPosition(start.size(), vox->getX(), vox->getY(), vox->getZ(), 0);
+                    loc = casacore::IPosition(start.size(), vox->getX(), vox->getY(), vox->getZ(), 0);
                 }
             }
             float flux = array(loc - start);
-            std::vector<casa::Gaussian2D<Double> > gaussians = itsSource->gaussFitSet(itsFitType);
+            std::vector<casacore::Gaussian2D<Double> > gaussians = itsSource->gaussFitSet(itsFitType);
             for (int g = 0; g < gaussians.size(); g++) {
                 pos(0) = vox->getX() * 1.;
                 pos(1) = vox->getY() * 1.;

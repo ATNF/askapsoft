@@ -355,7 +355,7 @@ const float chisqProb(const float ndof, const float chisq)
 }
 
 const std::vector<Double>
-deconvolveGaussian(const casa::Gaussian2D<Double> &measured, duchamp::Beam beam)
+deconvolveGaussian(const casacore::Gaussian2D<Double> &measured, duchamp::Beam beam)
 {
     double a2 = beam.maj(), b2 = beam.min(), pa2 = beam.pa() * M_PI / 180.;
     double a0 = measured.majorAxis(), b0 = measured.minorAxis(), pa0 = measured.PA();
@@ -395,7 +395,7 @@ deconvolveGaussian(const casa::Gaussian2D<Double> &measured, duchamp::Beam beam)
 
 }
 const std::vector<Double>
-deconvolveGaussian(const casa::Gaussian2D<Double> &measured, casa::Vector<Double> &errors, duchamp::Beam beam)
+deconvolveGaussian(const casacore::Gaussian2D<Double> &measured, casacore::Vector<Double> &errors, duchamp::Beam beam)
 {
     double a2 = beam.maj(), b2 = beam.min(), pa2 = beam.pa() * M_PI / 180.;
     double a0 = measured.majorAxis(), b0 = measured.minorAxis(), pa0 = measured.PA();

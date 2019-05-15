@@ -64,7 +64,7 @@ class FlaggerFactory {
         ///                     be the subject of flagging.
         /// @return a vector containing pointers to the flagging strategies.
         static std::vector< boost::shared_ptr<IFlagger> > build(
-            const LOFAR::ParameterSet& parset, const casa::MeasurementSet& ms);
+            const LOFAR::ParameterSet& parset, const casacore::MeasurementSet& ms);
 };
 
 }

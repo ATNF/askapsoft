@@ -81,8 +81,8 @@ class FileFlagTask : public askap::cp::ingest::ITask {
         /// @param[in,out] flag vis spectrum for the given baseline/pol index to work with
         /// @param[in] baseline baseline ID
         /// @param[in] beam beam ID
-        void processRow(casa::Vector<casa::Complex> &vis, casa::Vector<casa::Bool> &flag,
-                        const casa::uInt baseline, const casa::uInt beam);
+        void processRow(casacore::Vector<casacore::Complex> &vis, casacore::Vector<casacore::Bool> &flag,
+                        const casacore::uInt baseline, const casacore::uInt beam);
 
     private:
 

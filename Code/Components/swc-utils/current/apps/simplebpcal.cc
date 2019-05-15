@@ -85,28 +85,28 @@ double get1934fluxDensity(const double freqInMHz)
 }  
 
 
-std::string printComplex(const casa::Complex &val) {
-  return std::string("[")+utility::toString<float>(casa::real(val))+" , "+utility::toString<float>(casa::imag(val))+"]";
+std::string printComplex(const casacore::Complex &val) {
+  return std::string("[")+utility::toString<float>(casacore::real(val))+" , "+utility::toString<float>(casacore::imag(val))+"]";
 }
 
 // cubes -> baseline x channel x pol (are resized inside)
 // baseline order is 1-2,1-3 and 2-3, two polarisations, number of channels are set when the first data point is sighted
-void makeAvgSpectra(const IConstDataSource &ds, const casa::uInt beam, casa::Cube<casa::Complex> &spc, casa::Cube<casa::Bool> &flags, casa::Vector<double> &freq) {
+void makeAvgSpectra(const IConstDataSource &ds, const casacore::uInt beam, casacore::Cube<casacore::Complex> &spc, casacore::Cube<casacore::Bool> &flags, casacore::Vector<double> &freq) {
   double skipAtStart = 135; // number of seconds to skip at start of the file (FR settling)
 
   IDataSelectorPtr sel=ds.createSelector();
   sel->chooseCrossCorrelations();
   sel->chooseFeed(beam);
   IDataConverterPtr conv=ds.createConverter();  
-  conv->setFrequencyFrame(casa::MFrequency::Ref(casa::MFrequency::TOPO),"MHz");
-  conv->setEpochFrame(casa::MEpoch(casa::Quantity(0.,"d"),
-                      casa::MEpoch::Ref(casa::MEpoch::UTC)),"s");
-  conv->setDirectionFrame(casa::MDirection::Ref(casa::MDirection::J2000));                    
+  conv->setFrequencyFrame(casacore::MFrequency::Ref(casacore::MFrequency::TOPO),"MHz");
+  conv->setEpochFrame(casacore::MEpoch(casacore::Quantity(0.,"d"),
+                      casacore::MEpoch::Ref(casacore::MEpoch::UTC)),"s");
+  conv->setDirectionFrame(casacore::MDirection::Ref(casacore::MDirection::J2000));                    
   size_t counter = 0;
   double startTime = 0;
   double stopTime = 0;
   // same shape as flags and spc
-  casa::Cube<casa::uInt> counters;
+  casacore::Cube<casacore::uInt> counters;
 
   for (IConstDataSharedIter it=ds.createConstIterator(sel,conv);it!=it.end();++it) {  
        if (++counter == 1) {
@@ -120,9 +120,9 @@ void makeAvgSpectra(const IConstDataSource &ds, const casa::uInt beam, casa::Cub
            counters.resize(3, it->nChannel(), 2);
            counters.set(0u);
            spc.resize(3, it->nChannel(), 2);
-           spc.set(casa::Complex(0.,0.));
+           spc.set(casacore::Complex(0.,0.));
            flags.resize(3, it->nChannel(), 2);
-           flags.set(casa::True);
+           flags.set(casacore::True);
            freq.resize(it->nChannel());
            freq = it->frequency();
        } else { 
@@ -133,8 +133,8 @@ void makeAvgSpectra(const IConstDataSource &ds, const casa::uInt beam, casa::Cub
        ASKAPASSERT(it->nPol() == 4);
        ASKAPASSERT(it->nChannel() > 1);
 
-       for (casa::uInt row = 0; row<it->nRow(); ++row) {
-            casa::uInt baselineIndex = 4;
+       for (casacore::uInt row = 0; row<it->nRow(); ++row) {
+            casacore::uInt baselineIndex = 4;
             if ((it->antenna1()[row] == 0) && (it->antenna2()[row] == 1)) {
                 baselineIndex = 0;
             } else if ((it->antenna1()[row] == 0) && (it->antenna2()[row] == 2)) {
@@ -146,13 +146,13 @@ void makeAvgSpectra(const IConstDataSource &ds, const casa::uInt beam, casa::Cub
                 continue;
             }
             ASKAPDEBUGASSERT(baselineIndex < counters.nrow());
-            for (casa::uInt pol = 0; pol < 2; ++pol) {
-                 casa::uInt polIndex = (pol == 0 ? 0 : 3);
+            for (casacore::uInt pol = 0; pol < 2; ++pol) {
+                 casacore::uInt polIndex = (pol == 0 ? 0 : 3);
                  ASKAPDEBUGASSERT(polIndex < it->nPol());
-                 casa::Vector<casa::Bool> visFlags = it->flag().xyPlane(polIndex).row(row);
-                 casa::Vector<casa::Complex> vis = it->visibility().xyPlane(polIndex).row(row);
+                 casacore::Vector<casacore::Bool> visFlags = it->flag().xyPlane(polIndex).row(row);
+                 casacore::Vector<casacore::Complex> vis = it->visibility().xyPlane(polIndex).row(row);
                  ASKAPDEBUGASSERT(vis.nelements() == it->nChannel());
-                 for (casa::uInt ch = 0; ch < vis.nelements(); ++ch) {
+                 for (casacore::uInt ch = 0; ch < vis.nelements(); ++ch) {
                       if (!visFlags[ch]) {
                           spc(baselineIndex, ch, pol) += vis[ch];
                           flags(baselineIndex, ch, pol) = false;
@@ -168,12 +168,12 @@ void makeAvgSpectra(const IConstDataSource &ds, const casa::uInt beam, casa::Cub
   if (counter!=0) {
       std::cout<<"Averaged "<<counter<<" integration cycles, time span "<<(stopTime-startTime)/60.<<" minutues"<<std::endl;
       // normalisation
-      for (casa::uInt baseline = 0; baseline < counters.nrow(); ++baseline) {
-           for (casa::uInt ch = 0; ch < counters.ncolumn(); ++ch) {
-                for (casa::uInt pol = 0; pol < counters.nplane(); ++pol) {
+      for (casacore::uInt baseline = 0; baseline < counters.nrow(); ++baseline) {
+           for (casacore::uInt ch = 0; ch < counters.ncolumn(); ++ch) {
+                for (casacore::uInt pol = 0; pol < counters.nplane(); ++pol) {
                      if (!flags(baseline, ch, pol)) {
                          ASKAPDEBUGASSERT(counters(baseline,ch,pol) > 0);
-                         spc(baseline,ch,pol) /= casa::Float(counters(baseline,ch,pol));
+                         spc(baseline,ch,pol) /= casacore::Float(counters(baseline,ch,pol));
                      }
                 }
            }
@@ -184,13 +184,13 @@ void makeAvgSpectra(const IConstDataSource &ds, const casa::uInt beam, casa::Cub
 } 
 
 // input - vector of visibilities (order: 1-2, 1-3, 2-3), freq - frequency in MHz, return: 4-vector with complex gains (antennas 0,1,2) +  closure phase in deg (real). 
-casa::Vector<casa::Complex> processOne(const casa::Vector<casa::Complex> &vis, double freq)
+casacore::Vector<casacore::Complex> processOne(const casacore::Vector<casacore::Complex> &vis, double freq)
 {
    ASKAPASSERT(vis.nelements() == 3);
-   casa::Vector<casa::Complex> result(4, casa::Complex(0.,0.));
+   casacore::Vector<casacore::Complex> result(4, casacore::Complex(0.,0.));
    const double flux = get1934fluxDensity(freq);
 
-   casa::Vector<casa::Complex> spAvg(3,casa::Complex(0.,0.));
+   casacore::Vector<casacore::Complex> spAvg(3,casacore::Complex(0.,0.));
    spAvg[0] = vis[0];
    spAvg[1] = vis[2];
    spAvg[2] = vis[1];
@@ -199,19 +199,19 @@ casa::Vector<casa::Complex> processOne(const casa::Vector<casa::Complex> &vis, d
    const float ph2 = -arg(spAvg[2]);
    const float closurePh = arg(spAvg[0]*spAvg[1]*conj(spAvg[2]));
            
-   result[3] = casa::Complex(closurePh/casa::C::pi*180., 0.);
+   result[3] = casacore::Complex(closurePh/casacore::C::pi*180., 0.);
    float amp0 = 1.;
    float amp1 = 1.;
    float amp2 = 1.;
    if (flux > 0) {
-       ASKAPCHECK((casa::abs(spAvg[0])> 1e-6) && (casa::abs(spAvg[1])> 1e-6) && (casa::abs(spAvg[2])> 1e-6), "One of the measured amplitudes is too close to 0.: "<<spAvg);
-       amp0 = sqrt(casa::abs(spAvg[2]) * casa::abs(spAvg[0]) / casa::abs(spAvg[1]) / flux);
-       amp1 = sqrt(casa::abs(spAvg[1]) * casa::abs(spAvg[0]) / casa::abs(spAvg[2]) / flux);
-       amp2 = sqrt(casa::abs(spAvg[2]) * casa::abs(spAvg[1]) / casa::abs(spAvg[0]) / flux);
+       ASKAPCHECK((casacore::abs(spAvg[0])> 1e-6) && (casacore::abs(spAvg[1])> 1e-6) && (casacore::abs(spAvg[2])> 1e-6), "One of the measured amplitudes is too close to 0.: "<<spAvg);
+       amp0 = sqrt(casacore::abs(spAvg[2]) * casacore::abs(spAvg[0]) / casacore::abs(spAvg[1]) / flux);
+       amp1 = sqrt(casacore::abs(spAvg[1]) * casacore::abs(spAvg[0]) / casacore::abs(spAvg[2]) / flux);
+       amp2 = sqrt(casacore::abs(spAvg[2]) * casacore::abs(spAvg[1]) / casacore::abs(spAvg[0]) / flux);
    }
-   result[0] = casa::Complex(amp0,0.);
-   result[1] = casa::Complex(cos(ph1),sin(ph1)) * amp1;
-   result[2] = casa::Complex(cos(ph2),sin(ph2)) * amp2;
+   result[0] = casacore::Complex(amp0,0.);
+   result[1] = casacore::Complex(cos(ph1),sin(ph1)) * amp1;
+   result[2] = casacore::Complex(cos(ph2),sin(ph2)) * amp2;
    return result;
 }
 
@@ -221,9 +221,9 @@ void process(const std::vector<std::string> &fnames)
 
          TableDataSource ds(fnames[beam],TableDataSource::MEMORY_BUFFERS);     
         
-         casa::Cube<casa::Complex> spc;
-         casa::Cube<casa::Bool> flags;
-         casa::Vector<double> freq;
+         casacore::Cube<casacore::Complex> spc;
+         casacore::Cube<casacore::Bool> flags;
+         casacore::Vector<double> freq;
          makeAvgSpectra(ds, beam, spc, flags, freq);
          ASKAPDEBUGASSERT(spc.shape() == flags.shape());
          ASKAPDEBUGASSERT(freq.nelements() == flags.ncolumn());
@@ -232,22 +232,22 @@ void process(const std::vector<std::string> &fnames)
 
          const std::string asciiFname = "result_beam"+utility::toString<size_t>(beam)+".dat";
          std::ofstream os(asciiFname.c_str());
-         for (casa::uInt ch=0; ch < flags.ncolumn(); ++ch) {
+         for (casacore::uInt ch=0; ch < flags.ncolumn(); ++ch) {
               
-              casa::Vector<casa::Complex> xxRes(4, casa::Complex(0.,0.));
+              casacore::Vector<casacore::Complex> xxRes(4, casacore::Complex(0.,0.));
               if (!flags(0,ch,0) && !flags(1,ch,0) && !flags(2,ch,0)) {
                    xxRes = processOne(spc.xyPlane(0).column(ch), freq[ch]);
               }      
-              casa::Vector<casa::Complex> yyRes(4, casa::Complex(0.,0.));
+              casacore::Vector<casacore::Complex> yyRes(4, casacore::Complex(0.,0.));
               if (!flags(0,ch,1) && !flags(1,ch,1) && !flags(2,ch,1)) {
                    yyRes = processOne(spc.xyPlane(1).column(ch), freq[ch]);
               }      
               os<<ch;
               for (size_t i=0; i<3; ++i) {
-                   os<<" "<<casa::abs(xxRes[i])<<" "<<casa::arg(xxRes[i]) / casa::C::pi * 180.<<" "<<
-                            casa::abs(yyRes[i])<<" "<<casa::arg(yyRes[i]) / casa::C::pi * 180.;
+                   os<<" "<<casacore::abs(xxRes[i])<<" "<<casacore::arg(xxRes[i]) / casacore::C::pi * 180.<<" "<<
+                            casacore::abs(yyRes[i])<<" "<<casacore::arg(yyRes[i]) / casacore::C::pi * 180.;
               }
-              os<<" "<<casa::real(xxRes[3])<<" "<<casa::real(yyRes[3])<<endl;
+              os<<" "<<casacore::real(xxRes[3])<<" "<<casacore::real(yyRes[3])<<endl;
          }
      }
 }
@@ -260,11 +260,11 @@ int main(int argc, char **argv) {
 	 return -2;
      }
 
-     casa::Timer timer;
+     casacore::Timer timer;
     
      timer.mark();
 
-     casa::Matrix<std::pair<casa::Complex, casa::Float> > bandpasses;
+     casacore::Matrix<std::pair<casacore::Complex, casacore::Float> > bandpasses;
      std::vector<std::string> msNames(argc - 1);
 
      for (int beam = 0; beam < argc - 1; ++beam) {

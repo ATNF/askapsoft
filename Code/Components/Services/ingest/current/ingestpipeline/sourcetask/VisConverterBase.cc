@@ -80,10 +80,10 @@ VisConverterBase::VisConverterBase(const LOFAR::ParameterSet& params,
 
    // Trigger a dummy frame conversion with casa measures to ensure 
    // all caches are setup early on
-   const casa::MVEpoch dummyEpoch(56000.);
+   const casacore::MVEpoch dummyEpoch(56000.);
 
-   casa::MEpoch::Convert(casa::MEpoch(dummyEpoch, casa::MEpoch::Ref(casa::MEpoch::TAI)),
-                         casa::MEpoch::Ref(casa::MEpoch::UTC))();
+   casacore::MEpoch::Convert(casacore::MEpoch(dummyEpoch, casacore::MEpoch::Ref(casacore::MEpoch::TAI)),
+                         casacore::MEpoch::Ref(casacore::MEpoch::UTC))();
 
    ASKAPCHECK(itsBaselineMap.isLowerTriangle() != itsBaselineMap.isUpperTriangle(),
           "We currently support either upper or lower triangle of correlation products, not mixed cases");
@@ -126,7 +126,7 @@ void VisConverterBase::initBeamMap(const LOFAR::ParameterSet& params)
         ASKAPLOG_INFO_STR(logger, "Beam indices will be mapped according to <"<<beamidmap<<">");
         itsBeamIDMap.add(beamidmap);
     }   
-    const casa::uInt nBeamsInConfig = itsConfig.feed().nFeeds();
+    const casacore::uInt nBeamsInConfig = itsConfig.feed().nFeeds();
 
     // by default receive the same number of beams as defined in the config
     itsBeamsToReceive = nBeamsInConfig;
@@ -135,7 +135,7 @@ void VisConverterBase::initBeamMap(const LOFAR::ParameterSet& params)
     // however, dropping data at source (i.e. in the receiving thread) is only used
     // for early testing or when performance is limited but limited functionality is sufficient
     // so the following code is not expected to alter itsBeamsToReceive in production system
-    const casa::uInt beamCutoffAtSource = VisSource::getMaxBeamId(params);
+    const casacore::uInt beamCutoffAtSource = VisSource::getMaxBeamId(params);
     if (beamCutoffAtSource < itsBeamsToReceive) {
         itsBeamsToReceive = beamCutoffAtSource;
     }
@@ -158,12 +158,12 @@ void VisConverterBase::initBeamMap(const LOFAR::ParameterSet& params)
     // determine the number of beams required, given the map 
     // (to check itsMaxNBeams for consistency or to initialise it)
     // the map can be sparse, but the MS requires contiguous index space
-    casa::uInt maxNBeamsRequired = 0;
+    casacore::uInt maxNBeamsRequired = 0;
     for (int beam = 0; beam < static_cast<int>(itsBeamsToReceive) + 1; ++beam) {
          const int processedBeamIndex = itsBeamIDMap(beam);
          if (processedBeamIndex > static_cast<int>(maxNBeamsRequired)) {
              // negative values are automatically excluded by this condition
-             maxNBeamsRequired = static_cast<casa::uInt>(processedBeamIndex);
+             maxNBeamsRequired = static_cast<casacore::uInt>(processedBeamIndex);
          }
     }
     // increment, because indices are zero-based in the MS
@@ -202,7 +202,7 @@ uint32_t VisConverterBase::sumOfArithmeticSeries(uint32_t n, uint32_t a,
 /// @brief helper method to build cached correlator product map
 /// @details 
 /// @param[in] recordedStokes stokes vector of the accessor to be built
-void VisConverterBase::buildCachedCorrelatorProductMap(const casa::Vector<casa::Stokes::StokesTypes> &recordedStokes)
+void VisConverterBase::buildCachedCorrelatorProductMap(const casacore::Vector<casacore::Stokes::StokesTypes> &recordedStokes)
 {
    itsCachedStokesVector.reference(recordedStokes.copy());
    const int32_t nProducts = itsBaselineMap.maxID() + 1;
@@ -214,9 +214,9 @@ void VisConverterBase::buildCachedCorrelatorProductMap(const casa::Vector<casa::
         itsCachedCorrelatorProductMap[product].get<1>() = itsBaselineMap.idToAntenna2(product);
         // stokes is undefined by default
         itsCachedCorrelatorProductMap[product].get<2>() = -1;
-        const casa::Stokes::StokesTypes stokes = itsBaselineMap.idToStokes(product);
-        if (stokes != casa::Stokes::Undefined) {
-            for (casa::uInt i = 0; i < itsCachedStokesVector.nelements(); ++i) {
+        const casacore::Stokes::StokesTypes stokes = itsBaselineMap.idToStokes(product);
+        if (stokes != casacore::Stokes::Undefined) {
+            for (casacore::uInt i = 0; i < itsCachedStokesVector.nelements(); ++i) {
                  if (itsCachedStokesVector[i] == stokes) {
                      ASKAPDEBUGASSERT(itsCachedCorrelatorProductMap[product].get<2>() == -1);
                      itsCachedCorrelatorProductMap[product].get<2>() = static_cast<int32_t>(i);
@@ -225,7 +225,7 @@ void VisConverterBase::buildCachedCorrelatorProductMap(const casa::Vector<casa::
             if (itsCachedCorrelatorProductMap[product].get<2>() == -1) {
                 // the warning is given only once
                 if (std::find(itsIgnoredStokesWarned.begin(), itsIgnoredStokesWarned.end(), stokes) == itsIgnoredStokesWarned.end()) {
-                    ASKAPLOG_WARN_STR(logger, "Stokes type " << casa::Stokes::name(stokes)
+                    ASKAPLOG_WARN_STR(logger, "Stokes type " << casacore::Stokes::name(stokes)
                                       << " is not configured for storage");
                     itsIgnoredStokesWarned.insert(stokes);
                 }
@@ -245,7 +245,7 @@ void VisConverterBase::buildCachedCorrelatorProductMap(const casa::Vector<casa::
 /// @param[in] beam beam ID to map (defined by the IOC)
 /// @return a pair of row and polarisation indices (guaranteed to
 /// be within VisChunk shape). Undefined value for unmapped products.
-boost::optional<std::pair<casa::uInt, casa::uInt> > 
+boost::optional<std::pair<casacore::uInt, casacore::uInt> > 
 VisConverterBase::mapCorrProduct(uint32_t baseline, uint32_t beam) const
 {
    ASKAPCHECK(itsVisChunk, "VisChunk should be initialised before mapCorrProduct call");
@@ -281,17 +281,17 @@ VisConverterBase::mapCorrProduct(uint32_t baseline, uint32_t beam) const
    const uint32_t antenna2 = itsBaselineMap.isUpperTriangle() ? static_cast<uint32_t>(mappedAnt2) : static_cast<uint32_t>(mappedAnt1);
    ASKAPDEBUGASSERT(antenna1 <= antenna2);
 
-   const casa::Int beamid = itsBeamIDMap(beam);
+   const casacore::Int beamid = itsBeamIDMap(beam);
    if (beamid < 0) {
        // this beam ID is intentionally unmapped - no warning needed
        return boost::none;
    }
-   ASKAPCHECK(beamid < static_cast<casa::Int>(itsMaxNBeams), 
+   ASKAPCHECK(beamid < static_cast<casacore::Int>(itsMaxNBeams), 
              "Received beam id beam="<<beam<<" mapped to beamid="<<beamid<<
              " which is outside the beam index range, itsMaxNBeams="<<itsMaxNBeams);
 
    // 1) polarisation index, validity and non-negativity has been checked above
-   const casa::uInt polIndex = static_cast<casa::uInt>(mappedPol);
+   const casacore::uInt polIndex = static_cast<casacore::uInt>(mappedPol);
    ASKAPCHECK(polIndex < itsVisChunk->nPol(), "Polarisation index exceeds chunk's dimensions");
 
    // 2) Check the indexes are within the visibility chunk
@@ -308,14 +308,14 @@ VisConverterBase::mapCorrProduct(uint32_t baseline, uint32_t beam) const
 
    const std::string errorMsg = "Indexing failed to find row ";
    ASKAPCHECK(row < itsVisChunk->nRow(), "Row number exceeds the chunk dimensions, internal inconsistency suspected");
-   ASKAPCHECK(itsVisChunk->antenna1()(row) == static_cast<casa::uInt>(mappedAnt1), errorMsg); 
-   ASKAPCHECK(itsVisChunk->antenna2()(row) == static_cast<casa::uInt>(mappedAnt2), errorMsg);
+   ASKAPCHECK(itsVisChunk->antenna1()(row) == static_cast<casacore::uInt>(mappedAnt1), errorMsg); 
+   ASKAPCHECK(itsVisChunk->antenna2()(row) == static_cast<casacore::uInt>(mappedAnt2), errorMsg);
 
 
-   ASKAPCHECK(itsVisChunk->beam1()(row) == static_cast<casa::uInt>(beamid), errorMsg);
-   ASKAPCHECK(itsVisChunk->beam2()(row) == static_cast<casa::uInt>(beamid), errorMsg);
+   ASKAPCHECK(itsVisChunk->beam1()(row) == static_cast<casacore::uInt>(beamid), errorMsg);
+   ASKAPCHECK(itsVisChunk->beam2()(row) == static_cast<casacore::uInt>(beamid), errorMsg);
 
-   return std::pair<casa::uInt, casa::uInt>(row, polIndex);
+   return std::pair<casacore::uInt, casacore::uInt>(row, polIndex);
 }
 
 /// @brief row for given baseline and beam
@@ -345,22 +345,22 @@ uint32_t VisConverterBase::calculateRow(uint32_t ant1, uint32_t ant2,
 /// integration is processed.
 /// @param[in] timestamp BAT corresponding to this new chunk
 /// @param[in] corrMode correlator mode parameters (determines shape, etc)
-void VisConverterBase::initVisChunk(const casa::uLong timestamp, 
+void VisConverterBase::initVisChunk(const casacore::uLong timestamp, 
                                     const CorrelatorMode &corrMode)
 {
     ASKAPCHECK(itsConfig.receiverId() >= 0, "An attempt to use visibility converter for the rank ("<<
                itsConfig.rank()<<") which is not meant to receive visibilities");
 
     itsAntWithValidData.resize(0);
-    const casa::uInt nAntenna = itsConfig.antennas().size();
+    const casacore::uInt nAntenna = itsConfig.antennas().size();
     ASKAPCHECK(nAntenna > 0, "Must have at least one antenna defined");
-    const casa::uInt nChannels = itsChannelManager.localNChannels(itsConfig.receiverId());
+    const casacore::uInt nChannels = itsChannelManager.localNChannels(itsConfig.receiverId());
     // number of polarisation products is determined by the correlator mode
-    const casa::uInt nPol = corrMode.stokes().size();
-    const casa::uInt nBaselines = nAntenna * (nAntenna + 1) / 2;
-    const casa::uInt nRow = nBaselines * itsMaxNBeams;
+    const casacore::uInt nPol = corrMode.stokes().size();
+    const casacore::uInt nBaselines = nAntenna * (nAntenna + 1) / 2;
+    const casacore::uInt nRow = nBaselines * itsMaxNBeams;
     // correlator dump time is determined by the correlator mode
-    const casa::uInt period = corrMode.interval(); // in microseconds
+    const casacore::uInt period = corrMode.interval(); // in microseconds
 
     // now shape is determined, can create a new chunk
     itsVisChunk.reset(new VisChunk(nRow, nChannels, nPol, nAntenna));
@@ -370,7 +370,7 @@ void VisConverterBase::initVisChunk(const casa::uLong timestamp,
     const uint64_t midpointBAT = static_cast<uint64_t>(timestamp + (period / 2ull));
     itsVisChunk->time() = bat2epoch(midpointBAT).getValue();
     // Convert the interval from microseconds (long) to seconds (double)
-    const casa::Double interval = period / 1000.0 / 1000.0;
+    const casacore::Double interval = period / 1000.0 / 1000.0;
     itsVisChunk->interval() = interval;
 
     // All visibilities get flagged as bad, then as the visibility data
@@ -386,25 +386,25 @@ void VisConverterBase::initVisChunk(const casa::uLong timestamp,
     // the last parameter of stokesFromIndex just defines the 
     // frame (i.e. linear, circular) and can be
     // any product from the chosen frame. 
-    const casa::Stokes::StokesTypes stokesTemplate = corrMode.stokes()[0];
-    casa::uInt outPolIndex = 0;
-    for (casa::uInt polIndex = 0; polIndex < 4; ++polIndex) {
-         casa::Stokes::StokesTypes thisStokes = casa::Stokes::Undefined;
-         const casa::Stokes::StokesTypes testedStokes = 
+    const casacore::Stokes::StokesTypes stokesTemplate = corrMode.stokes()[0];
+    casacore::uInt outPolIndex = 0;
+    for (casacore::uInt polIndex = 0; polIndex < 4; ++polIndex) {
+         casacore::Stokes::StokesTypes thisStokes = casacore::Stokes::Undefined;
+         const casacore::Stokes::StokesTypes testedStokes = 
                scimath::PolConverter::stokesFromIndex(polIndex, stokesTemplate);
          // search via for-loop rather than via std::find to do further checks
-         for (std::vector<casa::Stokes::StokesTypes>::const_iterator 
+         for (std::vector<casacore::Stokes::StokesTypes>::const_iterator 
                 ci = corrMode.stokes().begin(); ci != corrMode.stokes().end(); 
                 ++ci) {
               if (*ci == testedStokes) {
                   // this product is present in the correlator output
-                  ASKAPCHECK(thisStokes == casa::Stokes::Undefined, 
+                  ASKAPCHECK(thisStokes == casacore::Stokes::Undefined, 
                       "Duplicate Stokes products found in the polarisation setup: "<<
                        scimath::PolConverter::toString(corrMode.stokes()));
                   thisStokes = testedStokes;
               }
          }
-         if (thisStokes != casa::Stokes::Undefined) {
+         if (thisStokes != casacore::Stokes::Undefined) {
              ASKAPASSERT(outPolIndex < nPol);
              itsVisChunk->stokes()(outPolIndex++) = thisStokes;
          }
@@ -421,9 +421,9 @@ void VisConverterBase::initVisChunk(const casa::uLong timestamp,
     // channel width is determined by the correlator configuration
     itsVisChunk->channelWidth() = corrMode.chanWidth().getValue("Hz");
 
-    for (casa::uInt beam = 0, row = 0; beam < itsMaxNBeams; ++beam) {
-        for (casa::uInt ant1 = 0; ant1 < nAntenna; ++ant1) {
-            for (casa::uInt ant2 = ant1; ant2 < nAntenna; ++ant2,++row) {
+    for (casacore::uInt beam = 0, row = 0; beam < itsMaxNBeams; ++beam) {
+        for (casacore::uInt ant1 = 0; ant1 < nAntenna; ++ant1) {
+            for (casacore::uInt ant2 = ant1; ant2 < nAntenna; ++ant2,++row) {
                 ASKAPCHECK(row < nRow, "Row index (" << row <<
                            ") should be less than nRow (" << nRow << ")");
 
@@ -461,7 +461,7 @@ void VisConverterBase::initVisChunk(const casa::uLong timestamp,
 /// By default (and after every call to initVisChunk) all antennas
 /// are unflagged.
 /// @param[in] antenna index for the antenna to flag as bad
-void VisConverterBase::flagAntenna(casa::uInt antenna) 
+void VisConverterBase::flagAntenna(casacore::uInt antenna) 
 {
    // we don't care about VisChunk, but this method is not intended
    // to be called prior to its initialisation
@@ -480,7 +480,7 @@ void VisConverterBase::flagAntenna(casa::uInt antenna)
 /// @brief query whether given antenna produce good data
 /// @param[in] antenna index of antenna to check
 /// @return true if a given antenna is unflagged
-bool VisConverterBase::isAntennaGood(casa::uInt antenna) const
+bool VisConverterBase::isAntennaGood(casacore::uInt antenna) const
 {
    if (itsAntWithValidData.size() == 0) {
        return true;

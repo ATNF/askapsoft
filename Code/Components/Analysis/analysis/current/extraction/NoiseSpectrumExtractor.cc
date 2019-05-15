@@ -70,14 +70,14 @@ NoiseSpectrumExtractor::NoiseSpectrumExtractor(const LOFAR::ParameterSet& parset
     itsAreaInBeams = parset.getFloat("noiseArea", 50);
     itsRobustFlag = parset.getBool("robust", true);
 
-    casa::Stokes stk;
+    casacore::Stokes stk;
     itsCurrentStokes = itsStokesList[0];
     itsInputCube = itsCubeStokesMap[itsCurrentStokes];
     if (itsStokesList.size() > 1) {
         ASKAPLOG_WARN_STR(logger, "Noise Extractor: " <<
                           "Will only use the first provided Stokes parameter: " <<
                           stk.name(itsCurrentStokes));
-        itsStokesList = casa::Vector<casa::Stokes::StokesTypes>(1, itsCurrentStokes);
+        itsStokesList = casacore::Vector<casacore::Stokes::StokesTypes>(1, itsCurrentStokes);
         itsCubeStokesMap.clear();
         itsCubeStokesMap[itsCurrentStokes] = itsInputCube;
     }
@@ -101,8 +101,8 @@ void NoiseSpectrumExtractor::setBoxWidth()
                               itsBoxWidth << "pix");
         } else {
 
-            int dirCoNum = itsInputCoords.findCoordinate(casa::Coordinate::DIRECTION);
-            casa::DirectionCoordinate dirCoo = itsInputCoords.directionCoordinate(dirCoNum);
+            int dirCoNum = itsInputCoords.findCoordinate(casacore::Coordinate::DIRECTION);
+            casacore::DirectionCoordinate dirCoo = itsInputCoords.directionCoordinate(dirCoNum);
             double fwhmMajPix = inputBeam[0].getValue(dirCoo.worldAxisUnits()[0]) /
                                 fabs(dirCoo.increment()[0]);
             double fwhmMinPix = inputBeam[1].getValue(dirCoo.worldAxisUnits()[1]) /
@@ -137,16 +137,16 @@ void NoiseSpectrumExtractor::extract()
         sub(new SubImage<Float>(*itsInputCubePtr, itsSlicer));
 
         ASKAPASSERT(sub->size() > 0);
-        const casa::MaskedArray<Float> msub(sub->get(), sub->getMask());
-        casa::Array<Float> subarray(sub->shape());
+        const casacore::MaskedArray<Float> msub(sub->get(), sub->getMask());
+        casacore::Array<Float> subarray(sub->shape());
         subarray = msub;
 
         ASKAPLOG_DEBUG_STR(logger, "subarray.shape = " << subarray.shape());
 
-        casa::IPosition outBLC(itsArray.ndim(), 0);
-        casa::IPosition outTRC(itsArray.shape() - 1);
+        casacore::IPosition outBLC(itsArray.ndim(), 0);
+        casacore::IPosition outTRC(itsArray.shape() - 1);
 
-        casa::Array<Float> noisearray;
+        casacore::Array<Float> noisearray;
         if (itsRobustFlag) {
             noisearray = partialMadfms(subarray, IPosition(2, 0, 1)).
                          reform(itsArray(outBLC, outTRC).shape()) /

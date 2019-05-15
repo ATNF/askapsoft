@@ -49,7 +49,7 @@ namespace cp {
 namespace ingest {
 
 
-ParallelPhaseApplicator::ParallelPhaseApplicator(const casa::Vector<double> &freq, casa::Cube<casa::Complex> &vis, size_t nThreads) : 
+ParallelPhaseApplicator::ParallelPhaseApplicator(const casacore::Vector<double> &freq, casacore::Cube<casacore::Complex> &vis, size_t nThreads) : 
                            itsFreq(freq), itsCube(vis), itsBuffer(nThreads), itsInterrupted(false) {
    ASKAPASSERT(freq.nelements() == vis.ncolumn());
    for (size_t th = 0; th <nThreads; ++th) {
@@ -65,33 +65,33 @@ ParallelPhaseApplicator::~ParallelPhaseApplicator() {
 void ParallelPhaseApplicator::run() {
    const int32_t ONE_SECOND=1000000;
    while (!itsInterrupted) {
-          boost::shared_ptr<boost::tuple<casa::uInt, double, double> > item = itsBuffer.next(ONE_SECOND);
+          boost::shared_ptr<boost::tuple<casacore::uInt, double, double> > item = itsBuffer.next(ONE_SECOND);
           if (!item) {
               continue;
           }
-          const casa::uInt row = item->get<0>();
+          const casacore::uInt row = item->get<0>();
           const double phaseOffset = item->get<1>();
           const double residualDelay = item->get<2>();
-          const casa::IPosition &shape = itsCube.shape();
-          casa::Cube<casa::Complex> tmpBuf;
-          tmpBuf.takeStorage(shape, itsCube.data(), casa::SHARE);
-          casa::Matrix<casa::Complex> thisRow = tmpBuf.yzPlane(row);
-          for (casa::uInt chan = 0; chan < shape[1]; ++chan) {
+          const casacore::IPosition &shape = itsCube.shape();
+          casacore::Cube<casacore::Complex> tmpBuf;
+          tmpBuf.takeStorage(shape, itsCube.data(), casacore::SHARE);
+          casacore::Matrix<casacore::Complex> thisRow = tmpBuf.yzPlane(row);
+          for (casacore::uInt chan = 0; chan < shape[1]; ++chan) {
                const float phase = static_cast<float>(phaseOffset +
-                        2. * casa::C::pi * itsFreq[chan] * residualDelay);
-               const casa::Complex phasor(cos(phase), sin(phase));
+                        2. * casacore::C::pi * itsFreq[chan] * residualDelay);
+               const casacore::Complex phasor(cos(phase), sin(phase));
 
                // actual rotation (same for all polarisations)
-               for (casa::uInt pol = 0; pol < thisRow.ncolumn(); ++pol) {
+               for (casacore::uInt pol = 0; pol < thisRow.ncolumn(); ++pol) {
                     thisRow(chan,pol) *= phasor;
                }
           }
    }
 }
       
-void ParallelPhaseApplicator::add(casa::uInt row, double phaseOffset, double residualDelay) {
+void ParallelPhaseApplicator::add(casacore::uInt row, double phaseOffset, double residualDelay) {
    ASKAPDEBUGASSERT(row < itsCube.nrow());
-   boost::shared_ptr<boost::tuple<casa::uInt, double, double> > item(new boost::tuple<casa::uInt, double, double>(row,phaseOffset,residualDelay));
+   boost::shared_ptr<boost::tuple<casacore::uInt, double, double> > item(new boost::tuple<casacore::uInt, double, double>(row,phaseOffset,residualDelay));
    itsBuffer.addWhenThereIsSpace(item);
 };
 

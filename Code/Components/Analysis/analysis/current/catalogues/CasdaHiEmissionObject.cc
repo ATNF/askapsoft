@@ -180,18 +180,18 @@ CasdaHiEmissionObject::CasdaHiEmissionObject(sourcefitting::RadioSource &obj,
     }
     double intFluxscale = getIntFluxConversionScale(newHead_vel, casda::intFluxUnitSpectral);
 
-    casa::Unit imageFreqUnits(newHead_freq.WCS().cunit[obj.header().WCS().spec]);
-    casa::Unit freqUnits(casda::freqUnit);
-    double freqScale = casa::Quantity(1., imageFreqUnits).getValue(freqUnits);
-    casa::Unit freqWidthUnits(casda::freqWidthUnit);
-    double freqWidthScale = casa::Quantity(1., imageFreqUnits).getValue(freqWidthUnits);
-    casa::Unit imageVelUnits(newHead_vel.WCS().cunit[obj.header().WCS().spec]);
-    casa::Unit velUnits(casda::velocityUnit);
-    double velScale = casa::Quantity(1., imageVelUnits).getValue(velUnits);
+    casacore::Unit imageFreqUnits(newHead_freq.WCS().cunit[obj.header().WCS().spec]);
+    casacore::Unit freqUnits(casda::freqUnit);
+    double freqScale = casacore::Quantity(1., imageFreqUnits).getValue(freqUnits);
+    casacore::Unit freqWidthUnits(casda::freqWidthUnit);
+    double freqWidthScale = casacore::Quantity(1., imageFreqUnits).getValue(freqWidthUnits);
+    casacore::Unit imageVelUnits(newHead_vel.WCS().cunit[obj.header().WCS().spec]);
+    casacore::Unit velUnits(casda::velocityUnit);
+    double velScale = casacore::Quantity(1., imageVelUnits).getValue(velUnits);
     // scale factor for the angular size
-    casa::Unit headerShapeUnits(obj.header().getShapeUnits());
-    casa::Unit shapeUnits(casda::shapeUnit);
-    double shapeScale = casa::Quantity(1., headerShapeUnits).getValue(shapeUnits);
+    casacore::Unit headerShapeUnits(obj.header().getShapeUnits());
+    casacore::Unit shapeUnits(casda::shapeUnit);
+    double shapeScale = casacore::Quantity(1., headerShapeUnits).getValue(shapeUnits);
 
     double xpeak = obj.getXPeak(), ypeak = obj.getYPeak(), zpeak = obj.getZPeak();
     double xave = obj.getXaverage(), yave = obj.getYaverage(), zave = obj.getZaverage();
@@ -391,9 +391,9 @@ CasdaHiEmissionObject::CasdaHiEmissionObject(sourcefitting::RadioSource &obj,
     ASKAPLOG_INFO_STR(logger, "Fitting Busy function to spectrum of object " << itsObjectID);
     int status = hidata.busyFunctionFit();
     if (status == 0) {
-        casa::Vector<double> BFparams = hidata.BFparams();
+        casacore::Vector<double> BFparams = hidata.BFparams();
         ASKAPLOG_INFO_STR(logger, "BF results: " << BFparams);
-        casa::Vector<double> BFerrors = hidata.BFerrors();
+        casacore::Vector<double> BFerrors = hidata.BFerrors();
         const float channelFreqWidth = newHead_freq.WCS().cdelt[obj.header().WCS().spec] * freqScale;
         itsBFfit_a.value() = BFparams[0];
         itsBFfit_a.error() = BFerrors[0];

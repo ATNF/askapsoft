@@ -55,34 +55,34 @@ using namespace casa;
 
 ASKAP_LOGGER(logger, ".MSFlaggingSummary");
 
-casa::uInt MSFlaggingSummary::summariseChunk(const casa::MSColumns& msc, casa::uInt start, casa::uInt chunkId)
+casacore::uInt MSFlaggingSummary::summariseChunk(const casacore::MSColumns& msc, casacore::uInt start, casacore::uInt chunkId)
 {
     // These attributes are used to delineate chunks (i.e. if they change
     // it is the end of this chunk)
-    const casa::Int scanId = msc.scanNumber()(start);
-    const casa::Int obsId = msc.observationId()(start);
-    const casa::Int dataDescId = msc.dataDescId()(start);
-    const casa::Int fieldId = msc.fieldId()(start);
+    const casacore::Int scanId = msc.scanNumber()(start);
+    const casacore::Int obsId = msc.observationId()(start);
+    const casacore::Int dataDescId = msc.dataDescId()(start);
+    const casacore::Int fieldId = msc.fieldId()(start);
 
     //
-    const casa::ROMSDataDescColumns& ddc = msc.dataDescription();
-    const casa::ROMSPolarizationColumns& polc = msc.polarization();
-    const casa::ROMSFieldColumns& fieldc = msc.field();
-    const casa::ROMSSpWindowColumns& spwc = msc.spectralWindow();
+    const casacore::ROMSDataDescColumns& ddc = msc.dataDescription();
+    const casacore::ROMSPolarizationColumns& polc = msc.polarization();
+    const casacore::ROMSFieldColumns& fieldc = msc.field();
+    const casacore::ROMSSpWindowColumns& spwc = msc.spectralWindow();
 
-    const casa::uInt descPolId = ddc.polarizationId()(dataDescId);
-    const casa::uInt descSpwId = ddc.spectralWindowId()(dataDescId);
+    const casacore::uInt descPolId = ddc.polarizationId()(dataDescId);
+    const casacore::uInt descSpwId = ddc.spectralWindowId()(dataDescId);
 
     // Stats to capture
     uint64_t nRowsFlagged = 0;
     uint64_t nVisFlagged = 0;
     uint64_t nVis= 0;
-    set<casa::Double> timeset;
-    set< pair<casa::Int, casa::Int> > baselineset;
-    set<casa::Int> feedset;
+    set<casacore::Double> timeset;
+    set< pair<casacore::Int, casacore::Int> > baselineset;
+    set<casacore::Int> feedset;
 
     // Process rows until a new chunk is found or the table ends
-    casa::uInt row = start;
+    casacore::uInt row = start;
     while (row < msc.nrow()
             && scanId == msc.scanNumber()(row)
             && obsId == msc.observationId()(row)
@@ -103,10 +103,10 @@ casa::uInt MSFlaggingSummary::summariseChunk(const casa::MSColumns& msc, casa::u
         if (msc.flagRow()(row)) nRowsFlagged++;
 
         // Visibility flagging
-        const Matrix<casa::Bool> flags = msc.flag()(row);
+        const Matrix<casacore::Bool> flags = msc.flag()(row);
         nVis += flags.size();
-        for (casa::uInt m = 0; m < flags.nrow(); ++m) {
-            for (casa::uInt n = 0; n < flags.ncolumn(); ++n) {
+        for (casacore::uInt m = 0; m < flags.nrow(); ++m) {
+            for (casacore::uInt n = 0; n < flags.ncolumn(); ++n) {
                 if (flags(m, n)) nVisFlagged++;
             }
         }
@@ -125,7 +125,7 @@ casa::uInt MSFlaggingSummary::summariseChunk(const casa::MSColumns& msc, casa::u
             << ")");
 
     // Build a string array from stokes types
-    const casa::Vector<casa::Int> stokesTypesInt = polc.corrType()(descPolId);
+    const casacore::Vector<casacore::Int> stokesTypesInt = polc.corrType()(descPolId);
     string stokesList = "[";
     for (size_t i = 0; i < stokesTypesInt.size(); ++i) {
         if (i != 0) stokesList += ", ";
@@ -151,11 +151,11 @@ casa::uInt MSFlaggingSummary::summariseChunk(const casa::MSColumns& msc, casa::u
     return row;
 }
 
-void MSFlaggingSummary::printToLog(const casa::MSColumns& msc)
+void MSFlaggingSummary::printToLog(const casacore::MSColumns& msc)
 {
         ASKAPLOG_INFO_STR(logger, "Pre-flagging Measurement Set Summary:");
 
-        const casa::uInt nrow = msc.nrow();
+        const casacore::uInt nrow = msc.nrow();
         if (nrow == 0) {
             ASKAPLOG_INFO_STR(logger, "No rows");
             return;
@@ -163,8 +163,8 @@ void MSFlaggingSummary::printToLog(const casa::MSColumns& msc)
 
         // Print a summary for each chunk of data
         ASKAPDEBUGASSERT(nrow > 0);
-        casa::uInt row = 0;
-        casa::uInt chunkId = 1;
+        casacore::uInt row = 0;
+        casacore::uInt chunkId = 1;
         const string line = "-------------------------------------------------------------------------------";
             ASKAPLOG_INFO_STR(logger, line);
         do {

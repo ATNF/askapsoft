@@ -45,34 +45,34 @@ class Antenna {
     public:
 
         /// @brief Constructor
-        Antenna(const casa::String& name,
-                const casa::String& mount,
-                const casa::Vector<casa::Double>& position,
-                const casa::Quantity& diameter,
-                const casa::Quantity& delay);
+        Antenna(const casacore::String& name,
+                const casacore::String& mount,
+                const casacore::Vector<casacore::Double>& position,
+                const casacore::Quantity& diameter,
+                const casacore::Quantity& delay);
 
         /// @brief Antenna name (e.g. "ak01")
-        casa::String name(void) const;
+        casacore::String name(void) const;
 
         // @brief Mount type of antenna (e.g. "EQUATORIAL", "ALT-AZ")
-        casa::String mount(void) const;
+        casacore::String mount(void) const;
 
         /// @brief Positin of the antenna. This position is in the right-handed frame, X towards
         /// the intersection of the equator and the Greenwich meridian, Z towards the pole.
-        casa::Vector<casa::Double> position(void) const;
+        casacore::Vector<casacore::Double> position(void) const;
 
         /// @brief Nominal diameter of the dish.
-        casa::Quantity diameter(void) const;
+        casacore::Quantity diameter(void) const;
 
         /// @brief Additional delay component for this antenna
-        casa::Quantity delay(void) const;
+        casacore::Quantity delay(void) const;
 
     private:
-        casa::String itsName;
-        casa::String itsMount;
-        casa::Vector<casa::Double> itsPosition;
-        casa::Quantity itsDiameter;
-        casa::Quantity itsDelay;
+        casacore::String itsName;
+        casacore::String itsMount;
+        casacore::Vector<casacore::Double> itsPosition;
+        casacore::Quantity itsDiameter;
+        casacore::Quantity itsDelay;
 };
 
 }

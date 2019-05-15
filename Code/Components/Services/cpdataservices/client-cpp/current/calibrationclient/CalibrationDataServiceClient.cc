@@ -82,22 +82,22 @@ CalibrationDataServiceClient::~CalibrationDataServiceClient()
     itsComm->destroy();
 }
 
-void CalibrationDataServiceClient::addGainSolution(casa::Long id, const GainSolution& sol)
+void CalibrationDataServiceClient::addGainSolution(casacore::Long id, const GainSolution& sol)
 {
     itsService->addGainsSolution(id,IceMapper::toIce(sol));
 }
 
-void CalibrationDataServiceClient::addLeakageSolution(casa::Long id, const LeakageSolution& sol)
+void CalibrationDataServiceClient::addLeakageSolution(casacore::Long id, const LeakageSolution& sol)
 {
     itsService->addLeakageSolution(id, IceMapper::toIce(sol));
 }
 
-void CalibrationDataServiceClient::addBandpassSolution(casa::Long id, const BandpassSolution& sol)
+void CalibrationDataServiceClient::addBandpassSolution(casacore::Long id, const BandpassSolution& sol)
 {
     itsService->addBandpassSolution(id, IceMapper::toIce(sol));
 }
 
-casa::Long CalibrationDataServiceClient::getLatestSolutionID(void)
+casacore::Long CalibrationDataServiceClient::getLatestSolutionID(void)
 {
     return itsService->getLatestSolutionID();
 }
@@ -105,13 +105,13 @@ casa::Long CalibrationDataServiceClient::getLatestSolutionID(void)
 /// Create new solution ID to use with add functions
 ///
 /// @return ID of the brand new entry to with calibration solutions can be attached
-casa::Long CalibrationDataServiceClient::newSolutionID()
+casacore::Long CalibrationDataServiceClient::newSolutionID()
 {
     return itsService->newSolutionID();
 }
 
 
-GainSolution CalibrationDataServiceClient::getGainSolution(const casa::Long id)
+GainSolution CalibrationDataServiceClient::getGainSolution(const casacore::Long id)
 {
     askap::interfaces::calparams::TimeTaggedGainSolution ice_sol;
     try {
@@ -122,7 +122,7 @@ GainSolution CalibrationDataServiceClient::getGainSolution(const casa::Long id)
     return IceMapper::fromIce(ice_sol);
 }
 
-LeakageSolution CalibrationDataServiceClient::getLeakageSolution(const casa::Long id)
+LeakageSolution CalibrationDataServiceClient::getLeakageSolution(const casacore::Long id)
 {
     askap::interfaces::calparams::TimeTaggedLeakageSolution ice_sol;
     try {
@@ -133,7 +133,7 @@ LeakageSolution CalibrationDataServiceClient::getLeakageSolution(const casa::Lon
     return IceMapper::fromIce(ice_sol);
 }
 
-BandpassSolution CalibrationDataServiceClient::getBandpassSolution(const casa::Long id)
+BandpassSolution CalibrationDataServiceClient::getBandpassSolution(const casacore::Long id)
 {
     askap::interfaces::calparams::TimeTaggedBandpassSolution ice_sol;
     try {
@@ -144,7 +144,7 @@ BandpassSolution CalibrationDataServiceClient::getBandpassSolution(const casa::L
     return IceMapper::fromIce(ice_sol);
 
 }
-void CalibrationDataServiceClient::adjustGains(casa::Long id, GainSolution &sol)
+void CalibrationDataServiceClient::adjustGains(casacore::Long id, GainSolution &sol)
 {
   try {
     itsService->adjustGains(id, IceMapper::toIce(sol));

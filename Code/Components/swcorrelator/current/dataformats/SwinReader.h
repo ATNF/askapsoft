@@ -64,7 +64,7 @@ public:
    /// everything would go out of sync and reading would fail.
    /// @param[in] name file name
    /// @param[in] nchan number of spectral channels
-   SwinReader(const std::string &name, const casa::uInt nchan);
+   SwinReader(const std::string &name, const casacore::uInt nchan);
 
    /// @brief constructor
    /// @details The DiFX output knows nothing about the beam number.
@@ -75,7 +75,7 @@ public:
    /// the constructor creates a reader in the detached state. A call to assign
    /// is required before reading can happen.
    /// @param[in] nchan number of spectral channels
-   explicit SwinReader(const casa::uInt nchan);
+   explicit SwinReader(const casacore::uInt nchan);
    
    /// @brief start reading the same file again
    void rewind();
@@ -94,29 +94,29 @@ public:
    
    /// @brief obtain current UVW
    /// @return vector with uvw
-   casa::Vector<double> uvw() const;
+   casacore::Vector<double> uvw() const;
    
    /// @brief obtain visibility vector
    /// @details Number of elements is the number of spectral channels.
    /// @return visibility vector corresponding to the current record 
-   casa::Vector<casa::Complex> visibility() const;
+   casacore::Vector<casacore::Complex> visibility() const;
    
    /// @brief get current polarisation
    /// @details stokes descriptor corresponding to the current polarisation
-   casa::Stokes::StokesTypes stokes() const;
+   casacore::Stokes::StokesTypes stokes() const;
    
    /// @brief pair of antennas corresponding to the current baseline
    /// @details antenna IDs are zero-based.
    /// @return pair of antenna IDs
-   std::pair<casa::uInt, casa::uInt> baseline() const;
+   std::pair<casacore::uInt, casacore::uInt> baseline() const;
 
    /// @brief time corresponding to the current baseline
    /// @return epoch measure
-   casa::MEpoch epoch() const;   
+   casacore::MEpoch epoch() const;   
    
    /// @brief get frequency ID of the current record
    /// @return frequency ID
-   casa::uInt freqID() const;
+   casacore::uInt freqID() const;
    
 protected:
    /// @brief helper method to read the header   
@@ -138,22 +138,22 @@ private:
    boost::shared_ptr<std::ifstream> itsStream;
    
    /// @brief UVWs
-   casa::Vector<double> itsUVW;
+   casacore::Vector<double> itsUVW;
    
    /// @brief visibilities
-   casa::Vector<casa::Complex> itsVisibility;
+   casacore::Vector<casacore::Complex> itsVisibility;
    
    /// @brief polarisation descriptor
-   casa::Stokes::StokesTypes itsStokes;
+   casacore::Stokes::StokesTypes itsStokes;
    
    /// @brief baseline
-   std::pair<casa::uInt, casa::uInt> itsBaseline;
+   std::pair<casacore::uInt, casacore::uInt> itsBaseline;
    
    /// @brief epoch
-   casa::MEpoch itsEpoch; 
+   casacore::MEpoch itsEpoch; 
         
    /// @brief frequency ID
-   casa::uInt itsFreqID;
+   casacore::uInt itsFreqID;
 };
 
 } // namespace swcorrelator

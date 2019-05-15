@@ -61,13 +61,13 @@ public:
     /// @param[in] pol polarisation index to use
     /// @param[in] ampCutoff if positive, amplitudes above ampCutoff will be flagged
     /// @param[in] refAnt reference antenna index   
-    explicit DelaySolverImpl(double targetRes, casa::Stokes::StokesTypes pol = casa::Stokes::XX, 
-                             float ampCutoff = -1., casa::uInt refAnt = 1);
+    explicit DelaySolverImpl(double targetRes, casacore::Stokes::StokesTypes pol = casacore::Stokes::XX, 
+                             float ampCutoff = -1., casacore::uInt refAnt = 1);
     
     /// @brief set baselines to exclude
     /// @details An empty vector configures the class to take all available baselines into account.
     /// @param[in] bsln vector with pair of indices representing baselines to exclude from the solution
-    void excludeBaselines(const casa::Vector<std::pair<casa::uInt, casa::uInt> > &bsln);
+    void excludeBaselines(const casacore::Vector<std::pair<casacore::uInt, casacore::uInt> > &bsln);
      
     /// @brief process one data accessor
     /// @param[in] acc data accessor to process
@@ -79,7 +79,7 @@ public:
     /// @param[in] useFFT if true, FFT-based delay estimator is used. It is less accurate but
     /// is more robust for large delays and less sensitive to flagged data. 
     /// @return a vector with one delay per antenna (antennas are in the index-increasing order).
-    casa::Vector<double> solve(bool useFFT) const; 
+    casacore::Vector<double> solve(bool useFFT) const; 
     
     /// @brief set initial delay approximation
     /// @details The class can optionally remove some a priori known (approximate) delay in 
@@ -89,7 +89,7 @@ public:
     /// this is the default). There should be one value per antenna. An exception is thrown if
     /// antenna ID greater than or equal to the size of the vector is encountered
     /// @param[in] delays in seconds
-    void setApproximateDelays(const casa::Vector<double> &delays);
+    void setApproximateDelays(const casacore::Vector<double> &delays);
     
     /// @brief initialise the accumulation
     /// @details This method reverts the state of the object to that before the first call to process method.
@@ -107,14 +107,14 @@ protected:
     /// @brief helper method to check that all channels/rows are flagged
     /// @param[in] flags matrix with flags
     /// @return true, if all channels and rows are flagged
-    static bool checkAllFlagged(const casa::Matrix<bool> &flags);
+    static bool checkAllFlagged(const casacore::Matrix<bool> &flags);
     
     /// @brief helper method to obtain delay approximation for the given row
     /// @details Zero is returned if itsDelayApproximation is empty. Otherwise,
     /// delay for the given row is extracted (based on metadata contained in the buffers).
     /// Note, delay units are the same as itsDelayApproximation (i.e. seconds).
     /// @param[in] row row of interest
-    double delayApproximation(casa::uInt row) const;
+    double delayApproximation(casacore::uInt row) const;
         
 private:
 
@@ -123,47 +123,47 @@ private:
     double itsTargetRes;
     
     /// @brief polarisation product to use
-    casa::Stokes::StokesTypes itsPol;
+    casacore::Stokes::StokesTypes itsPol;
     
     /// @brief if positive, amplitudes aboves this cutoff are flagged
     float itsAmpCutoff;
     
     /// @brief reference antenna index
-    casa::uInt itsRefAnt;
+    casacore::uInt itsRefAnt;
 
     /// @brief baselines to exclude (empty vector is all are taken into account)
-    casa::Vector<std::pair<casa::uInt, casa::uInt> > itsExcludedBaselines;
+    casacore::Vector<std::pair<casacore::uInt, casacore::uInt> > itsExcludedBaselines;
 
     /// @brief summed or averaged spectra
-    casa::Matrix<casa::Complex> itsSpcBuffer;
+    casacore::Matrix<casacore::Complex> itsSpcBuffer;
     
     /// @brief counts per channel per row
-    casa::Matrix<casa::uInt> itsAvgCounts;
+    casacore::Matrix<casacore::uInt> itsAvgCounts;
 
     /// @brief number of accessors processed
-    casa::uInt itsNAvg;
+    casacore::uInt itsNAvg;
     
     /// @brief spectral axis (to ensure it doesn't change throughout the dataset)
-    casa::Vector<double> itsFreqAxis;
+    casacore::Vector<double> itsFreqAxis;
     
     /// @brief first antenna indices (to ensure they're the same for all iterations)
-    casa::Vector<casa::uInt> itsAnt1IDs;
+    casacore::Vector<casacore::uInt> itsAnt1IDs;
 
     /// @brief second antenna indices (to ensure they're the same for all iterations)
-    casa::Vector<casa::uInt> itsAnt2IDs;
+    casacore::Vector<casacore::uInt> itsAnt2IDs;
     
     /// @brief delay estimator
     scimath::DelayEstimator itsDelayEstimator;
     
     /// @brief number of spectral channels to average
-    casa::uInt itsChanToAverage;
+    casacore::uInt itsChanToAverage;
     
     /// @brief a priori delay information for all antennas
     /// @details If this vector is not empty, it contains initial approximation of delays
     /// which are taken out of the full resolution data before averaging takes place. This
     /// allows to get a coarse delay first in full resolution data and then refine it with
     /// averaging. Empty array means zero initial delay (i.e. nothing special is done).
-    casa::Vector<double> itsDelayApproximation;  
+    casacore::Vector<double> itsDelayApproximation;  
 };
 
 } // namespace utils

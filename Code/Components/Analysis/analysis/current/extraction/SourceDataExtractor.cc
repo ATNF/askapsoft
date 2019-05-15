@@ -53,7 +53,7 @@
 #include <casacore/measures/Measures/Stokes.h>
 #include <boost/shared_ptr.hpp>
 
-#include <utils/PolConverter.h>
+#include <askap/scimath/utils/PolConverter.h>
 
 ASKAP_LOGGER(logger, ".sourcedataextractor");
 
@@ -99,9 +99,9 @@ SourceDataExtractor::~SourceDataExtractor()
     itsInputCubePtr.reset();
 }
 
-casa::Vector<Quantum<Double> > SourceDataExtractor::inputBeam()
+casacore::Vector<Quantum<Double> > SourceDataExtractor::inputBeam()
 {
-    casa::Vector<Quantum<Double> > inputBeam(3, 0.);
+    casacore::Vector<Quantum<Double> > inputBeam(3, 0.);
     if (this->openInput()) {
         inputBeam = itsInputCubePtr->imageInfo().restoringBeam().toVector();
     }
@@ -109,10 +109,10 @@ casa::Vector<Quantum<Double> > SourceDataExtractor::inputBeam()
 }
 
 
-casa::IPosition SourceDataExtractor::getShape(std::string image)
+casacore::IPosition SourceDataExtractor::getShape(std::string image)
 {
     itsInputCube = image;
-    casa::IPosition shape;
+    casacore::IPosition shape;
     if (this->openInput()) {
         shape = itsInputCubePtr->shape();
         this->closeInput();
@@ -173,10 +173,10 @@ void SourceDataExtractor::setSourceLoc(T* src)
     }
     itsOutputFilename = ss.str();
     ASKAPLOG_DEBUG_STR(logger, "SourceDataExtractor for source " << itsOutputFilename);
-    casa::DirectionCoordinate dc = itsInputCoords.directionCoordinate();
-    casa::Vector<casa::Double> pix(2);
-    MDirection refDir(casa::Quantity(getRA(*src), "deg"),
-                      casa::Quantity(getDec(*src), "deg"),
+    casacore::DirectionCoordinate dc = itsInputCoords.directionCoordinate();
+    casacore::Vector<casacore::Double> pix(2);
+    MDirection refDir(casacore::Quantity(getRA(*src), "deg"),
+                      casacore::Quantity(getDec(*src), "deg"),
                       dc.directionType());
     dc.toPixel(pix, refDir);
     ASKAPLOG_DEBUG_STR(logger, "Converting to pixel coords: refDir="<<refDir<<", pix="<<pix);
@@ -209,11 +209,11 @@ void SourceDataExtractor::setSource(CasdaComponent* src)
 
 
 bool SourceDataExtractor::checkPol(std::string image,
-                                   casa::Stokes::StokesTypes stokes)
+                                   casacore::Stokes::StokesTypes stokes)
 {
 
     itsInputCube = image;
-    std::vector<casa::Stokes::StokesTypes> stokesvec(1, stokes);
+    std::vector<casacore::Stokes::StokesTypes> stokesvec(1, stokes);
     std::string polstring = scimath::PolConverter::toString(stokesvec)[0];
 
     bool haveMatch = false;
@@ -221,7 +221,7 @@ bool SourceDataExtractor::checkPol(std::string image,
         int stokeCooNum = itsInputCubePtr->coordinates().polarizationCoordinateNumber();
         if (stokeCooNum > -1) {
 
-            const casa::StokesCoordinate
+            const casacore::StokesCoordinate
             stokeCoo = itsInputCubePtr->coordinates().stokesCoordinate(stokeCooNum);
             if (stokeCooNum == -1 || itsStkAxis == -1) {
                 ASKAPCHECK(polstring == "I", "Extraction: Input cube " << image <<
@@ -235,7 +235,7 @@ bool SourceDataExtractor::checkPol(std::string image,
         } else {
             ASKAPLOG_WARN_STR(logger, "Input cube has no Stokes axis - assuming it is Stokes I");
             // No Stokes axis - assume it is Stokes I
-            haveMatch = (stokes == casa::Stokes::I);
+            haveMatch = (stokes == casacore::Stokes::I);
         }
         this->closeInput();
     } else ASKAPLOG_ERROR_STR(logger, "Could not open image");
@@ -246,7 +246,7 @@ void SourceDataExtractor::verifyInputs()
 {
     std::vector<std::string>::iterator im;
     std::vector<std::string> pollist = scimath::PolConverter::toString(itsStokesList);
-    casa::Stokes stokes;
+    casacore::Stokes stokes;
     ASKAPCHECK(itsInputCubeList.size() > 0,
                "Extraction: You have not provided a spectralCube input");
     ASKAPCHECK(itsStokesList.size() > 0,
@@ -256,7 +256,7 @@ void SourceDataExtractor::verifyInputs()
     if (itsInputCubeList.size() > 1) { // multiple input cubes provided
 
         // check they are all the same shape
-        casa::IPosition refShape = this->getShape(itsInputCubeList[0]);
+        casacore::IPosition refShape = this->getShape(itsInputCubeList[0]);
         for (size_t i = 1; i < itsInputCubeList.size(); i++) {
             ASKAPCHECK(refShape == this->getShape(itsInputCubeList[i]),
                        "Extraction: shapes of " << itsInputCubeList[0] <<
@@ -268,7 +268,7 @@ void SourceDataExtractor::verifyInputs()
                 if (checkPol(*im, itsStokesList[i])) {
                     ASKAPLOG_DEBUG_STR(logger, "Stokes " << stokes.name(itsStokesList[i]) << " has image " << *im);
                     itsCubeStokesMap.insert(
-                        std::pair<casa::Stokes::StokesTypes, std::string>(itsStokesList[i], *im));
+                        std::pair<casacore::Stokes::StokesTypes, std::string>(itsStokesList[i], *im));
                 }
             }
         }
@@ -280,7 +280,7 @@ void SourceDataExtractor::verifyInputs()
             // the filename has a "%p" string, meaning
             // polarisation substitution is possible
             for (size_t i = 0; i < itsStokesList.size(); i++) {
-                casa::String stokesname(stokes.name(itsStokesList[i]));
+                casacore::String stokesname(stokes.name(itsStokesList[i]));
                 stokesname.downcase();
                 std::string input = itsInputCubeList[0];
                 ASKAPLOG_DEBUG_STR(logger, "Input cube name: replacing \"%p\" with " <<
@@ -289,7 +289,7 @@ void SourceDataExtractor::verifyInputs()
                 if (checkPol(input, itsStokesList[i])) {
                     ASKAPLOG_DEBUG_STR(logger, "Stokes " << stokes.name(itsStokesList[i]) << " has image " << input);
                     itsCubeStokesMap.insert(
-                        std::pair<casa::Stokes::StokesTypes, std::string>(itsStokesList[i], input));
+                        std::pair<casacore::Stokes::StokesTypes, std::string>(itsStokesList[i], input));
                 }
             }
         } else {
@@ -300,7 +300,7 @@ void SourceDataExtractor::verifyInputs()
                 if (hasMatch) {
                     ASKAPLOG_DEBUG_STR(logger, "Stokes " << stokes.name(itsStokesList[i]) << " has image " << itsInputCubeList[0]);
                     itsCubeStokesMap.insert(
-                        std::pair<casa::Stokes::StokesTypes, std::string>(itsStokesList[i],
+                        std::pair<casacore::Stokes::StokesTypes, std::string>(itsStokesList[i],
                                 itsInputCubeList[0]));
                 }
             }
@@ -315,7 +315,7 @@ void SourceDataExtractor::verifyInputs()
 
 void SourceDataExtractor::writeBeam(std::string &filename)
 {
-    casa::Vector<Quantum<Double> >
+    casacore::Vector<Quantum<Double> >
     inputBeam = itsInputCubePtr->imageInfo().restoringBeam().toVector();
 
     if (inputBeam.size() > 0) {
@@ -330,9 +330,9 @@ void SourceDataExtractor::writeBeam(std::string &filename)
     }
 }
 
-casa::Unit SourceDataExtractor::bunit()
+casacore::Unit SourceDataExtractor::bunit()
 {
-    casa::Unit bunits;
+    casacore::Unit bunits;
     if (openInput()) {
         bunits = itsInputCubePtr->units();
         closeInput();

@@ -65,7 +65,7 @@ class CalibrationDataServiceClient {
         /// Create new solution ID to use with add functions
         ///
         /// @return ID of the brand new entry to with calibration solutions can be attached
-        casa::Long newSolutionID();
+        casacore::Long newSolutionID();
 
         /// Add a new gain solution to the data service. This method is
         /// intended to be used by the calibratin pipeine, and is called
@@ -73,7 +73,7 @@ class CalibrationDataServiceClient {
         ///
         /// @param[in] id solution id to work with
         /// @param[in] sol  the gain solution to add.
-        void addGainSolution(casa::Long id, const GainSolution& sol);
+        void addGainSolution(casacore::Long id, const GainSolution& sol);
 
         /// Add a new leakage solution to the data service. This method is
         /// intended to be used by the calibratin pipeine, and is called
@@ -82,7 +82,7 @@ class CalibrationDataServiceClient {
         /// @param[in] id solution id to work with
         /// @param[in] sol  the leakage solution to add.
         /// @return a unique id referencing the solution in the data service.
-        void addLeakageSolution(casa::Long id, const LeakageSolution& sol);
+        void addLeakageSolution(casacore::Long id, const LeakageSolution& sol);
 
         /// Add a new bandpass solution to the data service. This method is
         /// intended to be used by the calibratin pipeine, and is called
@@ -91,7 +91,7 @@ class CalibrationDataServiceClient {
         /// @param[in] id solution id to work with
         /// @param[in] sol  the bandpass solution to add.
         /// @return a unique id referencing the solution in the data service.
-        void addBandpassSolution(casa::Long id, const BandpassSolution& sol);
+        void addBandpassSolution(casacore::Long id, const BandpassSolution& sol);
 
         /**
          * Merge in a new time tagged gains solution with the latest gains and store it
@@ -148,7 +148,7 @@ class CalibrationDataServiceClient {
         /// Obtain the ID for the latest solution.
         ///
         /// @return the ID of the latest solution
-        casa::Long getLatestSolutionID(void);
+        casacore::Long getLatestSolutionID(void);
 
 
         /**
@@ -184,7 +184,7 @@ class CalibrationDataServiceClient {
         /// @return the gain solution.
         /// @throw AskapError if the solution specified by the id does not
         ///         exist.
-        GainSolution getGainSolution(const casa::Long id);
+        GainSolution getGainSolution(const casacore::Long id);
 
         /// Get a leakage solution.
         ///
@@ -192,7 +192,7 @@ class CalibrationDataServiceClient {
         /// @return the leakage solution.
         /// @throw AskapError if the solution specified by the id does not
         ///         exist.
-        LeakageSolution getLeakageSolution(const casa::Long id);
+        LeakageSolution getLeakageSolution(const casacore::Long id);
 
         /// Get a bandpass solution.
         ///
@@ -200,7 +200,7 @@ class CalibrationDataServiceClient {
         /// @return the bandpass solution.
         /// @throw AskapError if the solution specified by the id does not
         ///         exist.
-        BandpassSolution getBandpassSolution(const casa::Long id);
+        BandpassSolution getBandpassSolution(const casacore::Long id);
 
     private:
 

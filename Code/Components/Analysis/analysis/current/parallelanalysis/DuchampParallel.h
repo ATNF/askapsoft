@@ -203,7 +203,7 @@ class DuchampParallel {
         /// and valid
         /// @param useSubimageInfo Whether to use infomation about the
         /// distribution of the image amongst workers.
-        /// @return A casa::SubImage pointer to the desired sub-image.
+        /// @return A casacore::SubImage pointer to the desired sub-image.
         const boost::shared_ptr<SubImage<Float> >
         getSubimage(const boost::shared_ptr<ImageInterface<Float> > imagePtr,
                     bool useSubimageInfo = true);

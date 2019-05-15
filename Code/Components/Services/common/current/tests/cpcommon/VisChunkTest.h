@@ -116,9 +116,9 @@ class VisChunkTest : public CppUnit::TestFixture {
             VisChunk::ShPtr chunk(new VisChunk(initialRows, initialChans, initialPols, nAnt));
 
             // Create and assign the containers
-            casa::Cube<casa::Complex> vis(newRows, newChans, newPols);
-            casa::Cube<casa::Bool> flag(newRows, newChans, newPols);
-            casa::Vector<casa::Double> frequency(newChans);
+            casacore::Cube<casacore::Complex> vis(newRows, newChans, newPols);
+            casacore::Cube<casacore::Bool> flag(newRows, newChans, newPols);
+            casacore::Vector<casacore::Double> frequency(newChans);
             chunk->resize(vis, flag, frequency);
 
             // Verify the result
@@ -145,8 +145,8 @@ class VisChunkTest : public CppUnit::TestFixture {
             // setup some data
             VisChunk source(nRows, nChans, nPols, nAnt);
             source.flag().set(true);
-            source.visibility().set(casa::Complex(2.048, -1.11)); 
-            const casa::MVEpoch epoch(55902., 0.13);
+            source.visibility().set(casacore::Complex(2.048, -1.11)); 
+            const casacore::MVEpoch epoch(55902., 0.13);
             source.time()=epoch;
             source.targetName() = "Virgo";
             source.interval() = 5.;
@@ -157,28 +157,28 @@ class VisChunkTest : public CppUnit::TestFixture {
             source.beam2().set(6u);
             source.beam1PA().set(1.0);
             source.beam2PA().set(2.0);
-            const casa::MVDirection dir(0.35, -0.85);
+            const casacore::MVDirection dir(0.35, -0.85);
             source.phaseCentre().set(dir);
-            source.targetPointingCentre().set(casa::MDirection(dir,casa::MDirection::J2000));
-            const casa::MDirection dir1(casa::MVDirection(0.5, -0.7), casa::MDirection::J2000);
+            source.targetPointingCentre().set(casacore::MDirection(dir,casacore::MDirection::J2000));
+            const casacore::MDirection dir1(casacore::MVDirection(0.5, -0.7), casacore::MDirection::J2000);
             source.actualPointingCentre().set(dir1);
-            const casa::Quantity pa(92.668, "deg");
+            const casacore::Quantity pa(92.668, "deg");
             source.actualPolAngle().set(pa);
-            const casa::Quantity az(131.195, "deg");
+            const casacore::Quantity az(131.195, "deg");
             source.actualAzimuth().set(az);
-            const casa::Quantity el(37.166, "deg");
+            const casacore::Quantity el(37.166, "deg");
             source.actualElevation().set(el);
             source.onSourceFlag().set(true);
-            const casa::RigidVector<casa::Double, 3> uvw(-102.345, 12.333, 1.002);
+            const casacore::RigidVector<casacore::Double, 3> uvw(-102.345, 12.333, 1.002);
             source.uvw().set(uvw);
             const double freq = 939.5e6;
             source.frequency().set(freq);
             const double resolution = 1e6/54;
             source.channelWidth() = resolution;
-            source.stokes().set(casa::Stokes::XX);
-            const casa::MDirection::Ref dirFrame(casa::MDirection::J2000);
+            source.stokes().set(casacore::Stokes::XX);
+            const casacore::MDirection::Ref dirFrame(casacore::MDirection::J2000);
             source.directionFrame() = dirFrame;
-            source.beamOffsets().assign(casa::Matrix<double>(2,36,1.));
+            source.beamOffsets().assign(casacore::Matrix<double>(2,36,1.));
             
 
             // make a copy
@@ -187,8 +187,8 @@ class VisChunkTest : public CppUnit::TestFixture {
             // corrupt the original container to test whether reference semantics has been
             // dealt with properly
             source.flag().set(false);
-            source.visibility().set(casa::Complex(0.,0)); 
-            source.time()=casa::MVEpoch(0., 0.);
+            source.visibility().set(casacore::Complex(0.,0)); 
+            source.time()=casacore::MVEpoch(0., 0.);
             source.targetName() = "Junk";
             source.interval() = 10.;
             source.scan() = 0u;
@@ -198,19 +198,19 @@ class VisChunkTest : public CppUnit::TestFixture {
             source.beam2().set(0u);
             source.beam1PA().set(0.0);
             source.beam2PA().set(0.0);
-            source.phaseCentre().set(casa::MVDirection(0.,0.));
-            source.targetPointingCentre().set(casa::MVDirection(0.,0.));
-            source.actualPointingCentre().set(casa::MVDirection(0.,0.));
+            source.phaseCentre().set(casacore::MVDirection(0.,0.));
+            source.targetPointingCentre().set(casacore::MVDirection(0.,0.));
+            source.actualPointingCentre().set(casacore::MVDirection(0.,0.));
             source.actualPolAngle().set(az);
             source.actualAzimuth().set(el);
             source.actualElevation().set(pa);
             source.onSourceFlag().set(false);
-            source.uvw().set(casa::RigidVector<casa::Double, 3>());
+            source.uvw().set(casacore::RigidVector<casacore::Double, 3>());
             source.frequency().set(0.);
             source.channelWidth() = 0.01;
-            source.stokes().set(casa::Stokes::RR);
-            source.directionFrame() = casa::MDirection::Ref(casa::MDirection::AZEL);
-            source.beamOffsets().assign(casa::Matrix<double>(2,36,2.));
+            source.stokes().set(casacore::Stokes::RR);
+            source.directionFrame() = casacore::MDirection::Ref(casacore::MDirection::AZEL);
+            source.beamOffsets().assign(casacore::Matrix<double>(2,36,2.));
 
             
             // test the result
@@ -246,7 +246,7 @@ class VisChunkTest : public CppUnit::TestFixture {
 
             // check content 
             checkCube(target.flag(), true);
-            checkCube(target.visibility(), casa::Complex(2.048, -1.11));
+            checkCube(target.visibility(), casacore::Complex(2.048, -1.11));
             CPPUNIT_ASSERT(epoch.near(target.time()));
             CPPUNIT_ASSERT(target.targetName() == "Virgo");
             CPPUNIT_ASSERT_DOUBLES_EQUAL(5., target.interval(), 1e-6);
@@ -258,7 +258,7 @@ class VisChunkTest : public CppUnit::TestFixture {
             checkVector(target.beam1PA(), float(1.0));
             checkVector(target.beam2PA(), float(2.0));
             checkVector(target.phaseCentre(), dir);
-            checkVector(target.targetPointingCentre(), casa::MDirection(dir,casa::MDirection::J2000));
+            checkVector(target.targetPointingCentre(), casacore::MDirection(dir,casacore::MDirection::J2000));
             checkVector(target.actualPolAngle(), pa);
             checkVector(target.actualAzimuth(), az);
             checkVector(target.actualElevation(), el);
@@ -266,12 +266,12 @@ class VisChunkTest : public CppUnit::TestFixture {
             checkVector(target.uvw(), uvw);
             checkVector(target.frequency(), freq);
             CPPUNIT_ASSERT_DOUBLES_EQUAL(resolution, target.channelWidth(), 1e-6);
-            checkVector(target.stokes(), casa::Stokes::XX);
+            checkVector(target.stokes(), casacore::Stokes::XX);
             CPPUNIT_ASSERT_EQUAL(dirFrame.getType(), target.directionFrame().getType());
             CPPUNIT_ASSERT_EQUAL(size_t(2u), target.beamOffsets().nrow());
             CPPUNIT_ASSERT_EQUAL(size_t(36u), target.beamOffsets().ncolumn());
-            for (casa::uInt beam=0; beam < target.beamOffsets().ncolumn(); ++beam) {
-                 for (casa::uInt coord=0; coord < target.beamOffsets().nrow(); ++coord) {
+            for (casacore::uInt beam=0; beam < target.beamOffsets().ncolumn(); ++beam) {
+                 for (casacore::uInt coord=0; coord < target.beamOffsets().nrow(); ++coord) {
                       CPPUNIT_ASSERT_DOUBLES_EQUAL(1., target.beamOffsets()(coord, beam), 1e-6);
                  }
             }
@@ -355,16 +355,16 @@ private:
             CPPUNIT_ASSERT_DOUBLES_EQUAL(val2, val1, 1e-6);
         }
 
-        static void checkVal(const casa::Complex& val1, const casa::Complex& val2) {
-            CPPUNIT_ASSERT_DOUBLES_EQUAL(casa::real(val2), casa::real(val1), 1e-6);
-            CPPUNIT_ASSERT_DOUBLES_EQUAL(casa::imag(val2), casa::imag(val1), 1e-6);
+        static void checkVal(const casacore::Complex& val1, const casacore::Complex& val2) {
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(casacore::real(val2), casacore::real(val1), 1e-6);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(casacore::imag(val2), casacore::imag(val1), 1e-6);
         }
 
-        static void checkVal(const casa::MVDirection& val1, const casa::MVDirection& val2) {
+        static void checkVal(const casacore::MVDirection& val1, const casacore::MVDirection& val2) {
             CPPUNIT_ASSERT_DOUBLES_EQUAL(0., val1.separation(val2), 1e-6);
         }
 
-        static void checkVal(const casa::MDirection& val1, const casa::MDirection& val2) {
+        static void checkVal(const casacore::MDirection& val1, const casacore::MDirection& val2) {
             // we're only concerned with an exact match of two measures, don't need to cater
             // for the case where two directions in different frames actually point to the same
             // physical direction on the sky
@@ -372,24 +372,24 @@ private:
             CPPUNIT_ASSERT_DOUBLES_EQUAL(0., val1.getValue().separation(val2.getValue()), 1e-6);
         }
 
-        static void checkVal(const casa::Quantity& val1, const casa::Quantity& val2) {
+        static void checkVal(const casacore::Quantity& val1, const casacore::Quantity& val2) {
             CPPUNIT_ASSERT(val1.getFullUnit() == val2.getFullUnit());
             CPPUNIT_ASSERT_DOUBLES_EQUAL(val1.getValue(), val2.getValue(), 1e-6);
         }
 
-        static void checkVal(const casa::RigidVector<casa::Double, 3> &val1,
-                             const casa::RigidVector<casa::Double, 3> &val2) {
+        static void checkVal(const casacore::RigidVector<casacore::Double, 3> &val1,
+                             const casacore::RigidVector<casacore::Double, 3> &val2) {
             CPPUNIT_ASSERT_DOUBLES_EQUAL(val1(0), val2(0), 1e-6);
             CPPUNIT_ASSERT_DOUBLES_EQUAL(val1(1), val2(1), 1e-6);
             CPPUNIT_ASSERT_DOUBLES_EQUAL(val1(2), val2(2), 1e-6);
         }
 
         template<typename T>
-        static void checkCube(const casa::Cube<T> &in, const T& val) 
+        static void checkCube(const casacore::Cube<T> &in, const T& val) 
         {
-           for (casa::uInt row = 0; row < in.nrow(); ++row) {
-                for (casa::uInt column = 0; column < in.ncolumn(); ++column) {
-                     for (casa::uInt plane = 0; plane < in.nplane(); ++plane) {
+           for (casacore::uInt row = 0; row < in.nrow(); ++row) {
+                for (casacore::uInt column = 0; column < in.ncolumn(); ++column) {
+                     for (casacore::uInt plane = 0; plane < in.nplane(); ++plane) {
                           checkVal(in(row, column, plane), val);
                      }
                 }
@@ -397,9 +397,9 @@ private:
         }
 
         template<typename T>
-        static void checkVector(const casa::Vector<T> &in, const T& val) 
+        static void checkVector(const casacore::Vector<T> &in, const T& val) 
         {
-           for (casa::uInt row = 0; row < in.nelements(); ++row) {
+           for (casacore::uInt row = 0; row < in.nelements(); ++row) {
                 checkVal(in[row], val);
            }
         }

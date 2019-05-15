@@ -54,7 +54,7 @@ struct ISink : private boost::noncopyable {
   /// @param[in] buf products buffer
   /// @note The calculation is bypassed if itsUVWValid flag is already set in the buffer
   /// @return time epoch corresponding to the BAT of the buffer
-  virtual casa::MEpoch calculateUVW(CorrProducts &buf) const = 0;
+  virtual casacore::MEpoch calculateUVW(CorrProducts &buf) const = 0;
   
   /// @brief write one buffer to the measurement set
   /// @details Current fieldID and dataDescID are assumed

@@ -59,24 +59,24 @@ using namespace askap;
 ImplCalWeightSolver::ImplCalWeightSolver() throw() :
 	 vp_real(NULL),vp_imag(NULL) {}
 
-ImplCalWeightSolver::~ImplCalWeightSolver() throw(casa::AipsError) 
+ImplCalWeightSolver::~ImplCalWeightSolver() throw(casacore::AipsError) 
 {
   if (vp_real!=NULL) delete vp_real;
   if (vp_imag!=NULL) delete vp_imag;
 }
 
 // set up calculation for a given pointing centre and sky model
-void ImplCalWeightSolver::setSky(const casa::MDirection &ipc,
-       const casa::String &clname) throw(casa::AipsError)
+void ImplCalWeightSolver::setSky(const casacore::MDirection &ipc,
+       const casacore::String &clname) throw(casacore::AipsError)
 {
   cl=ComponentList(Path(clname),True);
   pc=ipc;
 }
 
 // set up the voltage pattern from a disk-based image
-void ImplCalWeightSolver::setVP(const casa::String &namer,
-		                const casa::String &namei) 
-	 throw(casa::AipsError)
+void ImplCalWeightSolver::setVP(const casacore::String &namer,
+		                const casacore::String &namei) 
+	 throw(casacore::AipsError)
 {
   if (vp_real!=NULL) delete vp_real;
   if (vp_imag!=NULL) delete vp_imag;
@@ -93,11 +93,11 @@ void ImplCalWeightSolver::setVP(const casa::String &namer,
 /// @param[in] name output image name
 /// @param[in] weights vector of weights
 void ImplCalWeightSolver::makeSyntheticPB(const std::string &name, 
-	                     const casa::Vector<casa::Complex> &weights)
+	                     const casacore::Vector<casacore::Complex> &weights)
 {
   ASKAPASSERT(vp_real!=NULL);
   ASKAPASSERT(vp_imag!=NULL);
-  const casa::CoordinateSystem cs = vp_real->coordinates();
+  const casacore::CoordinateSystem cs = vp_real->coordinates();
   PagedImage<float> result(name);
   result.setCoordinateInfo(cs);
   
@@ -106,7 +106,7 @@ void ImplCalWeightSolver::makeSyntheticPB(const std::string &name,
 // calculate visibility matrix for given feed_offsets
 // uvw - a vector with the uvw coordinates (in the units of wavelength)
 void ImplCalWeightSolver::formVisMatrix(const Matrix<Double> &feed_offsets,
-             const Vector<Double> &uvw) const throw(casa::AipsError)
+             const Vector<Double> &uvw) const throw(casacore::AipsError)
 {
   if (uvw.nelements()!=3)
      throw AipsError("uvw should be a vector with 3 elements");
@@ -162,13 +162,13 @@ void ImplCalWeightSolver::formVisMatrix(const Matrix<Double> &feed_offsets,
 	    Double phasor=2*M_PI*(uvw[0]*l+uvw[1]*m+
 		   uvw[2]*(sqrt(1.-square(l)-square(m))-1.));
 	    visbuf*=Complex(cos(phasor),sin(phasor))*
-	           casa::Double(real(flux.value()[0])/
+	           casacore::Double(real(flux.value()[0])/
 		        sqrt(1.-square(l)-square(m)));
 	    */
 	    // assume that phase terms will be cancelled (with the help of
 	    // the dish + A^hA multiplies to the conjugate. We still need
 	    // to prove it theoretically).
-	    visbuf*=casa::Double(real(flux.value()[0]));
+	    visbuf*=casacore::Double(real(flux.value()[0]));
 
 	    for (uInt measurement=0;measurement<vismatrix.nrow();
 	         ++measurement) 
@@ -183,9 +183,9 @@ void ImplCalWeightSolver::formVisMatrix(const Matrix<Double> &feed_offsets,
 // pa - parallactic angle to rotate all source offsets (in radians)
 // if skycat!="", a table with this name will be filled with the offsets
 // w.r.t. the dish pointing centre
-void ImplCalWeightSolver::formVPMatrix(const casa::Matrix<casa::Double> &feed_offsets,
-                    casa::Double pa, const casa::String &skycat)
-                    const throw(casa::AipsError)
+void ImplCalWeightSolver::formVPMatrix(const casacore::Matrix<casacore::Double> &feed_offsets,
+                    casacore::Double pa, const casacore::String &skycat)
+                    const throw(casacore::AipsError)
 {
   if (vp_real==NULL) 
      throw AipsError("A vp image should be set before calling formVPMatrix");
@@ -266,7 +266,7 @@ void ImplCalWeightSolver::formVPMatrix(const casa::Matrix<casa::Double> &feed_of
 	         Double m2=m0-feed_offsets(feed2,1);
 	         if (!getVPValue(visbuf2,l2,m2)) continue;
 		 vismatrix(feed1,feed2)+=visbuf1*conj(visbuf2)*
-		                 casa::Double(real(flux.value()[0]));
+		                 casacore::Double(real(flux.value()[0]));
 	    }
        }
   }  
@@ -280,10 +280,10 @@ void ImplCalWeightSolver::formVPMatrix(const casa::Matrix<casa::Double> &feed_of
 // pa - parallactic angle to rotate all source offsets (in radians)
 // if skycat!="", a table with this name will be filled with the offsets
 // w.r.t. the dish pointing centre
-casa::Matrix<casa::Complex>
-ImplCalWeightSolver::calBasis(const casa::Matrix<casa::Double> &feed_offsets,
-               casa::uInt ndim, casa::Double pa, const casa::String &skycat)
-     	                      const throw(casa::AipsError)
+casacore::Matrix<casacore::Complex>
+ImplCalWeightSolver::calBasis(const casacore::Matrix<casacore::Double> &feed_offsets,
+               casacore::uInt ndim, casacore::Double pa, const casacore::String &skycat)
+     	                      const throw(casacore::AipsError)
 {
   if (ndim>feed_offsets.nrow())
       throw AipsError("The dimension of the basis can not be greater than the number of feeds");
@@ -291,7 +291,7 @@ ImplCalWeightSolver::calBasis(const casa::Matrix<casa::Double> &feed_offsets,
   //QFSumOptimizer qfso;
   //qfso.solve(vismatrix,ndim);
   //return qfso.getBasis();
-  return casa::Matrix<casa::Complex>();
+  return casacore::Matrix<casacore::Complex>();
 }
 
 
@@ -302,10 +302,10 @@ ImplCalWeightSolver::calBasis(const casa::Matrix<casa::Double> &feed_offsets,
 // pa - parallactic angle to rotate all source offsets (in radians)
 // if skycat!="", a table with this name will be filled with the offsets
 // w.r.t. the dish pointing centre
-casa::Matrix<casa::Complex>
-ImplCalWeightSolver::eigenWeights(const casa::Matrix<casa::Double>
-                    &feed_offsets, casa::Double pa,
-		    const casa::String &skycat)  const throw(casa::AipsError)
+casacore::Matrix<casacore::Complex>
+ImplCalWeightSolver::eigenWeights(const casacore::Matrix<casacore::Double>
+                    &feed_offsets, casacore::Double pa,
+		    const casacore::String &skycat)  const throw(casacore::AipsError)
 {
    formVPMatrix(feed_offsets,pa,skycat);
    /*
@@ -368,10 +368,10 @@ Bool ImplCalWeightSolver::getVPValue(Complex &val, Double l, Double m) const
   return True;
 }
 
-casa::Matrix<casa::Complex>
-    ImplCalWeightSolver::solveWeights(const casa::Matrix<casa::Double> &feed_offsets,
-	     const casa::Vector<casa::Double> &uvw) const
-                                  throw(casa::AipsError)
+casacore::Matrix<casacore::Complex>
+    ImplCalWeightSolver::solveWeights(const casacore::Matrix<casacore::Double> &feed_offsets,
+	     const casacore::Vector<casacore::Double> &uvw) const
+                                  throw(casacore::AipsError)
 {
   if (vp_real==NULL || vp_imag==NULL)
       throw AipsError("VP image must be set before calling solveWeights");
@@ -386,6 +386,6 @@ casa::Matrix<casa::Complex>
   */  
   //EqSolver solver(vismatrix);
   //return solver.solveWeights();
-  return casa::Matrix<casa::Complex>();
+  return casacore::Matrix<casacore::Complex>();
 }
 

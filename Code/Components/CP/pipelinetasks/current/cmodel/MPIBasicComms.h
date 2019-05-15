@@ -69,7 +69,7 @@ class MPIBasicComms {
 
         std::vector<askap::cp::sms::client::Component> receiveComponents(int source);
 
-        void sumImages(casa::ImageInterface<casa::Float>& image, int root);
+        void sumImages(casacore::ImageInterface<casacore::Float>& image, int root);
 
         void signalReady(int dest);
 

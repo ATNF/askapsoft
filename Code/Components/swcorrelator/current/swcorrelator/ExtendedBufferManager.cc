@@ -232,7 +232,7 @@ void ExtendedBufferManager::releaseBuffers(const BufferSet &ids) const
 /// @note It is assumed that the lock had been aquired
 bool ExtendedBufferManager::notAllReleased() const
 { 
-  for (casa::uInt index = 0; index < itsReleaseFlags.nelements(); ++index) {
+  for (casacore::uInt index = 0; index < itsReleaseFlags.nelements(); ++index) {
        if (itsReleaseFlags[index]) {
            return true;
        }

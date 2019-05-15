@@ -93,7 +93,7 @@ BeamScatterTask::BeamScatterTask(const LOFAR::ParameterSet& parset,
             "This task is intended to be used in parallel mode only");
     ASKAPCHECK(itsNStreams > 0, "Beam scatter task needs non-zero number of streams");
     // we implicitly assume the following in MPI code
-    ASKAPASSERT(sizeof(casa::Bool) == sizeof(char));
+    ASKAPASSERT(sizeof(casacore::Bool) == sizeof(char));
 }
 
 BeamScatterTask::~BeamScatterTask()
@@ -130,7 +130,7 @@ void BeamScatterTask::process(VisChunk::ShPtr& chunk)
            ASKAPCHECK(chunk->nRow() == itsBeam.nelements(), "Number of rows changed since the first iteration, this is unexpected");
            ASKAPDEBUGASSERT(itsBeam.nelements() == itsAntenna1.nelements());
            ASKAPDEBUGASSERT(itsBeam.nelements() == itsAntenna2.nelements());
-           for (casa::uInt row = 0; row<chunk->nRow(); ++row) {
+           for (casacore::uInt row = 0; row<chunk->nRow(); ++row) {
                 ASKAPCHECK(chunk->beam1()[row] == itsBeam[row], "Beam number mismatch for row "<<row);
                 ASKAPCHECK(chunk->beam2()[row] == itsBeam[row], "Beam number mismatch for row "<<row);
                 ASKAPCHECK(chunk->antenna1()[row] == itsAntenna1[row], "Antenna 1 number mismatch for row "<<row);
@@ -403,13 +403,13 @@ void BeamScatterTask::initialiseSplit(const askap::cp::common::VisChunk::ShPtr& 
       // figure out parameters
       ASKAPCHECK(chunk, "First stream is supposed to have input data");
       // build map beamID: start row, end row
-      std::map<casa::uInt, std::pair<casa::uInt, casa::uInt> > beamRowMap;
-      for (casa::uInt row = 0; row < chunk->nRow(); ++row) {
-           const casa::uInt beam = chunk->beam1()[row];
+      std::map<casacore::uInt, std::pair<casacore::uInt, casacore::uInt> > beamRowMap;
+      for (casacore::uInt row = 0; row < chunk->nRow(); ++row) {
+           const casacore::uInt beam = chunk->beam1()[row];
            ASKAPCHECK(chunk->beam2()[row] == beam, "Correlations between different beams are not supported (row="<<row<<")");
-           const std::map<casa::uInt, std::pair<casa::uInt, casa::uInt> >::iterator it = beamRowMap.find(beam);
+           const std::map<casacore::uInt, std::pair<casacore::uInt, casacore::uInt> >::iterator it = beamRowMap.find(beam);
            if (it == beamRowMap.end()) {
-               beamRowMap[beam] = std::pair<casa::uInt, casa::uInt>(row, row);
+               beamRowMap[beam] = std::pair<casacore::uInt, casacore::uInt>(row, row);
            } else {
                ASKAPCHECK(row == it->second.second + 1, "Data corresponding to beam "<<beam<<" seem to spread across non-contiguous blocks of rows. Not supported.");
                it->second.second = row;
@@ -420,14 +420,14 @@ void BeamScatterTask::initialiseSplit(const askap::cp::common::VisChunk::ShPtr& 
 
       // the following logic is required because there could be gaps in beam space (data container is a sparse array)
 
-      std::vector<std::pair<casa::uInt, casa::uInt> > streamRowMap(itsNStreams, std::pair<casa::uInt, casa::uInt>(0u, 0u));
-      const casa::uInt beamsPerStream = beamRowMap.size() % itsNStreams == 0 ? beamRowMap.size() / itsNStreams : beamRowMap.size() / (itsNStreams - 1);
-      std::map<casa::uInt, std::pair<casa::uInt, casa::uInt> >::const_iterator ci = beamRowMap.begin();
+      std::vector<std::pair<casacore::uInt, casacore::uInt> > streamRowMap(itsNStreams, std::pair<casacore::uInt, casacore::uInt>(0u, 0u));
+      const casacore::uInt beamsPerStream = beamRowMap.size() % itsNStreams == 0 ? beamRowMap.size() / itsNStreams : beamRowMap.size() / (itsNStreams - 1);
+      std::map<casacore::uInt, std::pair<casacore::uInt, casacore::uInt> >::const_iterator ci = beamRowMap.begin();
 
-      casa::uInt lastRow = 0;
+      casacore::uInt lastRow = 0;
       for (size_t stream = 0; stream < streamRowMap.size(); ++stream) {
-           std::vector<casa::uInt> handledBeams; 
-           for (casa::uInt beamNo = 0; beamNo < beamsPerStream; ++beamNo) {
+           std::vector<casacore::uInt> handledBeams; 
+           for (casacore::uInt beamNo = 0; beamNo < beamsPerStream; ++beamNo) {
                 if (ci != beamRowMap.end()) {
                     if (beamNo == 0) {
                         streamRowMap[stream] = ci->second;
@@ -458,8 +458,8 @@ void BeamScatterTask::initialiseSplit(const askap::cp::common::VisChunk::ShPtr& 
 
       //1) scatter rows dealt with by this particular stream (stream number is the local rank in the intra-group communicator) 
       
-      ASKAPDEBUGASSERT(sizeof(std::pair<casa::uInt, casa::uInt>) == 2 * sizeof(uint32_t));
-      casa::uInt tempBuf[2] = {lastRow + 1, lastRow + 1};
+      ASKAPDEBUGASSERT(sizeof(std::pair<casacore::uInt, casacore::uInt>) == 2 * sizeof(uint32_t));
+      casacore::uInt tempBuf[2] = {lastRow + 1, lastRow + 1};
       const int response = MPI_Scatter((void*)streamRowMap.data(), 2, MPI_UNSIGNED, &tempBuf, 2, MPI_UNSIGNED, 0, itsCommunicator);
       ASKAPCHECK(response == MPI_SUCCESS, "Erroneous response from MPI_Scatter = "<<response);
       // consistency checks - we rely on the exect structure of the data
@@ -472,7 +472,7 @@ void BeamScatterTask::initialiseSplit(const askap::cp::common::VisChunk::ShPtr& 
       itsRowCounts.resize(itsNStreams);
       itsRowOffsets.resize(itsNStreams);
       for (size_t stream = 0; stream < streamRowMap.size(); ++stream) {
-           const std::pair<casa::uInt, casa::uInt> rowsForThisStream = streamRowMap[stream];
+           const std::pair<casacore::uInt, casacore::uInt> rowsForThisStream = streamRowMap[stream];
            ASKAPASSERT(rowsForThisStream.first < rowsForThisStream.second);
            itsRowCounts[stream] = rowsForThisStream.second - rowsForThisStream.first + 1;
            itsRowOffsets[stream] = rowsForThisStream.first;
@@ -505,14 +505,14 @@ void BeamScatterTask::initialiseSplit(const askap::cp::common::VisChunk::ShPtr& 
 /// (on other ranks of the local communicator). It is the requirement that
 /// the shape is correctly initialised before calling this method.
 template<typename T>
-void BeamScatterTask::scatterCube(casa::Cube<T> &cube) const
+void BeamScatterTask::scatterCube(casacore::Cube<T> &cube) const
 {
-  // due to unfavourable layout of casa::Cube data storage, we can't use the similar approach to 
+  // due to unfavourable layout of casacore::Cube data storage, we can't use the similar approach to 
   // scatterVector. At this stage, do the job with extra copy 
 
   ASKAPDEBUGASSERT(itsHandledRows.second > itsHandledRows.first);
-  const casa::uInt expectedNumberOfRows = itsHandledRows.second - itsHandledRows.first + 1;
-  const casa::uInt elementsPerRow = cube.ncolumn() * cube.nplane();
+  const casacore::uInt expectedNumberOfRows = itsHandledRows.second - itsHandledRows.first + 1;
+  const casacore::uInt elementsPerRow = cube.ncolumn() * cube.nplane();
   if (localRank() == 0) {
       ASKAPDEBUGASSERT(itsNStreams > 1);
       ASKAPASSERT(itsRowCounts[0] == static_cast<int>(expectedNumberOfRows));
@@ -535,16 +535,16 @@ void BeamScatterTask::scatterCube(casa::Cube<T> &cube) const
            // are any benefits in terms of performance). However, separating it this way may allow parallelisation if we are desperate for
            // extra peformance and/or replacing scatter call with individual (and perhaps asynchronous) sends, when the data for the 
            // particular rank are ready).
-           casa::Slicer curStreamDataSlicer(casa::IPosition(3,*ci2, 0, 0), casa::IPosition(3, *ci1, cube.ncolumn(), cube.nplane()));
-           typename casa::Cube<T> curStreamData = cube(curStreamDataSlicer);
+           casacore::Slicer curStreamDataSlicer(casacore::IPosition(3,*ci2, 0, 0), casacore::IPosition(3, *ci1, cube.ncolumn(), cube.nplane()));
+           typename casacore::Cube<T> curStreamData = cube(curStreamDataSlicer);
            // scale the offset and counts with elementsPerRow, now these are the offsets in flattened array of type T
            (*ci1) *= elementsPerRow;
            (*ci2) *= elementsPerRow;
            ASKAPASSERT(static_cast<int>(curStreamData.nelements()) == *ci1);
            {
               // perform the copy and keep the order the same as for the target container - this way we don't need transpose on the receive side
-              typename casa::Array<T> bufReference;
-              bufReference.takeStorage(curStreamData.shape(), sndBuffer.get() + (*ci2), casa::SHARE);
+              typename casacore::Array<T> bufReference;
+              bufReference.takeStorage(curStreamData.shape(), sndBuffer.get() + (*ci2), casacore::SHARE);
               bufReference = curStreamData;
            }
 
@@ -572,15 +572,15 @@ void BeamScatterTask::scatterCube(casa::Cube<T> &cube) const
 /// @param[in,out] vec vector for both input (on local rank 0) and output
 /// (on other ranks of the local communicator)
 template<typename T>
-void  BeamScatterTask::scatterVector(casa::Vector<T> &vec) const
+void  BeamScatterTask::scatterVector(casacore::Vector<T> &vec) const
 {
   ASKAPDEBUGASSERT(itsHandledRows.second > itsHandledRows.first);
-  const casa::uInt expectedSize = itsHandledRows.second - itsHandledRows.first + 1;
+  const casacore::uInt expectedSize = itsHandledRows.second - itsHandledRows.first + 1;
   if (localRank() == 0) {
       ASKAPDEBUGASSERT(itsNStreams == static_cast<int>(itsRowCounts.size()));
       ASKAPDEBUGASSERT(itsNStreams == static_cast<int>(itsRowOffsets.size()));
       ASKAPASSERT(vec.contiguousStorage());
-      typename casa::Vector<T> tempBuf(expectedSize); // for cross-check
+      typename casacore::Vector<T> tempBuf(expectedSize); // for cross-check
       ASKAPASSERT(tempBuf.contiguousStorage());
       ASKAPDEBUGASSERT(itsNStreams > 1);
       ASKAPASSERT(itsRowCounts[0] == static_cast<int>(expectedSize));
@@ -605,7 +605,7 @@ void  BeamScatterTask::scatterVector(casa::Vector<T> &vec) const
           ASKAPCHECK(response == MPI_SUCCESS, "Erroneous response from MPI_Scatterv = "<<response);
       }
       // consistency check
-      for (casa::uInt row = 0; row < expectedSize; ++row) {
+      for (casacore::uInt row = 0; row < expectedSize; ++row) {
            ASKAPCHECK(MPITraitsHelper<T>::equal(tempBuf[row],vec[row + itsRowOffsets[0]]), "Data mismatch detected in MPI collective");
       }
   } else {
@@ -622,15 +622,15 @@ void  BeamScatterTask::scatterVector(casa::Vector<T> &vec) const
 /// @brief specialisation to scatter vector of MVDirections
 /// @param[in,out] vec vector for both input (on local rank 0) and output
 /// (on other ranks of the local communicator)
-void BeamScatterTask::scatterVector(casa::Vector<casa::MVDirection> &vec) const
+void BeamScatterTask::scatterVector(casacore::Vector<casacore::MVDirection> &vec) const
 {
    // quick and dirty way of scattering vector of MVDirections
    // relying on internal representation is probably too dangerous here
-   casa::Vector<casa::RigidVector<casa::Double, 3> > mvdBuf(vec.nelements());
+   casacore::Vector<casacore::RigidVector<casacore::Double, 3> > mvdBuf(vec.nelements());
    if (localRank() == 0) {
        // pack data in the buffer
-       for (casa::uInt row=0; row<vec.nelements(); ++row) {
-            const casa::Vector<casa::Double> representation = vec[row].getVector();
+       for (casacore::uInt row=0; row<vec.nelements(); ++row) {
+            const casacore::Vector<casacore::Double> representation = vec[row].getVector();
             ASKAPDEBUGASSERT(representation.nelements() == 3);
             mvdBuf[row] = representation;
        }
@@ -641,7 +641,7 @@ void BeamScatterTask::scatterVector(casa::Vector<casa::MVDirection> &vec) const
        if (vec.nelements() != mvdBuf.nelements()) {
            vec.resize(mvdBuf.nelements());
        }
-       for (casa::uInt row=0; row<vec.nelements(); ++row) {
+       for (casacore::uInt row=0; row<vec.nelements(); ++row) {
             vec[row].putVector(mvdBuf[row].vector());
        }
    }
@@ -698,7 +698,7 @@ void BeamScatterTask::broadcastRIFields(askap::cp::common::VisChunk::ShPtr& chun
       // 2) initialise chunk
       ASKAPDEBUGASSERT(itsHandledRows.second > itsHandledRows.first);
       ASKAPCHECK(itsHandledRows.second < buffer[1], "Selected row numbers for this stream exceed the number of rows available");
-      const casa::uInt expectedSize = itsHandledRows.second - itsHandledRows.first + 1;
+      const casacore::uInt expectedSize = itsHandledRows.second - itsHandledRows.first + 1;
       
       //ASKAPLOG_DEBUG_STR(logger, "Initialising chunk for "<<buffer[2]<<" channels, "<<
       //                   buffer[3]<<" polarisations and "<<buffer[4]<<" antennas, but for "<<expectedSize<<" rows");
@@ -744,7 +744,7 @@ void BeamScatterTask::broadcastRIFields(askap::cp::common::VisChunk::ShPtr& chun
 /// @details
 /// @param[in,out] chunk the instance of VisChunk to work with
 /// @param[in] newNRows new number of rows
-void BeamScatterTask::trimChunk(askap::cp::common::VisChunk::ShPtr& chunk, casa::uInt newNRows)
+void BeamScatterTask::trimChunk(askap::cp::common::VisChunk::ShPtr& chunk, casacore::uInt newNRows)
 {
   // note - code largely untested, only used to study performance, i.e. scientific content is not preserved / dealt with correctly yet
   ASKAPLOG_DEBUG_STR(logger, "Trimming chunk to contain "<<newNRows<<" rows");
@@ -777,7 +777,7 @@ void BeamScatterTask::trimChunk(askap::cp::common::VisChunk::ShPtr& chunk, casa:
   // the file but with non-zero index
   newChunk->beamOffsets().assign(chunk->beamOffsets());
 
-  const casa::Slicer vecSlicer(casa::IPosition(1,0), casa::IPosition(1,newNRows));
+  const casacore::Slicer vecSlicer(casacore::IPosition(1,0), casacore::IPosition(1,newNRows));
   
   // have to copy row-dependent vectors to ensure they're contiguous
   newChunk->antenna1().assign(chunk->antenna1()(vecSlicer).copy());
@@ -789,11 +789,11 @@ void BeamScatterTask::trimChunk(askap::cp::common::VisChunk::ShPtr& chunk, casa:
   newChunk->phaseCentre().assign(chunk->phaseCentre()(vecSlicer).copy());
   newChunk->uvw().assign(chunk->uvw()(vecSlicer).copy());
   
-  casa::IPosition shape = chunk->visibility().shape();
+  casacore::IPosition shape = chunk->visibility().shape();
   ASKAPASSERT(chunk->flag().shape() == shape);
   ASKAPASSERT(shape.nelements() == 3);
   shape[0] = newNRows;
-  const casa::Slicer cubeSlicer(casa::IPosition(3,0,0,0), shape);
+  const casacore::Slicer cubeSlicer(casacore::IPosition(3,0,0,0), shape);
 
 
   // have to copy row-dependent cubes to ensure they're contiguous

@@ -48,8 +48,8 @@ ASKAP_LOGGER(logger, ".FeedConfig");
 using namespace askap;
 using namespace askap::cp::ingest;
 
-FeedConfig::FeedConfig(const casa::Matrix<casa::Quantity>& offsets,
-                       const casa::Vector<casa::String>& pols) :
+FeedConfig::FeedConfig(const casacore::Matrix<casacore::Quantity>& offsets,
+                       const casacore::Vector<casacore::String>& pols) :
         itsOffsets(offsets), itsPols(pols)
 {
     ASKAPCHECK(offsets.ncolumn() == 2,
@@ -60,7 +60,7 @@ FeedConfig::FeedConfig(const casa::Matrix<casa::Quantity>& offsets,
                "shape of offsets matrix and polarisations vector not consistent");
 
     // Ensure all offsets conform to radians
-    casa::Matrix<casa::Quantity>::const_iterator it;
+    casacore::Matrix<casacore::Quantity>::const_iterator it;
 
     for (it = itsOffsets.begin(); it != itsOffsets.end(); ++it) {
         ASKAPCHECK(it->isConform("rad"), "Offset must conform to radians");
@@ -87,28 +87,28 @@ FeedConfig& FeedConfig::operator=(const FeedConfig &other)
 }
 
 
-casa::Quantity FeedConfig::offsetX(casa::uInt i) const
+casacore::Quantity FeedConfig::offsetX(casacore::uInt i) const
 {
     ASKAPCHECK(i < itsOffsets.nrow(),
                "Feed index out of bounds");
     return itsOffsets(i, 0);
 }
 
-casa::Quantity FeedConfig::offsetY(casa::uInt i) const
+casacore::Quantity FeedConfig::offsetY(casacore::uInt i) const
 {
     ASKAPCHECK(i < itsOffsets.nrow(),
                "Feed index out of bounds");
     return itsOffsets(i, 1);
 }
 
-casa::String FeedConfig::pol(casa::uInt i) const
+casacore::String FeedConfig::pol(casacore::uInt i) const
 {
     ASKAPCHECK(i < itsPols.nelements(),
                "Feed index out of bounds");
     return itsPols(i);
 }
 
-casa::uInt FeedConfig::nFeeds(void) const
+casacore::uInt FeedConfig::nFeeds(void) const
 {
     return itsOffsets.nrow();
 }
@@ -118,12 +118,12 @@ casa::uInt FeedConfig::nFeeds(void) const
 /// format of the VisChunk buffer (i.e. 2 x nBeam matrix with offsets in radians).
 /// It is not clear whether this method is going to be useful long term
 /// @param[in] buffer the matrix to fill. It is resized, if necessary.
-void FeedConfig::fillMatrix(casa::Matrix<casa::Double> &buffer) const
+void FeedConfig::fillMatrix(casacore::Matrix<casacore::Double> &buffer) const
 {
    if (buffer.nrow() != 2 || buffer.ncolumn() != nFeeds()) {
        buffer.resize(2, nFeeds());
    }
-   for (casa::uInt beam = 0; beam < buffer.ncolumn(); ++beam) {
+   for (casacore::uInt beam = 0; beam < buffer.ncolumn(); ++beam) {
         buffer(0, beam) = itsOffsets(beam, 0).getValue("rad");
         buffer(1, beam) = itsOffsets(beam, 1).getValue("rad");
    }

@@ -58,12 +58,12 @@ class DistributedImageWriter : public ImageWriter {
         /// nothing here.
         void create();
 
-        void write(const casa::Array<casa::Float> &data,
-                   const casa::IPosition &loc,
+        void write(const casacore::Array<casacore::Float> &data,
+                   const casacore::IPosition &loc,
                    bool accumulate = false);
 
-        void write(const casa::MaskedArray<casa::Float> &data,
-                   const casa::IPosition &loc, bool accumulate);
+        void write(const casacore::MaskedArray<casacore::Float> &data,
+                   const casacore::IPosition &loc, bool accumulate);
 
         /// @details Handles distributed writing of the requested
         /// data. When in parallel mode, the master cycles through the
@@ -75,9 +75,9 @@ class DistributedImageWriter : public ImageWriter {
         /// ImageWriter and the mask using the writeMask function,
         /// then send an OK signal back to the master.  In serial
         /// mode, we directly call ImageWriter::write.
-        void write(const casa::Array<casa::Float> &data,
-                   const casa::Array<bool> &mask,
-                   const casa::IPosition &loc, bool accumulate);
+        void write(const casacore::Array<casacore::Float> &data,
+                   const casacore::Array<bool> &mask,
+                   const casacore::IPosition &loc, bool accumulate);
 
     protected:
 

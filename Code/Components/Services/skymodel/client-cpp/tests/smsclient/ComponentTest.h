@@ -49,12 +49,12 @@ class ComponentTest : public CppUnit::TestFixture {
 
     public:
         void setUp() {
-            itsRA = casa::Quantity(187.5, "deg");
-            itsDec = casa::Quantity(-45.0, "deg");
-            itsPositionAngle = casa::Quantity(1.0, "rad");
-            itsMajorAxis = casa::Quantity(12.0, "arcsec");
-            itsMinorAxis = casa::Quantity(8.0, "arcsec");
-            itsI1400 = casa::Quantity(0.1, "Jy");
+            itsRA = casacore::Quantity(187.5, "deg");
+            itsDec = casacore::Quantity(-45.0, "deg");
+            itsPositionAngle = casacore::Quantity(1.0, "rad");
+            itsMajorAxis = casacore::Quantity(12.0, "arcsec");
+            itsMinorAxis = casacore::Quantity(8.0, "arcsec");
+            itsI1400 = casacore::Quantity(0.1, "Jy");
             itsSpectralIndex = -0.1;
             itsSpectralCurvature = 0.01;
         };
@@ -64,8 +64,8 @@ class ComponentTest : public CppUnit::TestFixture {
 
         void testConstructor() {
             // Test with various non-conformant units
-            casa::Quantity conformJy(0.1, "Jy");
-            casa::Quantity conformDeg(187.5, "deg");
+            casacore::Quantity conformJy(0.1, "Jy");
+            casacore::Quantity conformDeg(187.5, "deg");
             CPPUNIT_ASSERT_THROW(Component(1l,conformJy, itsDec, itsPositionAngle,
                     itsMajorAxis, itsMinorAxis, itsI1400, itsSpectralIndex, itsSpectralCurvature), askap::AskapError);
             CPPUNIT_ASSERT_THROW(Component(1l,itsRA, conformJy, itsPositionAngle,
@@ -100,14 +100,14 @@ class ComponentTest : public CppUnit::TestFixture {
         }
 
         private:
-        casa::Quantity itsRA;
-        casa::Quantity itsDec;
-        casa::Quantity itsPositionAngle;
-        casa::Quantity itsMajorAxis;
-        casa::Quantity itsMinorAxis;
-        casa::Quantity itsI1400;
-        casa::Double itsSpectralIndex;
-        casa::Double itsSpectralCurvature;
+        casacore::Quantity itsRA;
+        casacore::Quantity itsDec;
+        casacore::Quantity itsPositionAngle;
+        casacore::Quantity itsMajorAxis;
+        casacore::Quantity itsMinorAxis;
+        casacore::Quantity itsI1400;
+        casacore::Double itsSpectralIndex;
+        casacore::Double itsSpectralCurvature;
 };
 
 }

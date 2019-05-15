@@ -46,23 +46,23 @@ class ParsetAccessor : public ISolutionAccessor {
         ParsetAccessor(const LOFAR::ParameterSet& parset);
 
         /// @see ISolutionAccessor::getGain
-        virtual casa::Complex getGain(casa::uInt ant,
-                                      casa::uInt beam,
+        virtual casacore::Complex getGain(casacore::uInt ant,
+                                      casacore::uInt beam,
                                       ISolutionAccessor::Pol pol,
-                                      casa::Bool& valid) const;
+                                      casacore::Bool& valid) const;
 
         /// @see ISolutionAccessor::getLeakage
-        virtual casa::Complex getLeakage(casa::uInt ant,
-                                         casa::uInt beam,
+        virtual casacore::Complex getLeakage(casacore::uInt ant,
+                                         casacore::uInt beam,
                                          ISolutionAccessor::LeakageTerm term,
-                                         casa::Bool& valid) const;
+                                         casacore::Bool& valid) const;
 
         /// @see ISolutionAccessor::getBandpass
-        virtual casa::Complex getBandpass(casa::uInt ant,
-                                          casa::uInt beam,
-                                          casa::uInt chan,
+        virtual casacore::Complex getBandpass(casacore::uInt ant,
+                                          casacore::uInt beam,
+                                          casacore::uInt chan,
                                           ISolutionAccessor::Pol pol,
-                                          casa::Bool& valid) const;
+                                          casacore::Bool& valid) const;
 
     private:
         /// @brief Helper method to load complex parameter
@@ -70,7 +70,7 @@ class ParsetAccessor : public ISolutionAccessor {
         /// forms a complex number.
         /// @param[in] name parameter name
         /// @return complex number
-        casa::Complex readComplex(const std::string &name) const;
+        casacore::Complex readComplex(const std::string &name) const;
 
         const LOFAR::ParameterSet itsParset;
 };

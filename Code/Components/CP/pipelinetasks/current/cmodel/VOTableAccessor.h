@@ -59,10 +59,10 @@ class VOTableAccessor : public IGlobalSkyModel {
 
         /// @see askap::cp::pipelinetasks::IGlobalSkyModel::coneSearch
         virtual askap::cp::sms::client::ComponentListPtr coneSearch(
-                const casa::Quantity& ra,
-                const casa::Quantity& dec,
-                const casa::Quantity& searchRadius,
-                const casa::Quantity& fluxLimit);
+                const casacore::Quantity& ra,
+                const casacore::Quantity& dec,
+                const casacore::Quantity& searchRadius,
+                const casacore::Quantity& fluxLimit);
 
     private:
 
@@ -87,7 +87,7 @@ class VOTableAccessor : public IGlobalSkyModel {
         /// @param[out] unitMap maps FieldEnum to units
         static void initFieldInfo(const std::vector<askap::accessors::VOTableField>& fields,
                 std::map<VOTableAccessor::FieldEnum, size_t>& posMap,
-                std::map<VOTableAccessor::FieldEnum, casa::Unit>& unitMap);
+                std::map<VOTableAccessor::FieldEnum, casacore::Unit>& unitMap);
 
         /// Check if the given UCD is found in the UCD attribute of the field.
         ///
@@ -100,22 +100,22 @@ class VOTableAccessor : public IGlobalSkyModel {
         /// Process a row from the VOTable, creating a Component object and
         /// adding to the the "list".
         void processRow(const std::vector<std::string>& cells,
-                const casa::Quantity& searchRA,
-                const casa::Quantity& searchDec,
-                const casa::Quantity& searchRadius,
-                const casa::Quantity& fluxLimit,
+                const casacore::Quantity& searchRA,
+                const casacore::Quantity& searchDec,
+                const casacore::Quantity& searchRadius,
+                const casacore::Quantity& fluxLimit,
                 std::map<VOTableAccessor::FieldEnum, size_t>& posMap,
-                std::map<VOTableAccessor::FieldEnum, casa::Unit>& unitMap,
+                std::map<VOTableAccessor::FieldEnum, casacore::Unit>& unitMap,
                 std::list<askap::cp::sms::client::Component>& list);
 
         /// Filename of the VOTable
         const std::string itsFilename;
 
         /// Count of components below the flux limit
-        casa::uLong itsBelowFluxLimit;
+        casacore::uLong itsBelowFluxLimit;
 
         /// Count of components outside of the search radius
-        casa::uLong itsOutsideSearchCone;
+        casacore::uLong itsOutsideSearchCone;
 };
 
 }

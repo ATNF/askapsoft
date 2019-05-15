@@ -65,46 +65,46 @@ class BaselineMapTest : public CppUnit::TestFixture {
             params.add("4","[3,1,YY]");
             BaselineMap bm(params);
 
-            CPPUNIT_ASSERT_EQUAL(1, bm.getID(1,3,casa::Stokes::XY));
+            CPPUNIT_ASSERT_EQUAL(1, bm.getID(1,3,casacore::Stokes::XY));
             CPPUNIT_ASSERT_EQUAL(4, bm.maxID());
             CPPUNIT_ASSERT_EQUAL(size_t(3), bm.size());
             CPPUNIT_ASSERT_EQUAL(0, bm.idToAntenna1(0));
             CPPUNIT_ASSERT_EQUAL(0, bm.idToAntenna2(0));
-            CPPUNIT_ASSERT_EQUAL(casa::Stokes::XX, bm.idToStokes(0));
+            CPPUNIT_ASSERT_EQUAL(casacore::Stokes::XX, bm.idToStokes(0));
             CPPUNIT_ASSERT_EQUAL(1, bm.idToAntenna1(1));
             CPPUNIT_ASSERT_EQUAL(3, bm.idToAntenna2(1));
-            CPPUNIT_ASSERT_EQUAL(casa::Stokes::XY, bm.idToStokes(1));
+            CPPUNIT_ASSERT_EQUAL(casacore::Stokes::XY, bm.idToStokes(1));
             CPPUNIT_ASSERT_EQUAL(3, bm.idToAntenna1(4));
             CPPUNIT_ASSERT_EQUAL(1, bm.idToAntenna2(4));
-            CPPUNIT_ASSERT_EQUAL(casa::Stokes::YY, bm.idToStokes(4));
+            CPPUNIT_ASSERT_EQUAL(casacore::Stokes::YY, bm.idToStokes(4));
 
-            CPPUNIT_ASSERT_EQUAL(0, testNoMatch(3,1,casa::Stokes::XX));
+            CPPUNIT_ASSERT_EQUAL(0, testNoMatch(3,1,casacore::Stokes::XX));
         };
 
-        int32_t testNoMatch(const int32_t ant1, const int32_t ant2, const casa::Stokes::StokesTypes pol) {
+        int32_t testNoMatch(const int32_t ant1, const int32_t ant2, const casacore::Stokes::StokesTypes pol) {
             LOFAR::ParameterSet params;
             params.add("baselineids","[0]");
             params.add("0","[3,1,XX]");
             BaselineMap bm(params);
 
-            CPPUNIT_ASSERT_EQUAL(0, bm.getID(3,1,casa::Stokes::XX));
+            CPPUNIT_ASSERT_EQUAL(0, bm.getID(3,1,casacore::Stokes::XX));
             CPPUNIT_ASSERT_EQUAL(0, bm.maxID());
             CPPUNIT_ASSERT_EQUAL(size_t(1), bm.size());
             return bm.getID(ant1,ant2,pol);
         }
         
         void testNoMatchAnt1() {
-            CPPUNIT_ASSERT_EQUAL(-1, testNoMatch(1, 1, casa::Stokes::XX));
+            CPPUNIT_ASSERT_EQUAL(-1, testNoMatch(1, 1, casacore::Stokes::XX));
         }
 
         void testNoMatchAnt2() {
-            CPPUNIT_ASSERT_EQUAL(-1, testNoMatch(3,2,casa::Stokes::XX));
+            CPPUNIT_ASSERT_EQUAL(-1, testNoMatch(3,2,casacore::Stokes::XX));
         }
 
         void testNoMatchPol() {
-            CPPUNIT_ASSERT_EQUAL(-1, testNoMatch(3, 1, casa::Stokes::XY));
-            CPPUNIT_ASSERT_EQUAL(-1, testNoMatch(3, 1, casa::Stokes::YY));
-            CPPUNIT_ASSERT_EQUAL(-1, testNoMatch(3, 1, casa::Stokes::XY));
+            CPPUNIT_ASSERT_EQUAL(-1, testNoMatch(3, 1, casacore::Stokes::XY));
+            CPPUNIT_ASSERT_EQUAL(-1, testNoMatch(3, 1, casacore::Stokes::YY));
+            CPPUNIT_ASSERT_EQUAL(-1, testNoMatch(3, 1, casacore::Stokes::XY));
         }
         void testSliceMap() {
             LOFAR::ParameterSet params;
@@ -153,13 +153,13 @@ class BaselineMapTest : public CppUnit::TestFixture {
             // check the first antenna
             const int ant1[21] = {0, 0, -1, -1, 0, 0, 0, -1, -1, 0, 0, -1, -1, -1, -1, -1, -1, -1, 1, 1, 1};
             const int ant2[21] = {0, 0, -1, -1, 1, 1, 0, -1, -1, 1, 1, -1, -1, -1, -1, -1, -1, -1, 1, 1, 1};
-            const casa::Stokes::StokesTypes stokes[21] = {casa::Stokes::XX, casa::Stokes::XY, 
-                      casa::Stokes::Undefined, casa::Stokes::Undefined, casa::Stokes::XX, casa::Stokes::XY, 
-                      casa::Stokes::YY, casa::Stokes::Undefined, casa::Stokes::Undefined, casa::Stokes::YX,
-                      casa::Stokes::YY,  casa::Stokes::Undefined, casa::Stokes::Undefined,  
-                      casa::Stokes::Undefined, casa::Stokes::Undefined, casa::Stokes::Undefined, 
-                      casa::Stokes::Undefined, casa::Stokes::Undefined, casa::Stokes::XX, 
-                      casa::Stokes::XY, casa::Stokes::YY};
+            const casacore::Stokes::StokesTypes stokes[21] = {casacore::Stokes::XX, casacore::Stokes::XY, 
+                      casacore::Stokes::Undefined, casacore::Stokes::Undefined, casacore::Stokes::XX, casacore::Stokes::XY, 
+                      casacore::Stokes::YY, casacore::Stokes::Undefined, casacore::Stokes::Undefined, casacore::Stokes::YX,
+                      casacore::Stokes::YY,  casacore::Stokes::Undefined, casacore::Stokes::Undefined,  
+                      casacore::Stokes::Undefined, casacore::Stokes::Undefined, casacore::Stokes::Undefined, 
+                      casacore::Stokes::Undefined, casacore::Stokes::Undefined, casacore::Stokes::XX, 
+                      casacore::Stokes::XY, casacore::Stokes::YY};
             for (int product = 0; product < 21; ++product) {
                  CPPUNIT_ASSERT_EQUAL(ant1[product], bm.idToAntenna1(product + 1));
                  CPPUNIT_ASSERT_EQUAL(ant2[product], bm.idToAntenna2(product + 1));
@@ -205,8 +205,8 @@ class BaselineMapTest : public CppUnit::TestFixture {
         }
         void testDefaultMap() {
             // we store the test map in the same directory this file is
-            const casa::Path thisFile(__FILE__);
-            casa::Path path2map(thisFile.dirName());
+            const casacore::Path thisFile(__FILE__);
+            casacore::Path path2map(thisFile.dirName());
             path2map.append("TestBaselineMap.parset");
             CPPUNIT_ASSERT(path2map.isValid());
             LOFAR::ParameterSet templateConfig(path2map.expandedName());

@@ -56,12 +56,12 @@ using std::endl;
 using namespace askap;
 using namespace askap::accessors;
 
-casa::Matrix<casa::Complex> flagOutliers(const casa::Matrix<casa::Complex> &in) {
+casacore::Matrix<casacore::Complex> flagOutliers(const casacore::Matrix<casacore::Complex> &in) {
   //return in;
-  casa::Matrix<casa::Complex> result(in);
-  for (casa::uInt row=0;row<result.nrow(); ++row) {
-       for (casa::uInt col=0; col<result.ncolumn(); ++col) {
-            if (casa::abs(result(row,col))>1) {
+  casacore::Matrix<casacore::Complex> result(in);
+  for (casacore::uInt row=0;row<result.nrow(); ++row) {
+       for (casacore::uInt col=0; col<result.ncolumn(); ++col) {
+            if (casacore::abs(result(row,col))>1) {
                 result(row,col) = 0.;
             }
        }
@@ -75,13 +75,13 @@ void process(const IConstDataSource &ds, size_t nAvg) {
   sel->chooseFeed(7);
   sel->chooseCrossCorrelations();
   IDataConverterPtr conv=ds.createConverter();  
-  conv->setFrequencyFrame(casa::MFrequency::Ref(casa::MFrequency::TOPO),"MHz");
-  conv->setEpochFrame(casa::MEpoch(casa::Quantity(55913.0,"d"),
-                      casa::MEpoch::Ref(casa::MEpoch::UTC)),"s");
-  conv->setDirectionFrame(casa::MDirection::Ref(casa::MDirection::J2000));                    
+  conv->setFrequencyFrame(casacore::MFrequency::Ref(casacore::MFrequency::TOPO),"MHz");
+  conv->setEpochFrame(casacore::MEpoch(casacore::Quantity(55913.0,"d"),
+                      casacore::MEpoch::Ref(casacore::MEpoch::UTC)),"s");
+  conv->setDirectionFrame(casacore::MDirection::Ref(casacore::MDirection::J2000));                    
   size_t counter = 0;
-  casa::Vector<casa::Complex> buf(3, casa::Complex(0.,0.));
-  casa::uInt nChan = 0;
+  casacore::Vector<casacore::Complex> buf(3, casacore::Complex(0.,0.));
+  casacore::uInt nChan = 0;
   double startTime = 0;
   double curTime = 0;
     
@@ -117,9 +117,9 @@ void process(const IConstDataSource &ds, size_t nAvg) {
            ASKAPCHECK(it->antenna2()[1] == it->antenna2()[2], "Expect baselines in the order 1-2,1-3 and 2-3");
        }
        //
-       casa::Vector<casa::Complex> freqAvBuf(3, casa::Complex(0.,0.));
-       for (casa::uInt ch=0; ch<it->nChannel(); ++ch) {
-            casa::Matrix<casa::Complex> allChan = flagOutliers(it->visibility().xyPlane(0));
+       casacore::Vector<casacore::Complex> freqAvBuf(3, casacore::Complex(0.,0.));
+       for (casacore::uInt ch=0; ch<it->nChannel(); ++ch) {
+            casacore::Matrix<casacore::Complex> allChan = flagOutliers(it->visibility().xyPlane(0));
             freqAvBuf += allChan.column(ch);
        }
        freqAvBuf /= float(it->nChannel());
@@ -132,23 +132,23 @@ void process(const IConstDataSource &ds, size_t nAvg) {
        
        if (++counter == nAvg) {
            buf /= float(nAvg);
-           const float phClosure = arg(useSWCorrelator ? buf[0]*buf[1]*conj(buf[2]) : buf[0]*conj(buf[1])*buf[2])/casa::C::pi*180.; 
+           const float phClosure = arg(useSWCorrelator ? buf[0]*buf[1]*conj(buf[2]) : buf[0]*conj(buf[1])*buf[2])/casacore::C::pi*180.; 
            os<<std::scientific<<std::setprecision(15)<<curTime/60.<<" "<<std::fixed<<std::setprecision(6)<<phClosure;
-           for (casa::uInt baseline = 0; baseline<3; ++baseline) {
-                os<<" "<<arg(buf[baseline])/casa::C::pi*180.;
+           for (casacore::uInt baseline = 0; baseline<3; ++baseline) {
+                os<<" "<<arg(buf[baseline])/casacore::C::pi*180.;
            }
            os<<std::endl;
-           buf.set(casa::Complex(0.,0.));
+           buf.set(casacore::Complex(0.,0.));
            counter = 0;
        }
        //cout<<"time: "<<it->time()<<endl;
   }
   if (counter!=0) {
       buf /= float(counter);
-      const float phClosure = arg(buf[0]*buf[1]*conj(buf[2]))/casa::C::pi*180.; 
+      const float phClosure = arg(buf[0]*buf[1]*conj(buf[2]))/casacore::C::pi*180.; 
       os<<std::scientific<<std::setprecision(15)<<curTime/60.<<" "<<std::fixed<<std::setprecision(6)<<phClosure;
-      for (casa::uInt baseline = 0; baseline<3; ++baseline) {
-           os<<" "<<arg(buf[baseline])/casa::C::pi*180.;
+      for (casacore::uInt baseline = 0; baseline<3; ++baseline) {
+           os<<" "<<arg(buf[baseline])/casacore::C::pi*180.;
       }
       os<<std::endl;
   }
@@ -162,7 +162,7 @@ int main(int argc, char **argv) {
 	 return -2;
      }
 
-     casa::Timer timer;
+     casacore::Timer timer;
 
      timer.mark();
      TableDataSource ds(argv[1],TableDataSource::MEMORY_BUFFERS);     

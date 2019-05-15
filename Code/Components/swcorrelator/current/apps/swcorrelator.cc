@@ -61,7 +61,7 @@ int main(int argc, const char** argv)
     signal(SIGTERM, &signalHandler);
 
     try {
-       casa::Timer timer;
+       casacore::Timer timer;
        timer.mark();
        
        cmdlineparser::Parser parser; // a command line parser

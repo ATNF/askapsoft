@@ -85,7 +85,7 @@ void QuackTask::process(askap::cp::common::VisChunk::ShPtr& chunk)
        } else {
           ASKAPLOG_DEBUG_STR(logger, "Cycle "<<itsNCyclesThisScan + 1<<" of scan "<<itsCountedScanNumber<<" - flagging all the data");
        }
-       chunk->flag().set(casa::True);
+       chunk->flag().set(casacore::True);
    } else {
        if (itsNCycles != 0 && (itsNCyclesThisScan == itsNCycles)) {
            if (itsVerboseRank) {

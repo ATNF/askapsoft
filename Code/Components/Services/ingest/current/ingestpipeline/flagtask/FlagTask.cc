@@ -84,18 +84,18 @@ void FlagTask::process(askap::cp::common::VisChunk::ShPtr& chunk)
         return;
     }
 
-    const casa::uInt nRow = chunk->nRow();
-    const casa::uInt nChannel = chunk->nChannel();
-    const casa::uInt nPol = chunk->nPol();
+    const casacore::uInt nRow = chunk->nRow();
+    const casacore::uInt nChannel = chunk->nChannel();
+    const casacore::uInt nPol = chunk->nPol();
 
-    casa::Cube<casa::Complex>& vis = chunk->visibility();
-    casa::Cube<casa::Bool>& flag = chunk->flag();
-    const casa::Vector<casa::uInt>& ant1 = chunk->antenna1();
-    const casa::Vector<casa::uInt>& ant2 = chunk->antenna2();
+    casacore::Cube<casacore::Complex>& vis = chunk->visibility();
+    casacore::Cube<casacore::Bool>& flag = chunk->flag();
+    const casacore::Vector<casacore::uInt>& ant1 = chunk->antenna1();
+    const casacore::Vector<casacore::uInt>& ant2 = chunk->antenna2();
 
-    for (casa::uInt pol = 0; pol < nPol; ++pol) {
-        for (casa::uInt chan = 0; chan < nChannel; ++chan) {
-            for (casa::uInt row = 0; row < nRow; ++row) {
+    for (casacore::uInt pol = 0; pol < nPol; ++pol) {
+        for (casacore::uInt chan = 0; chan < nChannel; ++chan) {
+            for (casacore::uInt row = 0; row < nRow; ++row) {
                 const bool isAuto = ant1(row) == ant2(row);
                 if (isAuto && !itsAutoCorrThresholdSet) continue;
                 if (!isAuto && !itsCrossCorrThresholdSet) continue;
