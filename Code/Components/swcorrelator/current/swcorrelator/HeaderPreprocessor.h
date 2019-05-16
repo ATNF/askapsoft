@@ -33,7 +33,7 @@
 #define ASKAP_SWCORRELATOR_HEADER_PREPROCESSOR
 
 // own includes
-#include <askap/IndexConverter.h>
+#include <askap/askap/IndexConverter.h>
 #include <swcorrelator/BufferHeader.h>
 
 // boost includes

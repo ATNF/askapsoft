@@ -37,7 +37,7 @@
 // own includes
 #include <swcorrelator/CorrProducts.h>
 #include <swcorrelator/ISink.h>
-#include <askap/IndexConverter.h>
+#include <askap/askap/IndexConverter.h>
 
 // casa includes
 #include "casacore/ms/MeasurementSets/MeasurementSet.h"

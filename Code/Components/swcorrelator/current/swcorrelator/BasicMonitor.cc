@@ -34,7 +34,7 @@
 #include <askap/askap/AskapLogging.h>
 #include <askap/askap/AskapError.h>
 #include <askap/askap/AskapUtil.h>
-#include <utils/DelayEstimator.h>
+#include <askap/scimath/utils/DelayEstimator.h>
 
 
 #include <fstream>

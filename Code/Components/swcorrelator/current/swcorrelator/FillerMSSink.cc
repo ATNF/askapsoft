@@ -409,7 +409,7 @@ void FillerMSSink::initAntennasAndBeams()
   /// antennas.ASKAP.antenna0=[x,y,z]
   /// ...
   for (int iant = 0; iant < nAnt; ++iant) {
-       const vector<double> xyz = antParset.getDoubleVector(antNames[iant]);
+       const std::vector<double> xyz = antParset.getDoubleVector(antNames[iant]);
        itsAntXYZ(iant,0) = xyz[0] * scale;
        itsAntXYZ(iant,1) = xyz[1] * scale;
        itsAntXYZ(iant,2) = xyz[2] * scale;
