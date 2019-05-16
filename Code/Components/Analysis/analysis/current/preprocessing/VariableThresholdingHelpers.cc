@@ -53,12 +53,13 @@ void slidingBoxStats(casacore::Array<Float> &input,
     ASKAPASSERT(input.shape() == spread.shape());
 
     if (useRobust) {
-        middle = slidingArrayMath(input, box, MedianFunc<Float>());
-        spread = slidingArrayMath(input, box, MadfmFunc<Float>()) /
+        middle = casacore::slidingArrayMath(input, box, MedianFunc<Float>());
+        spread = casacore::slidingArrayMath(input, box, MadfmFunc<Float>()) /
                  Statistics::correctionFactor;
     } else {
-        middle = slidingArrayMath(input, box, MeanFunc<Float>());
-        spread = slidingArrayMath(input, box, StddevFunc<Float>());
+        middle = casacore::slidingArrayMath(input, box, MeanFunc<Float>());
+	// now has an argument == dof
+        spread = casacore::slidingArrayMath(input, box, StddevFunc<Float>(1));
     }
 }
 
@@ -93,12 +94,12 @@ void slidingBoxMaskedStats(casacore::MaskedArray<Float> &input,
     ASKAPASSERT(input.shape() == spread.shape());
 
     if (useRobust) {
-        middle = slidingArrayMath(input, box, MaskedMedianFunc<Float>());
-        spread = slidingArrayMath(input, box, MaskedMadfmFunc<Float>()) /
+        middle = casacore::slidingArrayMath(input, box, MaskedMedianFunc<Float>());
+        spread = casacore::slidingArrayMath(input, box, MaskedMadfmFunc<Float>()) /
                  Statistics::correctionFactor;
     } else {
-        middle = slidingArrayMath(input, box, MaskedMeanFunc<Float>());
-        spread = slidingArrayMath(input, box, MaskedStddevFunc<Float>());
+        middle = casacore::slidingArrayMath(input, box, MaskedMeanFunc<Float>());
+        spread = casacore::slidingArrayMath(input, box, MaskedStddevFunc<Float>());
     }
 }
 

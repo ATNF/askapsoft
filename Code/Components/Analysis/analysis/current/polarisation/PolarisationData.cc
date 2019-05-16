@@ -94,7 +94,7 @@ void PolarisationData::initialise(CasdaComponent *comp)
     ASKAPASSERT(itsFrequencies.size() == size);
     itsLambdaSquared = casacore::Vector<Float>(size);
     for (unsigned int i = 0; i < size; i++) {
-        float lambda = QC::c.getValue() / itsFrequencies[i];
+        float lambda = QC::c().getValue() / itsFrequencies[i];
         itsLambdaSquared[i] = lambda * lambda;
     }
 

@@ -51,7 +51,7 @@
 ///@brief Where the log messages go.
 ASKAP_LOGGER(logger, ".matching");
 
-using namespace askap;
+//using namespace askap;
 
 namespace askap {
 

@@ -308,7 +308,7 @@ void SourceDataExtractor::verifyInputs()
                        "Image " << itsInputCubeList[0] << " does not match any requested Stokes");
         }
     }
-    ASKAPLOG_DEBUG_STR(logger, "CubeStokesMap: " << itsCubeStokesMap);
+    // ASKAPLOG_DEBUG_STR(logger, "CubeStokesMap: " << itsCubeStokesMap);
 
 }
 

@@ -39,7 +39,7 @@
 #include <askap/askap/Application.h>
 #include <askap/askap/AskapLogging.h>
 #include <askap/askap/AskapError.h>
-#include <askap/StatReporter.h>
+#include <askap/askap/StatReporter.h>
 #include <FITS/FITSparallel.h>
 #include <FITS/FITSfile.h>
 #include <Common/ParameterSet.h>

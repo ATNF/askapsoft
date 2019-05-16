@@ -119,7 +119,7 @@ using namespace LOFAR::TYPES;
 ASKAP_LOGGER(logger, ".parallelanalysis");
 
 using namespace std;
-using namespace askap;
+// using namespace askap;
 using namespace askap::askapparallel;
 using namespace askap::analysisutilities;
 

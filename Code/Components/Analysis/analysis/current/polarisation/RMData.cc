@@ -150,7 +150,7 @@ void RMData::calculate(RMSynthesis *rmsynth)
                               (float((numChan - 1) / numChan) + pow(lsqzero, 4) /
                                rmsynth->lsqVariance());
 
-        itsFracPol = itsPintPeak / rmsynth->imodel().flux(QC::c.getValue() / sqrt(lsqzero));
+        itsFracPol = itsPintPeak / rmsynth->imodel().flux(QC::c().getValue() / sqrt(lsqzero));
         itsFracPol_err = sqrt(itsPintPeak_err * itsPintPeak_err + noise * noise);
 
         // Define arrays used to find the complexity measures - built from the fractional polarisation spectrum in RMSynthesis.

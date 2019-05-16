@@ -31,7 +31,7 @@
 #include <askap/askapparallel/AskapParallel.h>
 #include <askap/askap/AskapLogging.h>
 #include <askap/askap/AskapError.h>
-#include <askap/Log4cxxLogSink.h>
+#include <askap/askap/Log4cxxLogSink.h>
 ASKAP_LOGGER(logger, ".testgridderload");
 
 #include <stdexcept>

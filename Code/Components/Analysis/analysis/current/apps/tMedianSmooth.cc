@@ -58,7 +58,7 @@ void findSNR(float *input, float *output, float *outmed, float *outmadfm,
     madfm = slidingArrayMath(base, box, MadfmFunc<Float>()) / Statistics::correctionFactor;
 
     casacore::Vector<Float> mean = slidingArrayMath(base, box, MeanFunc<Float>());
-    casacore::Vector<Float> stddev = slidingArrayMath(base, box, StddevFunc<Float>());
+    casacore::Vector<Float> stddev = slidingArrayMath(base, box, StddevFunc<Float>(1));
     casacore::Vector<Float> sum = slidingArrayMath(base, box, SumFunc<Float>());
     casacore::Vector<Float> snr = (base - medians);
     ASKAPLOG_DEBUG_STR(logger, "shape=" << shape << ", box=" << box);

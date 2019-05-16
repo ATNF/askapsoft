@@ -27,7 +27,7 @@
 #include <askap/askap/AskapLogging.h>
 #include <askap/askap/AskapError.h>
 #include <casacore/casa/Logging/LogIO.h>
-#include <askap/Log4cxxLogSink.h>
+#include <askap/askap/Log4cxxLogSink.h>
 
 #include <patternmatching/Matcher.h>
 #include <Common/ParameterSet.h>

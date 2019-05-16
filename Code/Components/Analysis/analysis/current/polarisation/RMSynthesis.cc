@@ -163,7 +163,7 @@ void RMSynthesis::calculate(const casacore::Vector<float> &lsq,
     }
 
     // Put back into Jy by multiplying by the Stokes I model at the reference wavelength
-    float nuRef = QC::c.getValue() / sqrt(itsRefLambdaSquared);
+    float nuRef = QC::c().getValue() / sqrt(itsRefLambdaSquared);
     itsFaradayDF *= itsImodel.flux(nuRef);
 
     // Compute RMSF
