@@ -25,7 +25,7 @@
 ASKAP_LOGGER(logger, ".testloadgridder");
 
 #include <testloadgridder/TestLoadGridder.h>
-#include <gridding/VisGridderFactory.h>
+#include <askap/gridding/VisGridderFactory.h>
 
 namespace askap
 {

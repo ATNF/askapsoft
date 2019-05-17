@@ -15,6 +15,8 @@ env["ENV"]["AIPSPATH"] = os.environ['AIPSPATH']
 #env.Append(CCFLAGS=['-DASKAP_GRID_WITH_BLAS'])
 env.Append(CCFLAGS=['-DASKAP_GRID_WITH_POINTERS'])
 
+# for casarest
+env.AppendUnique(CCFLAGS=['-I/usr/local/include/casarest'])
 # create build object with library name
 pkg = env.AskapPackage("synthutil")
 env["ENV"]["AIPSPATH"] = os.environ['AIPSPATH']

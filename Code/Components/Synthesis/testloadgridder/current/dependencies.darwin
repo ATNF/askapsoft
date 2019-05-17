@@ -1,3 +1,3 @@
-synthesis=/usr/local
-askapparallel=/usr/local
-accessors=/usr/local
+synthesis=/usr/local; yanda_synthesis
+askapparallel=/usr/local; askap_askapparallel
+accessors=/usr/local; askap_accessors

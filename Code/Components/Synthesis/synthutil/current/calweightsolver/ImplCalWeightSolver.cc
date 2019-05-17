@@ -34,9 +34,9 @@
 //
 
 #include <calweightsolver/ImplCalWeightSolver.h>
-#include <components/ComponentModels/Flux.h>
-#include <components/ComponentModels/SpectralModel.h>
-#include <components/ComponentModels/ComponentShape.h>
+#include <casarest/components/ComponentModels/Flux.h>
+#include <casarest/components/ComponentModels/SpectralModel.h>
+#include <casarest/components/ComponentModels/ComponentShape.h>
 #include <casacore/measures/Measures/MDirection.h>
 #include <casacore/measures/Measures/MCDirection.h>
 #include <casacore/measures/Measures/MeasConvert.h>

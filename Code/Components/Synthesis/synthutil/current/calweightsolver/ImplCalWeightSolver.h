@@ -31,8 +31,8 @@
 // given sky model
 
 #include <casacore/casa/aips.h>
-#include <components/ComponentModels/SkyComponent.h>
-#include <components/ComponentModels/ComponentList.h>
+#include <casarest/components/ComponentModels/SkyComponent.h>
+#include <casarest/components/ComponentModels/ComponentList.h>
 #include <casacore/measures/Measures/MDirection.h>
 #include <casacore/casa/Exceptions/Error.h>
 #include <casacore/casa/Arrays/Matrix.h>
@@ -43,7 +43,7 @@
 
 
 #include <boost/shared_ptr.hpp>
-#include <gridding/IBasicIllumination.h>
+#include <askap/gridding/IBasicIllumination.h>
 
 class ImplCalWeightSolver {
     casacore::MDirection pc; // dish pointing centre

@@ -29,7 +29,7 @@
 #ifndef TESTLOADGRIDDER_H_
 #define TESTLOADGRIDDER_H_
 
-#include <gridding/TableVisGridder.h>
+#include <askap/gridding/TableVisGridder.h>
 #include <Common/ParameterSet.h>
 
 namespace askap
