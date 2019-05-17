@@ -29,18 +29,18 @@
 ///
 /// @author Max Voronkov <maxim.voronkov@csiro.au>
 
-#include <dataaccess/TableDataSource.h>
-#include <dataaccess/IConstDataAccessor.h>
+#include <askap/dataaccess/TableDataSource.h>
+#include <askap/dataaccess/IConstDataAccessor.h>
 
-#include <askap_accessors.h>
+#include <askap/askap_accessors.h>
 #include <askap/askap/AskapLogging.h>
 ASKAP_LOGGER(logger, "");
 
 #include <askap/askap/AskapError.h>
-#include <dataaccess/SharedIter.h>
+#include <askap/dataaccess/SharedIter.h>
 
-#include <dataaccess/TableManager.h>
-#include <dataaccess/IDataConverterImpl.h>
+#include <askap/dataaccess/TableManager.h>
+#include <askap/dataaccess/IDataConverterImpl.h>
 
 #include <swcorrelator/DataMonitors.h>
 #include <swcorrelator/CorrProducts.h>

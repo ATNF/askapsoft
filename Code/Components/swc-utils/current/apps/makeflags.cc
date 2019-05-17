@@ -33,7 +33,7 @@
 #include <askap/askap/AskapError.h>
 #include <askap_swcorrelator.h>
 #include <askap/askap/AskapLogging.h>
-#include <utils/MultiDimArrayPlaneIter.h>
+#include <askap/scimath/utils/MultiDimArrayPlaneIter.h>
 
 // casa includes
 #include <casacore/casa/OS/Timer.h>

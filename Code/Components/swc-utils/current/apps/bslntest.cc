@@ -24,16 +24,16 @@
 ///
 
 
-#include <dataaccess/TableDataSource.h>
-#include <askap_accessors.h>
+#include <askap/dataaccess/TableDataSource.h>
+#include <askap/askap_accessors.h>
 #include <askap/askap/AskapLogging.h>
 ASKAP_LOGGER(logger, "");
 
 #include <askap/askap/AskapError.h>
-#include <dataaccess/SharedIter.h>
+#include <askap/dataaccess/SharedIter.h>
 
-#include <dataaccess/TableManager.h>
-#include <dataaccess/IDataConverterImpl.h>
+#include <askap/dataaccess/TableManager.h>
+#include <askap/dataaccess/IDataConverterImpl.h>
 
 // casa
 #include <casacore/measures/Measures/MFrequency.h>
@@ -46,10 +46,10 @@ ASKAP_LOGGER(logger, "");
 #include <casacore/casa/OS/Timer.h>
 #include <casacore/casa/Arrays/ArrayMath.h>
 
-#include <utils/DelayEstimator.h>
-#include <fitting/GenericNormalEquations.h>
-#include <fitting/LinearSolver.h>
-#include <fitting/DesignMatrix.h>
+#include <askap/scimath/utils/DelayEstimator.h>
+#include <askap/scimath/fitting/GenericNormalEquations.h>
+#include <askap/scimath/fitting/LinearSolver.h>
+#include <askap/scimath/fitting/DesignMatrix.h>
 
 // std
 #include <stdexcept>

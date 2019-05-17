@@ -24,17 +24,17 @@
 ///
 
 
-#include <dataaccess/TableDataSource.h>
-#include <askap_accessors.h>
+#include <askap/dataaccess/TableDataSource.h>
+#include <askap/askap_accessors.h>
 #include <askap/askap/AskapLogging.h>
 ASKAP_LOGGER(logger, "");
 
 #include <askap/askap/AskapError.h>
-#include <dataaccess/SharedIter.h>
+#include <askap/dataaccess/SharedIter.h>
 
-#include <dataaccess/TableManager.h>
-#include <dataaccess/IDataConverterImpl.h>
-#include <fft/FFTWrapper.h>
+#include <askap/dataaccess/TableManager.h>
+#include <askap/dataaccess/IDataConverterImpl.h>
+#include <askap/scimath/fft/FFTWrapper.h>
 
 // casa
 #include <casacore/measures/Measures/MFrequency.h>
@@ -42,7 +42,7 @@ ASKAP_LOGGER(logger, "");
 #include <casacore/casa/OS/Timer.h>
 #include <casacore/casa/Arrays/ArrayMath.h>
 #include <casacore/casa/Arrays/MatrixMath.h>
-#include <utils/ImageUtils.h>
+#include <askap/scimath/utils/ImageUtils.h>
 #include <casacore/casa/Arrays/Cube.h>
 
 
