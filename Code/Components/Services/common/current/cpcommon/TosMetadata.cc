@@ -33,14 +33,15 @@
 #include <utility>
 
 // ASKAPsoft includes
-#include "askap/AskapError.h"
+#include "askap/askap/AskapError.h"
 #include "casacore/casa/aips.h"
 #include "casacore/casa/Quanta.h"
 #include "cpcommon/CasaBlobUtils.h"
 
 // LOFAR
 #include <Blob/BlobArray.h>
-
+#include <Blob/BlobOStream.h>
+#include <Blob/BlobIStream.h>
 
 // Using
 using namespace std;

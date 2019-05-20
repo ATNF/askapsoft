@@ -4,4 +4,4 @@ scimath=/usr/local
 common=/usr/local; Common
 blob=/usr/local; Blob
 casacore=/usr/local;casa_ms casa_images casa_mirlib casa_coordinates casa_fits casa_lattices casa_measures casa_scimath casa_scimath_f casa_tables casa_casa
-casarest=/usr/local
+casarest=/usr/local;casa_components

@@ -31,7 +31,7 @@
 #include "casacore/casa/aips.h"
 #include "boost/scoped_ptr.hpp"
 #include "casacore/measures/Measures/MDirection.h"
-#include "askap/AskapError.h"
+#include "askap/askap/AskapError.h"
 #include "casacore/casa/Quanta/Quantum.h"
 #include "Blob/BlobIStream.h"
 #include "Blob/BlobIBufVector.h"

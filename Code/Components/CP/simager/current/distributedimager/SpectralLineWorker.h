@@ -34,7 +34,7 @@
 #include <Common/ParameterSet.h>
 #include <fitting/INormalEquations.h>
 #include <fitting/Params.h>
-#include <dataaccess/TableDataSource.h>
+#include <askap/dataaccess/TableDataSource.h>
 #include <gridding/IVisGridder.h>
 
 // Local includes

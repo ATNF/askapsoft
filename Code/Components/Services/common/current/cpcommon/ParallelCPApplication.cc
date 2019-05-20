@@ -49,9 +49,9 @@
 #include "log4cxx/logmanager.h"
 
 // ASKAPsoft includes
-#include "askap/AskapLogging.h"
-#include "askap/AskapError.h"
-#include "askap/AskapUtil.h"
+#include "askap/askap/AskapLogging.h"
+#include "askap/askap/AskapError.h"
+#include "askap/askap/AskapUtil.h"
 
 // Local package includes
 #include "cpcommon/ParallelCPApplication.h"

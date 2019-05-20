@@ -29,7 +29,7 @@
 #include "VisChunk.h"
 
 // ASKAPsoft includes
-#include "askap/AskapError.h"
+#include "askap/askap/AskapError.h"
 #include "casacore/casa/aips.h"
 #include "casacore/casa/Quanta/MVEpoch.h"
 #include "casacore/casa/Quanta/MVDirection.h"

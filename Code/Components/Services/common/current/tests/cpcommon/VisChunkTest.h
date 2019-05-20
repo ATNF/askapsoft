@@ -28,7 +28,7 @@
 #include <cppunit/extensions/HelperMacros.h>
 
 // Support classes
-#include "askap/AskapError.h"
+#include "askap/askap/AskapError.h"
 #include "casacore/casa/Arrays/Vector.h"
 #include "casacore/casa/Arrays/Cube.h"
 #include "Blob/BlobIStream.h"

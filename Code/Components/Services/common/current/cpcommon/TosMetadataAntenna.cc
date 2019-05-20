@@ -28,7 +28,7 @@
 #include "TosMetadataAntenna.h"
 
 // ASKAPsoft includes
-#include "askap/AskapError.h"
+#include "askap/askap/AskapError.h"
 #include "casacore/casa/aips.h"
 #include "casacore/measures/Measures/MDirection.h"
 #include "casacore/casa/Quanta/Quantum.h"
@@ -40,7 +40,8 @@
 // 3rdParty
 #include "Blob/BlobArray.h"
 #include "Blob/BlobAipsIO.h"
-
+#include "Blob/BlobOStream.h"
+#include "Blob/BlobIStream.h"
 // Using
 using namespace askap::cp;
 

@@ -39,7 +39,7 @@
 #include <string>
 
 // ASKAPsoft includes
-#include "askap/Application.h"
+#include "askap/askap/Application.h"
 
 namespace askap {
 namespace cp {

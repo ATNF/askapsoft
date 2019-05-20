@@ -39,13 +39,13 @@
 #include <Common/ParameterSet.h>
 #include <fitting/Params.h>
 #include <fitting/Axes.h>
-#include <dataaccess/IConstDataSource.h>
-#include <dataaccess/TableConstDataSource.h>
-#include <dataaccess/IConstDataIterator.h>
-#include <dataaccess/IDataConverter.h>
-#include <dataaccess/IDataSelector.h>
-#include <dataaccess/IDataIterator.h>
-#include <dataaccess/SharedIter.h>
+#include <askap/dataaccess/IConstDataSource.h>
+#include <askap/dataaccess/TableConstDataSource.h>
+#include <askap/dataaccess/IConstDataIterator.h>
+#include <askap/dataaccess/IDataConverter.h>
+#include <askap/dataaccess/IDataSelector.h>
+#include <askap/dataaccess/IDataIterator.h>
+#include <askap/dataaccess/SharedIter.h>
 #include <casacore/casa/Quanta.h>
 #include <askap/imageaccess/BeamLogger.h>
 

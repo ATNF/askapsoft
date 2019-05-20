@@ -29,8 +29,8 @@
 
 // Support classes
 #include "boost/scoped_ptr.hpp"
-#include "askap/AskapError.h"
-#include "askap/AskapUtil.h"
+#include "askap/askap/AskapError.h"
+#include "askap/askap/AskapUtil.h"
 
 #include "Blob/BlobIStream.h"
 #include "Blob/BlobIBufVector.h"
