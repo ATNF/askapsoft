@@ -31,7 +31,7 @@
 #include <iostream>
 #include <limits>
 #include <stdint.h>
-#include "askap/AskapError.h"
+#include "askap/askap/AskapError.h"
 
 // Classes to test
 #include "simplayback/ChannelMap.h"

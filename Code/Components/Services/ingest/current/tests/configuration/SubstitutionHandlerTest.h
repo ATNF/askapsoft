@@ -38,7 +38,7 @@
 #include "configuration/ISubstitutionRule.h"
 
 // other ASKAPsoft includes
-#include "askap/AskapUtil.h"
+#include "askap/askap/AskapUtil.h"
 
 using namespace std;
 

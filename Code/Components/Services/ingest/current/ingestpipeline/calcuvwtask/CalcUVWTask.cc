@@ -35,8 +35,8 @@
 #include <vector>
 
 // ASKAPsoft includes
-#include "askap/AskapLogging.h"
-#include "askap/AskapError.h"
+#include "askap/askap/AskapLogging.h"
+#include "askap/askap/AskapError.h"
 #include "Common/ParameterSet.h"
 #include "casacore/casa/Arrays/Matrix.h"
 #include "casacore/casa/Arrays/MatrixMath.h"

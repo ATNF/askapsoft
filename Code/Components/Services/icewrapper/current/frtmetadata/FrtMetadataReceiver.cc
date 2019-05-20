@@ -39,8 +39,8 @@
 #include <map>
 
 // ASKAPsoft includes
-#include "askap/AskapLogging.h"
-#include "askap/AskapError.h"
+#include "askap/askap/AskapLogging.h"
+#include "askap/askap/AskapError.h"
 #include "Ice/Ice.h"
 #include "IceStorm/IceStorm.h"
 #include "boost/shared_ptr.hpp"

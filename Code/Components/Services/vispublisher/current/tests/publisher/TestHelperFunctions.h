@@ -35,7 +35,7 @@
 #include <vector>
 #include <cstring>
 #include "casacore/casa/Arrays/Cube.h"
-#include "askap/AskapError.h"
+#include "askap/askap/AskapError.h"
 #include "publisher/InputMessage.h"
 
 namespace askap {

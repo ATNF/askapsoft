@@ -30,7 +30,7 @@
 
 
 #include <cppunit/extensions/HelperMacros.h>
-#include <calibaccess/JonesIndex.h>
+#include <askap/calibaccess/JonesIndex.h>
 
 #include <boost/shared_ptr.hpp>
 #include <boost/thread.hpp>

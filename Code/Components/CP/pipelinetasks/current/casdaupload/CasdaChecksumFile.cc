@@ -36,7 +36,7 @@
 #include <iomanip>
 
 // ASKAPsoft includes
-#include "askap/AskapError.h"
+#include "askap/askap/AskapError.h"
 #include "boost/crc.hpp"
 #include "openssl/sha.h"
 

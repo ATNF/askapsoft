@@ -1,11 +1,11 @@
 # SMS application dependencies
-askap=/usr/local
-askap_accessors=/usr/local
+askap=/usr/local; askap_askap
+askap_accessors=/usr/local; askap_accessors
 boost=/usr/local; boost_system boost_filesystem boost_date_time
 common=/usr/local; Common
 cppiceinterfaces=Code/Interfaces/cpp/current
 interfaces=Code/Interfaces/slice/current
-log4cxx=/usr/local
+log4cxx=/usr/local; log4cxx
 logappenders=Code/Base/logappenders/current
 logfilters=/usr/local
 icewrapper=Code/Components/Services/icewrapper/current

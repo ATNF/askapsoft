@@ -35,7 +35,7 @@
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 #include <boost/math/constants/constants.hpp>
 #include <Common/ParameterSet.h>
-#include <votable/VOTable.h>
+#include <askap/votable/VOTable.h>
 
 // Classes to test
 #include "datamodel/Common.h"

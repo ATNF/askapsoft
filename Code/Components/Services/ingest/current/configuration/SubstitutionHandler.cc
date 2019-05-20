@@ -30,7 +30,7 @@
 
 // own includes
 #include "configuration/SubstitutionHandler.h"
-#include "askap/AskapError.h"
+#include "askap/askap/AskapError.h"
 
 namespace askap {
 namespace cp {

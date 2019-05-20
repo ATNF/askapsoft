@@ -40,8 +40,8 @@
 #include <mpi.h>
 
 // ASKAPsoft includes
-#include "askap/AskapLogging.h"
-#include "askap/AskapError.h"
+#include "askap/askap/AskapLogging.h"
+#include "askap/askap/AskapError.h"
 #include "casacore/casa/OS/Timer.h"
 #include "Blob/BlobIStream.h"
 #include "Blob/BlobIBufVector.h"

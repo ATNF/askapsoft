@@ -28,7 +28,7 @@
 #include "TypedValueMapConstMapper.h"
 
 // ASKAPsoft includes
-#include "askap/AskapError.h"
+#include "askap/askap/AskapError.h"
 #include "casacore/casa/aips.h"
 
 #include "casacore/measures/Measures/MDirection.h"

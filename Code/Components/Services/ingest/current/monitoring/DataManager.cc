@@ -36,8 +36,8 @@
 #include <map>
 
 // ASKAPsoft includes
-#include "askap/AskapError.h"
-#include "askap/AskapUtil.h"
+#include "askap/askap/AskapError.h"
+#include "askap/askap/AskapUtil.h"
 #include "Ice/Ice.h"
 #include "casacore/measures/Measures/MEpoch.h"
 #include "casacore/casa/OS/Time.h"

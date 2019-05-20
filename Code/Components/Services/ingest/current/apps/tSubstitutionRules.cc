@@ -41,9 +41,9 @@
 #include "configuration/SubstitutionHandler.h"
 #include "cpcommon/ParallelCPApplication.h"
 #include "cpcommon/VisChunk.h"
-#include "askap/AskapLogging.h"
-#include "askap/AskapError.h"
-#include "askap/AskapUtil.h"
+#include "askap/askap/AskapLogging.h"
+#include "askap/askap/AskapError.h"
+#include "askap/askap/AskapUtil.h"
 
 // boost includes
 #include "boost/shared_ptr.hpp"

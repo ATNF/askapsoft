@@ -39,13 +39,13 @@
 // ASKAPsoft includes
 #include "boost/thread.hpp"
 #include "boost/thread/mutex.hpp"
-#include "askap/AskapError.h"
-#include "askap/AskapLogging.h"
+#include "askap/askap/AskapError.h"
+#include "askap/askap/AskapLogging.h"
 #include "casacore/casa/aipstype.h"
 #include "casacore/casa/BasicSL/Complex.h"
 #include "calibrationclient/CalibrationDataServiceClient.h"
-#include "calibaccess/JonesJTerm.h"
-#include "calibaccess/JonesDTerm.h"
+#include "askap/calibaccess/JonesJTerm.h"
+#include "askap/calibaccess/JonesDTerm.h"
 #include "calibrationclient/GenericSolution.h"
 
 using namespace askap::cp::ingest;

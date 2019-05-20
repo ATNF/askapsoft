@@ -35,11 +35,11 @@
 #include <iomanip>
 
 // ASKAPsoft includes
-#include "askap/AskapLogging.h"
-#include "askap/AskapError.h"
-#include "askap/AskapUtil.h"
+#include "askap/askap/AskapLogging.h"
+#include "askap/askap/AskapError.h"
+#include "askap/askap/AskapUtil.h"
 #include "Common/ParameterSet.h"
-#include "askap/StatReporter.h"
+#include "askap/askap/StatReporter.h"
 #include "casacore/casa/aipstype.h"
 #include "casacore/ms/MeasurementSets/MeasurementSet.h"
 #include "casacore/ms/MeasurementSets/MSColumns.h"

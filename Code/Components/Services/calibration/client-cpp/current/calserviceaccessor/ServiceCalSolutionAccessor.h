@@ -42,7 +42,7 @@
 #include <Common/ParameterSet.h>
 
 // own includes
-#include <calibaccess/ICalSolutionAccessor.h>
+#include <askap/calibaccess/ICalSolutionAccessor.h>
 
 // std includes
 #include <string>

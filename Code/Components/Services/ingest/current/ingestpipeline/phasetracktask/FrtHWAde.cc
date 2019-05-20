@@ -32,9 +32,9 @@
 #include "askap_cpingest.h"
 
 // ASKAPsoft includes
-#include "askap/AskapLogging.h"
-#include "askap/AskapError.h"
-#include "askap/AskapUtil.h"
+#include "askap/askap/AskapLogging.h"
+#include "askap/askap/AskapError.h"
+#include "askap/askap/AskapUtil.h"
 #include "casacore/casa/Arrays/Vector.h"
 #include "casacore/casa/OS/Timer.h"
 

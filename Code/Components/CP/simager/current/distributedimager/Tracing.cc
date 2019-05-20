@@ -31,7 +31,7 @@
 #include <string>
 
 // ASKAPsoft includes
-#include "askap/AskapError.h"
+#include "askap/askap/AskapError.h"
 #include "mpe.h"
 
 using namespace askap::cp;

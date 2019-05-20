@@ -16,6 +16,8 @@ pkg.AddSubPackage("casdaupload")
 
 env.Append(CCFLAGS=['-O2'])
 
+# for casarest
+env.AppendUnique(CCFLAGS=['-I/usr/local/include/casarest'])
 if sys.platform  == 'darwin':
   env.AppendUnique(LINKFLAGS=['-framework', 'Python'])
 

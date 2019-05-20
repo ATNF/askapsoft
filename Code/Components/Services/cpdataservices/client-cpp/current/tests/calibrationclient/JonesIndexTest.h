@@ -31,7 +31,7 @@
 #include "casacore/casa/aipstype.h"
 
 // Classes to test
-#include "calibaccess/JonesIndex.h"
+#include "askap/calibaccess/JonesIndex.h"
 
 namespace askap {
 namespace cp {

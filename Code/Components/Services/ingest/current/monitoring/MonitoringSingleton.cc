@@ -35,9 +35,9 @@
 #include <stdexcept>
 
 // ASKAPsoft includes
-#include "askap/AskapLogging.h"
-#include "askap/AskapError.h"
-#include "askap/AskapUtil.h"
+#include "askap/askap/AskapLogging.h"
+#include "askap/askap/AskapError.h"
+#include "askap/askap/AskapUtil.h"
 #include "Ice/Ice.h"
 #include "iceutils/CommunicatorConfig.h"
 #include "iceutils/CommunicatorFactory.h"

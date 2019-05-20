@@ -28,9 +28,9 @@
 #include <cppunit/extensions/HelperMacros.h>
 
 // Support classes
-#include "askap/AskapError.h"
+#include "askap/askap/AskapError.h"
 #include "Common/ParameterSet.h"
-#include "askap/AskapUtil.h"
+#include "askap/askap/AskapUtil.h"
 
 // Classes to test
 #include "ingestpipeline/sourcetask/ChannelManager.h"

@@ -35,7 +35,7 @@
 #include "askap_cpingest.h"
 
 // ASKAPsoft includes
-#include "askap/AskapLogging.h"
+#include "askap/askap/AskapLogging.h"
 
 ASKAP_LOGGER(logger, ".VisConverter");
 

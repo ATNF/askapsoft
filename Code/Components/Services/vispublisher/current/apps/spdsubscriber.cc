@@ -31,7 +31,7 @@
 #include <sstream>
 
 // ASKAPsoft includes
-#include "askap/AskapUtil.h"
+#include "askap/askap/AskapUtil.h"
 #include <zmq.hpp>
 
 using namespace std;

@@ -36,12 +36,12 @@
 #include <limits>
 
 // ASKAPsoft includes
-#include "askap/AskapLogging.h"
-#include "askap/AskapError.h"
+#include "askap/askap/AskapLogging.h"
+#include "askap/askap/AskapError.h"
 #include "casacore/casa/aips.h"
 #include "Common/ParameterSet.h"
 #include "casacore/casa/Arrays/Vector.h"
-#include "askap/AskapUtil.h"
+#include "askap/askap/AskapUtil.h"
 #include "casacore/casa/Quanta.h"
 
 

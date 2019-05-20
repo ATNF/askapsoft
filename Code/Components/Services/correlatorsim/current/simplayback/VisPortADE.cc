@@ -36,8 +36,8 @@
 
 // ASKAPsoft includes
 #include "boost/asio.hpp"
-#include "askap/AskapError.h"
-#include "askap/AskapLogging.h"
+#include "askap/askap/AskapError.h"
+#include "askap/askap/AskapLogging.h"
 #include "cpcommon/VisDatagramADE.h"
 
 // Using

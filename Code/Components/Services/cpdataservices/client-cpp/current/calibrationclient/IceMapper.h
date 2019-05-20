@@ -32,9 +32,9 @@
 #include "CalibrationDataService.h" // Ice generated interface
 
 // Local package includes
-#include "calibaccess/JonesIndex.h"
-#include "calibaccess/JonesJTerm.h"
-#include "calibaccess/JonesDTerm.h"
+#include "askap/calibaccess/JonesIndex.h"
+#include "askap/calibaccess/JonesJTerm.h"
+#include "askap/calibaccess/JonesDTerm.h"
 #include "GenericSolution.h"
 
 namespace askap {

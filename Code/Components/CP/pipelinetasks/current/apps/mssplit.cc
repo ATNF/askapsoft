@@ -35,8 +35,8 @@
 #include "mssplit/MsSplitApp.h"
 
 // ASKAPsoft includes
-#include "askap/AskapError.h"
-#include "askap/AskapLogging.h"
+#include "askap/askap/AskapError.h"
+#include "askap/askap/AskapLogging.h"
 
 ASKAP_LOGGER(logger, ".mssplit");
 

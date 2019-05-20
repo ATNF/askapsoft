@@ -30,7 +30,7 @@
 // Support classes
 #include <limits>
 #include "casacore/casa/aipstype.h"
-#include "askap/AskapError.h"
+#include "askap/askap/AskapError.h"
 #include "casacore/casa/Quanta/Quantum.h"
 
 // Classes to test

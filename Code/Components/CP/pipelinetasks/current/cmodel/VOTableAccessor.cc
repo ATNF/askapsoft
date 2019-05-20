@@ -42,9 +42,9 @@
 #include <list>
 
 // ASKAPsoft include
-#include "askap/AskapLogging.h"
-#include "askap/AskapError.h"
-#include "votable/VOTable.h"
+#include "askap/askap/AskapLogging.h"
+#include "askap/askap/AskapError.h"
+#include "askap/votable/VOTable.h"
 #include "boost/lexical_cast.hpp"
 
 // Casacore includes

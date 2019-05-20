@@ -39,12 +39,12 @@
 #include "casdaupload/SpectrumElement.h"
 #include "casdaupload/MomentMapElement.h"
 #include "casdaupload/CasdaFileUtils.h"
-#include "askap/AskapLogging.h"
-#include "askap/AskapError.h"
+#include "askap/askap/AskapLogging.h"
+#include "askap/askap/AskapError.h"
 #include "xercesc/dom/DOM.hpp" // Includes all DOM
 #include "boost/filesystem.hpp"
-#include "votable/XercescString.h"
-#include "votable/XercescUtils.h"
+#include "askap/votable/XercescString.h"
+#include "askap/votable/XercescUtils.h"
 
 // Using
 using namespace askap::cp::pipelinetasks;

@@ -40,9 +40,9 @@
 
 // Local package includes
 #include "calibrationclient/CalibrationDataServiceClient.h"
-#include "calibaccess/JonesIndex.h"
-#include "calibaccess/JonesJTerm.h"
-#include "calibaccess/JonesDTerm.h"
+#include "askap/calibaccess/JonesIndex.h"
+#include "askap/calibaccess/JonesJTerm.h"
+#include "askap/calibaccess/JonesDTerm.h"
 #include "calibrationclient/GenericSolution.h"
 
 using namespace std;

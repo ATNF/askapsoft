@@ -52,8 +52,8 @@ class FlaggerFactory {
         ///
         /// @param[in,out]  v1  the vector that will be appended to.
         /// @param[in]      v2  the vector that will be appended to v1.
-        static void appendFlaggers(vector< boost::shared_ptr<IFlagger> >& v1,
-                                   const vector< boost::shared_ptr<IFlagger> > v2);
+        static void appendFlaggers(std::vector< boost::shared_ptr<IFlagger> >& v1,
+                                   const std::vector< boost::shared_ptr<IFlagger> > v2);
 
         /// Builds flagging flagger objects based on the configuration in
         /// the parameter set.

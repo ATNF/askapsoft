@@ -35,8 +35,8 @@
 
 // ASKAPsoft includes
 #include "cpcommon/ParallelCPApplication.h"
-#include "askap/AskapLogging.h"
-#include "askap/AskapError.h"
+#include "askap/askap/AskapLogging.h"
+#include "askap/askap/AskapError.h"
 #include "boost/shared_ptr.hpp"
 #include "cpcommon/VisDatagram.h"
 #include "configuration/Configuration.h"

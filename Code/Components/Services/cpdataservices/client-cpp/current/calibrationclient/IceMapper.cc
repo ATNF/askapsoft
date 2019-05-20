@@ -31,12 +31,12 @@
 #include "askap_cpdataservices.h"
 
 // ASKAPsoft includes
-#include "askap/AskapError.h"
+#include "askap/askap/AskapError.h"
 #include "casacore/casa/aipstype.h"
 
 // Local package includes
-#include "calibaccess/JonesJTerm.h"
-#include "calibaccess/JonesIndex.h"
+#include "askap/calibaccess/JonesJTerm.h"
+#include "askap/calibaccess/JonesIndex.h"
 #include "GenericSolution.h"
 
 // Using

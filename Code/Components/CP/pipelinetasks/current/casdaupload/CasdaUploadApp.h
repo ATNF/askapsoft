@@ -32,7 +32,7 @@
 #include <string>
 
 // ASKAPsoft includes
-#include "askap/Application.h"
+#include "askap/askap/Application.h"
 #include "xercesc/dom/DOM.hpp" // Includes all DOM
 #include "boost/filesystem.hpp"
 #include "Common/ParameterSet.h"

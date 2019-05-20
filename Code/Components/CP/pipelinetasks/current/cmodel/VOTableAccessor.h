@@ -30,8 +30,8 @@
 // System includes
 
 // ASKAPsoft includes
-#include "votable/VOTableField.h"
-#include "votable/VOTableRow.h"
+#include "askap/votable/VOTableField.h"
+#include "askap/votable/VOTableRow.h"
 
 // Local package includes
 #include "cmodel/Common.h"

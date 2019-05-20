@@ -30,7 +30,7 @@
 // Support classes
 #include <sstream>
 #include <cmath>
-#include "askap/AskapError.h"
+#include "askap/askap/AskapError.h"
 #include "Common/ParameterSet.h"
 #include "cpcommon/VisChunk.h"
 #include "casacore/measures/Measures.h"

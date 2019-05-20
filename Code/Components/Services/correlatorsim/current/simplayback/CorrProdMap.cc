@@ -37,9 +37,9 @@
 
 // Include package level header file
 #include "askap_correlatorsim.h"
-#include "askap/AskapError.h"
-#include "askap/AskapUtil.h"
-#include "askap/AskapError.h"
+#include "askap/askap/AskapError.h"
+#include "askap/askap/AskapUtil.h"
+#include "askap/askap/AskapError.h"
 
 using namespace askap;
 using namespace askap::utility;

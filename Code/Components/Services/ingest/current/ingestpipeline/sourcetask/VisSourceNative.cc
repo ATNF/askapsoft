@@ -36,8 +36,8 @@
 #include <netinet/in.h>
 
 // ASKAPsoft includes
-#include "askap/AskapLogging.h"
-#include "askap/AskapError.h"
+#include "askap/askap/AskapLogging.h"
+#include "askap/askap/AskapError.h"
 #include "boost/scoped_ptr.hpp"
 #include "boost/thread.hpp"
 

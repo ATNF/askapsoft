@@ -36,7 +36,7 @@
 // ASKAPsoft includes
 #include <askap/askap/AskapError.h>
 #include <askap/askap/AskapLogging.h>
-#include <votable/VOTable.h>
+#include <askap/votable/VOTable.h>
 
 // ODB includes
 #include <odb/mysql/database.hxx>

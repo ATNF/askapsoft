@@ -40,8 +40,8 @@
 #include <inttypes.h>
 
 // ASKAPsoft includes
-#include "askap/AskapError.h"
-#include "askap/AskapLogging.h"
+#include "askap/askap/AskapError.h"
+#include "askap/askap/AskapLogging.h"
 #include "casacore/ms/MeasurementSets/MeasurementSet.h"
 #include "casacore/ms/MeasurementSets/MSColumns.h"
 #include "casacore/casa/Arrays/Matrix.h"

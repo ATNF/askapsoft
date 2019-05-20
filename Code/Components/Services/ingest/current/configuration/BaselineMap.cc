@@ -39,8 +39,8 @@
 #include <boost/tuple/tuple_comparison.hpp>
 
 // ASKAPsoft includes
-#include "askap/AskapError.h"
-#include "askap/AskapUtil.h"
+#include "askap/askap/AskapError.h"
+#include "askap/askap/AskapUtil.h"
 #include "Common/ParameterSet.h"
 #include "casacore/measures/Measures/Stokes.h"
 

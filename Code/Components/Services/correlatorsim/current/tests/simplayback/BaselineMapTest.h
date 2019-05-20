@@ -30,7 +30,7 @@
 // Support classes
 #include <limits>
 #include <stdint.h>
-#include "askap/AskapError.h"
+#include "askap/askap/AskapError.h"
 #include "Common/ParameterSet.h"
 #include "casacore/measures/Measures/Stokes.h"
 

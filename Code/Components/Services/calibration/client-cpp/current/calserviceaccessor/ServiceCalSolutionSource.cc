@@ -30,7 +30,7 @@
 /// @author Stephen Ord <Stephen.Ord@csiro.au>
 
 
-#include <calibaccess/ServiceCalSolutionSourceStub.h>
+#include <askap/calibaccess/ServiceCalSolutionSourceStub.h>
 #include "ServiceCalSolutionSource.h"
 #include "ServiceCalSolutionAccessor.h"
 

@@ -33,11 +33,11 @@
 // System includes
 
 // ASKAPsoft includes
-#include "askap/AskapError.h"
-#include "askap/AskapUtil.h"
+#include "askap/askap/AskapError.h"
+#include "askap/askap/AskapUtil.h"
 #include "xercesc/dom/DOM.hpp" // Includes all DOM
-#include "votable/XercescString.h"
-#include "votable/XercescUtils.h"
+#include "askap/votable/XercescString.h"
+#include "askap/votable/XercescUtils.h"
 
 // Local package includes
 

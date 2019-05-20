@@ -33,9 +33,9 @@
 
 // ASKAPsoft includes
 #include "casacore/casa/aipstype.h"
-#include "calibaccess/JonesJTerm.h"
-#include "calibaccess/JonesDTerm.h"
-#include "calibaccess/JonesIndex.h"
+#include "askap/calibaccess/JonesJTerm.h"
+#include "askap/calibaccess/JonesDTerm.h"
+#include "askap/calibaccess/JonesIndex.h"
 
 using namespace askap::accessors;
 

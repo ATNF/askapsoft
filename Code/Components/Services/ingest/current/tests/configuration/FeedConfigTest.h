@@ -28,7 +28,7 @@
 #include <cppunit/extensions/HelperMacros.h>
 
 // Support classes
-#include "askap/AskapError.h"
+#include "askap/askap/AskapError.h"
 #include "casacore/casa/aips.h"
 #include "casacore/casa/BasicSL.h"
 #include "casacore/casa/Quanta.h"

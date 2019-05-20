@@ -35,8 +35,8 @@
 
 // ASKAPsoft includes
 #include "xercesc/dom/DOM.hpp" // Includes all DOM
-#include "votable/XercescString.h"
-#include "votable/XercescUtils.h"
+#include "askap/votable/XercescString.h"
+#include "askap/votable/XercescUtils.h"
 
 // Using
 using namespace askap::cp::pipelinetasks;

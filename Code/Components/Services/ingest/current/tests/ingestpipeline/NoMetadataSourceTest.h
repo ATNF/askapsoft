@@ -37,7 +37,7 @@
 #include "cpcommon/VisChunk.h"
 #include "ConfigurationHelper.h"
 #include "VisDatagramTestHelper.h"
-#include "askap/AskapUtil.h"
+#include "askap/askap/AskapUtil.h"
 
 // Classes to test
 #include "ingestpipeline/sourcetask/NoMetadataSource.h"

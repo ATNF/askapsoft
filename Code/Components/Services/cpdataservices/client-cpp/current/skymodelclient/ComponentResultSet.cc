@@ -31,7 +31,7 @@
 #include "askap_cpdataservices.h"
 
 // ASKAPsoft includes
-#include "askap/AskapError.h"
+#include "askap/askap/AskapError.h"
 #include "SkyModelService.h" // Ice generated interface
 #include "casacore/casa/Quanta/Quantum.h"
 

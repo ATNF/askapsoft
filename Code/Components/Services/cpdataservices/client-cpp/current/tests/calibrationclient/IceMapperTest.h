@@ -31,8 +31,8 @@
 #include "casacore/casa/aipstype.h"
 #include "casacore/casa/BasicSL/Complex.h"
 #include "CalibrationDataService.h" // Ice generated interface
-#include "calibaccess/JonesJTerm.h"
-#include "calibaccess/JonesIndex.h"
+#include "askap/calibaccess/JonesJTerm.h"
+#include "askap/calibaccess/JonesIndex.h"
 #include "calibrationclient/GenericSolution.h"
 
 // Classes to test

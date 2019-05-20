@@ -34,7 +34,7 @@
 #include <netdb.h>
 
 // ASKAPsoft includes
-#include "askap/AskapError.h"
+#include "askap/askap/AskapError.h"
 #include "Ice/Ice.h"
 
 // Using

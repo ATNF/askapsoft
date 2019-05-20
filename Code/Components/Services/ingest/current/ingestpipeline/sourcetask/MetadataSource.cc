@@ -34,9 +34,9 @@
 #include <string>
 
 // ASKAPsoft includes
-#include "askap/AskapLogging.h"
-#include "askap/AskapError.h"
-#include "askap/AskapUtil.h"
+#include "askap/askap/AskapLogging.h"
+#include "askap/askap/AskapError.h"
+#include "askap/askap/AskapUtil.h"
 #include "boost/shared_ptr.hpp"
 #include "cpcommon/TosMetadata.h"
 

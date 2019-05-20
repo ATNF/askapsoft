@@ -30,7 +30,7 @@
 // Support classes
 #include <string>
 #include <boost/filesystem.hpp>
-#include <votable/VOTable.h>
+#include <askap/votable/VOTable.h>
 #include <askap/askap/AskapError.h>
 
 // Classes to test

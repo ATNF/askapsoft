@@ -39,8 +39,8 @@
  
 // ASKAPsoft includes
 #include "cpcommon/ParallelCPApplication.h"
-#include "askap/AskapLogging.h"
-#include "askap/AskapError.h"
+#include "askap/askap/AskapLogging.h"
+#include "askap/askap/AskapError.h"
 #include "boost/shared_ptr.hpp"
 #include <boost/thread/thread.hpp>
 #include "cpcommon/VisDatagram.h"
@@ -51,7 +51,7 @@
 #include "ingestpipeline/sourcetask/VisConverterADE.h"
 #include "configuration/Configuration.h" // Includes all configuration attributes too
 #include "cpcommon/VisChunk.h"
-#include "askap/AskapUtil.h"
+#include "askap/askap/AskapUtil.h"
 
 // I am not very happy to have MPI includes here, we may abstract this interaction
 // eventually. This task is specific for the parallel case, so there is no reason to

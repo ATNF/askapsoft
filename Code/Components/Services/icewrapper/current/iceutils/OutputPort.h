@@ -31,7 +31,7 @@
 #include <string>
 
 // ASKAPsoft includes
-#include "askap/AskapError.h"
+#include "askap/askap/AskapError.h"
 #include <Ice/Ice.h>
 #include <IceStorm/IceStorm.h>
 #include <boost/shared_ptr.hpp>

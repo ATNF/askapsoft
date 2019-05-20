@@ -38,14 +38,14 @@
 
 // ASKAPsoft includes
 #include "boost/program_options.hpp"
-#include "askap/AskapError.h"
+#include "askap/askap/AskapError.h"
 #include "casacore/casa/aipstype.h"
 #include "Common/ParameterSet.h"
 
 // Local package includes
 #include "calibrationclient/CalibrationDataServiceClient.h"
-#include "calibaccess/JonesJTerm.h"
-#include "calibaccess/JonesIndex.h"
+#include "askap/calibaccess/JonesJTerm.h"
+#include "askap/calibaccess/JonesIndex.h"
 #include "calibrationclient/GenericSolution.h"
 
 using namespace std;

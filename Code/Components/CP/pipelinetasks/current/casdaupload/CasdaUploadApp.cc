@@ -35,18 +35,18 @@
 #include <vector>
 
 // ASKAPsoft includes
-#include "askap/AskapLogging.h"
-#include "askap/AskapError.h"
+#include "askap/askap/AskapLogging.h"
+#include "askap/askap/AskapError.h"
 #include "Common/ParameterSet.h"
 #include "Common/KVpair.h"
-#include "askap/StatReporter.h"
+#include "askap/askap/StatReporter.h"
 #include "boost/scoped_ptr.hpp"
 #include "boost/filesystem.hpp"
 #include "xercesc/dom/DOM.hpp" // Includes all DOM
 #include "xercesc/framework/LocalFileFormatTarget.hpp"
 #include "xercesc/framework/XMLFormatter.hpp"
-#include "votable/XercescString.h"
-#include "votable/XercescUtils.h"
+#include "askap/votable/XercescString.h"
+#include "askap/votable/XercescUtils.h"
 
 // Local package includes
 #include "casdaupload/IdentityElement.h"

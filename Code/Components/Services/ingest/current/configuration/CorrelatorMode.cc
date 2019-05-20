@@ -31,7 +31,7 @@
 #include "askap_cpingest.h"
 
 // ASKAPsoft includes
-#include "askap/AskapError.h"
+#include "askap/askap/AskapError.h"
 #include "casacore/casa/BasicSL.h"
 #include "casacore/casa/Quanta.h"
 #include "casacore/measures/Measures/MDirection.h"

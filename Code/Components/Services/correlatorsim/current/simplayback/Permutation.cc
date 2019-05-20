@@ -37,7 +37,7 @@
 #include <cmath>
 
 #ifndef OUTSIDEASKAP
-#include "askap/AskapError.h"
+#include "askap/askap/AskapError.h"
 
 using namespace askap;
 using namespace askap::cp;

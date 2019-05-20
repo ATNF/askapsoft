@@ -38,7 +38,7 @@
 #include <calibrationclient/CalibrationDataServiceClient.h>
 #include <calibrationclient/GenericSolution.h>
 
-#include <calibaccess/ICalSolutionAccessor.h>
+#include <askap/calibaccess/ICalSolutionAccessor.h>
 
 #include "ServiceCalSolutionAccessor.h"
 

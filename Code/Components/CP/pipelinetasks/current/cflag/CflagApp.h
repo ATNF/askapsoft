@@ -28,7 +28,7 @@
 #define ASKAP_CP_PIPELINETASKS_CFLAGAPP_H
 
 // ASKAPsoft includes
-#include "askap/Application.h"
+#include "askap/askap/Application.h"
 
 // Local package includes
 

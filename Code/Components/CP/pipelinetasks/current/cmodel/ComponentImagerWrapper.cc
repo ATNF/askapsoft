@@ -36,9 +36,9 @@
 
 // ASKAPsoft includes
 #include "boost/scoped_ptr.hpp"
-#include "askap/AskapLogging.h"
-#include "askap/AskapError.h"
-#include "askap/AskapUtil.h"
+#include "askap/askap/AskapLogging.h"
+#include "askap/askap/AskapError.h"
+#include "askap/askap/AskapUtil.h"
 #include "Common/ParameterSet.h"
 #include "components/AskapComponentImager.h"
 

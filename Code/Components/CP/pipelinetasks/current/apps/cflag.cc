@@ -28,8 +28,8 @@
 #include "askap_pipelinetasks.h"
 
 // ASKAPsoft includes
-#include "askap/AskapError.h"
-#include "askap/AskapLogging.h"
+#include "askap/askap/AskapError.h"
+#include "askap/askap/AskapLogging.h"
 
 // Local packages includes
 #include "cflag/CflagApp.h"

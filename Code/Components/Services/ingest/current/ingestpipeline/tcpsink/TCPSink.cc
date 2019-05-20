@@ -41,9 +41,9 @@
 #include "boost/thread/mutex.hpp"
 #include "boost/thread/condition.hpp"
 #include "boost/asio.hpp"
-#include "askap/AskapLogging.h"
-#include "askap/AskapError.h"
-#include "askap/AskapUtil.h"
+#include "askap/askap/AskapLogging.h"
+#include "askap/askap/AskapError.h"
+#include "askap/askap/AskapUtil.h"
 #include "cpcommon/VisChunk.h"
 
 // Casecore includes

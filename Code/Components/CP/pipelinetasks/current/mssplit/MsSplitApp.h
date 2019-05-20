@@ -37,10 +37,10 @@
 #include <stdint.h>
 
 // ASKAPsoft includes
-#include "askap/AskapError.h"
-#include "askap/AskapLogging.h"
-#include "askap/Application.h"
-#include "askap/AskapUtil.h"
+#include "askap/askap/AskapError.h"
+#include "askap/askap/AskapLogging.h"
+#include "askap/askap/Application.h"
+#include "askap/askap/AskapUtil.h"
 #include "boost/shared_ptr.hpp"
 #include "boost/optional.hpp"
 #include "Common/ParameterSet.h"

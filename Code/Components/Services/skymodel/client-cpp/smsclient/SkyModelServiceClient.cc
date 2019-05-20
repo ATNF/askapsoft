@@ -35,7 +35,7 @@
 #include <vector>
 
 // ASKAPsoft includes
-#include "askap/AskapError.h"
+#include "askap/askap/AskapError.h"
 #include "Ice/Ice.h"
 #include "iceutils/CommunicatorConfig.h"
 #include "iceutils/CommunicatorFactory.h"

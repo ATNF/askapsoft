@@ -36,7 +36,7 @@
 
 #include <Common/ParameterSet.h>
 
-#include <calibaccess/ServiceCalSolutionSourceStub.h>
+#include <askap/calibaccess/ServiceCalSolutionSourceStub.h>
 #include <calibrationclient/CalibrationDataServiceClient.h>
 
 

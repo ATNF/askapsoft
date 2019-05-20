@@ -34,7 +34,7 @@
 #include <string>
 
 // ASKAPsoft includes
-#include "askap/AskapError.h"
+#include "askap/askap/AskapError.h"
 #include "Common/ParameterSet.h"
 
 using namespace std;

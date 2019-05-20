@@ -37,8 +37,8 @@
 #include <inttypes.h>
 
 // ASKAPsoft and casa includes
-#include "askap/AskapError.h"
-#include "askap/AskapLogging.h"
+#include "askap/askap/AskapError.h"
+#include "askap/askap/AskapLogging.h"
 #include "casacore/ms/MeasurementSets/MeasurementSet.h"
 #include "casacore/ms/MeasurementSets/MSColumns.h"
 #include "casacore/casa/Arrays/Vector.h"

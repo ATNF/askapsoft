@@ -32,7 +32,7 @@
 #include <iostream>
 #include <stdint.h>
 
-#include "askap/AskapError.h"
+#include "askap/askap/AskapError.h"
 
 using namespace std;
 

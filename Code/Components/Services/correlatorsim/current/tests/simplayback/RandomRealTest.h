@@ -28,7 +28,7 @@
 #include <cppunit/extensions/HelperMacros.h>
 
 // Support classes
-#include "askap/AskapError.h"
+#include "askap/askap/AskapError.h"
 
 // Classes to test
 #include "simplayback/RandomReal.h"

@@ -40,7 +40,7 @@
 #include <mpi.h>
 
 // ASKAPsoft includes
-#include "askap/AskapLogging.h"
+#include "askap/askap/AskapLogging.h"
 #include "casacore/casa/OS/Timer.h"
 
 using namespace askap::cp::pipelinetasks;

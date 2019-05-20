@@ -32,7 +32,7 @@
 #include <vector>
 
 // ASKAPsoft includes
-#include "askap/AskapUtil.h"
+#include "askap/askap/AskapUtil.h"
 #include <zmq.hpp>
 
 // Local package includes

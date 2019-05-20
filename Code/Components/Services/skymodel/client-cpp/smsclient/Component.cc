@@ -31,7 +31,7 @@
 #include "askap_smsclient.h"
 
 // ASKAPsoft includes
-#include "askap/AskapError.h"
+#include "askap/askap/AskapError.h"
 #include "casacore/casa/Quanta/Quantum.h"
 
 // Using

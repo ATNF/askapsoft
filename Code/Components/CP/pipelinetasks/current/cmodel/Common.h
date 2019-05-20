@@ -37,7 +37,7 @@
 #include <vector>
 
 // ASKAPsoft includes
-#include "askap/AskapError.h"
+#include "askap/askap/AskapError.h"
 #include "boost/scoped_ptr.hpp"
 #include "casacore/casa/aipstype.h"
 #include "casacore/casa/Quanta/Quantum.h"

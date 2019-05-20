@@ -31,7 +31,7 @@
 #include <string>
 #include <vector>
 #include "casacore/ms/MeasurementSets/MeasurementSet.h"
-#include "askap/AskapError.h"
+#include "askap/askap/AskapError.h"
 
 // Classes to test
 #include "cflag/FlaggerFactory.h"

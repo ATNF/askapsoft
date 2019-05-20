@@ -44,8 +44,8 @@ namespace LOFAR {
         LOFAR::BlobIStream& operator>>(LOFAR::BlobIStream& is, casacore::MVEpoch& obj);
 
         // casacore::MVDirection
-        LOFAR::BlobOStream& operator<<(LOFAR::BlobOStream& os, const casacore::MVDirection& obj);
-        LOFAR::BlobIStream& operator>>(LOFAR::BlobIStream& is, casacore::MVDirection& obj);
+//        LOFAR::BlobOStream& operator<<(LOFAR::BlobOStream& os, const casacore::MVDirection& obj);
+//        LOFAR::BlobIStream& operator>>(LOFAR::BlobIStream& is, casacore::MVDirection& obj);
 
         // casacore::MDirection
         LOFAR::BlobOStream& operator<<(LOFAR::BlobOStream& os, const casacore::MDirection& obj);

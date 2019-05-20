@@ -33,12 +33,12 @@
 // System includes
 
 // ASKAPsoft includes
-#include "askap/AskapUtil.h"
+#include "askap/askap/AskapUtil.h"
 #include "casacore/measures/Measures/MEpoch.h"
 #include "casacore/casa/Quanta/MVTime.h"
 #include "xercesc/dom/DOM.hpp" // Includes all DOM
-#include "votable/XercescString.h"
-#include "votable/XercescUtils.h"
+#include "askap/votable/XercescString.h"
+#include "askap/votable/XercescUtils.h"
 
 // Local package includes
 

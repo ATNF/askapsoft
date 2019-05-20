@@ -66,7 +66,7 @@ class SelectionFlagger : public IFlagger {
         ///
         /// @throw AskapError   If no selection criteria is specified
         ///                     in the parset for a listed rule.
-        static vector< boost::shared_ptr<IFlagger> > build(
+        static std::vector< boost::shared_ptr<IFlagger> > build(
                 const LOFAR::ParameterSet& parset,
                 const casacore::MeasurementSet& ms);
 

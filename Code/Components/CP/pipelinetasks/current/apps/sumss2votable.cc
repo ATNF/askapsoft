@@ -39,11 +39,11 @@
 #include <vector>
 
 // ASKAPsoft include
-#include "askap/AskapLogging.h"
-#include "askap/AskapError.h"
+#include "askap/askap/AskapLogging.h"
+#include "askap/askap/AskapError.h"
 #include "boost/lexical_cast.hpp"
 #include "casacore/casa/Quanta/Quantum.h"
-#include "votable/VOTable.h" // includes VOTable*.h
+#include "askap/votable/VOTable.h" // includes VOTable*.h
 
 using namespace std;
 using namespace askap;

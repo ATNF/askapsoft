@@ -37,10 +37,10 @@
 #include <stdint.h>
 
 // ASKAPsoft includes
-#include "askap/AskapUtil.h"
+#include "askap/askap/AskapUtil.h"
 #include "xercesc/dom/DOM.hpp" // Includes all DOM
-#include "votable/XercescUtils.h"
-#include "votable/XercescString.h"
+#include "askap/votable/XercescUtils.h"
+#include "askap/votable/XercescString.h"
 
 // Using
 using namespace std;

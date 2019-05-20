@@ -36,7 +36,7 @@
 #include <complex>
 #include <vector>
 #include <cstring>
-#include "askap/AskapError.h"
+#include "askap/askap/AskapError.h"
 #include "publisher/InputMessage.h"
 #include "publisher/SpdOutputMessage.h"
 #include "TestHelperFunctions.h"

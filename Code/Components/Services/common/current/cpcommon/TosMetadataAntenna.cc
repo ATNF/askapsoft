@@ -40,10 +40,11 @@
 // 3rdParty
 #include "Blob/BlobArray.h"
 #include "Blob/BlobAipsIO.h"
-#include "Blob/BlobOStream.h"
 #include "Blob/BlobIStream.h"
+#include "Blob/BlobOStream.h"
 // Using
 using namespace askap::cp;
+using namespace casacore;
 
 TosMetadataAntenna::TosMetadataAntenna(const casacore::String& name)
     : itsName(name), itsOnSource(false), itsFlagged(true)

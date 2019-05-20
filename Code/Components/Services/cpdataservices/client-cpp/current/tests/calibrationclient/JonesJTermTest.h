@@ -32,7 +32,7 @@
 #include "casacore/casa/BasicSL/Complex.h"
 
 // Classes to test
-#include "calibaccess/JonesJTerm.h"
+#include "askap/calibaccess/JonesJTerm.h"
 
 namespace askap {
 namespace cp {

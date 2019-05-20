@@ -26,8 +26,8 @@
 
 // ASKAPsoft includes
 #include "ingestpipeline/mssink/BeamSubstitutionRule.h"
-#include "askap/AskapUtil.h"
-#include "askap/AskapError.h"
+#include "askap/askap/AskapUtil.h"
+#include "askap/askap/AskapError.h"
 
 namespace askap {
 namespace cp {

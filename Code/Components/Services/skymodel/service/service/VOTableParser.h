@@ -37,7 +37,7 @@
 #include <boost/variant.hpp>
 
 // ASKAPsoft includes
-#include <votable/VOTable.h>
+#include <askap/votable/VOTable.h>
 
 // Local package includes
 #include "datamodel/ContinuumComponent.h"

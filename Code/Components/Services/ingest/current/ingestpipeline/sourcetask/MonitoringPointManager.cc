@@ -34,8 +34,8 @@
 #include "askap_cpingest.h"
 
 // ASKAPsoft includes
-#include "askap/AskapError.h"
-#include "askap/AskapUtil.h"
+#include "askap/askap/AskapError.h"
+#include "askap/askap/AskapUtil.h"
 #include "cpcommon/VisChunk.h"
 #include "monitoring/MonitoringSingleton.h"
 #include "casacore/measures/Measures/MDirection.h"

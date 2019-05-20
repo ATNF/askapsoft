@@ -12,6 +12,7 @@ pkg.AddSubPackage("cpcommon")
 
 env.AppendUnique(CCFLAGS=['-I/usr/local/include/casarest'])
 env.AppendUnique(CCFLAGS=['-I/usr/local/include/casacore'])
-#env.AppendUnique(CCFLAGS=['-Dcasa=casacore'])
+env.AppendUnique(CCFLAGS=['-Dcasa=casacore'])
+env.AppendUnique(CCFLAGS=['-DHAVE_AIPSPP'])
 # run the build process
 pkg()
