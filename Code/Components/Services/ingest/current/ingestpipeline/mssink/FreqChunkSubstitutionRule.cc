@@ -28,7 +28,7 @@
 #include "ingestpipeline/mssink/FreqChunkSubstitutionRule.h"
 #include "askap/askap/AskapUtil.h"
 #include "askap/askap/AskapError.h"
-#include "askap/IndexedCompare.h"
+#include "askap/askap/IndexedCompare.h"
 
 // it would be nice to get all MPI stuff in a single place, but ingest is already MPI-heavy throughout
 #include <mpi.h>

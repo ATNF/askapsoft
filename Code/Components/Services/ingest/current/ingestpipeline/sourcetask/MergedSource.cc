@@ -47,7 +47,7 @@
 #include "Common/ParameterSet.h"
 #include "cpcommon/TosMetadata.h"
 #include "cpcommon/VisDatagram.h"
-#include "utils/PolConverter.h"
+#include "askap/scimath/utils/PolConverter.h"
 #include "casacore/casa/Quanta/MVEpoch.h"
 #include "casacore/measures/Measures.h"
 #include "casacore/measures/Measures/MeasConvert.h"

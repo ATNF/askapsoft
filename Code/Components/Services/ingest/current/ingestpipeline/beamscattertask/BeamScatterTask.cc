@@ -47,7 +47,7 @@
 #include "cpcommon/CasaBlobUtils.h"
 #include "Blob/BlobAipsIO.h"
 #include <Blob/BlobSTL.h>
-#include "utils/CasaBlobUtils.h"
+#include "askap/scimath/utils/CasaBlobUtils.h"
 #include "ingestpipeline/MPITraitsHelper.h"
 
 // boost includes

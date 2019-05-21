@@ -30,8 +30,8 @@
 // ASKAPsoft includes
 #include "Common/ParameterSet.h"
 #include "cpcommon/VisChunk.h"
-#include "utils/DelayEstimator.h"
-#include "askap/CircularBuffer.h"
+#include "askap/scimath/utils/DelayEstimator.h"
+#include "askap/askap/CircularBuffer.h"
 
 // casa includes
 #include <casacore/casa/Arrays/Matrix.h>

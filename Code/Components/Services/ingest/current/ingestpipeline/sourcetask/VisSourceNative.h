@@ -32,7 +32,7 @@
 #include "boost/scoped_ptr.hpp"
 #include "boost/thread.hpp"
 #include "cpcommon/VisDatagram.h"
-#include "askap/CircularBuffer.h"
+#include "askap/askap/CircularBuffer.h"
 
 // Local package includes
 #include "ingestpipeline/sourcetask/IVisSource.h"

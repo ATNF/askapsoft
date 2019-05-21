@@ -35,7 +35,7 @@
 #include "boost/noncopyable.hpp"
 #include "tosmetadata/MetadataReceiver.h"
 #include "cpcommon/TosMetadata.h"
-#include "askap/CircularBuffer.h"
+#include "askap/askap/CircularBuffer.h"
 
 // Local package includes
 #include "ingestpipeline/sourcetask/IMetadataSource.h"

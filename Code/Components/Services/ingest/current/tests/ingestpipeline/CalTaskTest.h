@@ -32,7 +32,7 @@
 #include "Common/ParameterSet.h"
 #include "casacore/measures/Measures.h"
 #include "casacore/casa/Quanta/MVEpoch.h"
-#include "utils/PolConverter.h"
+#include "askap/scimath/utils/PolConverter.h"
 #include "configuration/Configuration.h"
 #include "ConfigurationHelper.h"
 

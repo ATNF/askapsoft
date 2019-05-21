@@ -124,7 +124,7 @@ ServiceCalSolutionAccessor::ServiceCalSolutionAccessor(boost::shared_ptr<askap::
 accessors::JonesJTerm ServiceCalSolutionAccessor::gain(const accessors::JonesIndex &index) const
 {
   ASKAPASSERT(this->solutionsValid);
-  map<accessors::JonesIndex,accessors::JonesJTerm> gains = itsGainSolution.map();
+  std::map<accessors::JonesIndex,accessors::JonesJTerm> gains = itsGainSolution.map();
   return gains[index];
 
 
@@ -141,7 +141,7 @@ accessors::JonesJTerm ServiceCalSolutionAccessor::gain(const accessors::JonesInd
 accessors::JonesDTerm ServiceCalSolutionAccessor::leakage(const accessors::JonesIndex &index) const
 {
   ASKAPASSERT(this->solutionsValid);
-  map<accessors::JonesIndex,accessors::JonesDTerm> leakages = itsLeakageSolution.map();
+  std::map<accessors::JonesIndex,accessors::JonesDTerm> leakages = itsLeakageSolution.map();
   return leakages[index];
 }
 

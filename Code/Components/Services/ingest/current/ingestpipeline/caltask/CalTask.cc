@@ -38,7 +38,7 @@
 #include "askap/askap/AskapLogging.h"
 #include "askap/askap/AskapError.h"
 #include "askap/askap/AskapUtil.h"
-#include "utils/PolConverter.h"
+#include "askap/scimath/utils/PolConverter.h"
 #include "cpcommon/VisChunk.h"
 
 // Local packages includes

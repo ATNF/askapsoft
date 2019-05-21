@@ -49,7 +49,7 @@ ShadowFlagTask::ShadowFlagTask(const LOFAR::ParameterSet &parset, const Configur
 {
    ASKAPLOG_DEBUG_STR(logger, "Constructor");
    itsAntennaNames.reserve(config.antennas().size());
-   for (vector<Antenna>::const_iterator ci = config.antennas().begin(); ci != config.antennas().end(); ++ci) {
+   for (std::vector<Antenna>::const_iterator ci = config.antennas().begin(); ci != config.antennas().end(); ++ci) {
         itsAntennaNames.push_back(ci->name());
         // could've got the actual diameter from the configuration here, but we'd have to support
         // heterogeneous case then or ensure all diameters are the same.

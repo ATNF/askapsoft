@@ -30,7 +30,7 @@
 // ASKAPsoft includes
 #include "Common/ParameterSet.h"
 #include "cpcommon/VisChunk.h"
-#include "utils/DelayEstimator.h"
+#include "askap/scimath/utils/DelayEstimator.h"
 
 // casa includes
 #include <casacore/casa/Arrays/Matrix.h>

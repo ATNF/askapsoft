@@ -35,8 +35,8 @@
 #include "boost/tuple/tuple_comparison.hpp"
 
 // ASKAPsoft includes
-#include "askap/AskapError.h"
-#include "askap/AskapUtil.h"
+#include "askap/askap/AskapError.h"
+#include "askap/askap/AskapUtil.h"
 // just to access static methods
 #include "ingestpipeline/sourcetask/VisSource.h"
 

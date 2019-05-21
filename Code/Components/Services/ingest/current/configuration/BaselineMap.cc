@@ -68,7 +68,7 @@ BaselineMap::BaselineMap(const LOFAR::ParameterSet& parset) : itsUpperTriangle(t
         const vector<int32_t> ids = parset.getInt32Vector("baselineids", true);
         itsSize = ids.size();
 
-        for (vector<int32_t>::const_iterator it = ids.begin();
+        for (std::vector<int32_t>::const_iterator it = ids.begin();
                 it != ids.end(); ++it) {
             const int32_t id = *it;
             if (!parset.isDefined(toString(id))) {

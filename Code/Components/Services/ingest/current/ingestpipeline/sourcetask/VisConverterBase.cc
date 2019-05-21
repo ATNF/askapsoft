@@ -44,7 +44,7 @@
 #include "askap/askap/AskapLogging.h"
 #include "askap/askap/AskapError.h"
 #include "askap/askap/AskapUtil.h"
-#include "utils/PolConverter.h"
+#include "askap/scimath/utils/PolConverter.h"
 
 // just for static members to access parameters
 #include "ingestpipeline/sourcetask/VisSource.h"

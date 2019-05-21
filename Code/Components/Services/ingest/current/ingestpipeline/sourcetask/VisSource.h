@@ -36,7 +36,7 @@
 #include "boost/noncopyable.hpp"
 #include "cpcommon/VisDatagram.h"
 #include "Common/ParameterSet.h"
-#include "askap/CircularBuffer.h"
+#include "askap/askap/CircularBuffer.h"
 
 
 // Local package includes

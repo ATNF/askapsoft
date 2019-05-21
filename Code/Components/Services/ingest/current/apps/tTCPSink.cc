@@ -44,7 +44,7 @@
 #include "boost/shared_ptr.hpp"
 #include <boost/thread/thread.hpp>
 #include "cpcommon/VisDatagram.h"
-#include "utils/ComplexGaussianNoise.h"
+#include "askap/scimath/utils/ComplexGaussianNoise.h"
 
 // Local package includes
 #include "ingestpipeline/tcpsink/TCPSink.h"

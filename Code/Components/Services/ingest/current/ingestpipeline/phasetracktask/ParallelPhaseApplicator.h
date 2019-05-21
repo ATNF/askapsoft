@@ -39,7 +39,7 @@
 #include "boost/tuple/tuple.hpp"
 
 // ASKAPsoft includes
-#include "askap/CircularBuffer.h"
+#include "askap/askap/CircularBuffer.h"
 
 
 namespace askap {

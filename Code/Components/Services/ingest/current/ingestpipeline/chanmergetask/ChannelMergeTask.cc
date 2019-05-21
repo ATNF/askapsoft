@@ -46,7 +46,7 @@
 #include "Blob/BlobOBufVector.h"
 #include "Blob/BlobArray.h"
 #include "Blob/BlobAipsIO.h"
-#include "utils/CasaBlobUtils.h"
+#include "askap/scimath/utils/CasaBlobUtils.h"
 #include "casacore/casa/OS/Timer.h"
 
 

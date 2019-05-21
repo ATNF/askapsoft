@@ -247,7 +247,7 @@ void Configuration::buildAntennas(void)
     const casacore::Quantity defaultDelay = asQuantity(itsParset.getString("antenna.ant.delay", "0s"));
     map<string, Antenna> antennaMap;
 
-    for (vector<string>::const_iterator it = antId.begin(); it != antId.end(); ++it) {
+    for (std::vector<string>::const_iterator it = antId.begin(); it != antId.end(); ++it) {
         const string keyBase = "antenna." + *it + ".";
         const string name = itsParset.getString(keyBase + "name");
         ASKAPCHECK(name.find(" ") == std::string::npos, 
@@ -281,7 +281,7 @@ void Configuration::buildAntennas(void)
     // Now read "baselinemap.antennaidx" and build the antenna vector with the
     // ordering that maps to the baseline mapping
     const vector<string> antOrdering = itsParset.getStringVector("baselinemap.antennaidx");
-    for (vector<string>::const_iterator it = antOrdering.begin(); it != antOrdering.end(); ++it) {
+    for (std::vector<string>::const_iterator it = antOrdering.begin(); it != antOrdering.end(); ++it) {
         map<string, Antenna>::const_iterator antit = antennaMap.find(*it);
         if (antit == antennaMap.end()) {
             ASKAPTHROW(AskapError, "Antenna " << *it << " is not configured");
@@ -366,7 +366,7 @@ void Configuration::buildCorrelatorModes(void)
 
         vector<casacore::Stokes::StokesTypes> stokes;
         const vector<string> stokesStrings = itsParset.isDefined(keyBase + "stokes") ? itsParset.getStringVector(keyBase + "stokes") : itsParset.getStringVector(standardKeyBase + "stokes");
-        for (vector<string>::const_iterator it = stokesStrings.begin();
+        for (std::vector<string>::const_iterator it = stokesStrings.begin();
                 it != stokesStrings.end(); ++it) {
             stokes.push_back(casacore::Stokes::type(*it));
         }

@@ -40,7 +40,7 @@
 #include "boost/thread/thread.hpp"
 #include "boost/tuple/tuple.hpp"
 
-#include "askap/CircularBuffer.h"
+#include "askap/askap/CircularBuffer.h"
 
 ASKAP_LOGGER(logger, ".ParallelPhaseApplicator");
 

@@ -41,7 +41,7 @@
 // ASKAPsoft includes
 #include "boost/shared_ptr.hpp"
 #include "frtmetadata/FrtMetadataReceiver.h"
-#include "askap/CircularBuffer.h"
+#include "askap/askap/CircularBuffer.h"
 
 namespace askap {
 namespace cp {

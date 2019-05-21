@@ -63,7 +63,7 @@ std::vector<IceMonitorPoint> DataManager::get(
     vector<IceMonitorPoint> out;
     boost::mutex::scoped_lock lock(itsMutex);
 
-    for (vector<string>::const_iterator it = pointnames.begin();
+    for (std::vector<string>::const_iterator it = pointnames.begin();
             it != pointnames.end(); ++it) {
         const map<string, IceMonitorPoint>::const_iterator element = itsData.find(*it);
         if (element != itsData.end()) {

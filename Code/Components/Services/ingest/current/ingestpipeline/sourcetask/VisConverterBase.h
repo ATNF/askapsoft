@@ -52,7 +52,7 @@
 // ASKAPsoft includes
 #include "cpcommon/VisDatagram.h"
 #include "cpcommon/VisChunk.h"
-#include "askap/IndexConverter.h"
+#include "askap/askap/IndexConverter.h"
 
 
 // local includes

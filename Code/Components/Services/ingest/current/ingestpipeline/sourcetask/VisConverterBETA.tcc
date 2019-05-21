@@ -35,7 +35,7 @@
 #include "boost/tuple/tuple_comparison.hpp"
 
 // ASKAPsoft includes
-#include "askap/AskapError.h"
+#include "askap/askap/AskapError.h"
 
 
 namespace askap {
