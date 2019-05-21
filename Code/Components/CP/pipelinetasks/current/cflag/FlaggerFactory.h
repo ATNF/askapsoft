@@ -47,11 +47,11 @@ namespace pipelinetasks {
 class FlaggerFactory {
     public:
 
-        /// Appends one vector of flaggers to another. Vector "v2" is appended
-        /// to vector "v1"
+        /// Appends one std::vector of flaggers to another. Vector "v2" is appended
+        /// to std::vector "v1"
         ///
-        /// @param[in,out]  v1  the vector that will be appended to.
-        /// @param[in]      v2  the vector that will be appended to v1.
+        /// @param[in,out]  v1  the std::vector that will be appended to.
+        /// @param[in]      v2  the std::vector that will be appended to v1.
         static void appendFlaggers(std::vector< boost::shared_ptr<IFlagger> >& v1,
                                    const std::vector< boost::shared_ptr<IFlagger> > v2);
 
@@ -62,7 +62,7 @@ class FlaggerFactory {
         ///                     of the flagging strategies to use.
         /// @param[in] ms       a reference to the measurement set that will
         ///                     be the subject of flagging.
-        /// @return a vector containing pointers to the flagging strategies.
+        /// @return a std::vector containing pointers to the flagging strategies.
         static std::vector< boost::shared_ptr<IFlagger> > build(
             const LOFAR::ParameterSet& parset, const casacore::MeasurementSet& ms);
 };

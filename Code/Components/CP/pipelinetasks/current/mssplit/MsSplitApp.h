@@ -179,7 +179,7 @@ class MsSplitApp : public askap::Application {
 
         // Map of rows to keep. This is for the case when we know
         // we do not need all rows
-        map<int,int> itsMapOfRows;
+	std::map<int,int> itsMapOfRows;
 
 };
 

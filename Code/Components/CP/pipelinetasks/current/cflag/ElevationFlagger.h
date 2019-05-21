@@ -55,7 +55,7 @@ class ElevationFlagger : public IFlagger {
         /// @brief Constructs zero or more instances of the ElevationFlagger.
         /// The flagger is responsible for reading the "parset" and constructing
         /// zero or more instances of itself, depending on the configuration.
-        static vector< boost::shared_ptr<IFlagger> > build(
+        static std::vector< boost::shared_ptr<IFlagger> > build(
                 const LOFAR::ParameterSet& parset,
                 const casacore::MeasurementSet& ms);
 
@@ -93,7 +93,7 @@ class ElevationFlagger : public IFlagger {
         // less than this then the row will be flagged.
         casacore::Quantity itsLowLimit;
 
-        // Timestamp that the antenna elevations vector was updated
+        // Timestamp that the antenna elevations std::vector was updated
         casacore::Double itsTimeElevCalculated;
 
         // Antenna elevations, as calculated at time "itsTimeElevCalculated"

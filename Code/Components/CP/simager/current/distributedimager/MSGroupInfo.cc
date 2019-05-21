@@ -70,7 +70,7 @@ MSGroupInfo::MSGroupInfo(const std::vector<std::string>& ms)
     ASKAPCHECK(!ms.empty(), "No measurement sets specified");
 
     // Frequency for each channel
-    vector<casacore::Quantity> freqinfo;
+    std::vector<casacore::Quantity> freqinfo;
 
     // Iterate over measurement sets
     const casacore::Unit frequnit("Hz");

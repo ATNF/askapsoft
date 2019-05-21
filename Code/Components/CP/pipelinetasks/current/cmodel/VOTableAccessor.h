@@ -82,7 +82,7 @@ class VOTableAccessor : public IGlobalSkyModel {
         /// Only those fields found in FieldEnum will be actioned. All other fields
         /// found in the "fields" input will be ignored.
         ///
-        /// @param[in] field    vector of fields.
+        /// @param[in] field    std::vector of fields.
         /// @param[out] posMap  maps FieldEnum to a zero-based index in the row
         /// @param[out] unitMap maps FieldEnum to units
         static void initFieldInfo(const std::vector<askap::accessors::VOTableField>& fields,

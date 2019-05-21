@@ -32,7 +32,7 @@
 #include <vector>
 
 // ASKAPsoft includes
-#include <fitting/Params.h>
+#include <askap/scimath/fitting/Params.h>
 
 // Local Package includes
 #include "distributedimager/MPIBasicComms.h"

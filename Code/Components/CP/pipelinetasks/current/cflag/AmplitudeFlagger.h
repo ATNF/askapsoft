@@ -59,7 +59,7 @@ class AmplitudeFlagger : public IFlagger {
         ///
         /// @throw AskapError   If an upper or lower threshold is not specified
         ///                     in the parset.
-        static vector< boost::shared_ptr<IFlagger> > build(
+        static std::vector< boost::shared_ptr<IFlagger> > build(
                 const LOFAR::ParameterSet& parset,
                 const casacore::MeasurementSet& ms);
 
@@ -88,7 +88,7 @@ class AmplitudeFlagger : public IFlagger {
         void loadParset(const LOFAR::ParameterSet& parset);
         void logParsetSummary(const LOFAR::ParameterSet& parset);
 
-        /// Returns a vector of stokes types for a given row in the main table
+        /// Returns a std::vector of stokes types for a given row in the main table
         /// of the measurement set. This will have the same dimension and
         /// ordering as the data/flag matrices.
         casacore::Vector<casacore::Int> getStokesType(casacore::MSColumns& msc,
@@ -136,12 +136,12 @@ class AmplitudeFlagger : public IFlagger {
         // be applied. An empty list means apply to all correlation products.
         std::set<casacore::Stokes::StokesTypes> itsStokes;
 
-        // Maps of accumulation vectors for averaging spectra and generating flags
+        // Maps of accumulation std::vectors for averaging spectra and generating flags
         std::map<rowKey, casacore::Vector<casacore::Double> > itsAveSpectra;
         std::map<rowKey, casacore::Vector<casacore::Bool> > itsMaskSpectra;
         std::map<rowKey, casacore::Vector<casacore::Int> > itsCountSpectra;
 
-        // Maps of accumulation vectors for averaging time series and generating flags
+        // Maps of accumulation std::vectors for averaging time series and generating flags
         std::map<rowKey, casacore::Vector<casacore::Float> > itsAveTimes;
         std::map<rowKey, casacore::Vector<casacore::Bool> > itsMaskTimes;
         std::map<rowKey, casacore::Int> itsCountTimes;
@@ -150,7 +150,7 @@ class AmplitudeFlagger : public IFlagger {
         rowKey getRowKey(casacore::MSColumns& msc, const casacore::uInt row,
             const casacore::uInt corr);
 
-        // Functions to handle accumulation vectors and indices
+        // Functions to handle accumulation std::vectors and indices
         void updateTimeVectors(const rowKey &key, const casacore::uInt pass);
         void initSpectrumVectors(const rowKey &key, const casacore::IPosition &shape);
 

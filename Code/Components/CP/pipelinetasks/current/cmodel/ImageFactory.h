@@ -57,7 +57,7 @@ class ImageFactory {
         static casacore::CoordinateSystem createCoordinateSystem(casacore::uInt nx, casacore::uInt ny,
                 const LOFAR::ParameterSet& parset);
 
-        // Convert a std::vector of strings (either I, Q, U or V) to a vector of
+        // Convert a std::vector of strings (either I, Q, U or V) to a std::vector of
         // integers mapping to casacore::Stokes types
         static casacore::Vector<casacore::Int> parseStokes(const std::vector<std::string>& input);
 

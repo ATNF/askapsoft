@@ -32,10 +32,10 @@
 
 // ASKAPsoft includes
 #include <Common/ParameterSet.h>
-#include <fitting/INormalEquations.h>
-#include <fitting/Params.h>
-#include <fitting/Solver.h>
-#include <fitting/Quality.h>
+#include <askap/scimath/fitting/INormalEquations.h>
+#include <askap/scimath/fitting/Params.h>
+#include <askap/scimath/fitting/Solver.h>
+#include <askap/scimath/fitting/Quality.h>
 #include <casacore/casa/Quanta/Quantum.h>
 #include <casacore/casa/Arrays/Vector.h>
 

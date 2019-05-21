@@ -34,19 +34,19 @@
 #include <askap/askap/AskapLogging.h>
 #include <askap/askap/AskapError.h>
 #include <Common/ParameterSet.h>
-#include <fitting/INormalEquations.h>
-#include <fitting/ImagingNormalEquations.h>
-#include <fitting/Params.h>
-#include <fitting/Solver.h>
-#include <fitting/Quality.h>
-#include <measurementequation/ImageSolverFactory.h>
-#include <measurementequation/SynthesisParamsHelper.h>
-#include <measurementequation/ImageRestoreSolver.h>
-#include <measurementequation/IImagePreconditioner.h>
-#include <measurementequation/WienerPreconditioner.h>
-#include <measurementequation/GaussianTaperPreconditioner.h>
-#include <measurementequation/ImageMultiScaleSolver.h>
-#include <measurementequation/ImageParamsHelper.h>
+#include <askap/scimath/fitting/INormalEquations.h>
+#include <askap/scimath/fitting/ImagingNormalEquations.h>
+#include <askap/scimath/fitting/Params.h>
+#include <askap/scimath/fitting/Solver.h>
+#include <askap/scimath/fitting/Quality.h>
+#include <askap/measurementequation/ImageSolverFactory.h>
+#include <askap/measurementequation/SynthesisParamsHelper.h>
+#include <askap/measurementequation/ImageRestoreSolver.h>
+#include <askap/measurementequation/IImagePreconditioner.h>
+#include <askap/measurementequation/WienerPreconditioner.h>
+#include <askap/measurementequation/GaussianTaperPreconditioner.h>
+#include <askap/measurementequation/ImageMultiScaleSolver.h>
+#include <askap/measurementequation/ImageParamsHelper.h>
 #include <casacore/casa/OS/Timer.h>
 
 // Local includes
@@ -183,8 +183,8 @@ void SolverCore::restoreImage()
     ASKAPDEBUGASSERT(itsModel);
 
     // remove parts of each faceted image
-    vector<string> names(itsModel->completions("image"));
-    for (vector<string>::const_iterator ci=names.begin(); ci !=names.end(); ++ci) {
+    std::vector<std::string> names(itsModel->completions("image"));
+    for (std::vector<std::string>::const_iterator ci=names.begin(); ci !=names.end(); ++ci) {
         const string name="image"+*ci;
         ImageParamsHelper iph(name);
         if (iph.isFacet()) {
@@ -206,8 +206,8 @@ void SolverCore::writeModel(const std::string &postfix)
     SynthesisParamsHelper::setUpImageHandler(itsParset);
 
     ASKAPLOG_INFO_STR(logger, "Writing out results as images");
-    vector<string> resultimages = itsModel->names();
-    for (vector<string>::const_iterator it = resultimages.begin(); it
+    std::vector<std::string> resultimages = itsModel->names();
+    for (std::vector<std::string>::const_iterator it = resultimages.begin(); it
             != resultimages.end(); it++) {
         if ((it->find("image") == 0) || (it->find("psf") == 0) ||
                 (it->find("weights") == 0) || (it->find("mask") == 0) ||
@@ -224,7 +224,7 @@ void SolverCore::writeModel(const std::string &postfix)
 
         // merged image should be a fixed parameter without facet suffixes
         resultimages = itsModel->fixedNames();
-        for (vector<string>::const_iterator ci = resultimages.begin();
+        for (std::vector<std::string>::const_iterator ci = resultimages.begin();
                 ci != resultimages.end();
                 ++ci) {
             const ImageParamsHelper iph(*ci);

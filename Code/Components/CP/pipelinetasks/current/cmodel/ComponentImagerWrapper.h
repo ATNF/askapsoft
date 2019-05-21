@@ -48,14 +48,14 @@ class ComponentImagerWrapper {
         ComponentImagerWrapper(const LOFAR::ParameterSet& parset);
 
         /// Project components onto the image
-        /// @param[in] vector of components to be projected.
+        /// @param[in] std::vector of components to be projected.
         /// @param[in] image to which the components will be projected.
         void projectComponents(const std::vector<askap::cp::sms::client::Component>& components,
                                casacore::ImageInterface<casacore::Float>& image,
                                const unsigned int term);
 
     private:
-        // Converts a vector of components (as obtained from the sky model
+        // Converts a std::vector of components (as obtained from the sky model
         // service) into CASA omponents.
         casacore::ComponentList translateComponentList(
             const std::vector<askap::cp::sms::client::Component>& components);

@@ -63,7 +63,7 @@ class StokesVFlagger : public IFlagger {
         /// @brief Constructs zero or more instances of the StokesVFlagger.
         /// The flagger is responsible for reading the "parset" and constructing
         /// zero or more instances of itself, depending on the configuration.
-        static vector< boost::shared_ptr<IFlagger> > build(
+        static std::vector< boost::shared_ptr<IFlagger> > build(
                 const LOFAR::ParameterSet& parset,
                 const casacore::MeasurementSet& ms);
 
@@ -143,17 +143,17 @@ class StokesVFlagger : public IFlagger {
         // Generate a key for a given row and polarisation
         rowKey getRowKey(const casacore::MSColumns& msc, const casacore::uInt row);
 
-        // Maps of accumulation vectors for averaging spectra and generating flags
+        // Maps of accumulation std::vectors for averaging spectra and generating flags
         std::map<rowKey, casacore::Vector<casacore::Double> > itsAveSpectra;
         std::map<rowKey, casacore::Vector<casacore::Bool> > itsMaskSpectra;
         std::map<rowKey, casacore::Vector<casacore::Int> > itsCountSpectra;
 
-        // Maps of accumulation vectors for averaging time series and generating flags
+        // Maps of accumulation std::vectors for averaging time series and generating flags
         std::map<rowKey, casacore::Vector<casacore::Float> > itsAveTimes;
         std::map<rowKey, casacore::Vector<casacore::Bool> > itsMaskTimes;
         std::map<rowKey, casacore::Int> itsCountTimes;
 
-        // Functions to handle accumulation vectors and indices
+        // Functions to handle accumulation std::vectors and indices
         void updateTimeVectors(const rowKey &key, const casacore::uInt pass);
         void initSpectrumVectors(const rowKey &key, const casacore::IPosition &shape);
 

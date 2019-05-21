@@ -36,15 +36,15 @@
 // ASKAPsoft includes
 #include <askap/askap/AskapLogging.h>
 #include <askap/askap/AskapError.h>
-#include <fitting/Equation.h>
-#include <fitting/INormalEquations.h>
-#include <fitting/ImagingNormalEquations.h>
-#include <fitting/Params.h>
-#include <gridding/IVisGridder.h>
-#include <gridding/VisGridderFactory.h>
-#include <measurementequation/SynthesisParamsHelper.h>
-#include <measurementequation/ImageFFTEquation.h>
-#include <measurementequation/SynthesisParamsHelper.h>
+#include <askap/scimath/fitting/Equation.h>
+#include <askap/scimath/fitting/INormalEquations.h>
+#include <askap/scimath/fitting/ImagingNormalEquations.h>
+#include <askap/scimath/fitting/Params.h>
+#include <askap/gridding/IVisGridder.h>
+#include <askap/gridding/VisGridderFactory.h>
+#include <askap/measurementequation/SynthesisParamsHelper.h>
+#include <askap/measurementequation/ImageFFTEquation.h>
+#include <askap/measurementequation/SynthesisParamsHelper.h>
 #include <askap/dataaccess/IConstDataSource.h>
 #include <askap/dataaccess/TableConstDataSource.h>
 #include <askap/dataaccess/IConstDataIterator.h>
@@ -166,7 +166,7 @@ askap::scimath::Params::ShPtr SpectralLineWorker::processWorkUnit(const Spectral
     }
     const string imagename = itsParset.getString("Images.name");
     if (imagename.at(0) == '[') {
-        ASKAPTHROW(std::runtime_error, "Image name specified as a vector.");
+        ASKAPTHROW(std::runtime_error, "Image name specified as a std::vector.");
     }
 
     const unsigned int localChannel = wu.get_localChannel();
@@ -313,10 +313,10 @@ void SpectralLineWorker::setupImage(const askap::scimath::Params::ShPtr& params,
 
         const int nfacets = parset.getInt32("nfacets", 1);
         const string name("image.slice");
-        const vector<string> direction = parset.getStringVector("direction");
-        const vector<string> cellsize = parset.getStringVector("cellsize");
-        const vector<int> shape = parset.getInt32Vector("shape");
-        //const vector<double> freq = parset.getDoubleVector("frequency");
+        const std::vector<std::string> direction = parset.getStringVector("direction");
+        const std::vector<std::string> cellsize = parset.getStringVector("cellsize");
+        const std::vector<int> shape = parset.getInt32Vector("shape");
+        //const std::vector<double> freq = parset.getDoubleVector("frequency");
         const int nchan = 1;
 
         const std::vector<std::string>

@@ -37,8 +37,8 @@
 #include <askap/askap/AskapLogging.h>
 #include <askap/askap/AskapError.h>
 #include <Common/ParameterSet.h>
-#include <fitting/Params.h>
-#include <fitting/Axes.h>
+#include <askap/scimath/fitting/Params.h>
+#include <askap/scimath/fitting/Axes.h>
 #include <askap/dataaccess/IConstDataSource.h>
 #include <askap/dataaccess/TableConstDataSource.h>
 #include <askap/dataaccess/IConstDataIterator.h>
@@ -66,8 +66,8 @@ SpectralLineMaster::SpectralLineMaster(LOFAR::ParameterSet& parset,
     : itsParset(parset), itsComms(comms), itsBeamList()
 {
     itsDoingPreconditioning = false;
-    const vector<string> preconditioners = itsParset.getStringVector("preconditioner.Names", std::vector<std::string>());
-    for (vector<string>::const_iterator pc = preconditioners.begin(); pc != preconditioners.end(); ++pc) {
+    const std::vector<std::string> preconditioners = itsParset.getStringVector("preconditioner.Names", std::vector<std::string>());
+    for (std::vector<std::string>::const_iterator pc = preconditioners.begin(); pc != preconditioners.end(); ++pc) {
         if ((*pc) == "Wiener" || (*pc) == "NormWiener" || (*pc) == "Robust" || (*pc) == "GaussianTaper") {
             itsDoingPreconditioning = true;
         }
@@ -82,7 +82,7 @@ SpectralLineMaster::~SpectralLineMaster()
 void SpectralLineMaster::run(void)
 {
     // Read from the configruation the list of datasets to process
-    const vector<string> ms = getDatasets(itsParset);
+    const std::vector<std::string> ms = getDatasets(itsParset);
     if (ms.size() == 0) {
         ASKAPTHROW(std::runtime_error, "No datasets specified in the parameter set file");
     }
@@ -230,7 +230,7 @@ std::vector<std::string> SpectralLineMaster::getDatasets(const LOFAR::ParameterS
     }
 
     // First look for "dataset" and if that does not exist try "dataset0"
-    vector<string> ms;
+    std::vector<std::string> ms;
     if (parset.isDefined("dataset")) {
         ms = itsParset.getStringVector("dataset", true);
     } else {

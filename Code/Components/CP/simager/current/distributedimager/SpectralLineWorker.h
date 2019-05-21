@@ -32,10 +32,10 @@
 
 // ASKAPsoft includes
 #include <Common/ParameterSet.h>
-#include <fitting/INormalEquations.h>
-#include <fitting/Params.h>
+#include <askap/scimath/fitting/INormalEquations.h>
+#include <askap/scimath/fitting/Params.h>
 #include <askap/dataaccess/TableDataSource.h>
-#include <gridding/IVisGridder.h>
+#include <askap/gridding/IVisGridder.h>
 
 // Local includes
 #include "distributedimager/IBasicComms.h"

@@ -75,7 +75,7 @@ class CasdaUploadApp : public askap::Application {
                                          const std::vector<MeasurementSetElement>& ms,
                                          const std::vector<EvaluationReportElement>& reports);
 
-        /// Copy artifacts in the "elements" vector to the given output directory.
+        /// Copy artifacts in the "elements" std::vector to the given output directory.
         /// During the copy process a checksum is created for the file.
         template <typename T>
         static void copyAndChecksumElements(const std::vector<T>& elements,

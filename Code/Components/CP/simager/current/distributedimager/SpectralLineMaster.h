@@ -34,12 +34,12 @@
 // ASKAPsoft includes
 #include <boost/scoped_ptr.hpp>
 #include <Common/ParameterSet.h>
-#include <fitting/Params.h>
+#include <askap/scimath/fitting/Params.h>
 
 // Local includes
 #include "distributedimager/IBasicComms.h"
-#include "distributedimager/CubeBuilder.h"
-#include "distributedimager/MSGroupInfo.h"
+#include "askap/distributedimager/CubeBuilder.h"
+#include "askap/distributedimager/MSGroupInfo.h"
 
 namespace askap {
 namespace cp {

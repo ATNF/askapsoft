@@ -43,11 +43,11 @@ namespace pipelinetasks {
 class CubeMakerHelperFunctions {
     public:
         // @details Expands the string such as: "image.i.[0..15].spectral" into a
-        // vector of strings from: "image.i.0.spectral" to "image.i.15.spectral"
+        // std::vector of strings from: "image.i.0.spectral" to "image.i.15.spectral"
         //
         // @param[in] pattern  a string containing the pattern of the image filesnames.
         //                     See the description for an example of this pattern.
-        // @return A vector of filenames, that is, the expansion of the input pattern.
+        // @return A std::vector of filenames, that is, the expansion of the input pattern.
         // @throw AskapError   If the input pattern is inavlid.
         static std::vector<std::string> expandPattern(const std::string& pattern);
 
