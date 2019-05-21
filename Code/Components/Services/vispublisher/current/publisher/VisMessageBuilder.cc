@@ -39,7 +39,7 @@
 // ASKAPsoft includes
 #include "askap/askap/AskapLogging.h"
 #include "askap/askap/AskapError.h"
-#include "utils/DelayEstimator.h"
+#include "askap/scimath/utils/DelayEstimator.h"
 
 // Local package includes
 #include "publisher/VisOutputMessage.h"

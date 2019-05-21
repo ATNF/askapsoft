@@ -41,7 +41,7 @@
 #include "askap/askap/AskapError.h"
 #include "askap/askap/AskapUtil.h"
 #include "Common/ParameterSet.h"
-#include "askap/StatReporter.h"
+#include "askap/askap/StatReporter.h"
 #include <zmq.hpp>
 #include <boost/asio.hpp>
 #include <casacore/casa/OS/Timer.h>

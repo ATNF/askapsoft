@@ -31,8 +31,8 @@
 #include <stdint.h>
 
 // ASKAPsoft includes
-#include "askap/Application.h"
-#include "askap/CircularBuffer.h"
+#include "askap/askap/Application.h"
+#include "askap/askap/CircularBuffer.h"
 
 // Local package includes
 #include "publisher/InputMessage.h"

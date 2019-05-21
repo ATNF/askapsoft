@@ -38,7 +38,7 @@
 #include <unistd.h>
 
 // ASKAPsoft includes
-#include "askap/Application.h"
+#include "askap/askap/Application.h"
 #include "askap/askap/AskapError.h"
 #include "askap/askap/AskapLogging.h"
 #include "tosmetadata/RawMetadataReceiver.h"
