@@ -444,26 +444,43 @@ configurations should be defined up front (so the appropriate **SPECTRAL_WINDOW*
 |                            |                   |            |received metadata request a correlator mode which has not     |
 |                            |                   |            |been defined in the configuration file. Each mode listed here |
 |                            |                   |            |should have the following parameters defined. Modes not listed|
-|                            |                   |            |are ignored, even if their parameters are defined.            |
+|                            |                   |            |are ignored, even if their parameters are defined. Also note, |
+|                            |                   |            |that the mode named **standard** acts as default for most of  |
+|                            |                   |            |the parameters of  all other modes (i.e. the user can define  |
+|                            |                   |            |correlator interval only for the **standard** mode and it will|
+|                            |                   |            |be used for all other modes, unless redefined). However, there|
+|                            |                   |            |is no requirement to have **standard** mode defined.          |
 +----------------------------+-------------------+------------+--------------------------------------------------------------+
 | All following parameters have correlator.mode.\ **name**\  prefix, where **name** is a mode listed in **correlator.modes** |
 +----------------------------+-------------------+------------+--------------------------------------------------------------+
-|<prefix>.chan_width         |quantity string    |None        |Separation of the channels in frequency, which is always      |
-|                            |                   |            |assumed to be equal to the channel width. Full quantity string|
-|                            |                   |            |with sign (for inverted spectra) and units.                   |
+|<prefix>.chan_width         |quantity string    |taken from  |Separation of the channels in frequency, which is always      |
+|                            |                   |**standard**|assumed to be equal to the channel width. Full quantity string|
+|                            |                   |mode        |with sign (for inverted spectra) and units.                   |
 +----------------------------+-------------------+------------+--------------------------------------------------------------+
-|<prefix>.interval           |uint               |None        |Correlator cycle time in microseconds.                        |
+|<prefix>.interval           |uint               |taken from  |Correlator cycle time in microseconds.                        |
+|                            |                   |**standard**|                                                              |
+|                            |                   |mode        |                                                              |
 +----------------------------+-------------------+------------+--------------------------------------------------------------+
-|<prefix>.n_chan             |uint               |None        |Number of spectral channels handled by a single source task.  |
-|                            |                   |            |In parallel environment, this is the number of channels       |
-|                            |                   |            |in the single data stream (normally - single card).           |
+|<prefix>.n_chan             |uint               |taken from  |Number of spectral channels handled by a single source task.  |
+|                            |                   |**standard**|In parallel environment, this is the number of channels       |
+|                            |                   |mode        |in the single data stream (normally - single card).           |
 +----------------------------+-------------------+------------+--------------------------------------------------------------+
-|<prefix>.stokes             |vector<string>     |None        |List of products in the polarisation vector in the order as   |
-|                            |                   |            |they are to be stored in the measurement set. Although, in    |
-|                            |                   |            |principle, all polarisation frames, including incomplete and  |
+|<prefix>.stokes             |vector<string>     |taken from  |List of products in the polarisation vector in the order as   |
+|                            |                   |**standard**|they are to be stored in the measurement set. Although, in    |
+|                            |                   |mode        |principle, all polarisation frames, including incomplete and  |
 |                            |                   |            |mixed frames, are supported here and in the definition of     |
 |                            |                   |            |correlation products, other frames than full linear are       |
 |                            |                   |            |likely to cause problems elsewhere.                           |
++----------------------------+-------------------+------------+--------------------------------------------------------------+
+|<prefix>.freq_offset        |quantity string    |"0Hz"       |Ingest pipeline constructs frequency axis up front as data not|
+|                            |                   |            |always arrive, but we want a contiguous structure with regular|
+|                            |                   |            |increments. Each receiving rank is setup independently        |
+|                            |                   |            |assuming the band is contiguous. The central frequency has    |
+|                            |                   |            |therefore different meaning depending on how many ranks are   |
+|                            |                   |            |in the job and what part of the band is received by ingest.   |
+|                            |                   |            |This parameter encapsulates all the complexity. It is the     |
+|                            |                   |            |frequency offset to get the centre of the band processed by   |
+|                            |                   |            |the first card. The numbers change depending on the zoom mode.| 
 +----------------------------+-------------------+------------+--------------------------------------------------------------+
 
 Monitoring via Ice
