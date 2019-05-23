@@ -1,6 +1,6 @@
-boost=/usr;boost_system boost_thread boost_chrono boost_program_options
-log4cxx=3rdParty/log4cxx/log4cxx-0.10.0
-ice=/usr;IceStorm Ice 
+boost=/usr/local;boost_system boost_thread-mt boost_chrono boost_program_options
+log4cxx=/usr/local; log4cxx
+ice=/usr/local;IceStorm Ice 
 cppiceinterfaces=Code/Interfaces/cpp/current
 iceutils=Code/Base/py-iceutils/current
 # for functests

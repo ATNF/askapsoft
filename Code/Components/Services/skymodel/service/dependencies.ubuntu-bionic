@@ -1,16 +1,16 @@
 # SMS application dependencies
-askap=Code/Base/askap/current
-askap_accessors=Code/Base/accessors/current
-boost=/usr; boost_system boost_filesystem boost_date_time
-common=3rdParty/LOFAR/Common/Common-3.3
+askap=/usr/local; askap_askap
+askap_accessors=/usr/local; askap_accessors
+boost=/usr/local; boost_system boost_filesystem boost_date_time
+common=/usr/local; Common
 cppiceinterfaces=Code/Interfaces/cpp/current
 interfaces=Code/Interfaces/slice/current
-log4cxx=3rdParty/log4cxx/log4cxx-0.10.0
+log4cxx=/usr/local; log4cxx
 logappenders=Code/Base/logappenders/current
-logfilters=Code/Base/logfilters/current
+logfilters=/usr/local
 icewrapper=Code/Components/Services/icewrapper/current
 ## HEALPix
-healpix_cxx=/usr; healpix_cxx
+healpix_cxx=/usr/local; healpix_cxx
 
 ## ODB and database dependencies
 libodb=3rdParty/odb/odb-2.4.0/libodb

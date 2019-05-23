@@ -1,2 +1,2 @@
-ice=/usr; Ice
+ice=/usr/local; Ice
 interfaces=Code/Interfaces/slice/current

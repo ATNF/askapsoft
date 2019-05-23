@@ -51,8 +51,8 @@
 
 // Local includes
 #include "distributedimager/IBasicComms.h"
-#include "messages/SpectralLineWorkUnit.h"
-#include "messages/SpectralLineWorkRequest.h"
+#include "askap/messages/SpectralLineWorkUnit.h"
+#include "askap/messages/SpectralLineWorkRequest.h"
 #include "Tracing.h"
 
 using namespace std;

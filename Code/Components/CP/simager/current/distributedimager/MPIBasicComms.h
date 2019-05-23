@@ -36,7 +36,7 @@
 #include <mpi.h>
 
 // ASKAPsoft includes
-#include "messages/IMessage.h"
+#include "askap/messages/IMessage.h"
 
 namespace askap {
 namespace cp {

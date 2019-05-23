@@ -39,7 +39,7 @@
 
 // Local includes
 #include "distributedimager/IBasicComms.h"
-#include "messages/SpectralLineWorkUnit.h"
+#include "askap/messages/SpectralLineWorkUnit.h"
 
 namespace askap {
 namespace cp {
