@@ -28,7 +28,7 @@
 #define ASKAP_CP_SIMAGER_IBASICCOMMS_H
 
 // ASKAPsoft includes
-#include <messages/IMessage.h>
+#include <askap/messages/IMessage.h>
 
 namespace askap {
 namespace cp {

@@ -28,9 +28,9 @@
 #include <cppunit/extensions/HelperMacros.h>
 
 // Classes to test
-#include <messages/IMessage.h>
-#include <messages/SpectralLineWorkRequest.h>
-#include <messages/SpectralLineWorkUnit.h>
+#include <askap/messages/IMessage.h>
+#include <askap/messages/SpectralLineWorkRequest.h>
+#include <askap/messages/SpectralLineWorkUnit.h>
 
 namespace askap
 {

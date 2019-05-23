@@ -1,3 +1,7 @@
-synthesis=Code/Components/Synthesis/synthesis/current
-askapparallel=Code/Base/askapparallel/current
-accessors=Code/Base/accessors/current
+synthesis=/usr/local; yanda_synthesis
+askapparallel=/usr/local; askap_askapparallel
+accessors=/usr/local; askap_accessors
+log4cxx=/usr;log4cxx
+askap=/usr/local;askap_askap
+casacore=/usr/local;casa_casa
+Common=/usr/local; Common

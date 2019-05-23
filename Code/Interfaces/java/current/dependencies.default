@@ -1,2 +1,2 @@
-ice=/usr
+ice=/usr/local
 interfaces=Code/Interfaces/slice/current

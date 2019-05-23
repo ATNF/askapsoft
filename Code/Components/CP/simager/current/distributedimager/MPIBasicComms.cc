@@ -42,14 +42,15 @@
 // ASKAPsoft includes
 #include "askap/askap/AskapLogging.h"
 #include "askap/askap/AskapError.h"
+#include "askap/askap/AskapUtil.h"
 #include "casacore/casa/OS/Timer.h"
 #include "Blob/BlobIStream.h"
 #include "Blob/BlobIBufVector.h"
 #include "Blob/BlobOStream.h"
 #include "Blob/BlobOBufVector.h"
+#include "askap/messages/IMessage.h"
 
 // Local package includes
-#include "messages/IMessage.h"
 #include "distributedimager/Tracing.h"
 
 using namespace askap::cp;

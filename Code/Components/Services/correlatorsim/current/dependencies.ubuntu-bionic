@@ -1,8 +1,8 @@
-boost=/usr
-askap=Code/Base/askap/current
-common=3rdParty/LOFAR/Common/Common-3.3
+boost=/usr/local
+askap=/usr/local
+common=/usr/local; Common
 cmdlineparser=3rdParty/cmdlineparser/cmdlineparser-0.1.1
-casacore=3rdParty/casacore/casacore-2.0.3;casa_ms casa_images casa_mirlib casa_coordinates casa_fits casa_lattices casa_measures casa_scimath casa_scimath_f casa_tables casa_casa
+casacore=/usr/local;casa_ms casa_images casa_mirlib casa_coordinates casa_fits casa_lattices casa_measures casa_scimath casa_scimath_f casa_tables casa_casa
 cppiceinterfaces=Code/Interfaces/cpp/current
 icewrapper=Code/Components/Services/icewrapper/current
 cpcommon=Code/Components/Services/common/current

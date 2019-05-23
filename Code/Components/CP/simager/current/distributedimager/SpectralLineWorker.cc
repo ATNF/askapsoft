@@ -57,13 +57,14 @@
 #include <Common/ParameterSet.h>
 #include <Common/Exceptions.h>
 #include <casacore/casa/OS/Timer.h>
+#include "askap/messages/SpectralLineWorkUnit.h"
+#include "askap/messages/SpectralLineWorkRequest.h"
 
 // Local includes
+//
 #include "distributedimager/IBasicComms.h"
 #include "distributedimager/SolverCore.h"
 #include "distributedimager/Tracing.h"
-#include "messages/SpectralLineWorkUnit.h"
-#include "messages/SpectralLineWorkRequest.h"
 
 using namespace std;
 using namespace askap::cp;
