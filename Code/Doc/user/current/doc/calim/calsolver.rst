@@ -56,10 +56,24 @@ All parameters given in the next table have **solver.LSQR** prefix (e.g., Cbpcal
 |                   |              |              |This option is only supported in ccalibrator,           |
 |                   |              |              |and must be accompanied by the following options:       |
 |                   |              |              |*Ccalibrator.solver=LSQR*, *Ccalibrator.solve=bandpass*.|
-|                   |              |              |The data partitioning are then defined via setting      |
+|                   |              |              |The data partitioning is then defined via setting       |
 |                   |              |              |*Ccalibrator.chanperworker*, and *Ccalibrator.chunk*,   |
 |                   |              |              |in analogous to *Channels* option in cimager            |
 |                   |              |              |(see :doc:`cimager` for more details).                  |
++-------------------+--------------+--------------+--------------------------------------------------------+
+|smoothing          |bool          |false         |Enables smoothing constraints along frequency channels. |
+|                   |              |              |This allows obtaining smoother gain phase and amplitude.|
+|                   |              |              |Must be used together                                   |
+|                   |              |              |with *Ccalibrator.solve=bandpass* option.               |
++-------------------+--------------+--------------+--------------------------------------------------------+
+|smoothing.MinWeight|float         |0.0           |Starting smoothing weight (at the first major cycle).   |
++-------------------+--------------+--------------+--------------------------------------------------------+
+|smoothing.MaxWeight|float         |3.e+6         |Final smoothing weight (after *nsteps* cycles).         |
+|                   |              |              |Basically, this controls the degree of smoothness.      |
++-------------------+--------------+--------------+--------------------------------------------------------+
+|smoothing.nsteps   |int           |10            |The number of major cycles during which the smoothing   |
+|                   |              |              |weight is increased from *MinWeight* to *MaxWeight*,    |
+|                   |              |              |using logarithmic steps.                                |
 +-------------------+--------------+--------------+--------------------------------------------------------+
 
 
