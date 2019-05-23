@@ -203,6 +203,29 @@ struct GenericNormalEquations : public INormalEquations {
   /// @details This is a const version of the metadata() method
   /// @return const reference to metadata
   inline const Params& metadata() const { return itsMetadata;}
+
+  /// @brief A lifetime watcher needed for initializeNormalMatrixParameters().
+  class NMInitializedParametersLifetimeWatcher {
+  public:
+      NMInitializedParametersLifetimeWatcher(GenericNormalEquations &gne) : itsGne(gne) {}
+      void setInitializationFlag() {
+          itsGne.metadata().add("NMParametersInitialized", 0);
+      };
+      ~NMInitializedParametersLifetimeWatcher() {
+          // Removing the flag.
+          itsGne.metadata().remove("NMParametersInitialized");
+      }
+  private:
+      GenericNormalEquations &itsGne;
+  };
+
+  /// @brief Performs advanced initialization of the normal matrix parameters.
+  /// It is used for performance optimization to avoid initializing parameters
+  /// inside addParameter() which leads to O(N^2) complexity when N parameters are being added one by one.
+  /// @param[in] names Parameter names to be added to the normal matrix.
+  /// @param[in] watcher Lifetime watcher, to remove the "ParametersInitialized" flag when go out of scope.
+  void initializeNormalMatrixParameters(const std::vector<std::string> &names,
+                                        NMInitializedParametersLifetimeWatcher &watcher);
     
 protected:
   /// @brief map of matrices (data element of each row map)

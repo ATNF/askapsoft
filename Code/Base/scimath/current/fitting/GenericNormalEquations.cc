@@ -190,6 +190,44 @@ void GenericNormalEquations::mergeParameter(const std::string &par,
    addParameter(par, srcItRow->second, srcItData->second);                        
 }
 
+void GenericNormalEquations::initializeNormalMatrixParameters(const std::vector<std::string> &names,
+                                                              NMInitializedParametersLifetimeWatcher &watcher)
+{
+    // For a single parameter, adding a 2x2 matrix.
+    const size_t rowParDim = 2;
+    const size_t colParDim = 2;
+
+    // before processing this row, check that the columns already exist as rows
+    for (std::vector<std::string>::const_iterator nameIt = names.begin();
+            nameIt != names.end(); ++nameIt) {
+        const std::string parname = *nameIt;
+
+        if (parname.find("gain.") != std::string::npos
+            && itsNormalMatrix.find(parname) == itsNormalMatrix.end()) {
+            // this is a new parameter. Add it to the NM
+            std::map<std::string, MapOfMatrices>::iterator
+                    newRowIt = itsNormalMatrix.insert(std::make_pair(
+                            parname, MapOfMatrices())).first;
+
+            // set all of the new parameter columns to zero
+            std::map<std::string, MapOfMatrices>::iterator newColIt;
+            for (newColIt = itsNormalMatrix.begin();
+                       newColIt != itsNormalMatrix.end(); ++newColIt) {
+
+                newRowIt->second.insert(std::make_pair(newColIt->first,
+                    casa::Matrix<double>(rowParDim, colParDim, 0.)));
+                // fill in the symmetric term
+                if (newRowIt->first != newColIt->first) {
+                    newColIt->second.insert(std::make_pair(newRowIt->first,
+                        casa::Matrix<double>(colParDim, rowParDim, 0.)));
+                }
+            }
+        }
+    }
+    // Set parameter initialization flag on.
+    watcher.setInitializationFlag();
+}
+
 /// @brief Add/update one parameter using given matrix and data vector
 /// @details This helper method is the main workhorse used in merging two
 /// normal equations, adding an independent parameter or a design matrix.
@@ -207,34 +245,35 @@ void GenericNormalEquations::mergeParameter(const std::string &par,
 void GenericNormalEquations::addParameter(const std::string &par, 
            const MapOfMatrices &inNM, const casa::Vector<double>& inDV)
 {
-
-  // before processing this row, check that the columns already exist as rows
-  for (MapOfMatrices::const_iterator nmColIt = inNM.begin();
-                      nmColIt != inNM.end(); ++nmColIt) {
-      if (itsNormalMatrix.find(nmColIt->first) == itsNormalMatrix.end()) {
-          // this is a new parameter. Add it to the NM
-          std::map<std::string, MapOfMatrices>::iterator
-                  newRowIt = itsNormalMatrix.insert(std::make_pair(
-                                 nmColIt->first,MapOfMatrices())).first;
-          const casa::uInt rowParDim = nmColIt->second.ncolumn(); 
-          // set all of the new parameter columns to zero
-          std::map<std::string, MapOfMatrices>::iterator newColIt;
-          for (newColIt = itsNormalMatrix.begin();
-                     newColIt != itsNormalMatrix.end(); ++newColIt) {
-              casa::uInt colParDim;
-              if (newColIt->first == newRowIt->first) {
-                  // this is the new parameter.
-                  colParDim = rowParDim; 
-              } else {
-                  // this is an old parameter. Get size from itsNormalMatrix
-                  colParDim = parameterDimension(newColIt->second);
-              }
-              newRowIt->second.insert(std::make_pair(newColIt->first,
-                  casa::Matrix<double>(rowParDim, colParDim, 0.)));
-              // fill in the symmetric term
-              if (newRowIt->first != newColIt->first) {
-                  newColIt->second.insert(std::make_pair(newRowIt->first,
-                      casa::Matrix<double>(colParDim, rowParDim, 0.)));
+  if (!metadata().has("NMParametersInitialized")) {
+      // before processing this row, check that the columns already exist as rows
+      for (MapOfMatrices::const_iterator nmColIt = inNM.begin();
+                          nmColIt != inNM.end(); ++nmColIt) {
+          if (itsNormalMatrix.find(nmColIt->first) == itsNormalMatrix.end()) {
+              // this is a new parameter. Add it to the NM
+              std::map<std::string, MapOfMatrices>::iterator
+                      newRowIt = itsNormalMatrix.insert(std::make_pair(
+                                     nmColIt->first,MapOfMatrices())).first;
+              const casa::uInt rowParDim = nmColIt->second.ncolumn();
+              // set all of the new parameter columns to zero
+              std::map<std::string, MapOfMatrices>::iterator newColIt;
+              for (newColIt = itsNormalMatrix.begin();
+                         newColIt != itsNormalMatrix.end(); ++newColIt) {
+                  casa::uInt colParDim;
+                  if (newColIt->first == newRowIt->first) {
+                      // this is the new parameter.
+                      colParDim = rowParDim;
+                  } else {
+                      // this is an old parameter. Get size from itsNormalMatrix
+                      colParDim = parameterDimension(newColIt->second);
+                  }
+                  newRowIt->second.insert(std::make_pair(newColIt->first,
+                      casa::Matrix<double>(rowParDim, colParDim, 0.)));
+                  // fill in the symmetric term
+                  if (newRowIt->first != newColIt->first) {
+                      newColIt->second.insert(std::make_pair(newRowIt->first,
+                          casa::Matrix<double>(colParDim, rowParDim, 0.)));
+                  }
               }
           }
       }
