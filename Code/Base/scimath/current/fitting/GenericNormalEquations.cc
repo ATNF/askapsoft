@@ -52,15 +52,20 @@
 // casa includes
 #include <casacore/casa/Arrays/ArrayMath.h>
 #include <casacore/casa/Arrays/MatrixMath.h>
+#include <casacore/casa/OS/Timer.h>
 
+// logging stuff
+#include <askap_scimath.h>
+#include <askap/AskapLogging.h>
 
-
-using namespace askap;
-using namespace askap::scimath;
 using namespace LOFAR;
 
 using casa::product;
 using casa::transpose;
+
+namespace askap { namespace scimath {
+
+ASKAP_LOGGER(logger, ".genericne");
 
 /// @brief a default constructor
 /// @details It creates an empty normal equations class
@@ -141,9 +146,13 @@ GenericNormalEquations::ShPtr GenericNormalEquations::clone() const
 void GenericNormalEquations::merge(const INormalEquations& src) 
 {
    try {
+      casa::Timer timer;
+      timer.mark();
+      ASKAPLOG_INFO_STR(logger, "Merging normal equations");
+
       const GenericNormalEquations &gne = 
                 dynamic_cast<const GenericNormalEquations&>(src);
-      
+
       // loop over all parameters, add them one by one.
       // We could have passed iterator directly to mergeParameter and it
       // would work faster (no extra search accross the map). But current
@@ -151,8 +160,10 @@ void GenericNormalEquations::merge(const INormalEquations& src)
       for (MapOfVectors::const_iterator ci = gne.itsDataVector.begin(); 
            ci != gne.itsDataVector.end(); ++ci) {
            mergeParameter(ci->first, gne);
-      }    
-      itsMetadata.merge(gne.metadata());      
+      }
+      itsMetadata.merge(gne.metadata());
+
+      ASKAPLOG_INFO_STR(logger, "Merged normal equations in "<< timer.real() << " seconds");
    }
    catch (const AskapError &) {
       throw;
@@ -691,5 +702,5 @@ std::vector<std::string> GenericNormalEquations::unknowns() const
   }
   return result;
 } // unknowns method
+}}
 
- 
