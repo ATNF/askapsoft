@@ -32,6 +32,7 @@
 /// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
 ///
 /// @author Max Voronkov <maxim.voronkov@csiro.au>
+/// @author Vitaliy Ogarko <vogarko@gmail.com>
 ///
 
 // own includes
@@ -187,7 +188,7 @@ void GenericNormalEquations::mergeParameter(const std::string &par,
    const MapOfVectors::const_iterator srcItData = src.itsDataVector.find(par);
    ASKAPDEBUGASSERT(srcItData != src.itsDataVector.end());
    
-   addParameter(par, srcItRow->second, srcItData->second);                        
+   addParameter(par, srcItRow->second, srcItData->second);
 }
 
 void GenericNormalEquations::initializeNormalMatrixParameters(const std::vector<std::string> &names,
@@ -202,7 +203,7 @@ void GenericNormalEquations::initializeNormalMatrixParameters(const std::vector<
             nameIt != names.end(); ++nameIt) {
         const std::string parname = *nameIt;
 
-        if (parname.find("gain.") != std::string::npos
+        if ((parname.find("gain.") != std::string::npos || parname.find("leakage.") != std::string::npos) // Process only relevant to the normal matrix parameters.
             && itsNormalMatrix.find(parname) == itsNormalMatrix.end()) {
             // this is a new parameter. Add it to the NM
             std::map<std::string, MapOfMatrices>::iterator
@@ -286,12 +287,12 @@ void GenericNormalEquations::addParameter(const std::string &par,
                          itsNormalMatrix.find(par);
   ASKAPDEBUGASSERT(nmRowIt != itsNormalMatrix.end());
   ASKAPDEBUGASSERT(nmRowIt->second.find(par) != nmRowIt->second.end());
-   
+
   for (MapOfMatrices::iterator nmColIt = nmRowIt->second.begin();
                       nmColIt != nmRowIt->second.end(); ++nmColIt) {
         
        // search for an appropriate parameter in the input matrix 
-       MapOfMatrices::const_iterator inNMIt = inNM.find(nmColIt->first);           
+       MapOfMatrices::const_iterator inNMIt = inNM.find(nmColIt->first);
        // work with cross-terms if the input matrix have them
        if (inNMIt != inNM.end()) {
            ASKAPCHECK(inNMIt->second.shape() == nmColIt->second.shape(),
@@ -301,7 +302,7 @@ void GenericNormalEquations::addParameter(const std::string &par,
            nmColIt->second += inNMIt->second; // add up a matrix         
        }
   }
-  
+
   // now process the data vector
   MapOfVectors::const_iterator dvIt = itsDataVector.find(par);
   if (dvIt != itsDataVector.end()) {
@@ -317,7 +318,7 @@ void GenericNormalEquations::addParameter(const std::string &par,
       itsDataVector.insert(std::make_pair(par, inDV));
   }
 
-}           
+}
 
 /// @brief extract dimension of a parameter from the given row
 /// @details This helper method analyses the matrices stored in the supplied

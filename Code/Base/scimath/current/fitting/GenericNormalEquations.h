@@ -31,6 +31,7 @@
 /// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
 ///
 /// @author Max Voronkov <maxim.voronkov@csiro.au>
+/// @author Vitaliy Ogarko <vogarko@gmail.com>
 ///
 
 #ifndef GENERIC_NORMAL_EQUATIONS_H
@@ -210,10 +211,12 @@ struct GenericNormalEquations : public INormalEquations {
       NMInitializedParametersLifetimeWatcher(GenericNormalEquations &gne) : itsGne(gne) {}
       void setInitializationFlag() {
           itsGne.metadata().add("NMParametersInitialized", 0);
-      };
+      }
       ~NMInitializedParametersLifetimeWatcher() {
-          // Removing the flag.
-          itsGne.metadata().remove("NMParametersInitialized");
+          if (itsGne.metadata().has("NMParametersInitialized")) {
+              // Removing the initialization flag.
+              itsGne.metadata().remove("NMParametersInitialized");
+          }
       }
   private:
       GenericNormalEquations &itsGne;
