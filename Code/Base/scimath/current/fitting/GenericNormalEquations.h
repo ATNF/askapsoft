@@ -208,18 +208,21 @@ struct GenericNormalEquations : public INormalEquations {
   /// @brief A lifetime watcher needed for initializeNormalMatrixParameters().
   class NMInitializedParametersLifetimeWatcher {
   public:
-      NMInitializedParametersLifetimeWatcher(GenericNormalEquations &gne) : itsGne(gne) {}
+      NMInitializedParametersLifetimeWatcher(const GenericNormalEquations &gne) : itsGne(gne) {}
       void setInitializationFlag() {
-          itsGne.metadata().add("NMParametersInitialized", 0);
+          nonconst().metadata().add("NMParametersInitialized", 0);
       }
       ~NMInitializedParametersLifetimeWatcher() {
           if (itsGne.metadata().has("NMParametersInitialized")) {
               // Removing the initialization flag.
-              itsGne.metadata().remove("NMParametersInitialized");
+              nonconst().metadata().remove("NMParametersInitialized");
           }
       }
   private:
-      GenericNormalEquations &itsGne;
+      const GenericNormalEquations &itsGne;
+      GenericNormalEquations& nonconst() {
+          return const_cast<GenericNormalEquations &>(itsGne);
+      }
   };
 
   /// @brief Performs advanced initialization of the normal matrix parameters.

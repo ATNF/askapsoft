@@ -153,6 +153,17 @@ void GenericNormalEquations::merge(const INormalEquations& src)
       const GenericNormalEquations &gne = 
                 dynamic_cast<const GenericNormalEquations&>(src);
 
+      // Generate a list of parameter names.
+      std::vector<std::string> names;
+      for (MapOfVectors::const_iterator ci = gne.itsDataVector.begin();
+         ci != gne.itsDataVector.end(); ++ci) {
+         names.push_back(ci->first);
+      }
+
+      // Advanced initialization of the normal matrix parameters.
+      NMInitializedParametersLifetimeWatcher watcher(gne);
+      initializeNormalMatrixParameters(names, watcher);
+
       // loop over all parameters, add them one by one.
       // We could have passed iterator directly to mergeParameter and it
       // would work faster (no extra search accross the map). But current
