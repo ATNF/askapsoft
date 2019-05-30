@@ -305,24 +305,24 @@ void GenericNormalEquations::addParameter(const std::string &par,
   // first, process normal matrix 
   // nmRowIt is an iterator over rows (the outer map) of the normal matrix
   // stored in this class 
-  std::map<std::string, MapOfMatrices>::iterator nmRowIt = 
+  std::map<std::string, MapOfMatrices>::iterator nmRowIt =
                          itsNormalMatrix.find(par);
   ASKAPDEBUGASSERT(nmRowIt != itsNormalMatrix.end());
   ASKAPDEBUGASSERT(nmRowIt->second.find(par) != nmRowIt->second.end());
 
-  for (MapOfMatrices::iterator nmColIt = nmRowIt->second.begin();
-                      nmColIt != nmRowIt->second.end(); ++nmColIt) {
-        
-       // search for an appropriate parameter in the input matrix 
-       MapOfMatrices::const_iterator inNMIt = inNM.find(nmColIt->first);
-       // work with cross-terms if the input matrix have them
-       if (inNMIt != inNM.end()) {
-           ASKAPCHECK(inNMIt->second.shape() == nmColIt->second.shape(),
-                    "shape mismatch for normal matrix, parameters ("<<
-                    nmColIt->first<<" , "<<nmRowIt->first<<"). "<<
-                    nmColIt->second.shape()<<" != "<<inNMIt->second.shape());
-           nmColIt->second += inNMIt->second; // add up a matrix         
-       }
+  for (MapOfMatrices::const_iterator inNMIt = inNM.begin();
+          inNMIt != inNM.end(); ++inNMIt) {
+
+      // search for an appropriate parameter in the normal matrix
+      MapOfMatrices::iterator nmColIt = nmRowIt->second.find(inNMIt->first);
+      // work with cross-terms if the input matrix have them
+      if (nmColIt != nmRowIt->second.end()) {
+          ASKAPCHECK(inNMIt->second.shape() == nmColIt->second.shape(),
+                   "shape mismatch for normal matrix, parameters ("<<
+                   nmColIt->first<<" , "<<nmRowIt->first<<"). "<<
+                   nmColIt->second.shape()<<" != "<<inNMIt->second.shape());
+          nmColIt->second += inNMIt->second; // add up a matrix
+      }
   }
 
   // now process the data vector
