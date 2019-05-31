@@ -132,7 +132,7 @@ struct ICalSolutionConstAccessor {
    /// @param[in] chan spectral channel of interest
    /// @return true, if the matrix returned by jones(...) method called with the same parameters is
    /// valid, false otherwise
-   bool jonesValid(const JonesIndex &index, const casa::uInt chan) const;
+   bool jonesAllValid(const JonesIndex &index, const casa::uInt chan) const;
    
    /// @brief obtain validity flag for the full 2x2 Jones Matrix
    /// @details This version of the method accepts antenna and beam indices explicitly and
@@ -143,6 +143,27 @@ struct ICalSolutionConstAccessor {
    /// @return true, if the matrix returned by jones(...) method called with the same parameters is
    /// valid, false otherwise
    bool jonesValid(const casa::uInt ant, const casa::uInt beam, const casa::uInt chan) const;
+
+   /// @brief obtain validity flag for the full 2x2 Jones Matrix
+   /// @details This method combines all validity flags for parameters used to compose Jones
+   /// matrix and returns true if at least one element is valid and false if none of the constituents
+   /// is valid
+   /// @param[in] index ant/beam index
+   /// @param[in] chan spectral channel of interest
+   /// @return true, if the matrix returned by jones(...) method called with the same parameters is
+   /// valid, false otherwise
+   bool jonesValid(const JonesIndex &index, const casa::uInt chan) const;
+   
+   /// @brief obtain validity flag for the full 2x2 Jones Matrix
+   /// @details This version of the method accepts antenna and beam indices explicitly and
+   /// does extra checks before calling the main method expressed via JonesIndex.
+   /// @param[in] ant antenna index
+   /// @param[in] beam beam index
+   /// @param[in] chan spectral channel of interest
+   /// @return true, if the matrix returned by jones(...) method called with the same parameters is
+   /// valid, false otherwise
+   bool jonesAllValid(const casa::uInt ant, const casa::uInt beam, const casa::uInt chan) const;
+
 
    /// @brief shared pointer definition
    typedef boost::shared_ptr<ICalSolutionConstAccessor> ShPtr;

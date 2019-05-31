@@ -144,7 +144,8 @@ public:
         CPPUNIT_ASSERT_EQUAL(2u, acc.cache().size());        
         
         // now read and check
-        CPPUNIT_ASSERT_EQUAL(false, acc.jonesValid(index,0));
+        CPPUNIT_ASSERT_EQUAL(false, acc.jonesAllValid(index,0));
+        CPPUNIT_ASSERT_EQUAL(true, acc.jonesValid(index,0));
         const casa::SquareMatrix<casa::Complex, 2> jones = acc.jones(index,0);
         
         testComplex(casa::Complex(1.1,0.1), jones(0,0));
@@ -163,7 +164,8 @@ public:
         acc.cache().remove(par2);
 
         // now read again and check
-        CPPUNIT_ASSERT_EQUAL(false, acc.jonesValid(index,0));
+        CPPUNIT_ASSERT_EQUAL(false, acc.jonesAllValid(index,0));
+        CPPUNIT_ASSERT_EQUAL(true, acc.jonesValid(index,0));
         const casa::SquareMatrix<casa::Complex, 2> jones2 = acc.jones(index,0);
         testComplex(casa::Complex(1.0,0.), jones2(0,0));
         testComplex(casa::Complex(1.0,0.), jones2(1,1));

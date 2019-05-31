@@ -96,8 +96,8 @@ casa::SquareMatrix<casa::Complex, 2> ICalSolutionConstAccessor::jones(const casa
    
 /// @brief obtain validity flag for the full 2x2 Jones Matrix
 /// @details This method combines all validity flags for parameters used to compose Jones
-/// matrix and returns true if all elements are valid and false if at least one constituent
-/// is not valid
+/// matrix and returns true if at least one component is defined and false if all constituents
+/// are not valid
 /// @param[in] index ant/beam index
 /// @param[in] chan spectral channel of interest
 /// @return true, if the matrix returned by jones(...) method called with the same parameters is
@@ -107,8 +107,11 @@ bool ICalSolutionConstAccessor::jonesValid(const JonesIndex &index, const casa::
   const JonesJTerm gTerm = gain(index);
   const JonesJTerm bpTerm = bandpass(index,chan);
   const JonesDTerm dTerm = leakage(index);
-  return gTerm.g1IsValid() && gTerm.g2IsValid() && bpTerm.g1IsValid() && bpTerm.g2IsValid() &&
-         dTerm.d12IsValid() && dTerm.d21IsValid();
+  // MV: there is a serious issue/contradiction in how we use the system now vs. how it was designed
+  // the following change is a hack changing the logic w.r.t. documentation (OR instead of AND), 
+  // we probably have to think how we approach it in the future when we have just bandpass or just gains, etc
+  return (gTerm.g1IsValid() && gTerm.g2IsValid()) || (bpTerm.g1IsValid() && bpTerm.g2IsValid()) ||
+         (dTerm.d12IsValid() && dTerm.d21IsValid());
 }
    
 /// @brief obtain validity flag for the full 2x2 Jones Matrix
@@ -124,6 +127,40 @@ bool ICalSolutionConstAccessor::jonesValid(const casa::uInt ant, const casa::uIn
   ASKAPCHECK(chan < 16416, "Channel number is supposed to be less than 16416");
   return jonesValid(JonesIndex(ant, beam), chan);
 }
+
+/// @brief obtain validity flag for the full 2x2 Jones Matrix
+/// @details This version of the method accepts antenna and beam indices explicitly and
+/// does extra checks before calling the main method expressed via JonesIndex.
+/// @param[in] ant antenna index
+/// @param[in] beam beam index
+/// @param[in] chan spectral channel of interest
+/// @return true, if the matrix returned by jones(...) method called with the same parameters is
+/// valid, false otherwise
+bool ICalSolutionConstAccessor::jonesAllValid(const casa::uInt ant, const casa::uInt beam, const casa::uInt chan) const
+{
+  ASKAPCHECK(chan < 16416, "Channel number is supposed to be less than 16416");
+  return jonesAllValid(JonesIndex(ant, beam), chan);
+}
+
+
+/// @brief obtain validity flag for the full 2x2 Jones Matrix
+/// @details This method combines all validity flags for parameters used to compose Jones
+/// matrix and returns true if all elements are valid and false if at least one constituent
+/// is not valid
+/// @param[in] index ant/beam index
+/// @param[in] chan spectral channel of interest
+/// @return true, if the matrix returned by jones(...) method called with the same parameters is
+/// valid, false otherwise
+bool ICalSolutionConstAccessor::jonesAllValid(const JonesIndex &index, const casa::uInt chan) const
+{
+  const JonesJTerm gTerm = gain(index);
+  const JonesJTerm bpTerm = bandpass(index,chan);
+  const JonesDTerm dTerm = leakage(index);
+  
+  return gTerm.g1IsValid() && gTerm.g2IsValid() && bpTerm.g1IsValid() && bpTerm.g2IsValid() &&
+         dTerm.d12IsValid() && dTerm.d21IsValid();
+}
+   
 
 } // namespace accessors
 } // namespace askap
