@@ -924,7 +924,7 @@ Cimager.Channels                                = ${CHANNEL_SELECTION_CONTIMG_SC
         # Parameters required for spectral-line imaging
         ####
 
-        if [ "${DO_SPECTRAL_IMAGING}" == "true" ]; then
+        if [ "${DO_SPECTRAL_PROCESSING}" == "true" ] && [ "${DO_SPECTRAL_IMAGING}" == "true" ]; then
             
             # Check value of IMAGETYPE - needs to be casa or fits
             if [ "${IMAGETYPE_SPECTRAL}" != "casa" ] && [ "${IMAGETYPE_SPECTRAL}" != "fits" ]; then
