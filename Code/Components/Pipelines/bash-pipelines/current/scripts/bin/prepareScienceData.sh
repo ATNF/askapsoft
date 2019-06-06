@@ -34,6 +34,7 @@ ID_SPLIT_SCI=""
 DO_IT=$DO_SPLIT_SCIENCE
 
 if [ -e "${OUTPUT}/${msSci}" ]; then
+    
     if [ "${CLOBBER}" != "true" ]; then
         # If we aren't clobbering files, don't run anything
         if [ "${DO_IT}" == "true" ]; then
@@ -49,11 +50,35 @@ if [ -e "${OUTPUT}/${msSci}" ]; then
             rm -f "${BANDPASS_CHECK_FILE}"
         fi
     fi
+
+elif [ -e "${OUTPUT}/${msSciFull}" ]; then
+    # if MS is missing, make sure we repeat the check for the full
+    # (concatenated) MS, in case we are doing time-splitting
+
+    if [ "${CLOBBER}" != "true" ]; then
+        # If we aren't clobbering files, don't run anything
+        if [ "${DO_IT}" == "true" ]; then
+            echo "MS ${msSciFull} exists, so not splitting for beam ${BEAM}"
+        fi
+        DO_IT=false
+    else
+        # If we are clobbering files, removing the existing one, but
+        # only if we are going to be running the job
+        if [ "${DO_IT}" == "true" ]; then
+            rm -rf "${OUTPUT}/${msSciFull}"
+            rm -f "${FLAG_CHECK_FILE}"
+            rm -f "${BANDPASS_CHECK_FILE}"
+        fi
+    fi
+    
 fi
 
 if [ -e "${OUTPUT}/${msSciAv}" ] && [ "${PURGE_FULL_MS}" == "true" ]; then
     # If we are purging the full MS, that means we don't need it.
     # If the averaged one works, we don't need to run the splitting
+    DO_IT=false
+elif [ -e "${OUTPUT}/${msSciAvFull}" ] && [ "${PURGE_FULL_MS}" == "true" ]; then
+    # If the time-window MSs don't exist but the concatenated one does, turn off
     DO_IT=false
 fi
 

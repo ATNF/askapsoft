@@ -590,12 +590,6 @@ function findScienceMSnames()
         sedstr="s/\.ms/_${FIELD}\.beam${BEAM}\.ms/g"
         msSci=$(echo "${MS_BASE_SCIENCE}" | sed -e "$sedstr")
     fi
-    # If time-splitting is sought, append the TimeWindow Number to the 
-    # measurement set:
-    if [ "${DO_SPLIT_TIMEWISE}" == "true" ]; then
-        sedstr="s/\.ms/\.timeWin${TimeWindow}\.ms/g"
-        msSci=$(echo "${msSci}" | sed -e "$sedstr")
-    fi
 
     # Replace the %s wildcard with the SBID
     sedstr="s|%s|${SB_SCIENCE}|g"
@@ -603,6 +597,16 @@ function findScienceMSnames()
 
     # Replace any spaces (e.g. from the FIELD name) with an underscore
     msSci=$(echo $msSci | sed -e 's/ /_/g')
+
+    # Make a copy to record the concatenated MS, to contrast with the timewindow changes done next.
+    msSciFull=$msSci
+    
+    # If time-splitting is sought, append the TimeWindow Number to the 
+    # measurement set:
+    if [ "${DO_SPLIT_TIMEWISE}" == "true" ]; then
+        sedstr="s/\.ms/\.timeWin${TimeWindow}\.ms/g"
+        msSci=$(echo "${msSci}" | sed -e "$sedstr")
+    fi
 
     if [ "${DO_COPY_SL}" == "true" ]; then
         # If we make a copy of the spectral-line MS, then append '_SL'
@@ -622,6 +626,7 @@ function findScienceMSnames()
         # $msSci
         sedstr="s/\.ms/_averaged\.ms/g"
         msSciAv=$(echo "$msSci" | sed -e "$sedstr")
+        msSciAvFull=$(echo "$msSciFull" | sed -e "$sedstr")
     else
         # If we are here, then the user has given a specific filename
         # for MS_SCIENCE_AVERAGE. In this case, we can either replace
@@ -644,9 +649,21 @@ function findScienceMSnames()
         sedstr="s|%s|${SB_SCIENCE}|g"
         msSciAv=$(echo "${msSciAv}" | sed -e "$sedstr")
 
+        # Make a copy to record the concatenated MS, to contrast with
+        # the timewindow changes done next.
+        msSciAvFull=$msSciAv
+        
+        # If time-splitting is sought, append the TimeWindow Number to the 
+        # measurement set:
+        if [ "${DO_SPLIT_TIMEWISE}" == "true" ]; then
+            sedstr="s/\.ms/\.timeWin${TimeWindow}\.ms/g"
+            msSciAv=$(echo "${msSciAv}" | sed -e "$sedstr")
+        fi
+
     fi
     # Replace any spaces (e.g. from the FIELD name) with an underscore
     msSciAv=$(echo $msSciAv | sed -e 's/ /_/g')
+    msSciAvFull=$(echo $msSciAvFull | sed -e 's/ /_/g')
 
     # We now define the name of the calibrated averaged dataset
     if [ "${KEEP_RAW_AV_MS}" == "true" ]; then
