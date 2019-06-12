@@ -72,7 +72,7 @@ ${exportDirective}
 
 ${askapsoftModuleCommands}
 FAT_NODE_CONT_IMG=${FAT_NODE_CONT_IMG}
-nodeDistribution="--ntasks-per-node=\${NPPN} "
+nodeDistribution="--ntasks-per-node=\\\${NPPN} "
 if [ "\${FAT_NODE_CONT_IMG}" == "true" ]; then
 
     nodelist=\$SLURM_JOB_NODELIST
@@ -82,21 +82,20 @@ if [ "\${FAT_NODE_CONT_IMG}" == "true" ]; then
     
     newlist=\$(hostname)
     icpu=0
-    for node in \$(scontrol show hostnames \$nodelist); do
-        if [[ "\$node" != "\$(hostname)" ]]; then
-            for proc in \$(seq 1 ${CPUS_PER_CORE_CONT_IMAGING}); do
-    	    icpu=\$((icpu+1))
-    	    if [[ "\$icpu" -lt "${NUM_CPUS_CONTIMG_SCI}" ]]; then 
-    		newlist=\$newlist,\$node
-     	    fi
-            done
-        fi
+    for proc in \$(seq 1 ${CPUS_PER_CORE_CONT_IMAGING}); do
+        for node in \$(scontrol show hostnames \$nodelist); do
+            if [[ "\$node" != "\$(hostname)" ]]; then
+    	       icpu=\$((icpu+1))
+    	       if [[ "\$icpu" -lt "${NUM_CPUS_CONTIMG_SCI}" ]]; then 
+    		   newlist=\$newlist,\$node
+     	       fi
+            fi
+        done
     done
     echo "NodeList: "\$nodelist
     echo "NewList: "\$newlist
 
     nodeDistribution="--nodelist=\$newlist --distribution=arbitrary"
-
 fi
 
 BASEDIR=${BASEDIR}
