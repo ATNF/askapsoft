@@ -220,11 +220,11 @@ else
 	tmpstr=\$(srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} flagInfo_bp.py -t \${TABLE} -npol 2 -b ${BEAM})
 	badAnteList=\$(echo \${tmpstr} |awk '{print \$2}')
 	addRule1=\$(echo \${tmpstr} |awk '{print \$1}')
-	if [ \${badAnteList} == "" ]; then 
+	if [ "\${badAnteList}" == "" ]; then 
 		addRule1=""
                 antennaPreFlagging="# Not pre-flagging any antennas "
 	else
-		if [ \${addRule1} == "" ];then 
+		if [ "\${addRule1}" == "" ];then 
 		    addRule1="BADANTE_B${BEAM}"
 		fi
                 antennaPreFlagging="# The following flags out the bad antennas using Pre-flags:
