@@ -115,12 +115,6 @@ Cflag.selection_flagger.rule4.autocorr  = ${FLAG_AUTOCORRELATION_SCIENCE}"
         autocorrFlagging="# No flagging of autocorrelations"
     fi
 
-    if [ "${ruleList}" == "" ]; then
-        selectionRule="# No selection rules used"
-    else
-        selectionRule="Cflag.selection_flagger.rules           = [${ruleList}]"
-    fi
-
     # Define a lower bound to the amplitudes, for use in either
     # flagging task
     amplitudeLow="# No absolute lower bound to visibility amplitudes"
@@ -180,6 +174,22 @@ cp "\$thisfile" "\$(echo "\$thisfile" | sed -e "\$sedstr")"
 
 USE_AOFLAGGER=${FLAG_SCIENCE_WITH_AOFLAGGER}
 
+USE_PREFLAGS=${DO_PREFLAG_SCIENCE}
+RAW_TABLE=${TABLE_BANDPASS}
+SMOOTH_TABLE=${TABLE_BANDPASS}.smooth
+DO_SMOOTH=${DO_BANDPASS_SMOOTH}
+
+# Define the ruleList variable here initiating it with the values defined in calling script: 
+ruleList="${ruleList}"
+
+if [ \${DO_SMOOTH} ] && [ -e \${SMOOTH_TABLE} ]; then
+    TABLE=\${SMOOTH_TABLE}
+else
+    TABLE=\${RAW_TABLE}
+fi
+
+
+DO_AMP_FLAG=${DO_AMP_FLAG}
 if [ "\${USE_AOFLAGGER}" == "true" ]; then
 
     log="${logs}/aoflag_science_${FIELDBEAM}_\${SLURM_JOB_ID}.log"
@@ -203,8 +213,38 @@ if [ "\${USE_AOFLAGGER}" == "true" ]; then
     fi
 
 else
+    if [ "\${USE_PREFLAGS}" == "true" ]; then
+        loadModule bptool
+        NCORES=1
+        NPPN=1
+	tmpstr=\$(srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} flagInfo_bp.py -t \${TABLE} -npol 2 -b ${BEAM})
+	badAnteList=\$(echo \${tmpstr} |awk '{print \$2}')
+	addRule1=\$(echo \${tmpstr} |awk '{print \$1}')
+	if [ \${badAnteList} == "" ]; then 
+		addRule1=""
+                antennaPreFlagging="# Not pre-flagging any antennas "
+	else
+		if [ \${addRule1} == "" ];then 
+		    addRule1="BADANTE_B${BEAM}"
+		fi
+                antennaPreFlagging="# The following flags out the bad antennas using Pre-flags:
+Cflag.selection_flagger.\${addRule1}.antenna   = \${badAnteList}"
+                if [ "\${ruleList}" == "" ]; then
+                    ruleList="\${addRule1}"
+                else
+                    ruleList="\${ruleList},\${addRule1}"
+                fi
+		DO_AMP_FLAG=true
+	fi
+        err=\$?
+        unloadModule bptool
+    fi
+    if [ "\${ruleList}" == "" ]; then
+            selectionRule="# No selection rules used"
+    else
+            selectionRule="Cflag.selection_flagger.rules           = [\${ruleList}]"
+    fi
 
-    DO_AMP_FLAG=${DO_AMP_FLAG}
     if [ \$DO_AMP_FLAG == true ]; then
 
         parset="${parsets}/cflag_amp_science_${FIELDBEAM}_\${SLURM_JOB_ID}.in"
@@ -214,9 +254,10 @@ Cflag.dataset                           = ${msSci}
 
 ${amplitudeCut}
 
-${selectionRule}
+\${selectionRule}
 
 ${antennaFlagging}
+\${antennaPreFlagging}
 
 ${channelFlagging}
 
