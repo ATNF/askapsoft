@@ -95,7 +95,18 @@ if [ "\${FAT_NODE_CONT_IMG}" == "true" ]; then
     echo "NodeList: "\$nodelist
     echo "NewList: "\$newlist
 
-    nodeDistribution="--nodelist=\$newlist --distribution=arbitrary"
+    #########################
+    # The option (using MPICH_RANK_REORDER_METHOD=0) does away with the FAT node 
+    # allocation for the master. However, it will allow for cyclic redistribution of the 
+    # workers on allocated nodes and will get around the OOM errors. 
+    #
+    export MPICH_RANK_REORDER_METHOD=0
+    nodeDistribution="--nodelist=\$nodelist"
+    #
+    # Other options that needs exploring -- perhaps with some slurm knobs turned ON? 
+    #nodeDistribution="--nodelist=\$newlist"
+    #nodeDistribution="--nodelist=\$newlist --distribution=arbitrary"
+    #nodeDistribution="--nodelist=\$newlist --distribution=cyclic"
 fi
 
 BASEDIR=${BASEDIR}
