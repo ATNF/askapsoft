@@ -29,6 +29,11 @@ Stokes-V flagging and dynamic flagging of amplitudes is done,
 optionally integrating over or across individual spectra. Each of
 these steps is selectable via input parameters.
 
+The ``DO_PREFLAG_SCIENCE`` parameter allows user to flag science data based on 
+already available information from processing of the bandpass data. At this stage 
+this is used to flag really bad antennas (with more than 80% channels flagged in 
+the bandpass table). 
+
 Again, there is an option to use the
 AOFlagger tool (written by Andre Offringa) to do the flagging. This
 can be turned on by ``FLAG_WITH_AOFLAGGER``, or
@@ -79,6 +84,9 @@ For details on making use of this feature, see the section on
 | ``DO_SPLIT_SCIENCE``                          | true                            | none                                            | Whether to split out the given beam from the science MS               |
 +-----------------------------------------------+---------------------------------+-------------------------------------------------+-----------------------------------------------------------------------+
 | ``JOB_TIME_SPLIT_SCIENCE``                    | ``JOB_TIME_DEFAULT`` (24:00:00) | none                                            | Time request for splitting the science MS                             |
++-----------------------------------------------+---------------------------------+-------------------------------------------------+-----------------------------------------------------------------------+
+| ``DO_PREFLAG_SCIENCE``                        | false                           | none                                            | Whether to propagate flags from Bandpass data to the splitted         |
+|                                               |                                 |                                                 | science MS. Currently, only BAD antenna flags are propagated          |
 +-----------------------------------------------+---------------------------------+-------------------------------------------------+-----------------------------------------------------------------------+
 | ``DO_FLAG_SCIENCE``                           | true                            | none                                            | Whether to flag the (splitted) science MS                             |
 +-----------------------------------------------+---------------------------------+-------------------------------------------------+-----------------------------------------------------------------------+
