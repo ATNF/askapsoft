@@ -116,8 +116,7 @@ Cbpcalibrator.refantenna                      = ${BANDPASS_REFANTENNA}"
     elif [ "${BANDPASS_SMOOTH_TOOL}" == "smooth_bandpass" ]; then
 
         DO_RUN_VALIDATION=true
-        script_module_commands="module use /group/askap/raj030/modulefiles
-loadModule bptool"
+        script_module_commands="loadModule bptool"
         unload_script="unloadModule bptool"
         script_name="smooth_bandpass.py"
         script_args="-t ${TABLE_BANDPASS} -wp "

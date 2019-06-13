@@ -287,7 +287,6 @@ fi"
     # BPTOOL
     BPTOOL_VERSION_USED=""
     if [ "${BANDPASS_SMOOTH_TOOL}" == "smooth_bandpass" ]; then
-        module use /group/askap/raj030/modulefiles
         loadModule bptool
         BPTOOL_VERSION_USED=${BPTOOL_VERSION}
         unloadModule bptool
