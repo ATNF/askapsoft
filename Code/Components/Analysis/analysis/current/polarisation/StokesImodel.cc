@@ -80,6 +80,7 @@ void StokesImodel::initialise(StokesSpectrum &I,
     itsInoise = I.noiseSpectrum();
 
     ASKAPLOG_DEBUG_STR(logger, "spectrum = " << itsIspectrum);
+    ASKAPLOG_DEBUG_STR(logger, "noise spectrum = " << itsInoise);
 
     if (itsType == "taylor") {
 

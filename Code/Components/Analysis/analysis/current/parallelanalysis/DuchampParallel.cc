@@ -936,12 +936,18 @@ void DuchampParallel::fitSources()
                 src.setAtEdge(false);
             }
 
-            if (!src.isAtEdge() && itsFitParams.doFit()) {
-                this->fitSource(src);
+            if (itsFitParams.doFit()) {
+                if (src.isAtEdge()){
+                    ASKAPLOG_INFO_STR(logger, "Source in edge region - deferring fit to after merging");
+                } else {
+                    this->fitSource(src);
+                }
             }
 
             itsSourceList.push_back(src);
+            ASKAPLOG_DEBUG_STR(logger, "Finished source #"<<i+1);
         }
+        ASKAPLOG_DEBUG_STR(logger, "Completed source fitting");
     }
 }
 
@@ -963,6 +969,7 @@ void DuchampParallel::fitSource(sourcefitting::RadioSource &src)
         src.extractSpectralTerms(itsParset);
 
     }
+    ASKAPLOG_DEBUG_STR(logger, "Completed fit for source "<<src.getID());
 
 }
 

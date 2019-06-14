@@ -1023,7 +1023,12 @@ bool RadioSource::fitGauss(casa::Matrix<casa::Double> &pos,
 
             unsigned int minGauss, maxGauss;
             if (itsFitParams.numGaussFromGuess()) {
-                minGauss = maxGauss = cmpntList.size();
+                minGauss = cmpntList.size();
+                maxGauss = cmpntList.size();
+                // maxGauss = 10;
+                // if (minGauss > maxGauss){
+                //     ASKAPLOG_WARN_STR(logger, "Island has " << minGauss << " subcomponents, which is too many. Not running fitting!");
+                // }
             } else {
                 minGauss = 1;
                 maxGauss = std::min(size_t(itsFitParams.maxNumGauss()), f.size());
@@ -1329,16 +1334,28 @@ void RadioSource::findSpectralTerm(std::string imageName, int term, bool doCalc)
 void RadioSource::extractSpectralTerms(LOFAR::ParameterSet &parset)
 {
 
-    std::vector<std::string>::iterator type;
-    std::vector<std::string> typelist = availableFitTypes;
-    typelist.push_back("best");
-
     // Define the parameter set, and
     LOFAR::ParameterSet spectralTermSubset = parset.makeSubset("spectralTerms.");
     // get the number of terms to fit
     int nterms = spectralTermSubset.getUint("nterms", 3);
     // get the peak SNR threshold above which we do the fitting.
     float thresholdForFit = spectralTermSubset.getFloat("snrThreshold", 0.);
+
+    std::vector<std::string>::iterator type;
+    std::vector<std::string> typelist = availableFitTypes;
+    typelist.push_back("best");
+
+    for (type = typelist.begin(); type < typelist.end(); type++) {
+        int nfits = itsBestFitMap[*type].numFits();
+        if (nterms > 1) {
+            itsAlphaMap[*type] = std::vector<double>(nfits, defaultAlpha);
+            itsAlphaError[*type] = std::vector<double>(nfits, 0.);
+        }
+        if (nterms > 2) {
+            itsBetaMap[*type] = std::vector<double>(nfits, defaultBeta);
+            itsBetaError[*type] = std::vector<double>(nfits, 0.);
+        }
+    }
 
     // Loop over fit types  - ie. the set of different component catalogues
     for (type = typelist.begin(); type < typelist.end(); type++) {

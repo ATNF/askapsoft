@@ -107,11 +107,14 @@ void IslandData::findBackground()
 {
     if (itsMeanImageName != "") {
         // mean map is defined, so extract array
+	ASKAPLOG_DEBUG_STR(logger, "Extracting the mean background array for this source");
         itsMeanExtractor->setSource(itsSource);
         itsMeanExtractor->extract();
         casa::IPosition start = itsMeanExtractor->slicer().start();
         casa::Array<float> meanArray = itsMeanExtractor->array();
         std::vector<PixelInfo::Voxel> voxelList = itsSource->getPixelSet();
+        ASKAPLOG_DEBUG_STR(logger, "Have " << voxelList.size() 
+                           << " voxels for mean background determination");
         itsBackground = 0.;
         std::vector<PixelInfo::Voxel>::iterator vox = voxelList.begin();
         for (; vox < voxelList.end(); vox++) {
@@ -130,6 +133,7 @@ void IslandData::findBackground()
                         loc = casa::IPosition(start.size(), vox->getX(), vox->getY(), vox->getZ(), 0);
                     }
                 }
+//                ASKAPLOG_DEBUG_STR(logger, "loc="<<loc<<", start="<<start<<", shape of meanArray="<<meanArray.shape());
                 itsBackground += meanArray(loc - start);
             }
         }
@@ -146,15 +150,19 @@ void IslandData::findNoise()
 {
     if (itsNoiseImageName != "") {
         // noise map is defined, so extract array
+	ASKAPLOG_DEBUG_STR(logger, "Extracting the noise array for this source");
         itsNoiseExtractor->setSource(itsSource);
         itsNoiseExtractor->extract();
         casa::IPosition start = itsNoiseExtractor->slicer().start();
         casa::Array<float> noiseArray = itsNoiseExtractor->array();
         std::vector<PixelInfo::Voxel> voxelList = itsSource->getPixelSet();
+        ASKAPLOG_DEBUG_STR(logger, "Have " << voxelList.size() 
+                           << " voxels for noise determination");
         itsNoise = 0.;
         std::vector<PixelInfo::Voxel>::iterator vox = voxelList.begin();
         for (; vox < voxelList.end(); vox++) {
             //float flux = vox->getF();
+//            ASKAPLOG_DEBUG_STR(logger, "Noise calcs: voxel: " << *vox);
             if (itsSource->isInObject(*vox)) {
                 // The Stokes axis, if present, will be of length 1, and will be either location 2 or 3 in the IPosition
                 casa::IPosition loc;
@@ -169,6 +177,7 @@ void IslandData::findNoise()
                         loc = casa::IPosition(start.size(), vox->getX(), vox->getY(), vox->getZ(), 0);
                     }
                 }
+//                ASKAPLOG_DEBUG_STR(logger, "loc="<<loc<<", start="<<start<<", shape of noiseArray="<<noiseArray.shape());
                 itsNoise += noiseArray(loc - start);
             }
         }
@@ -192,13 +201,18 @@ void IslandData::findResidualStats()
     itsImageExtractor->extract();
     ASKAPLOG_DEBUG_STR(logger, "Starting to find stats");
     casa::IPosition start = itsImageExtractor->slicer().start();
+    ASKAPLOG_DEBUG_STR(logger, "Extractor's slicer is " << itsImageExtractor->slicer() 
+                       << " with start location " << start);
     casa::Array<float> array = itsImageExtractor->array();
     std::vector<PixelInfo::Voxel> voxelList = itsSource->getPixelSet();
+    ASKAPLOG_DEBUG_STR(logger, "Have " << voxelList.size() 
+                       << " voxels for residual stats determination");
     float max, min, sumf = 0., sumff = 0.;
     casa::Vector<double> pos(2);
     std::vector<PixelInfo::Voxel>::iterator vox = voxelList.begin();
     for (; vox < voxelList.end(); vox++) {
         //float flux = vox->getF();
+//            ASKAPLOG_DEBUG_STR(logger, "Residual calcs: voxel: " << *vox);
         if (itsSource->isInObject(*vox)) {
             // The Stokes axis, if present, will be of length 1, and will be either location 2 or 3 in the IPosition
             casa::IPosition loc;
@@ -213,6 +227,7 @@ void IslandData::findResidualStats()
                     loc = casa::IPosition(start.size(), vox->getX(), vox->getY(), vox->getZ(), 0);
                 }
             }
+//                ASKAPLOG_DEBUG_STR(logger, "loc="<<loc<<", start="<<start<<", shape of array="<<array.shape());
             float flux = array(loc - start);
             std::vector<casa::Gaussian2D<Double> > gaussians = itsSource->gaussFitSet(itsFitType);
             for (int g = 0; g < gaussians.size(); g++) {
@@ -237,7 +252,7 @@ void IslandData::findResidualStats()
     itsResidualStddev = sqrt(sumff / size - sumf * sumf / size / size);
     itsResidualRMS = sqrt(sumff / size);
 
-    ASKAPLOG_DEBUG_STR(logger, "Residual stats on island: max=" << itsResidualMax << " min=" << itsResidualMin << " mean=" << itsResidualMean << " stddev=" << itsResidualStddev << " rms=" << itsResidualRMS);
+    ASKAPLOG_DEBUG_STR(logger, "Residual stats on island: max=" << itsResidualMax << " min=" << itsResidualMin << " mean=" << itsResidualMean << " stddev=" << itsResidualStddev << " rms=" << itsResidualRMS << " size="<<size<<" ("<<voxelList.size()<<")");
 
 }
 

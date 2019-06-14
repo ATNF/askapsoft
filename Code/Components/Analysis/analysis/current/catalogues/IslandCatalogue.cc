@@ -92,7 +92,9 @@ void IslandCatalogue::defineIslands(std::vector<sourcefitting::RadioSource> &src
 {
     std::vector<sourcefitting::RadioSource>::iterator src;
     for (src = srclist.begin(); src != srclist.end(); src++) {
+        ASKAPLOG_DEBUG_STR(logger, "Using source " << src->getName() << " to define island");
         CasdaIsland island(*src, parset);
+        ASKAPLOG_DEBUG_STR(logger, "Defined island " << island.id());
         itsIslands.push_back(island);
     }
 }

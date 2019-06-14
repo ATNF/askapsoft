@@ -133,10 +133,14 @@ CasdaIsland::CasdaIsland(sourcefitting::RadioSource &obj,
 
     // Average values for the background level & noise
     // Residual pixel statistics
+    ASKAPLOG_DEBUG_STR(logger, "Getting island data for " << itsIslandID);
     IslandData islanddata(parset, fitType);
+    ASKAPLOG_DEBUG_STR(logger, "Setting the source");
     islanddata.setSource(&obj);
+    ASKAPLOG_DEBUG_STR(logger, "Finding the voxel stats");
     islanddata.findVoxelStats();
 
+    ASKAPLOG_DEBUG_STR(logger, "Setting the stats");
     itsMeanBackground = islanddata.background() * peakFluxscale;
     itsBackgroundNoise = islanddata.noise() * peakFluxscale;
     itsMaxResidual = islanddata.residualMax() * peakFluxscale;
@@ -149,6 +153,8 @@ CasdaIsland::CasdaIsland(sourcefitting::RadioSource &obj,
     itsSolidAngle = itsNumPix * pixelToSolidAngle;
     // Get beam size in solid angle
     itsBeamArea = obj.header().beam().area() * pixelToSolidAngle;
+
+    ASKAPLOG_DEBUG_STR(logger, "Completed definition of island");
 
 }
 

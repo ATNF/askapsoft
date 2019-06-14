@@ -103,9 +103,9 @@ class StokesSpectrum {
         std::string cubeName() {return itsSpecExtractor->inputCube();};
 
         /// @brief Return pointer to the extractor used for the spectrum
-        SourceSpectrumExtractor *specExtractor() {return itsSpecExtractor;};
+        boost::shared_ptr<SourceSpectrumExtractor> specExtractor() {return itsSpecExtractor;};
         /// @brief Return pointer to the extractor used for the noise spectrum
-        SourceSpectrumExtractor *noiseExtractor() {return itsSpecExtractor;};
+    boost::shared_ptr<SourceSpectrumExtractor> noiseExtractor() {return itsSpecExtractor;};
 
     private:
 
@@ -123,9 +123,9 @@ class StokesSpectrum {
         std::string             itsBeamLog;
 
         /// @brief Extractor to obtain the source spectrum
-        SourceSpectrumExtractor *itsSpecExtractor;
+    boost::shared_ptr<SourceSpectrumExtractor> itsSpecExtractor;
         /// @brief Extractor to obtain the noise spectrum
-        NoiseSpectrumExtractor  *itsNoiseExtractor;
+    boost::shared_ptr<NoiseSpectrumExtractor>  itsNoiseExtractor;
 
         /// @brief The extracted spectrum
         casa::Vector<float>     itsSpectrum;

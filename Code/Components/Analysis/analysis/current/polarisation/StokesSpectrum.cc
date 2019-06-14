@@ -81,7 +81,7 @@ StokesSpectrum::StokesSpectrum(const LOFAR::ParameterSet &parset,
     if (itsParset.isDefined("imageHistory")){
         specParset.add("imageHistory", itsParset.getString("imageHistory"));
     }
-    itsSpecExtractor = new SourceSpectrumExtractor(specParset);
+    itsSpecExtractor = boost::shared_ptr<SourceSpectrumExtractor>(new SourceSpectrumExtractor(specParset));
     itsSpecExtractor->setObjectIDs(objid,objectname);
 
     // Define the parset used to set up the noise extractor
@@ -101,7 +101,7 @@ StokesSpectrum::StokesSpectrum(const LOFAR::ParameterSet &parset,
     if (itsParset.isDefined("imageHistory")){
         noiseParset.add("imageHistory", itsParset.getString("imageHistory"));
     }
-    itsNoiseExtractor = new NoiseSpectrumExtractor(noiseParset);
+    itsNoiseExtractor = boost::shared_ptr<NoiseSpectrumExtractor>(new NoiseSpectrumExtractor(noiseParset));
     itsNoiseExtractor->setObjectIDs(objid,objectname);
 
 

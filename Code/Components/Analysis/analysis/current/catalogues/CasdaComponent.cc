@@ -78,7 +78,9 @@ CasdaComponent::CasdaComponent(sourcefitting::RadioSource &obj,
     casa::Vector<Double> errors = obj.fitResults(fitType).errors(fitNumber);
     itsFlag4 = !obj.fitResults(fitType).isGood();
 
+    ASKAPLOG_DEBUG_STR(logger, "Defining island to go with component for source " << obj.getName() << ", fit #"<<fitNumber);
     CasdaIsland theIsland(obj, parset);
+    ASKAPLOG_DEBUG_STR(logger, "Done - have island " << theIsland.id());
 
     itsIslandID = theIsland.id();
     std::stringstream id;
@@ -97,8 +99,14 @@ CasdaComponent::CasdaComponent(sourcefitting::RadioSource &obj,
    duchamp::FitsHeader newHead_freq = changeSpectralAxis(obj.header(), "FREQ", casda::freqUnit);
 
     double thisRA, thisDec, zworld;
+    ASKAPLOG_DEBUG_STR(logger, "About to convert pixels to world:" << gauss.xCenter() << " " << gauss.yCenter() << " " << obj.getZcentre());
+    ASKAPLOG_DEBUG_STR(logger, "Gaussian: " << gauss 
+                       << " fitType="<<fitType 
+                       << " fitNumber="<<fitNumber 
+                       << " obj.numFits(fitType)="<<obj.numFits(fitType));
     newHead_freq.pixToWCS(gauss.xCenter(), gauss.yCenter(), obj.getZcentre(),
                           thisRA, thisDec, zworld);
+    ASKAPLOG_DEBUG_STR(logger, "Done: " << thisRA << " " << thisDec << " " << zworld);
     itsRA.value() = thisRA;
     itsDEC.value() = thisDec;
 
