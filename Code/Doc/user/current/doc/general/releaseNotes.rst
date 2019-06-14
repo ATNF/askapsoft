@@ -5,6 +5,32 @@ This page summarises the key changes in each tagged release of
 ASKAPsoft. This replicates the CHANGES file that is included in the
 code base.
 
+0.24.2 (TBC)
+------------
+
+This is planned as a patch release, and the following items have been
+fixed:
+
+Pipelines:
+
+ * Changes to the distribution of ranks within the imaging job, to
+   smooth out the memory usage a little.
+ * Use the bptool module to identify antennas to flag based on the
+   bandpass calibration table. Triggered by the new parameter
+   DO_PREFLAG_SCIENCE.
+ * Checkfiles will now indicate the time-window where appropriate, to
+   better distinguish work that has been done on datasets.
+ * Checks for spectral-line parameters are now only done when
+   DO_SPECTRAL_PROCESSING is set to true as well as DO_SPECTRAL_IMAGING. 
+ * Time-split data will now no longer be regenerated if the merged
+   dataset is present.
+
+Processing:
+
+ * A fix to Selavy to allow computation of spectral indices from
+   extracted spectra - this was failing due to uninitialised memory.
+
+
 0.24.1 (8 May 2019)
 -------------------
 
