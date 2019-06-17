@@ -1,0 +1,10 @@
+{"Common": "/usr/local", 
+ "Blob": "/usr/local",
+ "askap": "/usr/local", 
+ "logfilters" : "/usr/local",
+ "imagemath" : "/usr/local",
+ "scimath" : "/usr/local",
+ "askapparallel" : "/usr/local",
+ "accessors" : "/usr/local",
+ "components" : "/usr/local"
+}
