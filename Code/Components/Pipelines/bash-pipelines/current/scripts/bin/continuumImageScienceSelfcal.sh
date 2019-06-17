@@ -247,7 +247,7 @@ ${exportDirective}
 ${askapsoftModuleCommands}
 
 FAT_NODE_CONT_IMG=${FAT_NODE_CONT_IMG}
-nodeDistribution="--ntasks-per-node=\\\${NPPN}"
+#nodeDistribution="--ntasks-per-node=\\\${NPPN}"
 if [ "\${FAT_NODE_CONT_IMG}" == "true" ]; then
 
     nodelist=\$SLURM_JOB_NODELIST
@@ -568,6 +568,9 @@ EOFINNER
     echo "--- Imaging with $theimager ---" > "\$log"
     NCORES=${NUM_CPUS_CONTIMG_SCI}
     NPPN=${CPUS_PER_CORE_CONT_IMAGING}
+    if [ "\${FAT_NODE_CONT_IMG}" == "false" ]; then
+	    nodeDistribution="--ntasks-per-node=\${NPPN}"
+    fi
     srun --export=ALL --ntasks=\${NCORES} \${nodeDistribution} $theimager ${PROFILE_FLAG} -c "\$parset" >> "\$log"
     err=\$?
 
