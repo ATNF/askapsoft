@@ -1110,18 +1110,22 @@ Cimager.Channels                                = ${CHANNEL_SELECTION_CONTIMG_SC
         # Fix the direction string for linmos - do not need the J2000 bit
         linmosFeedCentre=$(echo "${DIRECTION_SCI}" | awk -F',' '{printf "%s,%s]",$1,$2}')
 
-        # Total number of channels should be exact multiple of
-        # channels-per-core, else the final process will take care of
-        # the rest and may run out of memory
-        # If it is not, give a warning and push on
-        chanPerCoreLinmosOK=$(echo "${NUM_CHAN_SCIENCE_SL}" "${NUM_SPECTRAL_CUBES}" "${NCHAN_PER_CORE_SPECTRAL_LINMOS}" | awk '{if (($1/$2 % $3)==0) print "yes"; else print "no"}')
-        if [ "${chanPerCoreLinmosOK}" == "no" ] && [ "${DO_MOSAIC}" == "true" ]; then
-            echo "WARNING - Number of spectral-line channels (${NUM_CHAN_SCIENCE_SL}) is not an exact multiple of NCHAN_PER_CORE_SPECTRAL_LINMOS (${NCHAN_PER_CORE_SPECTRAL_LINMOS})."
-            echo "         Pushing on, but there is the risk of memory problems with the spectral linmos task."
-        fi
-        # Determine the number of cores needed for spectral-line mosaicking
-        if [ "$NUM_CPUS_SPECTRAL_LINMOS" == "" ]; then
-            NUM_CPUS_SPECTRAL_LINMOS=$(echo "${NUM_CHAN_SCIENCE_SL}" "${NUM_SPECTRAL_CUBES}" "${NCHAN_PER_CORE_SPECTRAL_LINMOS}" | awk '{if($1%($2*$3)==0) print $1/$2/$3; else print int($1/$2/$3)+1;}')
+        if [ "${DO_SPECTRAL_PROCESSING}" == "true" ]; then
+            
+            # Total number of channels should be exact multiple of
+            # channels-per-core, else the final process will take care of
+            # the rest and may run out of memory
+            # If it is not, give a warning and push on
+            chanPerCoreLinmosOK=$(echo "${NUM_CHAN_SCIENCE_SL}" "${NUM_SPECTRAL_CUBES}" "${NCHAN_PER_CORE_SPECTRAL_LINMOS}" | awk '{if (($1/$2 % $3)==0) print "yes"; else print "no"}')
+            if [ "${chanPerCoreLinmosOK}" == "no" ] && [ "${DO_MOSAIC}" == "true" ]; then
+                echo "WARNING - Number of spectral-line channels (${NUM_CHAN_SCIENCE_SL}) is not an exact multiple of NCHAN_PER_CORE_SPECTRAL_LINMOS (${NCHAN_PER_CORE_SPECTRAL_LINMOS})."
+                echo "         Pushing on, but there is the risk of memory problems with the spectral linmos task."
+            fi
+            # Determine the number of cores needed for spectral-line mosaicking
+            if [ "$NUM_CPUS_SPECTRAL_LINMOS" == "" ]; then
+                NUM_CPUS_SPECTRAL_LINMOS=$(echo "${NUM_CHAN_SCIENCE_SL}" "${NUM_SPECTRAL_CUBES}" "${NCHAN_PER_CORE_SPECTRAL_LINMOS}" | awk '{if($1%($2*$3)==0) print $1/$2/$3; else print int($1/$2/$3)+1;}')
+            fi
+            
         fi
 
         ####################
