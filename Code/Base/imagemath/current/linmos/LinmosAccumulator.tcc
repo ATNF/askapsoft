@@ -487,21 +487,17 @@ namespace askap {
             // we need to interate through each of the taylor term images for all of the output
             // mosaics
 
-
             //
             // step through the pixels
             //
-
-
-
 
             Array<T> scr1 = taylor1.copy();
             Array<T> scr2 = taylor2.copy();
 
             ASKAPLOG_INFO_STR(linmoslogger,"Assuming Gaussian PB fwhm " << fwhm << " and freq " << freq);
 
-            for (int x=0; x < taylor1.shape()[0];++x) {
-                for (int y=0; y < taylor1.shape()[1];++y) {
+            for (int y=0; y < taylor1.shape()[1];++y) {
+                for (int x=0; x < taylor1.shape()[0];++x) {
 
                     fullpos[0] = x;
                     fullpos[1] = y;
@@ -1002,8 +998,8 @@ namespace askap {
                 T sensitivity;
 
                 IPosition pos(2);
-                for (int x=0; x<inSenPix.shape()[0];++x) {
-                    for (int y=0; y<inSenPix.shape()[1];++y) {
+                for (int y=0; y<inSenPix.shape()[1];++y) {
+                    for (int x=0; x<inSenPix.shape()[0];++x) {
                         pos[0] = x;
                         pos[1] = y;
                         sensitivity = itsInSenBuffer.getAt(pos);
@@ -1037,8 +1033,8 @@ namespace askap {
                 T sensitivity;
 
                 IPosition pos(2);
-                for (int x=0; x<inSenPix.shape()[0];++x) {
-                    for (int y=0; y<inSenPix.shape()[1];++y) {
+                for (int y=0; y<inSenPix.shape()[1];++y) {
+                    for (int x=0; x<inSenPix.shape()[0];++x) {
                         pos[0] = x;
                         pos[1] = y;
                         sensitivity = itsInSenBuffer.getAt(pos);
@@ -1149,8 +1145,8 @@ namespace askap {
                 ASKAPLOG_INFO_STR(linmoslogger, "Frequency is " << freq);
                 
                 // step through the pixels, setting the weights (power primary beam squared)
-                for (int x=0; x<outPix.shape()[0];++x) {
-                    for (int y=0; y<outPix.shape()[1];++y) {
+                for (int y=0; y<outPix.shape()[1];++y) {
+                    for (int x=0; x<outPix.shape()[0];++x) {
                         pos[0] = x;
                         pos[1] = y;
 
@@ -1206,8 +1202,8 @@ namespace askap {
             // Could restrict it (and the regrid) to a smaller region of interest.
             if (itsWeightState == CORRECTED) {
 
-              for (int x=0; x<outPix.shape()[0];++x) {
-                  for (int y=0; y<outPix.shape()[1];++y) {
+              for (int y=0; y<outPix.shape()[1];++y) {
+                  for (int x=0; x<outPix.shape()[0];++x) {
                         fullpos[0] = x;
                         fullpos[1] = y;
                         pos[0] = x;
@@ -1229,8 +1225,8 @@ namespace askap {
                   }
               }
             } else if (itsWeightState == INHERENT) {
-                for (int x=0; x<outPix.shape()[0];++x) {
-                    for (int y=0; y<outPix.shape()[1];++y) {
+                for (int y=0; y<outPix.shape()[1];++y) {
+                    for (int x=0; x<outPix.shape()[0];++x) {
                         fullpos[0] = x;
                         fullpos[1] = y;
                         pos[0] = x;
@@ -1263,8 +1259,8 @@ namespace askap {
                     }
                 }
             } else if (itsWeightState == WEIGHTED) {
-                for (int x=0; x<outPix.shape()[0];++x) {
-                    for (int y=0; y<outPix.shape()[1];++y) {
+                for (int y=0; y<outPix.shape()[1];++y) {
+                    for (int x=0; x<outPix.shape()[0];++x) {
                         fullpos[0] = x;
                         fullpos[1] = y;
                         pos[0] = x;
@@ -1306,8 +1302,8 @@ namespace askap {
                 T invVariance;
                 minMax(minVal,maxVal,minPos,maxPos,itsOutSnrBuffer);
                 T snrCutoff = itsCutoff * itsCutoff * maxVal;
-                for (int x=0; x<outPix.shape()[0];++x) {
-                    for (int y=0; y<outPix.shape()[1];++y) {
+                for (int y=0; y<outPix.shape()[1];++y) {
+                    for (int x=0; x<outPix.shape()[0];++x) {
                         fullpos[0] = x;
                         fullpos[1] = y;
                         pos[0] = x;
@@ -1325,13 +1321,12 @@ namespace askap {
         template<typename T> void LinmosAccumulator<T>::ImageToArray(Array<T>& outArr, const TempImage<T> inIm) {
 
           IPosition pos(2);
-          for (int x=0; x<outArr.shape()[0];++x) {
-            for (int y=0; y<outArr.shape()[1];++y) {
-
-              pos[0] = x;
-              pos[1] = y;
-              outArr(pos) = inIm(pos);
-            }
+          for (int y=0; y<outArr.shape()[1];++y) {
+              for (int x=0; x<outArr.shape()[0];++x) {
+                  pos[0] = x;
+                  pos[1] = y;
+                  outArr(pos) = inIm(pos);
+              }
           }
 
         }
@@ -1346,14 +1341,14 @@ namespace askap {
           tmpPix.reference(inArray);
 
           T normVal=0;
-          for (int x=0; x<tmpPix.shape()[0];++x) {
-            for (int y=0; y<tmpPix.shape()[1];++y) {
-              fullpos[0] = x;
-              fullpos[1] = y;
-              if (tmpPix(fullpos)> normVal) {
-                normVal = tmpPix(fullpos);
+          for (int y=0; y<tmpPix.shape()[1];++y) {
+              for (int x=0; x<tmpPix.shape()[0];++x) {
+                  fullpos[0] = x;
+                  fullpos[1] = y;
+                  if (tmpPix(fullpos)> normVal) {
+                      normVal = tmpPix(fullpos);
+                  }
               }
-            }
           }
           return normVal;
         }
@@ -1424,8 +1419,8 @@ namespace askap {
 
                 wgtPixBeam = Array<T>(itsInShape);
                 Vector<Double> offvec(3,0.);
-                for (int x=0; x<outPix.shape()[0];++x) {
-                    for (int y=0; y<outPix.shape()[1];++y) {
+                for (int y=0; y<outPix.shape()[1];++y) {
+                    for (int x=0; x<outPix.shape()[0];++x) {
                         wgtpos[0] = x;
                         wgtpos[1] = y;
 
@@ -1454,8 +1449,6 @@ namespace askap {
 
                     }
                 }
-
-
 
             }
 
@@ -1487,8 +1480,8 @@ namespace askap {
 ///
 
             if (itsWeightState == CORRECTED) {
-                for (int x=0; x<outPix.shape()[0];++x) {
-                    for (int y=0; y<outPix.shape()[1];++y) {
+                for (int y=0; y<outPix.shape()[1];++y) {
+                    for (int x=0; x<outPix.shape()[0];++x) {
                         fullpos[0] = x;
                         fullpos[1] = y;
                         wgtpos[0] = x;
@@ -1511,8 +1504,8 @@ namespace askap {
                     }
                 }
             } else if (itsWeightState == INHERENT) {
-                for (int x=0; x<outPix.shape()[0];++x) {
-                    for (int y=0; y<outPix.shape()[1];++y) {
+                for (int y=0; y<outPix.shape()[1];++y) {
+                    for (int x=0; x<outPix.shape()[0];++x) {
                         fullpos[0] = x;
                         fullpos[1] = y;
                         wgtpos[0] = x;
@@ -1541,8 +1534,8 @@ namespace askap {
                     }
                 }
             } else if (itsWeightState == WEIGHTED) {
-                for (int x=0; x<outPix.shape()[0];++x) {
-                    for (int y=0; y<outPix.shape()[1];++y) {
+                for (int y=0; y<outPix.shape()[1];++y) {
+                    for (int x=0; x<outPix.shape()[0];++x) {
                         fullpos[0] = x;
                         fullpos[1] = y;
                         wgtpos[0] = x;
@@ -1580,8 +1573,8 @@ namespace askap {
             // Accumulate sensitivity for this slice.
             if (itsDoSensitivity) {
                 double sensitivity;
-                for (int x=0; x<outPix.shape()[0];++x) {
-                    for (int y=0; y<outPix.shape()[1];++y) {
+                for (int y=0; y<outPix.shape()[1];++y) {
+                    for (int x=0; x<outPix.shape()[0];++x) {
                         fullpos[0] = x;
                         fullpos[1] = y;
                         sensitivity = inSenPix(fullpos);
@@ -1610,8 +1603,8 @@ namespace askap {
 
 
 
-            for (int x=0; x<outPix.shape()[0];++x) {
-                for (int y=0; y<outPix.shape()[1];++y) {
+            for (int y=0; y<outPix.shape()[1];++y) {
+                for (int x=0; x<outPix.shape()[0];++x) {
                     fullpos[0] = x;
                     fullpos[1] = y;
                     if (isNaN(outWgtPix(fullpos))) {
@@ -1626,8 +1619,8 @@ namespace askap {
             }
 
             if (itsDoSensitivity) {
-                for (int x=0; x<outPix.shape()[0];++x) {
-                    for (int y=0; y<outPix.shape()[1];++y) {
+                for (int y=0; y<outPix.shape()[1];++y) {
+                    for (int x=0; x<outPix.shape()[0];++x) {
                         fullpos[0] = x;
                         fullpos[1] = y;
                         if (isNaN(outWgtPix(fullpos))) {
@@ -1658,8 +1651,8 @@ namespace askap {
 
 
 
-            for (int x=0; x<outPix.shape()[0];++x) {
-                for (int y=0; y<outPix.shape()[1];++y) {
+            for (int y=0; y<outPix.shape()[1];++y) {
+                for (int x=0; x<outPix.shape()[0];++x) {
                     fullpos[0] = x;
                     fullpos[1] = y;
                     if (isNaN(outWgtPix(fullpos))) {
@@ -1674,8 +1667,8 @@ namespace askap {
             }
 
             if (itsDoSensitivity) {
-                for (int x=0; x<outPix.shape()[0];++x) {
-                    for (int y=0; y<outPix.shape()[1];++y) {
+                for (int y=0; y<outPix.shape()[1];++y) {
+                    for (int x=0; x<outPix.shape()[0];++x) {
                         fullpos[0] = x;
                         fullpos[1] = y;
                         if (isNaN(outWgtPix(fullpos))) {
