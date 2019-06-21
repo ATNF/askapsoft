@@ -423,6 +423,14 @@ is not searched.
 |                   |              |              |if any difference in the output with single       |
 |                   |              |              |precision.                                        |
 +-------------------+--------------+--------------+--------------------------------------------------+
+|sharecf            |bool          |false         |If true, use a (static) cache for the             |
+|                   |              |              |convolution functions in the WProject gridder.    |
+|                   |              |              |This saves both time and memory, especially for   |
+|                   |              |              |large images and spectral line cubes. Tests show  |
+|                   |              |              |no significant changes in continuum imaging but   |
+|                   |              |              |small differences in spectral cubes, it is not    |
+|                   |              |              |clear yet if these are a problem. Feedback welcome|
++-------------------+--------------+--------------+--------------------------------------------------+
 
 
 Note, that an exception is raised if the support size found during the support search
