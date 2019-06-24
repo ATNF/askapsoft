@@ -215,6 +215,14 @@ Parameters related to gridders that take the w-term into account
 |              |              |image (or the largest residual|dataset contains w-term exceeding this value (*W      |
 |              |              |w when using snapshots)       |scaling error: recommend allowing larger range of w*).|
 +--------------+--------------+------------------------------+------------------------------------------------------+
+|wmaxclip      |bool          |false                         |By default, throws an exception if w term is outside  |
+|              |              |                              |the valid range [-wmax,wmax]. If true data outside the|
+|              |              |                              |valid range is discarded during gridding.             |
+|              |              |                              |If clipping is used the value of wmax should not be   |
+|              |              |                              |increased in subsequent processing steps as           |
+|              |              |                              |unprocessed data may reappear (e.g., cont. subtraction|
+|              |              |                              |followed by imaging)                                  |
++--------------+--------------+------------------------------+------------------------------------------------------+
 
 
 Note, the previous default for wmax was 35000 for WProject and WStack and 10000 for AWProject and AProjectWStack.
