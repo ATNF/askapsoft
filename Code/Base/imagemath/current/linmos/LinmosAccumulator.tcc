@@ -1098,8 +1098,7 @@ namespace askap {
             }
             else {
 
-              wgtBuffer = TempImage<T>(itsOutBuffer.shape(), itsOutBuffer.coordinates(), maxMemoryInMB);
-
+                wgtBuffer = TempImage<T>(itsOutBuffer.shape(), itsOutBuffer.coordinates(), maxMemoryInMB);
 
             }
 
@@ -1115,7 +1114,6 @@ namespace askap {
                   "- maximum weight value " << normaliser );
             }
             if (itsWeightType == FROM_BP_MODEL || itsWeightType == COMBINED) {
-
 
                 Vector<double> pixel(2,0.);
                 MVDirection world0, world1;
@@ -1172,11 +1170,8 @@ namespace askap {
 
                         }
 
-
-
                     }
                 }
-
 
             }
 
@@ -1189,7 +1184,8 @@ namespace askap {
             else if (itsWeightType == COMBINED) {
                 minMax(minVal,maxVal,minPos,maxPos,wgtBeamBuffer);
                 maxVal = wgtBuffer.getAt(maxPos) * maxVal * maxVal;
-                  ASKAPLOG_INFO_STR(linmoslogger, "Primary COMBINED beam model weighting - maxVal: " << maxVal << " NVIS: " << wgtBuffer.getAt(maxPos) << " beam " <<  wgtBeamBuffer.getAt(maxPos) );
+                  ASKAPLOG_INFO_STR(linmoslogger, "Primary COMBINED beam model weighting - maxVal: " <<
+                      maxVal << " NVIS: " << wgtBuffer.getAt(maxPos) << " beam " <<  wgtBeamBuffer.getAt(maxPos) );
             }
             else { // FROM WEIGHT IMAGES
                 maxVal = 0.0;
@@ -1218,7 +1214,8 @@ namespace askap {
                           theWeight = wgtBuffer.getAt(pos) * wgtBeamBuffer.getAt(pos) * wgtBeamBuffer.getAt(pos);
                         }
 
-                        if (theWeight >= wgtCutoff) {
+                        // should also be testing NaN weights, but for now just test the pixel (need to test all state/type combos)
+                        if (theWeight >= wgtCutoff && !std::isnan(itsOutBuffer.getAt(pos))) {
                             outPix(fullpos) = outPix(fullpos) + itsOutBuffer.getAt(pos) * theWeight;
                             outWgtPix(fullpos) = outWgtPix(fullpos) + theWeight;
                         }
@@ -1252,7 +1249,8 @@ namespace askap {
 
                         }
 
-                        if (theWeight >= wgtCutoff) {
+                        // should also be testing NaN weights, but for now just test the pixel (need to test all state/type combos)
+                        if (theWeight >= wgtCutoff && !std::isnan(itsOutBuffer.getAt(pos))) {
                             outPix(fullpos) = outPix(fullpos) + itsOutBuffer.getAt(pos) * theWeight;
                             outWgtPix(fullpos) = outWgtPix(fullpos) + theDeWeight;
                         }
@@ -1265,7 +1263,6 @@ namespace askap {
                         fullpos[1] = y;
                         pos[0] = x;
                         pos[1] = y;
-
                         /// the beam squared weight is already in the image_pos
                         /// we need multiple cases here
                         T theWeight = 0.0;
@@ -1290,7 +1287,8 @@ namespace askap {
 
                         }
                         // using the deweight here as the weight is already in the imaage
-                        if (theDeWeight >= wgtCutoff) {
+                        // should also be testing NaN weights, but for now just test the pixel (need to test all state/type combos)
+                        if (theDeWeight >= wgtCutoff && !std::isnan(itsOutBuffer.getAt(pos))) {
                             outPix(fullpos) = outPix(fullpos) + itsOutBuffer.getAt(pos);
                             outWgtPix(fullpos) = outWgtPix(fullpos) + theDeWeight;
                         }
@@ -1308,8 +1306,10 @@ namespace askap {
                         fullpos[1] = y;
                         pos[0] = x;
                         pos[1] = y;
+
                         invVariance = itsOutSnrBuffer.getAt(pos);
-                        if (invVariance>=snrCutoff && wgtBuffer.getAt(pos)>=wgtCutoff) {
+                        // should also be testing NaN weights, but for now just test the pixel (need to test all state/type combos)
+                        if (invVariance>=snrCutoff && wgtBuffer.getAt(pos)>=wgtCutoff && !std::isnan(itsOutBuffer.getAt(pos))) {
                             outSenPix(fullpos) = outSenPix(fullpos) + invVariance;
                         }
                     }
@@ -1381,8 +1381,6 @@ namespace askap {
               normaliser = getNormaliser(inWgtPix,curpos);
 
             }
-
-
 
             if ( itsWeightType == FROM_BP_MODEL || itsWeightType == COMBINED ) { // this loop has to put the PB weighting in
                 wgtPix = Array<T>(itsInShape);
@@ -1465,7 +1463,8 @@ namespace askap {
                 minMax(minVal,maxVal,minPos,maxPos,wgtPixBeam);
                 T temp = wgtPix(maxPos) * maxVal * maxVal;
                 maxVal = temp;
-                ASKAPLOG_INFO_STR(linmoslogger, "Primary COMBINED beam model weighting - maxVal: " << maxVal << " NVIS: " << wgtPix(maxPos) << " beam " <<  wgtPixBeam(maxPos) );
+                ASKAPLOG_INFO_STR(linmoslogger, "Primary COMBINED beam model weighting - maxVal: " <<
+                                  maxVal << " NVIS: " << wgtPix(maxPos) << " beam " <<  wgtPixBeam(maxPos) );
             }
             else { // FROM WEIGHT IMAGES
               wgtPix.reference(inWgtPix); // note FROM_BP_MODEL overwrites this - the others dont so need to reference the weights
@@ -1476,8 +1475,6 @@ namespace askap {
 
             wgtCutoff = itsCutoff * itsCutoff * maxVal; // wgtPix is prop. to image (gain/sigma)^2
             ASKAPLOG_INFO_STR(linmoslogger,"Weight cut-off: " << wgtCutoff);
-///
-///
 
             if (itsWeightState == CORRECTED) {
                 for (int y=0; y<outPix.shape()[1];++y) {
@@ -1486,6 +1483,7 @@ namespace askap {
                         fullpos[1] = y;
                         wgtpos[0] = x;
                         wgtpos[1] = y;
+
                         /// make beamsquared weight times inverse variance
                         /// this should cover all cases - except the weight image case
                         T theWeight = 0.0;
@@ -1496,7 +1494,8 @@ namespace askap {
                           theWeight = wgtPix(wgtpos) * wgtPixBeam(wgtpos) * wgtPixBeam(wgtpos);
                         }
 
-                        if (theWeight >=wgtCutoff) {
+                        // should also be testing NaN weights, but for now just test the pixel (need to test all state/type combos)
+                        if (theWeight >=wgtCutoff && !std::isnan(inPix(fullpos))) {
                             outPix(fullpos)    = outPix(fullpos)  + inPix(fullpos) * theWeight;
                             outWgtPix(fullpos) = outWgtPix(fullpos) + theWeight ;
                         }
@@ -1523,11 +1522,13 @@ namespace askap {
                           theDeWeight = wgtPix(wgtpos);
                         }
                         else if (itsWeightType == FROM_WEIGHT_IMAGES ) {
-                          ASKAPLOG_WARN_STR(linmoslogger,"Weighting INHERENT images with weight images alone - NO primary beam correction will be done. Use Combined");
+                          ASKAPLOG_WARN_STR(linmoslogger,
+                          "Weighting INHERENT images with weight images alone - NO primary beam correction will be done. Use Combined");
                           theWeight = wgtPix(wgtpos);
                           theDeWeight = wgtPix(wgtpos);
                         }
-                        if (theWeight >= wgtCutoff) {
+                        // should also be testing NaN weights, but for now just test the pixel (need to test all state/type combos)
+                        if (theWeight >= wgtCutoff && !std::isnan(inPix(fullpos))) {
                             outPix(fullpos)    = outPix(fullpos)    + inPix(fullpos) * theWeight;
                             outWgtPix(fullpos) = outWgtPix(fullpos) + theDeWeight;
                         }
@@ -1545,10 +1546,7 @@ namespace askap {
                         T theWeight = 0.0;
                         T theDeWeight = 0.0;
                         if (itsWeightType == COMBINED) {
-
-
                           ASKAPTHROW(AskapError,"A projection weighting by weight image strangely not supported in this release");
-
                         }
                         else if (itsWeightType == FROM_BP_MODEL) {
                           theWeight = 1.0; /// beam already here
@@ -1563,7 +1561,8 @@ namespace askap {
 
                         }
                         // using the deweight here as the weight is already in the imaage
-                        if (theDeWeight >= wgtCutoff) {
+                        // should also be testing NaN weights, but for now just test the pixel (need to test all state/type combos)
+                        if (theDeWeight >= wgtCutoff && !std::isnan(inPix(fullpos))) {
                             outPix(fullpos)    = outPix(fullpos)    + inPix(fullpos) * theWeight;
                             outWgtPix(fullpos) = outWgtPix(fullpos) + theDeWeight;
                         }
@@ -1579,7 +1578,8 @@ namespace askap {
                         fullpos[1] = y;
                         sensitivity = inSenPix(fullpos);
                         // wgt and sen should be aligned.
-                        if (wgtPix(wgtpos)>=wgtCutoff && sensitivity>0.0) {
+                        // should also be testing NaN weights, but for now just test the pixel (need to test all state/type combos)
+                        if (wgtPix(wgtpos)>=wgtCutoff && sensitivity>0.0 && !std::isnan(inPix(fullpos))) {
                             outSenPix(fullpos) = outSenPix(fullpos) + 1.0 / (sensitivity * sensitivity);
                         }
                     }
