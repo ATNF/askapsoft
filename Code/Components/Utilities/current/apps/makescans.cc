@@ -104,6 +104,7 @@ void processOneMS(const std::vector<boost::tuple<casa::Int, double, double> > &b
 
   casa::uInt rowsOutside = 0;
   std::set<casa::Int> scansWithData;
+  casa::Int prevScan = 0;
  
   for (casa::uInt row = 0; row<ms.nrow(); ++row) {
        //casa::Array<casa::Bool> flagBuf;
@@ -119,9 +120,11 @@ void processOneMS(const std::vector<boost::tuple<casa::Int, double, double> > &b
            flagCol.get(row,flagBuf);
            flagBuf.set(casa::True);
            flagCol.put(row, flagBuf);
+           scanCol.put(row, prevScan);
        } else {
           scansWithData.insert(scan);
           scanCol.put(row, scan);
+          prevScan = scan;
           //std::cout<<"row = "<<row<<" scan="<<scan<<" "<<std::setprecision(15)<<timeCol.get(row)/86400.<<std::endl;
        }
   }
