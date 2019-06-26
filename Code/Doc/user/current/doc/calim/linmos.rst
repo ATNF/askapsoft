@@ -198,7 +198,8 @@ the key "primarybeam"
 +==================+==================+==============+============================================================+
 |primarybeam       |string            |"GaussianPB"  |Optional parameter that allows the user to select which     |
 |                  |                  |              |primary beam will be used in weighting. The parameters of   |
-|                  |                  |              |which can also be altered if required                       |
+|                  |                  |              |which can also be altered if required. Also supported are   |
+|                  |                  |              |MWA primary beams, via primarybeam = MWA_PB.                |
 +------------------+------------------+--------------+------------------------------------------------------------+
 
 **Gaussian Primary Beam Options**
@@ -229,6 +230,21 @@ The 2 dimensional beam is governed by the following parameters.
 +------------------+------------------+--------------+------------------------------------------------------------+
 | alpha            |double            |0.0           |PA in rad. measured from North in an +ve RA direction       |
 +------------------+------------------+--------------+------------------------------------------------------------+
+
+
+**MWA Primary Beam Options**
+
++-------------------+------------------+-----------------+------------------------------------------------------------+
+|**Parameter**      |**Type**          |**Default**      |**Description**                                             |
++===================+==================+=================+============================================================+
+| latitude          |double            | -26.703319 deg  | Array latitude in radians                                  |
++-------------------+------------------+-----------------+------------------------------------------------------------+
+| longitude         |double            | 116.67081 deg   | Array longitude in radians                                 |
++-------------------+------------------+-----------------+------------------------------------------------------------+
+| dipole.separation |double            | 1.10 metres     | Dipole separation                                          |
++-------------------+------------------+-----------------+------------------------------------------------------------+
+| dipole.height     |double            | 0.30 metres     | dipole hheight                                             |
++-------------------+------------------+-----------------+------------------------------------------------------------+
 
 Primary Beam Corrections to the Taylor terms
 --------------------------------------------
