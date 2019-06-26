@@ -39,6 +39,8 @@ namespace askap
       CPPUNIT_TEST(testEvaluateGaussian);
       CPPUNIT_TEST(testCreate2dGaussian);
       CPPUNIT_TEST(testEvaluate2dGaussian);
+      CPPUNIT_TEST(testCreateMWA);
+      CPPUNIT_TEST(testEvaluateMWA);
       CPPUNIT_TEST_SUITE_END();
 
   private:
@@ -282,6 +284,77 @@ namespace askap
 
           CPPUNIT_ASSERT(abs(testVal - beamval*beamval) < 1E-7);
 
+
+      }
+      void testCreateMWA()
+      {
+         LOFAR::ParameterSet parset;
+         parset.add("primarybeam","MWA_PB");
+         PrimaryBeam::ShPtr PB = PrimaryBeamFactory::make(parset);
+      }
+      void testEvaluateMWA() {
+          LOFAR::ParameterSet parset;
+
+          const casa::IPosition shape(2,256,256);
+          casa::Array<float> arr(shape);
+          arr.set(1.);
+          casa::CoordinateSystem coordsys(makeCoords());
+
+          casa::IPosition pixel(2,0.);
+          casa::Vector<double> offset(2,0.);
+          double res = 1. / 60. * C::pi/180.; // 1'
+          double az = 0;
+          double za = 0;
+          double frequency = 150.0E6; // 150MHz
+
+          parset.add("primarybeam","MWA_PB");
+          PrimaryBeam::ShPtr PB =  PrimaryBeamFactory::make(parset);
+
+          // reference direction of input coords
+          casa::MVDirection beamcentre(135*C::pi/180.0, 60*C::pi/180.0);
+
+          // get coordinates of the direction axes
+          const int dcPos = coordsys.findCoordinate(casa::Coordinate::DIRECTION,-1);
+          const casa::DirectionCoordinate outDC = coordsys.directionCoordinate(dcPos);
+
+          casa::Array<double> BeamArr(shape);
+
+          for (int x=0; x<shape[0];++x) {
+              for (int y=0; y<shape[1];++y) {
+
+                  // get the current pixel location and distance from beam centre
+                  pixel[0] = x;
+                  pixel[1] = y;
+                  offset[0] = double(pixel[0]-shape[0]/2) * res;
+                  offset[1] = double(pixel[1]-shape[1]/2) * res;
+
+                  za = asin( sqrt( offset[0]*offset[0] + offset[1]*offset[1] ) );
+                  az = atan2( offset[0], offset[1] );
+
+                  casacore::Matrix<casacore::Complex> J = PB->getJonesAtOffset(az,za,frequency);
+
+                  //cout << " offset --- " << offset << " az,za = " << az << ", " << za << ", J = " << J << endl;
+
+                  BeamArr(pixel) = real( J(0,0)*conj(J(0,0)) + J(0,1)*conj(J(0,1)) );
+
+              }
+          }
+          pixel[0] = 200;
+          pixel[1] = 200;
+          double testVal = BeamArr(pixel);
+          // 0.49583 is the val at 200,200
+          offset[0] = double(pixel[0]-shape[0]/2) * res;
+          offset[1] = double(pixel[1]-shape[1]/2) * res;
+          za = asin( sqrt( offset[0]*offset[0] + offset[1]*offset[1] ) );
+          az = atan2( offset[0], offset[1] );
+
+          casacore::Matrix<casacore::Complex> J = PB->getJonesAtOffset(az,za,frequency);
+
+          double beamVal = real( J(0,0)*conj(J(0,0)) + J(0,1)*conj(J(0,1)) );
+
+          cout << "testVal: " << testVal << " beamVal: " << beamVal << endl;
+
+          CPPUNIT_ASSERT(abs(testVal - beamVal) < 1E-7);
 
       }
       void testCreateAbstract()

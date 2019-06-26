@@ -57,7 +57,6 @@ namespace imagemath {
 
         double getYwidth();
 
-
         virtual double evaluateAtOffset(double offsetPA, double offsetDist, double frequency);
 
         virtual double evaluateAtOffset(double offsetDist, double frequency);
@@ -66,6 +65,7 @@ namespace imagemath {
         /// every pixel ....
 
         virtual casacore::Matrix<casacore::Complex> getJonesAtOffset(double offset, double frequency);
+        virtual casacore::Matrix<casacore::Complex> getJonesAtOffset(double offsetPA, double offsetDist, double frequency);
 
         /// Some sets.
 

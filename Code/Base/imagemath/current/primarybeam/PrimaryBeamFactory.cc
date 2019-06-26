@@ -24,6 +24,7 @@ ASKAP_LOGGER(logger, ".primarybeam.primarybeamfactory");
 #include "PrimaryBeamFactory.h"
 // Primary Beam Types
 #include "GaussianPB.h"
+#include "MWA_PB.h"
 
 
 namespace askap {
@@ -89,9 +90,8 @@ PrimaryBeam::ShPtr PrimaryBeamFactory::make(const LOFAR::ParameterSet &parset) {
         // all pre-defined primary beams
         ASKAPLOG_INFO_STR(logger, "Filling the Primary Beam registry with pre-defined Beams");
         addPreDefinedPrimaryBeam<GaussianPB>();
+        addPreDefinedPrimaryBeam<MWA_PB>();
         /// addPreDefinedPrimaryBeam<ExamplePB>();
-
-
     }
 
     // buffer for the result

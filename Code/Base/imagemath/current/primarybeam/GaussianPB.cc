@@ -166,6 +166,15 @@ namespace askap {
 
             }
 
+            casacore::Matrix<casacore::Complex> GaussianPB::getJonesAtOffset(double offsetPA, double offsetDist,
+                                                     double frequency) {
+                ASKAPLOG_WARN_STR(logger,"GaussianPB::getJonesAtOffset: unsupported option");
+                casacore::IPosition shape(2,2,2);
+                casacore::Matrix<casacore::Complex> Jones(shape);
+                Jones = 0.0;
+                return Jones;
+            }
+
             double GaussianPB::getFWHM(const double frequency, const double width=0) {
                 double sol = 299792458.0;
 
