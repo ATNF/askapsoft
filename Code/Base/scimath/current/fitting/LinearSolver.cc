@@ -208,9 +208,14 @@ std::pair<double,double> LinearSolver::solveSubsetOfNormalEquations(Params &para
 
     for (std::vector<std::pair<string, int> >::const_iterator indit2=indices.begin();indit2!=indices.end(); ++indit2)  {
         for (std::vector<std::pair<string, int> >::const_iterator indit1=indices.begin();indit1!=indices.end(); ++indit1)  {
+
              // Axes are dof, dof for each parameter
              // Take a deep breath for const-safe indexing into the double layered map
              const casa::Matrix<double>& nm = normalEquations().normalMatrix(indit1->first, indit2->first);
+
+             if (&nm == &emptyMatrix) {
+                 continue;
+             }
 
              for (size_t row=0; row<nm.nrow(); ++row)  {
                   for (size_t col=0; col<nm.ncolumn(); ++col) {

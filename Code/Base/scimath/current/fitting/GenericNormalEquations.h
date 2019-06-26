@@ -203,36 +203,8 @@ struct GenericNormalEquations : public INormalEquations {
   /// @brief obtain const reference to metadata
   /// @details This is a const version of the metadata() method
   /// @return const reference to metadata
-  inline const Params& metadata() const { return itsMetadata;}
+  inline const Params& metadata() const { return itsMetadata; }
 
-  /// @brief A lifetime watcher needed for initializeNormalMatrixParameters().
-  class NMInitializedParametersLifetimeWatcher {
-  public:
-      NMInitializedParametersLifetimeWatcher(const GenericNormalEquations &gne) : itsGne(gne) {}
-      void setInitializationFlag() {
-          nonconst().metadata().add("NMParametersInitialized", 0);
-      }
-      ~NMInitializedParametersLifetimeWatcher() {
-          if (itsGne.metadata().has("NMParametersInitialized")) {
-              // Removing the initialization flag.
-              nonconst().metadata().remove("NMParametersInitialized");
-          }
-      }
-  private:
-      const GenericNormalEquations &itsGne;
-      GenericNormalEquations& nonconst() {
-          return const_cast<GenericNormalEquations &>(itsGne);
-      }
-  };
-
-  /// @brief Performs advanced initialization of the normal matrix parameters.
-  /// It is used for performance optimization to avoid initializing parameters
-  /// inside addParameter() which leads to O(N^2) complexity when N parameters are being added one by one.
-  /// @param[in] names Parameter names to be added to the normal matrix.
-  /// @param[in] watcher Lifetime watcher, to remove the "ParametersInitialized" flag when go out of scope.
-  void initializeNormalMatrixParameters(const std::vector<std::string> &names,
-                                        NMInitializedParametersLifetimeWatcher &watcher);
-    
 protected:
   /// @brief map of matrices (data element of each row map)
   typedef std::map<std::string, casa::Matrix<double> > MapOfMatrices;
@@ -269,7 +241,18 @@ protected:
   /// @param[in] inDV input data vector 
   void addParameter(const std::string &par, const MapOfMatrices &inNM,
                     const casa::Vector<double>& inDV);
-  
+
+  /// @brief Add/update one parameter to/in sparse matrix, using given matrix and data vector.
+  /// @details Similar to addParameter, but does not initialize the full matrix.
+  /// Instead, only elements (cross-terms) used in calculations get initialized,
+  /// essentially allowing for building a sparse matrix.
+  /// @param[in] par name of the parameter to work with
+  /// @param[in] inNM input normal matrix
+  /// @param[in] inDV input data vector
+  /// @param[in] parDim parameter dimension
+  void addParameterSparsely(const std::string &par, const MapOfMatrices &inNM,
+                            const casa::Vector<double>& inDV, size_t parDim);
+
   /// @brief extract dimension of a parameter from the given row
   /// @details This helper method analyses the matrices stored in the supplied
   /// map (effectively a row of a sparse matrix) and extracts the dimension of
@@ -279,9 +262,8 @@ protected:
   /// all elements).
   /// @param[in] nmRow a row of the sparse normal matrix to work with
   /// @return dimension of the corresponding parameter
-  static casa::uInt parameterDimension(const MapOfMatrices &nmRow);  
-  
-  
+  static casa::uInt parameterDimension(const MapOfMatrices &nmRow);
+
   /// @brief Calculate an element of A^tA
   /// @details Each element of a sparse normal matrix is also a matrix
   /// in general. However, due to some limitations of CASA operators, a
@@ -320,7 +302,9 @@ protected:
              const std::string &par, casa::uInt dataPoint);
   
 private:
-  
+  // Adding the data vector for a parameter.
+  void addDataVector(const std::string &par, const casa::Vector<double>& inDV);
+
   /// @brief normal matrix
   /// @details Normal matrices stored as a map or maps of Matrixes - 
   /// it's really just a big matrix.

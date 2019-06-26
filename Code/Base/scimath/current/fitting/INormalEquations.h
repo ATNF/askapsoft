@@ -49,6 +49,8 @@ namespace askap {
 
 namespace scimath {
 
+extern casa::Matrix<double> emptyMatrix;
+
 /// @brief Generic interface to normal equations
 /// @details There are two kinds of normal equations currently supported. The
 /// first one is a generic case, where the full normal matrix is retained. It

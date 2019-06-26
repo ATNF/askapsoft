@@ -65,6 +65,8 @@ using casa::transpose;
 
 namespace askap { namespace scimath {
 
+casa::Matrix<double> emptyMatrix;
+
 ASKAP_LOGGER(logger, ".genericne");
 
 /// @brief a default constructor
@@ -153,17 +155,6 @@ void GenericNormalEquations::merge(const INormalEquations& src)
       const GenericNormalEquations &gne = 
                 dynamic_cast<const GenericNormalEquations&>(src);
 
-      // Generate a list of parameter names.
-      std::vector<std::string> names;
-      for (MapOfVectors::const_iterator ci = gne.itsDataVector.begin();
-         ci != gne.itsDataVector.end(); ++ci) {
-         names.push_back(ci->first);
-      }
-
-      // Advanced initialization of the normal matrix parameters.
-      NMInitializedParametersLifetimeWatcher watcher(gne);
-      initializeNormalMatrixParameters(names, watcher);
-
       // loop over all parameters, add them one by one.
       // We could have passed iterator directly to mergeParameter and it
       // would work faster (no extra search accross the map). But current
@@ -206,49 +197,11 @@ void GenericNormalEquations::mergeParameter(const std::string &par,
    const std::map<std::string, MapOfMatrices>::const_iterator srcItRow = 
                          src.itsNormalMatrix.find(par);
    ASKAPDEBUGASSERT(srcItRow != src.itsNormalMatrix.end());
-   
+
    const MapOfVectors::const_iterator srcItData = src.itsDataVector.find(par);
    ASKAPDEBUGASSERT(srcItData != src.itsDataVector.end());
-   
-   addParameter(par, srcItRow->second, srcItData->second);
-}
 
-void GenericNormalEquations::initializeNormalMatrixParameters(const std::vector<std::string> &names,
-                                                              NMInitializedParametersLifetimeWatcher &watcher)
-{
-    // For a single parameter, adding a 2x2 matrix.
-    const size_t rowParDim = 2;
-    const size_t colParDim = 2;
-
-    // before processing this row, check that the columns already exist as rows
-    for (std::vector<std::string>::const_iterator nameIt = names.begin();
-            nameIt != names.end(); ++nameIt) {
-        const std::string parname = *nameIt;
-
-        if ((parname.find("gain.") != std::string::npos || parname.find("leakage.") != std::string::npos) // Process only relevant to the normal matrix parameters.
-            && itsNormalMatrix.find(parname) == itsNormalMatrix.end()) {
-            // this is a new parameter. Add it to the NM
-            std::map<std::string, MapOfMatrices>::iterator
-                    newRowIt = itsNormalMatrix.insert(std::make_pair(
-                            parname, MapOfMatrices())).first;
-
-            // set all of the new parameter columns to zero
-            std::map<std::string, MapOfMatrices>::iterator newColIt;
-            for (newColIt = itsNormalMatrix.begin();
-                       newColIt != itsNormalMatrix.end(); ++newColIt) {
-
-                newRowIt->second.insert(std::make_pair(newColIt->first,
-                    casa::Matrix<double>(rowParDim, colParDim, 0.)));
-                // fill in the symmetric term
-                if (newRowIt->first != newColIt->first) {
-                    newColIt->second.insert(std::make_pair(newRowIt->first,
-                        casa::Matrix<double>(colParDim, rowParDim, 0.)));
-                }
-            }
-        }
-    }
-    // Set parameter initialization flag on.
-    watcher.setInitializationFlag();
+   addParameterSparsely(par, srcItRow->second, srcItData->second, 2);
 }
 
 /// @brief Add/update one parameter using given matrix and data vector
@@ -268,35 +221,33 @@ void GenericNormalEquations::initializeNormalMatrixParameters(const std::vector<
 void GenericNormalEquations::addParameter(const std::string &par, 
            const MapOfMatrices &inNM, const casa::Vector<double>& inDV)
 {
-  if (!metadata().has("NMParametersInitialized")) {
-      // before processing this row, check that the columns already exist as rows
-      for (MapOfMatrices::const_iterator nmColIt = inNM.begin();
-                          nmColIt != inNM.end(); ++nmColIt) {
-          if (itsNormalMatrix.find(nmColIt->first) == itsNormalMatrix.end()) {
-              // this is a new parameter. Add it to the NM
-              std::map<std::string, MapOfMatrices>::iterator
-                      newRowIt = itsNormalMatrix.insert(std::make_pair(
-                                     nmColIt->first,MapOfMatrices())).first;
-              const casa::uInt rowParDim = nmColIt->second.ncolumn();
-              // set all of the new parameter columns to zero
-              std::map<std::string, MapOfMatrices>::iterator newColIt;
-              for (newColIt = itsNormalMatrix.begin();
-                         newColIt != itsNormalMatrix.end(); ++newColIt) {
-                  casa::uInt colParDim;
-                  if (newColIt->first == newRowIt->first) {
-                      // this is the new parameter.
-                      colParDim = rowParDim;
-                  } else {
-                      // this is an old parameter. Get size from itsNormalMatrix
-                      colParDim = parameterDimension(newColIt->second);
-                  }
-                  newRowIt->second.insert(std::make_pair(newColIt->first,
-                      casa::Matrix<double>(rowParDim, colParDim, 0.)));
-                  // fill in the symmetric term
-                  if (newRowIt->first != newColIt->first) {
-                      newColIt->second.insert(std::make_pair(newRowIt->first,
-                          casa::Matrix<double>(colParDim, rowParDim, 0.)));
-                  }
+  // before processing this row, check that the columns already exist as rows
+  for (MapOfMatrices::const_iterator nmColIt = inNM.begin();
+                      nmColIt != inNM.end(); ++nmColIt) {
+      if (itsNormalMatrix.find(nmColIt->first) == itsNormalMatrix.end()) {
+          // this is a new parameter. Add it to the NM
+          std::map<std::string, MapOfMatrices>::iterator
+                  newRowIt = itsNormalMatrix.insert(std::make_pair(
+                                 nmColIt->first,MapOfMatrices())).first;
+          const casa::uInt rowParDim = nmColIt->second.ncolumn();
+          // set all of the new parameter columns to zero
+          std::map<std::string, MapOfMatrices>::iterator newColIt;
+          for (newColIt = itsNormalMatrix.begin();
+                     newColIt != itsNormalMatrix.end(); ++newColIt) {
+              casa::uInt colParDim;
+              if (newColIt->first == newRowIt->first) {
+                  // this is the new parameter.
+                  colParDim = rowParDim;
+              } else {
+                  // this is an old parameter. Get size from itsNormalMatrix
+                  colParDim = parameterDimension(newColIt->second);
+              }
+              newRowIt->second.insert(std::make_pair(newColIt->first,
+                  casa::Matrix<double>(rowParDim, colParDim, 0.)));
+              // fill in the symmetric term
+              if (newRowIt->first != newColIt->first) {
+                  newColIt->second.insert(std::make_pair(newRowIt->first,
+                      casa::Matrix<double>(colParDim, rowParDim, 0.)));
               }
           }
       }
@@ -325,21 +276,60 @@ void GenericNormalEquations::addParameter(const std::string &par,
       }
   }
 
-  // now process the data vector
-  MapOfVectors::const_iterator dvIt = itsDataVector.find(par);
-  if (dvIt != itsDataVector.end()) {
-      ASKAPCHECK(inDV.shape() == dvIt->second.shape(),
-               "shape mismatch for data vector, parameter: "<<dvIt->first<<
-               ". "<<inDV.shape()<<" != "<<dvIt->second.shape());
-      // we have to instantiate explicitly a casa::Vector object because
-      // otherwise, for some reason, the compiler can't figure out the type 
-      // properly at the += operator. Exploit reference semantics - no copying!
-      casa::Vector<double> destVec = dvIt->second;
-      destVec += inDV; // add up a vector  
-  } else {
-      itsDataVector.insert(std::make_pair(par, inDV));
+  // Processing the data vector.
+  addDataVector(par, inDV);
+}
+
+void GenericNormalEquations::addParameterSparsely(const std::string &par,
+           const MapOfMatrices &inNM, const casa::Vector<double>& inDV, size_t parDim)
+{
+  // First, process normal matrix.
+  // nmRowIt is an iterator over rows (the outer map) of the normal matrix stored in this class
+  std::map<std::string, MapOfMatrices>::iterator nmRowIt = itsNormalMatrix.find(par);
+  if (nmRowIt == itsNormalMatrix.end()) {
+  // Parameter not found in the matrix, adding the corresponding row.
+      nmRowIt = itsNormalMatrix.insert(std::make_pair(par, MapOfMatrices())).first;
   }
 
+  for (MapOfMatrices::const_iterator inNMIt = inNM.begin();
+       inNMIt != inNM.end(); ++inNMIt) {
+
+      // Search for an appropriate parameter in the normal matrix.
+      MapOfMatrices::iterator nmColIt = nmRowIt->second.find(inNMIt->first);
+      if (nmColIt == nmRowIt->second.end()) {
+          // Initialize a column with an empty matrix.
+          // Note: only the columns used in the calculation get initialized.
+          nmColIt = nmRowIt->second.insert(
+                        std::make_pair(inNMIt->first, casa::Matrix<double>(parDim, parDim, 0.))).first;
+      }
+
+      // Work with cross-terms if the input matrix have them.
+      ASKAPCHECK(inNMIt->second.shape() == nmColIt->second.shape(),
+               "shape mismatch for normal matrix, parameters ("<<
+               nmColIt->first<<" , "<<nmRowIt->first<<"). "<<
+               nmColIt->second.shape()<<" != "<<inNMIt->second.shape());
+      nmColIt->second += inNMIt->second; // add up a matrix
+  }
+
+  // Processing the data vector.
+  addDataVector(par, inDV);
+}
+
+void GenericNormalEquations::addDataVector(const std::string &par, const casa::Vector<double>& inDV)
+{
+    MapOfVectors::const_iterator dvIt = itsDataVector.find(par);
+    if (dvIt != itsDataVector.end()) {
+        ASKAPCHECK(inDV.shape() == dvIt->second.shape(),
+                 "shape mismatch for data vector, parameter: "<<dvIt->first<<
+                 ". "<<inDV.shape()<<" != "<<dvIt->second.shape());
+        // we have to instantiate explicitly a casa::Vector object because
+        // otherwise, for some reason, the compiler can't figure out the type
+        // properly at the += operator. Exploit reference semantics - no copying!
+        casa::Vector<double> destVec = dvIt->second;
+        destVec += inDV; // add up a vector
+    } else {
+        itsDataVector.insert(std::make_pair(par, inDV));
+    }
 }
 
 /// @brief extract dimension of a parameter from the given row
@@ -477,9 +467,8 @@ void GenericNormalEquations::add(const ComplexDiffMatrix &cdm, const PolXProduct
             // again and it goes out of scope
             normalMatrix.insert(std::make_pair(*iterCol,nmElementBuf));
        }
-       
        // now add this row to the normal equations
-       addParameter(*iterRow, normalMatrix, dataVector);
+       addParameterSparsely(*iterRow, normalMatrix, dataVector, 2);
   }
 }
  
@@ -646,8 +635,12 @@ const casa::Matrix<double>& GenericNormalEquations::normalMatrix(const std::stri
   ASKAPCHECK(cIt1 != itsNormalMatrix.end(), "Missing first parameter "<<par1<<" is requested from the normal matrix");
   std::map<string, casa::Matrix<double> >::const_iterator cIt2 = 
                                    cIt1->second.find(par2);
-  ASKAPCHECK(cIt2 != cIt1->second.end(), "Missing second parameter "<<par2<<" is requested from the normal matrix");
-  return cIt2->second;                             
+  //ASKAPCHECK(cIt2 != cIt1->second.end(), "Missing second parameter "<<par2<<" is requested from the normal matrix");
+  if (cIt2 == cIt1->second.end()) {
+  // Added this to allow for sparse matrix.
+      return emptyMatrix;
+  }
+  return cIt2->second;
 }
 
 /// @brief data vector for a given parameter
