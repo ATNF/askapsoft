@@ -48,7 +48,7 @@ if [ "${SUBMIT_JOBS}" == "true" ] && [ "${ALL_JOB_IDS}" != "" ]; then
     cat > "$sbatchfile" <<EOF
 #!/bin/bash -l
 ${SLURM_CONFIG}
-#SBATCH --time=0:10:00
+#SBATCH --time=2:00:00
 #SBATCH --ntasks=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --job-name=gatherStats
