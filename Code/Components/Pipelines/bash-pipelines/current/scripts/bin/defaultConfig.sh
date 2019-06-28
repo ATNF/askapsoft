@@ -107,8 +107,8 @@ LUSTRE_STRIPE_SIZE=1048576
 BUCKET_SIZE=1048576
 
 # Number of channels in the tile for the new MS we create through merging or splitting
-TILE_NCHAN_SCIENCE=54
-TILE_NCHAN_1934=54
+TILE_NCHAN_SCIENCE=1
+TILE_NCHAN_1934=1
 TILENCHAN_AV=18
 
 # Remove interim MSs when running local merging
@@ -819,7 +819,7 @@ CLEAN_CONTCUBE_WRITE_AT_MAJOR_CYCLE=false
 # Channel range to copy when DO_COPY_SL is turned on
 CHAN_RANGE_SL_SCIENCE=""
 # Tile size for SL measurement set
-TILENCHAN_SL=18
+TILENCHAN_SL=1
 
 # Method to present self-cal model: via a model image ("Cmodel"),
 # via a components parset ("Components"), or using the
