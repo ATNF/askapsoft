@@ -212,7 +212,7 @@ DO_APPLY_BANDPASS=true
 DO_AVERAGE_CHANNELS=true
 DO_CONT_IMAGING=true
 DO_SELFCAL=true
-MULTI_JOB_SELFCAL=true
+MULTI_JOB_SELFCAL=false
 DO_APPLY_CAL_CONT=true
 DO_CONTCUBE_IMAGING=false
 DO_SPECTRAL_PROCESSING=false
@@ -688,7 +688,7 @@ RESTORE_PRECONDITIONER_WIENER_TAPER=""
 # Method to present self-cal model: via a model image ("Cmodel")
 # via a components parset ("Components"), or using the
 # continuum-imaging clean model ("CleanModel")
-SELFCAL_METHOD="Cmodel"
+SELFCAL_METHOD="CleanModel"
 # Number of loops of self-calibration
 SELFCAL_NUM_LOOPS=1
 # Should we keep the images from the intermediate selfcal loops?
