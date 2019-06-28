@@ -500,28 +500,24 @@ void TableConstDataIterator::fillNoise(casa::Cube<casa::Complex> &noise) const
   // if the sigma spectrum exists, use those sigmas to fill the noise cube
   if (table().actualTableDesc().isColumn("SIGMA_SPECTRUM")) {
       // noise is given per channel and polarisation
-      casa::Matrix<Float> buf(itsNumberOfPols,itsNumberOfChannels);
+      // Setup a slicer to extract the specified channel range only
+      const Slicer chanSlicer(Slice(),Slice(startChan,nChan));
+      casa::Matrix<Float> buf(itsNumberOfPols,nChan);
       ROArrayColumn<Float> sigmaCol(itsCurrentIteration,"SIGMA_SPECTRUM");
       for (uInt row = 0; row<itsNumberOfRows; ++row) {
+#ifdef ASKAP_DEBUG
            const casa::IPosition shape = sigmaCol.shape(row);
            ASKAPDEBUGASSERT(shape.size()==2);
            ASKAPDEBUGASSERT((shape[0] == casa::Int(itsNumberOfPols)) &&
                             (shape[1] == casa::Int(itsNumberOfChannels)));
-
-           sigmaCol.get(row+itsCurrentTopRow,buf,False);
+#endif
+           sigmaCol.getSlice(row+itsCurrentTopRow,chanSlicer,buf,False);
 
            // SIGMA_SPECTRUM is ordered (pol,chan), so need to transpose
-           //const IPosition blc(2,0,startChan);
-           //const IPosition trc(2,itsNumberOfPols-1,startChan+nChan-1);
-           //casa::Matrix<casa::Complex> rowNoise = noise.yzPlane(row);
-           //const casa::Matrix<casa::Float> inVals = buf(blc,trc);
-           //convertArray(rowNoise, buf(blc,trc));
            for (casa::uInt chan=0; chan<nChan; chan++) {
                 for (casa::uInt pol=0; pol<itsNumberOfPols; pol++) {
-                     //ASKAPDEBUGASSERT(y<inVals.nrow());
-                     //ASKAPDEBUGASSERT(x<inVals.ncolumn());
                      // same noise for both real and imaginary parts
-                     const casa::Float val = buf(pol,chan+startChan);
+                     const casa::Float val = buf(pol,chan);
                      noise(row,chan,pol) = casa::Complex(val,val);
                 }
            }
