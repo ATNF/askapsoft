@@ -1133,7 +1133,7 @@ IMAGE_LIST="image psf psf.image residual sensitivity"
 
 # Whether we should archive the full-resolution (spectral) measurement
 # sets
-ARCHIVE_SPECTRAL_MS=true
+ARCHIVE_SPECTRAL_MS=false
 
 # Whether to archive individual beam images
 ARCHIVE_BEAM_IMAGES=false
