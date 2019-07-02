@@ -928,13 +928,30 @@ namespace askap {
             double maxMemoryInMB = double(shape.product()*sizeof(T))/1024./1024.+100;
             itsOutBuffer = TempImage<T>(shape, cSysTmp, maxMemoryInMB);
             ASKAPCHECK(itsOutBuffer.shape().nelements()>0, "Output buffer does not appear to be set");
-            if (itsWeightType == FROM_WEIGHT_IMAGES || itsWeightType == COMBINED ) {
-                itsOutWgtBuffer = TempImage<T>(shape, cSysTmp, maxMemoryInMB);
-                ASKAPCHECK(itsOutWgtBuffer.shape().nelements()>0,
-                    "Output weights buffer does not appear to be set");
-            }
+
+            itsOutWgtBuffer = TempImage<T>(shape, cSysTmp, maxMemoryInMB);
+            ASKAPCHECK(itsOutWgtBuffer.shape().nelements()>0, "Output weights buffer does not appear to be set");
+
             if (itsDoSensitivity) {
                 itsOutSnrBuffer = TempImage<T>(shape, cSysTmp, maxMemoryInMB);
+                ASKAPCHECK(itsOutSnrBuffer.shape().nelements()>0,
+                    "Output sensitivity buffer does not appear to be set");
+            }
+        }
+
+        template<typename T>
+        void LinmosAccumulator<T>::redirectOutputBuffers(void) {
+            // if not regridding point output buffers at input buffers
+            // TempImage operator= uses reference semantic...
+
+            itsOutBuffer = itsInBuffer;
+            ASKAPCHECK(itsOutBuffer.shape().nelements()>0, "Output buffer does not appear to be set");
+
+            itsOutWgtBuffer = itsInWgtBuffer;
+            ASKAPCHECK(itsOutWgtBuffer.shape().nelements()>0, "Output weights buffer does not appear to be set");
+
+            if (itsDoSensitivity) {
+                itsOutSnrBuffer = itsInSnrBuffer;
                 ASKAPCHECK(itsOutSnrBuffer.shape().nelements()>0,
                     "Output sensitivity buffer does not appear to be set");
             }
@@ -961,11 +978,10 @@ namespace askap {
             double maxMemoryInMB = double(shape.product()*sizeof(T))/1024./1024.+100;
             itsInBuffer = TempImage<T>(shape,cSys,maxMemoryInMB);
             ASKAPCHECK(itsInBuffer.shape().nelements()>0, "Input buffer does not appear to be set");
-            if (itsWeightType == FROM_WEIGHT_IMAGES || itsWeightType == COMBINED) {
-                itsInWgtBuffer = TempImage<T>(shape,cSys,maxMemoryInMB);
-                ASKAPCHECK(itsInWgtBuffer.shape().nelements()>0,
-                    "Input weights buffer does not appear to be set");
-            }
+
+            itsInWgtBuffer = TempImage<T>(shape,cSys,maxMemoryInMB);
+            ASKAPCHECK(itsInWgtBuffer.shape().nelements()>0, "Input weights buffer does not appear to be set");
+
             if (itsDoSensitivity) {
                 itsInSenBuffer = TempImage<T>(shape,cSys,maxMemoryInMB);
                 itsInSnrBuffer = TempImage<T>(shape,cSys,maxMemoryInMB);
@@ -983,49 +999,130 @@ namespace askap {
         }
 
         template<typename T>
-        void LinmosAccumulator<T>::loadInputBuffers(const scimath::MultiDimArrayPlaneIter& planeIter,
-                                                    Array<T>& inPix,
-                                                    Array<T>& inWgtPix,
-                                                    Array<T>& inSenPix) {
-            itsInBuffer.put(planeIter.getPlane(inPix));
-            if (itsWeightType == FROM_WEIGHT_IMAGES || itsWeightType == COMBINED ) {
-                itsInWgtBuffer.put(planeIter.getPlane(inWgtPix));
-            }
-            if (itsDoSensitivity) {
-                // invert sensitivities before regridding to avoid
-                // artefacts at sharp edges in the sensitivity image
-                itsInSenBuffer.put(planeIter.getPlane(inSenPix));
-                T sensitivity;
+        void LinmosAccumulator<T>::loadAndWeightInputBuffers(const IPosition& curpos,
+                                                             Array<T>& inPix,
+                                                             Array<T>& inWgtPix,
+                                                             Array<T>& inSenPix) {
 
-                IPosition pos(2);
-                for (int y=0; y<inSenPix.shape()[1];++y) {
-                    for (int x=0; x<inSenPix.shape()[0];++x) {
-                        pos[0] = x;
-                        pos[1] = y;
-                        sensitivity = itsInSenBuffer.getAt(pos);
-                        if (sensitivity>0) {
-                            itsInSnrBuffer.putAt(1.0 / (sensitivity * sensitivity), pos);
-                        } else {
-                            itsInSnrBuffer.putAt(0.0, pos);
-                        }
-                    }
-                }
-            }
-        }
-
-        template<typename T>
-        void LinmosAccumulator<T>::loadInputBuffers(const IPosition& curpos,
-                                                    Array<T>& inPix,
-                                                    Array<T>& inWgtPix,
-                                                    Array<T>& inSenPix) {
+            if (itsWeightType == FROM_WEIGHT_IMAGES) std::cout << "weighttype = FromWeightImages" << std::endl;
+            if (itsWeightType == COMBINED) std::cout << "weighttype = Combined" << std::endl;
+            if (itsWeightType == FROM_BP_MODEL) std::cout << "weighttype = FromPrimaryBeamModel" << std::endl;
+            if (itsWeightState == CORRECTED) std::cout << "weightstate = Corrected" << std::endl;
+            if (itsWeightState == INHERENT) std::cout << "weightstate = Inherent" << std::endl;
+            if (itsWeightState == WEIGHTED) std::cout << "weightstate = Weighted" << std::endl;
 
             // could extract the plane without an iterator, but will use one for consistency
             const scimath::MultiDimArrayPlaneIter planeIter(inPix.shape());
 
+            // CORRECTED: img
+            // INHERENT:  img * pb
+            // WEIGHTED:  img * pb^2
             itsInBuffer.put(planeIter.getPlane(inPix, curpos));
+
             if (itsWeightType == FROM_WEIGHT_IMAGES || itsWeightType == COMBINED ) {
+                // FROM_WEIGHT_IMAGES: sum(invvar) * pb^2
+                // COMBINED:           sum(invvar)
                 itsInWgtBuffer.put(planeIter.getPlane(inWgtPix, curpos));
             }
+
+            IPosition pos(2);
+
+            if (itsWeightType == FROM_BP_MODEL || itsWeightType == COMBINED) {
+ 
+                const int scPos = itsInCoordSys.findCoordinate(Coordinate::SPECTRAL,-1);
+                const SpectralCoordinate inSC = itsInCoordSys.spectralCoordinate(scPos);
+                int chPos = itsInCoordSys.pixelAxes(scPos)[0];
+                const T freq = inSC.referenceValue()[0] +
+                               (curpos[chPos] - inSC.referencePixel()[0]) * inSC.increment()[0];
+     
+                const int dcPos = itsInCoordSys.findCoordinate(Coordinate::DIRECTION,-1);
+                const DirectionCoordinate inDC = itsInCoordSys.directionCoordinate(dcPos);
+     
+                IPosition ref(2);
+                Vector<double> offset(2);
+                Vector<double> inc(2);
+     
+                T pb;
+     
+                ref[0] = inDC.referencePixel()[0];
+                ref[1] = inDC.referencePixel()[1];
+     
+                inc[0] = inDC.increment()[0];
+                inc[1] = inDC.increment()[1];
+
+                for (int y=0; y<inPix.shape()[1];++y) {
+                    for (int x=0; x<inPix.shape()[0];++x) {
+                        pos[0] = x;
+                        pos[1] = y;
+                        offset[0] = inc[0] * double(pos[0]-ref[0]);
+                        offset[1] = inc[1] * double(pos[1]-ref[1]);
+                        // this seems to be giving the same as world0.separation(world1)
+                        double offsetBeam = asin( sqrt( offset[0]*offset[0] + offset[1]*offset[1] ) );
+                        // this seems to be giving the same as world0.positionAngle(world1)
+                        double offsetAngle = atan2(offset[0],offset[1]);
+                        // set the weight
+                        //pb = exp(-offsetBeam*offsetBeam*4.*log(2.)/fwhm/fwhm);
+                        pb = itsPB->evaluateAtOffset(offsetAngle,offsetBeam,freq);
+                        if (itsWeightType == FROM_BP_MODEL) {
+                            if (itsWeightState == CORRECTED) {
+                                itsInBuffer.putAt( itsInBuffer.getAt(pos) * pb * pb, pos );
+                            }
+                            else if (itsWeightState == INHERENT) {
+                                itsInBuffer.putAt( itsInBuffer.getAt(pos) * pb, pos );
+                            }
+                            // else if (itsWeightState == WEIGHTED) // nothing to do
+                            itsInWgtBuffer.putAt( pb * pb, pos );
+                        }
+                        else if (itsWeightType == COMBINED) {
+                            if (itsWeightState == CORRECTED) {
+                                itsInBuffer.putAt( itsInBuffer.getAt(pos) * itsInWgtBuffer.getAt(pos) * pb * pb, pos );
+                            }
+                            else if (itsWeightState == INHERENT) {
+                                itsInBuffer.putAt( itsInBuffer.getAt(pos) * itsInWgtBuffer.getAt(pos) * pb, pos );
+                            }
+                            else { // WEIGHTED
+                                itsInBuffer.putAt( itsInBuffer.getAt(pos) * itsInWgtBuffer.getAt(pos), pos );
+                            }
+                            itsInWgtBuffer.putAt( itsInWgtBuffer.getAt(pos) * pb * pb, pos );
+                        }
+                        // else if (itsWeightType == FROM_WEIGHT_IMAGES) // done separately below
+                    }
+                }
+     
+            }
+            else { // FROM_WEIGHT_IMAGES
+                for (int y=0; y<inPix.shape()[1];++y) {
+                    for (int x=0; x<inPix.shape()[0];++x) {
+                        pos[0] = x;
+                        pos[1] = y;
+                        if (itsWeightState == CORRECTED) {
+                            itsInBuffer.putAt( itsInBuffer.getAt(pos) * itsInWgtBuffer.getAt(pos), pos );
+                        }
+                        else if (itsWeightState == INHERENT) {
+                            // Need pb=sqrt(pb^2), but pb^2 may be multiplied with sum(invvar). Two options:
+                            // Assume max(pb)=1 and use max(itsInWgtBuffer) to separate the sum(invvar) & pb^2 terms?
+                            //     T minVal, maxVal, wgtCutoff;
+                            //     IPosition minPos, maxPos;
+                            //     minMax(minVal,maxVal,minPos,maxPos,itsInWgtBuffer);
+                            //     T invvar = maxVal;
+                            //     itsInWgtBuffer /= invvar;
+                            // OR
+                            // Assume itsInWgtBuffer=pb^2, so no need for separation?
+                            itsInBuffer.putAt( itsInBuffer.getAt(pos) * sqrt(itsInWgtBuffer.getAt(pos)), pos );
+                        }
+                        else { // WEIGHTED
+                            // in this case we do expect itsInWgtBuffer to include both pb^2 and sum(invvar)
+                            // Assume max(pb)=1 and use max(itsInWgtBuffer) to separate the sum(invvar) & pb^2 terms...
+                            T minVal, maxVal, wgtCutoff;
+                            IPosition minPos, maxPos;
+                            minMax(minVal,maxVal,minPos,maxPos,itsInWgtBuffer);
+                            itsInBuffer.putAt( itsInBuffer.getAt(pos) * maxVal, pos );
+                        }
+                        // itsInWgtBuffer is already setup
+                    }
+                }
+            }
+
             if (itsDoSensitivity) {
                 // invert sensitivities before regridding to avoid
                 // artefacts at sharp edges in the sensitivity image
@@ -1050,17 +1147,22 @@ namespace askap {
 
         template<typename T>
         void LinmosAccumulator<T>::regrid() {
+
             ASKAPLOG_INFO_STR(linmoslogger, " - regridding with dec="<<
                 itsDecimate<<" rep="<<itsReplicate<<" force="<<itsForce);
             ASKAPCHECK(itsOutBuffer.shape().nelements()>0,
                 "Output buffer does not appear to be set");
             itsRegridder.regrid(itsOutBuffer, itsEmethod, itsAxes, itsInBuffer,
                                 itsReplicate, itsDecimate, false, itsForce);
-            if (itsWeightType == FROM_WEIGHT_IMAGES || itsWeightType == COMBINED ) {
-                itsRegridder.regrid(itsOutWgtBuffer, itsEmethod, itsAxes,
-                    itsInWgtBuffer, itsReplicate, itsDecimate, false, itsForce);
-            }
+
+            //ASKAPLOG_INFO_STR(linmoslogger, " - regridding weights image with dec="<<
+            //    itsDecimate<<" rep="<<itsReplicate<<" force="<<itsForce);
+            itsRegridder.regrid(itsOutWgtBuffer, itsEmethod, itsAxes,
+                itsInWgtBuffer, itsReplicate, itsDecimate, false, itsForce);
+
             if (itsDoSensitivity) {
+                //ASKAPLOG_INFO_STR(linmoslogger, " - regridding sensitivity image with dec="<<
+                //    itsDecimate<<" rep="<<itsReplicate<<" force="<<itsForce);
                 itsRegridder.regrid(itsOutSnrBuffer, itsEmethod, itsAxes,
                     itsInSnrBuffer, itsReplicate, itsDecimate, false, itsForce);
             }
@@ -1073,7 +1175,6 @@ namespace askap {
                                                    Array<T>& outSenPix,
                                                    const IPosition& curpos) {
 
-
             // I really worry about the replication here - there must be away
             // to avoid this.
 
@@ -1082,219 +1183,38 @@ namespace askap {
             // set a pixel iterator that does not have the higher dimensions
             IPosition pos(2);
 
-            // set the weights, either to those read in or using the primary-beam model
-            TempImage<T> wgtBuffer;
-            TempImage<T> wgtBeamBuffer;// typically for the weight beam
-              // apparently the +100 forces it to use the memory
-            double maxMemoryInMB = double(itsOutBuffer.shape().product()*sizeof(T))/1024./1024.+100;
-            wgtBeamBuffer = TempImage<T>(itsOutBuffer.shape(), itsOutBuffer.coordinates(), maxMemoryInMB);
-            wgtBeamBuffer.set(1.0); // set to one to make the weighting logic simpler
-            T normaliser = 1.0;
-
-            if (itsWeightType == FROM_WEIGHT_IMAGES || itsWeightType == COMBINED) {
-
-                wgtBuffer = itsOutWgtBuffer;
-
-            }
-            else {
-
-                wgtBuffer = TempImage<T>(itsOutBuffer.shape(), itsOutBuffer.coordinates(), maxMemoryInMB);
-
-            }
-
-            if (itsWeightState == WEIGHTED && itsWeightType == FROM_WEIGHT_IMAGES) {
-              /// going to normalise the weights.
-              ASKAPLOG_INFO_STR(linmoslogger,
-                "State is WEIGHTED and Type is WEIGHT_IMAGES - need to normalise");
-              Array<T> wgtSlice = Array<T>(wgtBuffer.shape());
-              ImageToArray(wgtSlice,wgtBuffer);
-
-              normaliser = getNormaliser(wgtSlice,curpos);
-              ASKAPLOG_INFO_STR(linmoslogger,
-                  "- maximum weight value " << normaliser );
-            }
-            if (itsWeightType == FROM_BP_MODEL || itsWeightType == COMBINED) {
-
-                Vector<double> pixel(2,0.);
-                MVDirection world0, world1;
-                T offsetBeam, pb;
-
-                // get coordinates of the spectral axis and the current frequency
-                const int scPos = itsInCoordSys.findCoordinate(Coordinate::SPECTRAL,-1);
-                const SpectralCoordinate inSC = itsInCoordSys.spectralCoordinate(scPos);
-                int chPos = itsInCoordSys.pixelAxes(scPos)[0];
-                const T freq = inSC.referenceValue()[0] +
-                    (curpos[chPos] - inSC.referencePixel()[0]) * inSC.increment()[0];
-
-                // set FWHM for the current beam
-                // Removing the factor of 1.22 gives a good match to the simultation weight images
-                //const T fwhm = 1.22*3e8/freq/12;
-                //const T fwhm = 3e8/freq/12;
-
-                // get coordinates of the direction axes
-                const int dcPos = itsInCoordSys.findCoordinate(Coordinate::DIRECTION,-1);
-                const DirectionCoordinate inDC = itsInCoordSys.directionCoordinate(dcPos);
-                const DirectionCoordinate outDC = itsOutCoordSys.directionCoordinate(dcPos);
-
-                // set the centre of the input beam (needs to be more flexible -- and correct...)
-                inDC.toWorld(world0,inDC.referencePixel());
-
-                ASKAPLOG_INFO_STR(linmoslogger, "Centre of beam is " << world0);
-                ASKAPLOG_INFO_STR(linmoslogger, "Frequency is " << freq);
-                
-                // step through the pixels, setting the weights (power primary beam squared)
-                for (int y=0; y<outPix.shape()[1];++y) {
-                    for (int x=0; x<outPix.shape()[0];++x) {
-                        pos[0] = x;
-                        pos[1] = y;
-
-                        // get the current pixel location and distance from beam centre
-                        pixel[0] = double(x);
-                        pixel[1] = double(y);
-                        outDC.toWorld(world1,pixel);
-                        offsetBeam = world0.separation(world1);
-                        double offsetAngle = world0.positionAngle(world1);
-                        // set the weight
-                        //pb = exp(-offsetBeam*offsetBeam*4.*log(2.)/fwhm/fwhm);
-                        pb = itsPB->evaluateAtOffset(offsetAngle,offsetBeam,freq);
-
-                        if (itsWeightType == FROM_BP_MODEL) {
-                          // this replicates the case where we just use the PB model
-                          wgtBuffer.putAt(pb * pb, pos); // this is an image
-                          wgtBeamBuffer.putAt(1.0,pos);
-                        }
-                        else { // COMBINED
-                          // this replicates the case where we use the model and the inv. variance
-                          // so we need somewhere to put the beam as the wgtBuffer contains the inv. variance
-                          wgtBeamBuffer.putAt(pb,pos);
-
-                        }
-
-                    }
-                }
-
-            }
-
             T minVal, maxVal, wgtCutoff;
             IPosition minPos, maxPos;
-            if (itsWeightType == FROM_BP_MODEL) {
-              minMax(minVal,maxVal,minPos,maxPos,wgtBuffer); // this covers the
-              ASKAPLOG_INFO_STR(linmoslogger, "Primary beam model weighting - maxVal: " << maxVal );
-            }
-            else if (itsWeightType == COMBINED) {
-                minMax(minVal,maxVal,minPos,maxPos,wgtBeamBuffer);
-                maxVal = wgtBuffer.getAt(maxPos) * maxVal * maxVal;
-                  ASKAPLOG_INFO_STR(linmoslogger, "Primary COMBINED beam model weighting - maxVal: " <<
-                      maxVal << " NVIS: " << wgtBuffer.getAt(maxPos) << " beam " <<  wgtBeamBuffer.getAt(maxPos) );
-            }
-            else { // FROM WEIGHT IMAGES
+            if (itsWeightType == FROM_WEIGHT_IMAGES) {
                 maxVal = 0.0;
-                ASKAPLOG_INFO_STR(linmoslogger, "From Weight Images beam weighting do not implement cutoff - maxVal: " << maxVal);
+                ASKAPLOG_INFO_STR(linmoslogger,
+                    "From Weight Images beam weighting do not implement cutoff - maxVal: " << maxVal);
             }
-
-            wgtCutoff = itsCutoff * itsCutoff * maxVal; // wgtBuffer is prop. to image (gain/sigma)^2
+            else {
+                minMax(minVal,maxVal,minPos,maxPos,itsOutWgtBuffer);
+                ASKAPLOG_INFO_STR(linmoslogger, "Primary beam weighting - maxVal: " << maxVal );
+            }
+            wgtCutoff = itsCutoff * itsCutoff * maxVal; // itsOutWgtBuffer is prop. to image (gain/sigma)^2
             ASKAPLOG_INFO_STR(linmoslogger,"Weight cut-off: " << wgtCutoff);
+
             // Accumulate the pixels of this slice.
             // Could restrict it (and the regrid) to a smaller region of interest.
-            if (itsWeightState == CORRECTED) {
 
-              for (int y=0; y<outPix.shape()[1];++y) {
-                  for (int x=0; x<outPix.shape()[0];++x) {
-                        fullpos[0] = x;
-                        fullpos[1] = y;
-                        pos[0] = x;
-                        pos[1] = y;
-                        // we need a beamsquared x inv. variance weight in the image
-                        // this should cover all cases
-                        T theWeight = 0.0;
-                        if (itsWeightType == FROM_WEIGHT_IMAGES) {
-                          theWeight = wgtBuffer.getAt(pos);
-                        }
-                        else {
-                          theWeight = wgtBuffer.getAt(pos) * wgtBeamBuffer.getAt(pos) * wgtBeamBuffer.getAt(pos);
-                        }
-
-                        // should also be testing NaN weights, but for now just test the pixel (need to test all state/type combos)
-                        if (theWeight >= wgtCutoff && !std::isnan(itsOutBuffer.getAt(pos))) {
-                            outPix(fullpos) = outPix(fullpos) + itsOutBuffer.getAt(pos) * theWeight;
-                            outWgtPix(fullpos) = outWgtPix(fullpos) + theWeight;
-                        }
-                  }
-              }
-            } else if (itsWeightState == INHERENT) {
-                for (int y=0; y<outPix.shape()[1];++y) {
-                    for (int x=0; x<outPix.shape()[0];++x) {
-                        fullpos[0] = x;
-                        fullpos[1] = y;
-                        pos[0] = x;
-                        pos[1] = y;
-                        // we need a beamsquared x inv. variance weight in the image
-                        // it already has a beam weight so the weight is a function of user choices
-
-                        T theWeight = 0.0;
-                        T theDeWeight = 0.0;
-
-                        if (itsWeightType == COMBINED) {
-                          theWeight = wgtBuffer.getAt(pos) * wgtBeamBuffer.getAt(pos); // beam squared . inv variance
-                          theDeWeight = wgtBeamBuffer.getAt(pos) * wgtBeamBuffer.getAt(pos) * wgtBuffer.getAt(pos); // as above
-                        }
-                        else if (itsWeightType == FROM_BP_MODEL) {
-                          theWeight = sqrt(wgtBuffer.getAt(pos));
-                          theDeWeight = wgtBuffer.getAt(pos);
-                        }
-                        else if (itsWeightType == FROM_WEIGHT_IMAGES ) {
-                           ASKAPLOG_WARN_STR(linmoslogger,"Weighting INHERENT images with weight images alone - NO primary beam correction will be done unless it is already in the weight image.");
-                           theWeight = wgtBuffer.getAt(pos);
-                           theDeWeight = wgtBuffer.getAt(pos);
-
-                        }
-
-                        // should also be testing NaN weights, but for now just test the pixel (need to test all state/type combos)
-                        if (theWeight >= wgtCutoff && !std::isnan(itsOutBuffer.getAt(pos))) {
-                            outPix(fullpos) = outPix(fullpos) + itsOutBuffer.getAt(pos) * theWeight;
-                            outWgtPix(fullpos) = outWgtPix(fullpos) + theDeWeight;
-                        }
-                    }
-                }
-            } else if (itsWeightState == WEIGHTED) {
-                for (int y=0; y<outPix.shape()[1];++y) {
-                    for (int x=0; x<outPix.shape()[0];++x) {
-                        fullpos[0] = x;
-                        fullpos[1] = y;
-                        pos[0] = x;
-                        pos[1] = y;
-                        /// the beam squared weight is already in the image_pos
-                        /// we need multiple cases here
-                        T theWeight = 0.0;
-                        T theDeWeight = 0.0;
-                        if (itsWeightType == COMBINED) {
-
-                          ASKAPTHROW(AskapError,"A projection weighting by weight image strangely not supported in this release");
-
-                        }
-                        else if (itsWeightType == FROM_BP_MODEL) {
-                          theWeight = 1.0; /// beam already here
-                          theDeWeight = wgtBuffer.getAt(pos);
-                        }
-                        else if (itsWeightType == FROM_WEIGHT_IMAGES ) {
-                          /// in this case I assume the beam^2 is already in the weight image
-                          /// as well as in the beam^2 in the image so ...
-                          /// there is no need to weight on the way in and I just need the
-                          /// weight images on the way out
-                          theWeight = 1.0; /// beam already here
-                          theDeWeight = (wgtBuffer.getAt(pos)/normaliser) * (wgtBuffer.getAt(pos)/normaliser); ///
-
-
-                        }
-                        // using the deweight here as the weight is already in the imaage
-                        // should also be testing NaN weights, but for now just test the pixel (need to test all state/type combos)
-                        if (theDeWeight >= wgtCutoff && !std::isnan(itsOutBuffer.getAt(pos))) {
-                            outPix(fullpos) = outPix(fullpos) + itsOutBuffer.getAt(pos);
-                            outWgtPix(fullpos) = outWgtPix(fullpos) + theDeWeight;
-                        }
+            for (int y=0; y<outPix.shape()[1];++y) {
+                for (int x=0; x<outPix.shape()[0];++x) {
+                    fullpos[0] = x;
+                    fullpos[1] = y;
+                    pos[0] = x;
+                    pos[1] = y;
+                    if (itsOutWgtBuffer.getAt(pos) >= wgtCutoff &&
+                        !std::isnan(itsOutWgtBuffer.getAt(pos)) &&
+                        !std::isnan(itsOutBuffer.getAt(pos))) {
+                        outPix(fullpos) = outPix(fullpos) + itsOutBuffer.getAt(pos);
+                        outWgtPix(fullpos) = outWgtPix(fullpos) + itsOutWgtBuffer.getAt(pos);
                     }
                 }
             }
+
             // Accumulate sensitivity for this slice.
             if (itsDoSensitivity) {
                 T invVariance;
@@ -1308,279 +1228,9 @@ namespace askap {
                         pos[1] = y;
 
                         invVariance = itsOutSnrBuffer.getAt(pos);
-                        // should also be testing NaN weights, but for now just test the pixel (need to test all state/type combos)
-                        if (invVariance>=snrCutoff && wgtBuffer.getAt(pos)>=wgtCutoff && !std::isnan(itsOutBuffer.getAt(pos))) {
+                        if (invVariance>=snrCutoff && itsOutWgtBuffer.getAt(pos)>=wgtCutoff &&
+                            !std::isnan(itsOutWgtBuffer.getAt(pos)) && !std::isnan(itsOutBuffer.getAt(pos))) {
                             outSenPix(fullpos) = outSenPix(fullpos) + invVariance;
-                        }
-                    }
-                }
-            }
-
-        }
-        // this should not be needed
-        template<typename T> void LinmosAccumulator<T>::ImageToArray(Array<T>& outArr, const TempImage<T> inIm) {
-
-          IPosition pos(2);
-          for (int y=0; y<outArr.shape()[1];++y) {
-              for (int x=0; x<outArr.shape()[0];++x) {
-                  pos[0] = x;
-                  pos[1] = y;
-                  outArr(pos) = inIm(pos);
-              }
-          }
-
-        }
-
-        // tired of duplication and minmax is failing
-
-        template<typename T> T LinmosAccumulator<T>::getNormaliser(const Array<T>& inArray,const IPosition& curpos) {
-
-          IPosition fullpos(curpos);
-
-          Array<T> tmpPix = Array<T>(inArray);
-          tmpPix.reference(inArray);
-
-          T normVal=0;
-          for (int y=0; y<tmpPix.shape()[1];++y) {
-              for (int x=0; x<tmpPix.shape()[0];++x) {
-                  fullpos[0] = x;
-                  fullpos[1] = y;
-                  if (tmpPix(fullpos)> normVal) {
-                      normVal = tmpPix(fullpos);
-                  }
-              }
-          }
-          return normVal;
-        }
-
-        template<typename T>
-        void LinmosAccumulator<T>::accumulatePlane(Array<T>& outPix,
-                                                   Array<T>& outWgtPix,
-                                                   Array<T>& outSenPix,
-                                                   const Array<T>& inPix,
-                                                   const Array<T>& inWgtPix,
-                                                   const Array<T>& inSenPix,
-                                                   const IPosition& curpos) {
-
-            ASKAPASSERT(inPix.shape() == outPix.shape());
-
-            // copy the pixel iterator containing all dimensions
-            IPosition fullpos(curpos);
-            // set up an indexing vector for the weights. If weight images are used, these are as in the image.
-            IPosition wgtpos(curpos);
-
-            Array<T> wgtPix; // typically for the weight image
-            Array<T> wgtPixBeam;// typically for the weight beam
-
-            T normaliser = 1.0;
-
-            if (itsWeightState == WEIGHTED && itsWeightType == FROM_WEIGHT_IMAGES) {
-              /// going to normalise the weights.
-              ASKAPLOG_INFO_STR(linmoslogger,
-                "State is WEIGHTED and Type is WEIGHT_IMAGES - need to normalise");
-              normaliser = getNormaliser(inWgtPix,curpos);
-
-            }
-
-            if ( itsWeightType == FROM_BP_MODEL || itsWeightType == COMBINED ) { // this loop has to put the PB weighting in
-                wgtPix = Array<T>(itsInShape);
-                Vector<double> pixel(2,0.);
-                Vector<double> world(2,0.);
-
-                T offsetBeam, pb;
-
-                // get coordinates of the spectral axis and the current frequency
-                const int scPos = itsInCoordSys.findCoordinate(Coordinate::SPECTRAL,-1);
-                const SpectralCoordinate inSC = itsInCoordSys.spectralCoordinate(scPos);
-                int chPos = itsInCoordSys.pixelAxes(scPos)[0];
-                const T freq = inSC.referenceValue()[0] +
-                    (curpos[chPos] - inSC.referencePixel()[0]) * inSC.increment()[0];
-
-                // set FWHM for the current beam
-                // Removing the factor of 1.22 gives a good match to the simultation weight images
-                //const T fwhm = 1.22*3e8/freq/12;
-                //const T fwhm = 3e8/freq/12;
-
-                // get coordinates of the direction axes
-                const int dcPos = itsInCoordSys.findCoordinate(Coordinate::DIRECTION,-1);
-                const DirectionCoordinate outDC = itsOutCoordSys.directionCoordinate(dcPos);
-
-                // get coordinates of beamCentre -- FIXME: make this more general.
-                MVDirection beamCentre = itsInCentre; // this has come from the reference pixel of the input Csys
-
-
-                // set the higher-order dimension to zero, as weights are on a 2D plane
-                for (uInt dim=0; dim<curpos.nelements(); ++dim) {
-                    wgtpos[dim] = 0;
-                }
-                // set the array
-
-                wgtPixBeam = Array<T>(itsInShape);
-                Vector<Double> offvec(3,0.);
-                for (int y=0; y<outPix.shape()[1];++y) {
-                    for (int x=0; x<outPix.shape()[0];++x) {
-                        wgtpos[0] = x;
-                        wgtpos[1] = y;
-
-                        // get the current pixel location and distance from beam centre
-                        pixel[0] = double(x);
-                        pixel[1] = double(y);
-                        outDC.toWorld(world,pixel);
-                        MVDirection pixDir(world);
-                        offsetBeam = beamCentre.separation(pixDir); // the difference between 2 direction cosines.
-                        double offsetAngle = beamCentre.positionAngle(pixDir); // the position angle ...
-                        // ASKAPLOG_INFO_STR(linmoslogger,"x,y: " << x << "," << y);
-                        // ASKAPLOG_INFO_STR(linmoslogger,"offset: " << offsetAngle << "," << offsetBeam << endl);
-                        // set the weight
-                        //pb = exp(-offsetBeam*offsetBeam*4.*log(2.)/fwhm/fwhm);
-                        pb = itsPB->evaluateAtOffset(offsetAngle,offsetBeam,freq);
-                        // ASKAPLOG_INFO_STR(linmoslogger,"pb: " << pb << endl);
-
-                        if (itsWeightType == FROM_BP_MODEL) {
-                          wgtPix(wgtpos) = pb * pb;
-                          wgtPixBeam(wgtpos) = 1.0;
-                        }
-                        else { // COMBINED - note wgtPix not accessed or changed
-                          wgtPixBeam(wgtpos) = pb;
-                        }
-
-
-                    }
-                }
-
-            }
-
-            T minVal, maxVal, wgtCutoff;
-            IPosition minPos, maxPos;
-
-            if (itsWeightType == FROM_BP_MODEL) {
-
-              minMax(minVal,maxVal,minPos,maxPos,wgtPix); // this covers the
-              ASKAPLOG_INFO_STR(linmoslogger, "Primary beam model weighting - maxVal: " << maxVal );
-            }
-            else if (itsWeightType == COMBINED) {
-                wgtPix.reference(inWgtPix); // note FROM_BP_MODEL overwrites this - the others dont so need to reference the weights
-                minMax(minVal,maxVal,minPos,maxPos,wgtPixBeam);
-                T temp = wgtPix(maxPos) * maxVal * maxVal;
-                maxVal = temp;
-                ASKAPLOG_INFO_STR(linmoslogger, "Primary COMBINED beam model weighting - maxVal: " <<
-                                  maxVal << " NVIS: " << wgtPix(maxPos) << " beam " <<  wgtPixBeam(maxPos) );
-            }
-            else { // FROM WEIGHT IMAGES
-              wgtPix.reference(inWgtPix); // note FROM_BP_MODEL overwrites this - the others dont so need to reference the weights
-              maxVal = 0.0;
-              // minMax(minVal,maxVal,minPos,maxPos,wgtPix);
-              ASKAPLOG_INFO_STR(linmoslogger, "From Weight Images beam weighting do not implement cutoff - maxVal: " << maxVal);
-            }
-
-            wgtCutoff = itsCutoff * itsCutoff * maxVal; // wgtPix is prop. to image (gain/sigma)^2
-            ASKAPLOG_INFO_STR(linmoslogger,"Weight cut-off: " << wgtCutoff);
-
-            if (itsWeightState == CORRECTED) {
-                for (int y=0; y<outPix.shape()[1];++y) {
-                    for (int x=0; x<outPix.shape()[0];++x) {
-                        fullpos[0] = x;
-                        fullpos[1] = y;
-                        wgtpos[0] = x;
-                        wgtpos[1] = y;
-
-                        /// make beamsquared weight times inverse variance
-                        /// this should cover all cases - except the weight image case
-                        T theWeight = 0.0;
-                        if (itsWeightType == FROM_WEIGHT_IMAGES ) {
-                          theWeight = wgtPix(wgtpos);
-                        }
-                        else {
-                          theWeight = wgtPix(wgtpos) * wgtPixBeam(wgtpos) * wgtPixBeam(wgtpos);
-                        }
-
-                        // should also be testing NaN weights, but for now just test the pixel (need to test all state/type combos)
-                        if (theWeight >=wgtCutoff && !std::isnan(inPix(fullpos))) {
-                            outPix(fullpos)    = outPix(fullpos)  + inPix(fullpos) * theWeight;
-                            outWgtPix(fullpos) = outWgtPix(fullpos) + theWeight ;
-                        }
-
-                    }
-                }
-            } else if (itsWeightState == INHERENT) {
-                for (int y=0; y<outPix.shape()[1];++y) {
-                    for (int x=0; x<outPix.shape()[0];++x) {
-                        fullpos[0] = x;
-                        fullpos[1] = y;
-                        wgtpos[0] = x;
-                        wgtpos[1] = y;
-                        /// make a beam squared weight times inverse variance
-                        /// we need multiple cases here
-                        T theWeight = 0.0;
-                        T theDeWeight = 0.0;
-                        if (itsWeightType == COMBINED) {
-                          theWeight = wgtPixBeam(wgtpos) * wgtPix(wgtpos);
-                          theDeWeight = wgtPixBeam(wgtpos) * wgtPixBeam(wgtpos) * wgtPix(wgtpos);
-                        }
-                        else if (itsWeightType == FROM_BP_MODEL) {
-                          theWeight = sqrt(wgtPix(wgtpos));
-                          theDeWeight = wgtPix(wgtpos);
-                        }
-                        else if (itsWeightType == FROM_WEIGHT_IMAGES ) {
-                          ASKAPLOG_WARN_STR(linmoslogger,
-                          "Weighting INHERENT images with weight images alone - NO primary beam correction will be done. Use Combined");
-                          theWeight = wgtPix(wgtpos);
-                          theDeWeight = wgtPix(wgtpos);
-                        }
-                        // should also be testing NaN weights, but for now just test the pixel (need to test all state/type combos)
-                        if (theWeight >= wgtCutoff && !std::isnan(inPix(fullpos))) {
-                            outPix(fullpos)    = outPix(fullpos)    + inPix(fullpos) * theWeight;
-                            outWgtPix(fullpos) = outWgtPix(fullpos) + theDeWeight;
-                        }
-                    }
-                }
-            } else if (itsWeightState == WEIGHTED) {
-                for (int y=0; y<outPix.shape()[1];++y) {
-                    for (int x=0; x<outPix.shape()[0];++x) {
-                        fullpos[0] = x;
-                        fullpos[1] = y;
-                        wgtpos[0] = x;
-                        wgtpos[1] = y;
-                        /// the beam squared weight is already in the image_pos
-                        /// we need multiple cases here
-                        T theWeight = 0.0;
-                        T theDeWeight = 0.0;
-                        if (itsWeightType == COMBINED) {
-                          ASKAPTHROW(AskapError,"A projection weighting by weight image strangely not supported in this release");
-                        }
-                        else if (itsWeightType == FROM_BP_MODEL) {
-                          theWeight = 1.0; /// beam already here
-                          theDeWeight = wgtPix(wgtpos);
-                        }
-                        else if (itsWeightType == FROM_WEIGHT_IMAGES ) {
-                          /// in this case I assume the beam^2 is already in the weight image
-                          /// as well as in the beam^2 in the image so ...
-
-                          theWeight = 1.0;
-                          theDeWeight = (wgtPix(wgtpos)/normaliser)*(wgtPix(wgtpos)/normaliser);
-
-                        }
-                        // using the deweight here as the weight is already in the imaage
-                        // should also be testing NaN weights, but for now just test the pixel (need to test all state/type combos)
-                        if (theDeWeight >= wgtCutoff && !std::isnan(inPix(fullpos))) {
-                            outPix(fullpos)    = outPix(fullpos)    + inPix(fullpos) * theWeight;
-                            outWgtPix(fullpos) = outWgtPix(fullpos) + theDeWeight;
-                        }
-                    }
-                }
-            }
-            // Accumulate sensitivity for this slice.
-            if (itsDoSensitivity) {
-                double sensitivity;
-                for (int y=0; y<outPix.shape()[1];++y) {
-                    for (int x=0; x<outPix.shape()[0];++x) {
-                        fullpos[0] = x;
-                        fullpos[1] = y;
-                        sensitivity = inSenPix(fullpos);
-                        // wgt and sen should be aligned.
-                        // should also be testing NaN weights, but for now just test the pixel (need to test all state/type combos)
-                        if (wgtPix(wgtpos)>=wgtCutoff && sensitivity>0.0 && !std::isnan(inPix(fullpos))) {
-                            outSenPix(fullpos) = outSenPix(fullpos) + 1.0 / (sensitivity * sensitivity);
                         }
                     }
                 }
@@ -1594,14 +1244,8 @@ namespace askap {
                                                  Array<T>& outSenPix,
                                                  const IPosition& curpos) {
 
-            T minVal, maxVal, normalizer=1.0;
-            IPosition minPos, maxPos;
-            minMax(minVal,maxVal,minPos,maxPos,outWgtPix);
-
             // copy the pixel iterator containing all dimensions
             IPosition fullpos(curpos);
-
-
 
             for (int y=0; y<outPix.shape()[1];++y) {
                 for (int x=0; x<outPix.shape()[0];++x) {
@@ -1611,8 +1255,10 @@ namespace askap {
                         setNaN(outPix(fullpos));
                     }
                     else if (outWgtPix(fullpos)>0.0) {
-                        outPix(fullpos) = outPix(fullpos) * normalizer / outWgtPix(fullpos);
+                        //outPix(fullpos) = outPix(fullpos) * normalizer / outWgtPix(fullpos);
+                        outPix(fullpos) = outPix(fullpos) / outWgtPix(fullpos);
                     } else {
+                        // should we set outPix and outWgtPix to NaN?
                         outPix(fullpos) = 0.0;
                     }
                 }
@@ -1638,18 +1284,12 @@ namespace askap {
         }
         template<typename T>
         void LinmosAccumulator<T>::weightPlane(Array<T>& outPix,
-                                                 const Array<T>& outWgtPix,
-                                                 Array<T>& outSenPix,
-                                                 const IPosition& curpos) {
-
-            T minVal, maxVal;
-            IPosition minPos, maxPos;
-            minMax(minVal,maxVal,minPos,maxPos,outWgtPix);
+                                               const Array<T>& outWgtPix,
+                                               Array<T>& outSenPix,
+                                               const IPosition& curpos) {
 
             // copy the pixel iterator containing all dimensions
             IPosition fullpos(curpos);
-
-
 
             for (int y=0; y<outPix.shape()[1];++y) {
                 for (int x=0; x<outPix.shape()[0];++x) {

@@ -137,24 +137,14 @@ namespace askap {
                 /// @brief set up any 2D temporary output image buffers required for regridding
                 void initialiseOutputBuffers(void);
 
+                /// @brief point output image buffers at the input buffers (needed if not regridding)
+                void redirectOutputBuffers(void);
+
                 /// @brief set up any 2D temporary input image buffers required for regridding
                 void initialiseInputBuffers(void);
 
                 /// @brief set up regridder
                 void initialiseRegridder(void);
-
-                /// @brief load the temporary image buffers with the current plane of the current input image
-                /// @details since all input image cubes use the same iterator, this approach is inadequate
-                /// when the the planes of the input images have different shapes. In that case the current
-                /// position in the iterator can be sent and a new temporary iterator, generated for each
-                /// input image cube.
-                /// @param[in] const scimath::MultiDimArrayPlaneIter& planeIter: current plane id
-                /// @param[in] Array<T>& inPix: image buffer
-                /// @param[in] Array<T>& inWgtPix: weight image buffer
-                void loadInputBuffers(const scimath::MultiDimArrayPlaneIter& planeIter,
-                                      Array<T>& inPix,
-                                      Array<T>& inWgtPix,
-                                      Array<T>& inSenPix);
 
                 /// @brief load the temporary image buffers with an arbitrary plane of the current input image
                 /// @details since all input image cubes use the same iterator, when the the planes of the input
@@ -163,10 +153,10 @@ namespace askap {
                 /// @param[in] const IPosition& curpos: current plane position
                 /// @param[in] Array<T>& inPix: image buffer
                 /// @param[in] Array<T>& inWgtPix: weight image buffer
-                void loadInputBuffers(const IPosition& curpos,
-                                      Array<T>& inPix,
-                                      Array<T>& inWgtPix,
-                                      Array<T>& inSenPix);
+                void loadAndWeightInputBuffers(const IPosition& curpos,
+                                               Array<T>& inPix,
+                                               Array<T>& inWgtPix,
+                                               Array<T>& inSenPix);
 
                 /// @brief call the regridder for the buffered plane
                 void regrid(void);
@@ -179,21 +169,6 @@ namespace askap {
                 void accumulatePlane(Array<T>& outPix,
                                      Array<T>& outWgtPix,
                                      Array<T>& outSenPix,
-                                     const IPosition& curpos);
-
-                /// @brief add the current plane to the accumulation arrays
-                /// @details This method adds directly from the input arrays
-                /// @param[out] Array<T>& outPix: accumulated weighted image pixels
-                /// @param[out] Array<T>& outWgtPix: accumulated weight pixels
-                /// @param[in] const Array<T>& inPix: input image pixels
-                /// @param[in] const Array<T>& inWgtPix: input weight pixels
-                /// @param[in] const IPosition& curpos: indices of the current plane
-                void accumulatePlane(Array<T>& outPix,
-                                     Array<T>& outWgtPix,
-                                     Array<T>& outSenPix,
-                                     const Array<T>& inPix,
-                                     const Array<T>& inWgtPix,
-                                     const Array<T>& inSenPix,
                                      const IPosition& curpos);
 
                 /// @brief divide the weighted pixels by the weights for the current plane
@@ -312,10 +287,6 @@ namespace askap {
                 std::map<std::string,bool> itsGenSensitivityImage;
                 //
                 PrimaryBeam::ShPtr itsPB;
-                /// utility function - should not really be here but minMax is
-                /// failing in some cases - should fix that first i suppose.
-                T getNormaliser(const Array<T>& inArray,const IPosition& curpos);
-                void ImageToArray(Array<T>& out, const TempImage<T> in);
 
         };
 

@@ -388,7 +388,6 @@ namespace askap
       accumulator.initialiseOutputBuffers();
       accumulator.initialiseInputBuffers();
 
-
       // loop over non-direction axes (e.g. spectral and/or polarisation)
       IPosition curpos(accumulator.inShape());
       for (uInt dim=0; dim<curpos.nelements(); ++dim) {
@@ -403,7 +402,7 @@ namespace askap
           accumulator.weightPlane(outPix, outWgtPix, outSenPix,curpos);
         }
         // load input buffer for the current plane
-        accumulator.loadInputBuffers(planeIter, inPix, inWgtPix, inSenPix);
+        accumulator.loadAndWeightInputBuffers(curpos, inPix, inWgtPix, inSenPix);
         // call regrid for any buffered images
         accumulator.regrid();
         // update the accululation arrays for this plane
