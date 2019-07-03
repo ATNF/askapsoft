@@ -158,7 +158,16 @@ struct GenericNormalEquations : public INormalEquations {
   /// @return one element of the sparse normal matrix (a dense matrix)
   virtual const casa::Matrix<double>& normalMatrix(const std::string &par1, 
                         const std::string &par2) const;
-  
+
+  /// @brief Returns iterator to the beginning of normal matrix row, defined by input parameter.
+  /// @param[in] par the name of the parameter describing the matrix row
+  std::map<string, casa::Matrix<double> >::const_iterator getNormalMatrixRowBegin(const std::string &par) const;
+
+  /// @brief Returns iterator to the end of normal matrix row, defined by input parameter.
+  /// @details It is used together with getNormalMatrixRowBegin() to iterate through the (sparse) matrix elements.
+  /// @param[in] par the name of the parameter describing the matrix row
+  std::map<string, casa::Matrix<double> >::const_iterator getNormalMatrixRowEnd(const std::string &par) const;
+
   /// @brief data vector for a given parameter
   /// @details In the current framework, parameters are essentially 
   /// vectors, not scalars. Each element of such vector is treated

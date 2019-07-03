@@ -643,6 +643,22 @@ const casa::Matrix<double>& GenericNormalEquations::normalMatrix(const std::stri
   return cIt2->second;
 }
 
+std::map<string, casa::Matrix<double> >::const_iterator GenericNormalEquations::getNormalMatrixRowBegin(const std::string &par) const
+{
+    std::map<string, std::map<string, casa::Matrix<double> > >::const_iterator cIt = itsNormalMatrix.find(par);
+    ASKAPCHECK(cIt != itsNormalMatrix.end(), "Missing parameter " << par << " is requested from the normal matrix");
+
+    return cIt->second.begin();
+}
+
+std::map<string, casa::Matrix<double> >::const_iterator GenericNormalEquations::getNormalMatrixRowEnd(const std::string &par) const
+{
+    std::map<string, std::map<string, casa::Matrix<double> > >::const_iterator cIt = itsNormalMatrix.find(par);
+    ASKAPCHECK(cIt != itsNormalMatrix.end(), "Missing parameter " << par << " is requested from the normal matrix");
+
+    return cIt->second.end();
+}
+
 /// @brief data vector for a given parameter
 /// @details In the current framework, parameters are essentially 
 /// vectors, not scalars. Each element of such vector is treated

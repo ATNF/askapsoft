@@ -32,6 +32,7 @@
 #endif
 
 #include <fitting/LinearSolver.h>
+#include <fitting/GenericNormalEquations.h>
 
 #include <askap/AskapError.h>
 #include <profile/AskapProfiler.h>
@@ -177,6 +178,8 @@ std::pair<double,double> LinearSolver::solveSubsetOfNormalEquations(Params &para
     int nParameters = 0;
 
     std::vector<std::pair<string, int> > indices(names.size());
+    std::map<string, int> indicesMap;
+
     {
       std::vector<std::pair<string, int> >::iterator it = indices.begin();
       for (vector<string>::const_iterator cit=names.begin(); cit!=names.end(); ++cit,++it)
@@ -184,6 +187,9 @@ std::pair<double,double> LinearSolver::solveSubsetOfNormalEquations(Params &para
         ASKAPDEBUGASSERT(it != indices.end());
         it->second = nParameters;
         it->first = *cit;
+
+        indicesMap[it->first] = it->second;
+
         ASKAPLOG_DEBUG_STR(logger, "Processing "<<*cit<<" "<<nParameters);
         const casa::uInt newParameters = normalEquations().dataVector(*cit).nelements();
         nParameters += newParameters;
@@ -206,26 +212,38 @@ std::pair<double,double> LinearSolver::solveSubsetOfNormalEquations(Params &para
         X = gsl_vector_alloc (nParameters);
     }
 
-    for (std::vector<std::pair<string, int> >::const_iterator indit2=indices.begin();indit2!=indices.end(); ++indit2)  {
-        for (std::vector<std::pair<string, int> >::const_iterator indit1=indices.begin();indit1!=indices.end(); ++indit1)  {
+    const GenericNormalEquations& gne = dynamic_cast<const GenericNormalEquations&>(normalEquations());
 
-             // Axes are dof, dof for each parameter
-             // Take a deep breath for const-safe indexing into the double layered map
-             const casa::Matrix<double>& nm = normalEquations().normalMatrix(indit1->first, indit2->first);
+    // Loop over matrix rows.
+    for (std::vector<std::pair<string, int> >::const_iterator indit1 = indices.begin();
+            indit1 != indices.end(); ++indit1) {
 
-             if (&nm == &emptyMatrix) {
-                 continue;
-             }
+        const casa::uInt nrow = normalEquations().dataVector(indit1->first).nelements();
+        for (size_t row = 0; row < nrow; ++row) {
 
-             for (size_t row=0; row<nm.nrow(); ++row)  {
-                  for (size_t col=0; col<nm.ncolumn(); ++col) {
-                       const double elem = nm(row,col);
-                       ASKAPCHECK(!std::isnan(elem), "Normal matrix seems to have NaN for row = "<<row<<" and col = "<<col<<", this shouldn't happem!");
-                       gsl_matrix_set(A, row+(indit1->second), col+(indit2->second), elem);
-                       //std::cout << "A " << row+(indit1->second) << " " << col+(indit2->second) << " " << nm(row,col) << std::endl;
-                  }
-             }
-         }
+            std::map<string, casa::Matrix<double> >::const_iterator colIt = gne.getNormalMatrixRowBegin(indit1->first);
+            std::map<string, casa::Matrix<double> >::const_iterator colItEnd = gne.getNormalMatrixRowEnd(indit1->first);
+
+            ASKAPCHECK(colIt != colItEnd, "Normal matrix has no elements for row = " << indit1->first << ", this shouldn't happen!");
+
+            // Loop over column elements.
+            for (; colIt != colItEnd; ++colIt) {
+
+                if (indicesMap.find(colIt->first) != indicesMap.end()) {
+                // It is a parameter to solve for, adding it to the matrix.
+
+                    int colIndex = indicesMap[colIt->first];
+                    const casa::Matrix<double>& nm = colIt->second;
+
+                    for (size_t col = 0; col < nm.ncolumn(); ++col) {
+                         const double elem = nm(row, col);
+                         ASKAPCHECK(!std::isnan(elem), "Normal matrix seems to have NaN for row = "<< row << " and col = " << col << ", this shouldn't happen!");
+
+                         gsl_matrix_set(A, row+(indit1->second), col+colIndex, elem);
+                    }
+                }
+            }
+        }
     }
 
     if (algorithm() != "LSQR") {
@@ -233,7 +251,7 @@ std::pair<double,double> LinearSolver::solveSubsetOfNormalEquations(Params &para
             const casa::Vector<double> &dv = normalEquations().dataVector(indit1->first);
             for (size_t row=0; row<dv.nelements(); ++row) {
                  const double elem = dv(row);
-                 ASKAPCHECK(!std::isnan(elem), "Data vector seems to have NaN for row = "<<row<<", this shouldn't happem!");
+                 ASKAPCHECK(!std::isnan(elem), "Data vector seems to have NaN for row = "<<row<<", this shouldn't happen!");
                  gsl_vector_set(B, row+(indit1->second), elem);
     //          std::cout << "B " << row << " " << dv(row) << std::endl;
             }
