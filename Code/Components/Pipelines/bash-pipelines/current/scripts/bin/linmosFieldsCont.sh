@@ -56,6 +56,11 @@ for TILE in $FULL_TILE_LIST; do
 
             tag="${imageCode}T${TTERM}${TILE}"
 
+            # Don't bother looking for altrestored images if we aren't doing that mode
+            if [ "${imageCode}" == "altrestored" ] && [ "${RESTORE_PRECONDITIONER_LIST}" == "" ]; then
+                DO_IT=false
+            fi
+
             if [ "${DO_IT}" == "true" ] && [ "${CLOBBER}" != "true" ]; then
                 setImageProperties cont
                 if [ -e "${OUTPUT}/${imageName}" ]; then
