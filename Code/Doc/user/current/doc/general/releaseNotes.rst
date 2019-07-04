@@ -24,11 +24,31 @@ Pipelines:
    DO_SPECTRAL_PROCESSING is set to true as well as DO_SPECTRAL_IMAGING. 
  * Time-split data will now no longer be regenerated if the merged
    dataset is present.
+ * New or changed pipeline default parameters:
+
+   - DO_PREFLAG_SCIENCE (true)
+   - GRIDDER_SHARECF and GRIDDER_SPECTRAL_SHARECF, to allow
+     performance enhancements to be realised in the pipeline.
+   - TILENCHAN_AV, TILENCHAN_SL, TILE_NCHAN_SCIENCE & TILE_NCHAN_1934
+     all now default to 1.
+   - SELAVY_NSUBY is now 6
+   - ARCHIVE_SPECTRAL_MS is now false
+   - MULTI_JOB_SELFCAL is now false
 
 Processing:
 
  * A fix to Selavy to allow computation of spectral indices from
    extracted spectra - this was failing due to uninitialised memory.
+ * There are numerous performance enhancements to imaging and
+   linear-mosaicking, resulting in faster processing times.
+ * The linear-mosaicking will now correct higher-order Taylor-term
+   images for primary beam variation with frequency, through the use
+   of the removebeam parameter.
+ * The WProject gridder will now discard data above the wmax limit,
+   rather than throwing an exception.
+ * The WProject gridder now has the option of using a static cache of
+   convolution functions, rather than re-generating for every instance
+   of a gridder.
 
 
 0.24.1 (8 May 2019)
