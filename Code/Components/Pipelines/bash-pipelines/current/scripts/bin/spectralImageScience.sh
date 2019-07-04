@@ -260,6 +260,7 @@ ${Imager}.gridder.WProject.oversample             = ${GRIDDER_SPECTRAL_OVERSAMPL
 ${Imager}.gridder.WProject.maxsupport             = ${GRIDDER_SPECTRAL_MAXSUPPORT}
 ${Imager}.gridder.WProject.variablesupport        = true
 ${Imager}.gridder.WProject.offsetsupport          = true
+${Imager}.gridder.WProject.sharecf                = ${GRIDDER_SPECTRAL_SHARECF}
 #
 ${cleaningPars}
 #

@@ -218,6 +218,7 @@ Cimager.gridder.WProject.oversample             = ${GRIDDER_OVERSAMPLE}
 Cimager.gridder.WProject.maxsupport             = ${GRIDDER_MAXSUPPORT}
 Cimager.gridder.WProject.variablesupport        = true
 Cimager.gridder.WProject.offsetsupport          = true
+Cimager.gridder.WProject.sharecf                = ${GRIDDER_SHARECF}
 #
 ${cleaningPars}
 #

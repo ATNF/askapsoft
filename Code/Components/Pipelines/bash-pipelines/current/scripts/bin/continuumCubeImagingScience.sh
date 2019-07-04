@@ -246,6 +246,7 @@ ${Imager}.gridder.WProject.oversample             = ${GRIDDER_OVERSAMPLE}
 ${Imager}.gridder.WProject.maxsupport             = ${GRIDDER_MAXSUPPORT}
 ${Imager}.gridder.WProject.variablesupport        = true
 ${Imager}.gridder.WProject.offsetsupport          = true
+${Imager}.gridder.WProject.sharecf                = ${GRIDDER_SHARECF}
 #
 ${cleaningPars}
 #

@@ -424,6 +424,7 @@ Ccalibrator.gridder.WProject.oversample         = ${GRIDDER_OVERSAMPLE}
 Ccalibrator.gridder.WProject.maxsupport         = ${GRIDDER_MAXSUPPORT}
 Ccalibrator.gridder.WProject.variablesupport    = true
 Ccalibrator.gridder.WProject.offsetsupport      = true
+Ccalibrator.gridder.WProject.sharecf            = ${GRIDDER_SHARECF}
 #
 Ccalibrator.ncycles                             = 25
 EOFINNER

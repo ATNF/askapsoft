@@ -238,6 +238,7 @@ CContSubtract.gridder.WProject.maxsupport         = ${GRIDDER_MAXSUPPORT}
 CContSubtract.gridder.WProject.frequencydependent = true
 CContSubtract.gridder.WProject.variablesupport    = true
 CContSubtract.gridder.WProject.offsetsupport      = true
+CContSubtract.gridder.WProject.sharecf            = ${GRIDDER_SPECTRAL_SHARECF}
 EOFINNER
 
     NCORES=1
