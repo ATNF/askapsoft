@@ -496,6 +496,11 @@ namespace askap {
 
             ASKAPLOG_INFO_STR(linmoslogger,"Assuming Gaussian PB fwhm " << fwhm << " and freq " << freq);
 
+            bool doT1 = (taylor1.size()>0);
+            bool doT2 = (taylor2.size()>0);
+            if (!doT1) doT2=false;
+            T toPut;
+
             for (int y=0; y < taylor1.shape()[1];++y) {
                 for (int x=0; x < taylor1.shape()[0];++x) {
 
@@ -514,16 +519,18 @@ namespace askap {
                     //
                     alpha = -8. * log(2.) * pow((offsetBeam/fwhm),2.);
                     // ASKAPLOG_INFO_STR(linmoslogger, "alpha " << alpha);
-                    T toPut = scr1(fullpos) - taylor0(fullpos) * alpha;
-                    // build
 
-                    taylor1(fullpos) = toPut;
+                    if (doT1){
+                        toPut = scr1(fullpos) - taylor0(fullpos) * alpha;
+                        // build
+                        taylor1(fullpos) = toPut;
+                    }
 
-                    beta = alpha;
-                    toPut = scr2(fullpos) - scr1(fullpos) * alpha - taylor0(fullpos)*(beta - alpha * (alpha + 1)/2.);
-                    //
-                    taylor2(fullpos) = toPut;
-
+                    if (doT2){
+                        beta = alpha;
+                        toPut = scr2(fullpos) - scr1(fullpos) * alpha - taylor0(fullpos)*(beta - alpha * (alpha + 1)/2.);
+                        taylor2(fullpos) = toPut;
+                    }
 
                     //
                 }
