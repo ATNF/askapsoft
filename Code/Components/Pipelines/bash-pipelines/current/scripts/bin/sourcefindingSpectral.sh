@@ -48,12 +48,14 @@ for subband in ${SUBBAND_WRITER_LIST}; do
     if [ "${DO_SPECTRAL_IMSUB}" == "true" ]; then
         if [ "$FIELD" == "." ]; then
             DEP=$(addDep "$DEP" "$(echo "${DEP_LINMOS_SPECTRAL_CONTSUB_ALL}" | sed -e 's/-d afterok://g')")
+            DEP=$(addDep "$DEP" "$(echo "${DEP_LINMOS_SPECTRAL_CONTSUB}" | sed -e 's/-d afterok://g')")
         elif [ "$BEAM" == "all" ]; then
             DEP=$(addDep "$DEP" "$(echo "${DEP_LINMOS_SPECTRAL_CONTSUB}" | sed -e 's/-d afterok://g')")
         fi
     fi
     if [ "$FIELD" == "." ]; then
         DEP=$(addDep "$DEP" "$(echo "${DEP_LINMOS_SPECTRAL_RESTORED_ALL}" | sed -e 's/-d afterok://g')")
+        DEP=$(addDep "$DEP" "$(echo "${DEP_LINMOS_SPECTRAL_RESTORED}" | sed -e 's/-d afterok://g')")
     elif [ "$BEAM" == "all" ]; then
         DEP=$(addDep "$DEP" "$(echo "${DEP_LINMOS_SPECTRAL_RESTORED}" | sed -e 's/-d afterok://g')")
     else
