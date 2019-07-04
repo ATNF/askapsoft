@@ -209,7 +209,17 @@ EOFINNER
         fi
         echo "Copying \${imList} to form \${imageName}"
         cp -r \${imList} \${imageName}
+        err=\$?
+        if [ \$err != 0 ]; then
+            echo "Error copying mosaic file \$imList"
+            exit $err
+        fi
         cp -r \${wtList} \${weightsImage}
+        err=\$?
+        if [ \$err != 0 ]; then
+            echo "Error copying mosaic weights file \$wtList"
+            exit $err
+        fi
     fi
 
 else
