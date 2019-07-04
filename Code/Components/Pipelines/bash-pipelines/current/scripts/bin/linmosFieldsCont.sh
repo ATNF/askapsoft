@@ -46,6 +46,12 @@ for TILE in $FULL_TILE_LIST; do
         for((TTERM=0;TTERM<NUM_TAYLOR_TERMS;TTERM++)); do
 
             DO_IT=$DO_MOSAIC
+
+            # Don't do this for the single-field case.
+            if [ "${NUM_FIELDS}" -eq 1 ]; then
+                DO_IT=false
+            fi
+            
             if [ "$DO_CONT_IMAGING" != "true" ]; then
                 DO_IT=false
             fi

@@ -34,6 +34,12 @@ ID_LINMOS_CONTCUBE_ALL=""
 mosaicImageList="restored image residual"
 
 DO_IT=$DO_MOSAIC
+
+# Don't do this for the single-field case.
+if [ "${NUM_FIELDS}" -eq 1 ]; then
+    DO_IT=false
+fi
+            
 if [ "$DO_CONTCUBE_IMAGING" != "true" ]; then
     DO_IT=false
 fi

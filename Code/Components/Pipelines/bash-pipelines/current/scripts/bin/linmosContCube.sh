@@ -169,6 +169,43 @@ EOFINNER
                 srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} \${PIPELINEDIR}/findCubeStatistics.py -c \${imageName}
             fi
 
+            # For single-field case, copy the mosaic to the top level
+            NUM_FIELDS=${NUM_FIELDS}
+            if [ "\${NUM_FIELDS}" -eq 1 ]; then
+        
+                #  just do a simple copy
+                if [ "\${IMAGETYPE_CONTCUBE}" == "fits" ]; then
+                    im="\${imageName}"
+                    wt="\${weightsImage}"
+                fi
+                FIELD="."
+                setImageProperties contcube
+                echo "Copying \${im} to form \${imageName}"
+                cp -r \${im} ../\${imageName}
+                err=\$?
+                if [ \$err != 0 ]; then
+                    echo "Error copying mosaic file \$im"
+                    exit $err
+                fi
+                cp -r \${wt} ../\${weightsImage}
+                err=\$?
+                if [ \$err != 0 ]; then
+                    echo "Error copying mosaic weights file \$wt"
+                    exit $err
+                fi
+
+                if [ "\${imageCode}" == "restored" ] || [ "\${imageCode}" == "residual" ]; then
+                    cp -r cubePlot-\${im%%.fits}.png ../cubePlot-\${imageName%%.fits}.png
+                    err=\$?
+                    if [ \$err != 0 ]; then
+                        echo "Error copying cubePlot file cubePlot-\${im%%.fits}.png"
+                        exit $err
+                    fi
+                fi
+
+            fi
+
+
         else
             echo "WARNING - no good images were found for mosaicking image type '\${imageCode}'!"
         fi

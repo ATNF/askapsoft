@@ -186,6 +186,34 @@ EOFINNER
     if [ \$err != 0 ]; then
         exit \$err
     fi
+
+    # For single-field case, copy the mosaic to the top level
+    NUM_FIELDS=${NUM_FIELDS}
+    if [ "\${NUM_FIELDS}" -eq 1 ]; then
+
+        #  just do a simple copy
+        if [ "\${IMAGETYPE_CONT}" == "fits" ]; then
+            im="\${imageName}"
+            wt="\${weightsImage}"
+        fi
+        FIELD="."
+        setImageProperties cont
+        echo "Copying \${im} to form \${imageName}"
+        cp -r \${im} ../\${imageName}
+        err=\$?
+        if [ \$err != 0 ]; then
+            echo "Error copying mosaic file \$im"
+            exit $err
+        fi
+        cp -r \${wt} ../\${weightsImage}
+        err=\$?
+        if [ \$err != 0 ]; then
+            echo "Error copying mosaic weights file \$wt"
+            exit $err
+        fi
+
+    fi
+
 else
     echo "WARNING - no good images were found for mosaicking image type '\${imageCode}'!"
 fi

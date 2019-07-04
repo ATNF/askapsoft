@@ -38,6 +38,12 @@ for imageCode in ${mosaicImageList}; do
     for subband in ${SUBBAND_WRITER_LIST}; do
 
         DO_IT=$DO_MOSAIC
+
+        # Don't do this for the single-field case.
+        if [ "${NUM_FIELDS}" -eq 1 ]; then
+            DO_IT=false
+        fi
+            
         if [ "$DO_SPECTRAL_IMAGING" != "true" ]; then
             DO_IT=false
         fi
