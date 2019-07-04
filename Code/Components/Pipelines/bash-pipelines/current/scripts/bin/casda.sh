@@ -256,6 +256,7 @@ image\${count}.RMSF.type     = cont_rmsf"
 done
 imageArtifacts=\$(echo "\${imageArtifacts[@]}" | sed -e 's/ /,/g')
 
+# Next, the catalogues
 catArtifacts=()
 catParams="# Individual catalogue details"
 for((i=0;i<\${#catNames[@]};i++)); do
@@ -267,8 +268,9 @@ cat\${i}.project  = ${PROJECT_ID}"
 done
 catArtifacts=\$(echo "\${catArtifacts[@]}" | sed -e 's/ /,/g')
 
+# Next, the measurement sets
 msArtifacts=()
-msParams="# Individual catalogue details"
+msParams="# Individual MS details"
 for((i=0;i<\${#msNames[@]};i++)); do
     msArtifacts+=(ms\${i})
     msParams="\${msParams}
@@ -276,7 +278,14 @@ ms\${i}.filename = \${OUTPUT}/\${msNames[i]}
 ms\${i}.project  = ${PROJECT_ID}"
 done
 msArtifacts=\$(echo "\${msArtifacts[@]}" | sed -e 's/ /,/g')
+#
+# Also, for each MS, copy the metadata directory into it prior to archiving
+for((i=0;i<\${#msNames[@]};i++)); do
+    mkdir -p \${OUTPUT}/\${msNames[i]}/ASKAP_METADATA
+    cp -r ${metadata}/* \${OUTPUT}/\${msNames[i]}/ASKAP_METADATA
+done
 
+# Finally, the evaluation files
 evalArtifacts=()
 evalParams="# Evaluation file details"
 for((i=0;i<\${#evalNames[@]};i++)); do
