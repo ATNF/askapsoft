@@ -33,7 +33,7 @@ Finally, the mosaics of all fields and/or tiles are combined to form a
 single mosaic image for the scheduling block. This second stage of
 mosaicking is not done if there is only a single field in the
 measurement set (instead the single field mosaic is copied to the
-top-level directory).
+top-level directory at the completion of the initial mosaicking job).
 
 Additionally, if there are multiple fields in the measurement set, but
 they should *not* be mosaicked together (for instance, if they are

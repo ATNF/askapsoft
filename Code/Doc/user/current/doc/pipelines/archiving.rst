@@ -37,7 +37,7 @@ steps:
   processing tasks went.
 
 
-The follwing is a list of files included in the upload to CASDA:
+The following is a list of files included in the upload to CASDA:
 
 * Images: all FITS files that have been processed (ie. continuum
   images, spectral cubes if requested, continuum cubes if requested)
@@ -47,7 +47,9 @@ The follwing is a list of files included in the upload to CASDA:
   component map and its associated residual image.
 * Measurement sets: all continuum measurement sets are included as
   individual files, along with all spectral measurement sets if
-  requested. These will be tarred for access through CASDA. 
+  requested. These will be tarred for access through CASDA. The
+  pipeline metadata directory will be copied into the measurement set,
+  where it will appear as a directory called ASKAP_METADATA.
 * Catalogues: all Selavy catalogues created for the final mosaics, in
   VOTable/XML format, along with any catalogues used for the continuum
   subtraction (if the components method is used).
