@@ -44,7 +44,7 @@ fi
 imageCode=restored
 setImageProperties cont
 
-if [ "${CLOBBER}" != "true" ] && [ -e "${imageName}" ]; then
+if [ "${CLOBBER}" != "true" ] && [ -e "${OUTPUT}/${imageName}" ]; then
     if [ "${DO_IT}" == "true" ]; then
         echo "Image ${imageName} exists, so not running continuum imaging for beam ${BEAM}"
     fi

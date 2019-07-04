@@ -39,9 +39,9 @@ ID_CONTIMG_SCI_SC=""
 
 DO_IT=$DO_CONT_IMAGING
 
-if [ "${CLOBBER}" != "true" ] && [ -e "${OUTPUT}/${imageName}" ]; then
+if [ "${CLOBBER}" != "true" ] && [ -e "${OUTPUT}/${imageName}" ] && [ -e "${OUTPUT}/${gainscaltab}" ]; then
     if [ "${DO_IT}" == "true" ]; then
-        echo "Image ${imageName} exists, so not running continuum imaging for beam ${BEAM}"
+        echo "Image ${imageName} and gains table ${gainscaltab} exist, so not running continuum imaging for beam ${BEAM}"
     fi
     DO_IT=false
 fi
