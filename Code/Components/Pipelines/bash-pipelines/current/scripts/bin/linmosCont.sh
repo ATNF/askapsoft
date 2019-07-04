@@ -40,17 +40,18 @@ fi
 BEAM=all
 for((LOOP=0;LOOP<=NLOOPS;LOOP++)); do
     for imageCode in ${mosaicImageList}; do
-        for((TTERM=0;TTERM<NUM_TAYLOR_TERMS;TTERM++)); do
 
+        TTERM=0
+        
             DO_IT=$DO_MOSAIC
             if [ "$DO_CONT_IMAGING" != "true" ]; then
                 DO_IT=false
             fi
 
             if [ $NLOOPS -gt 0 ]; then
-                tag="${imageCode}T${TTERM}L${LOOP}"
+                tag="${imageCode}L${LOOP}"
             else
-                tag="${imageCode}T${TTERM}"
+                tag="${imageCode}"
             fi
             
             if [ "${DO_IT}" == "true" ] && [ "${CLOBBER}" != "true" ]; then
@@ -170,6 +171,8 @@ linmos.weightstate      = Inherent
 ${reference}
 linmos.psfref           = ${LINMOS_PSF_REF}
 linmos.cutoff           = ${LINMOS_CUTOFF}
+linmos.removebeam       = true
+linmos.nterms           = \${NUM_TAYLOR_TERMS}
 EOFINNER
 
     NCORES=1
@@ -204,7 +207,6 @@ EOFOUTER
 
             fi
             
-        done
         unset TTERM
     done
 done
