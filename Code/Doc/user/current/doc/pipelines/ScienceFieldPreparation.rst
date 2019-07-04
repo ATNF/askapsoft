@@ -137,7 +137,7 @@ For details on making use of this feature, see the section on
 | ``NUM_CHAN_TO_AVERAGE``                       | 54                              | width (:doc:`../calim/mssplit`)                 | Number of channels to be averaged to create continuum                 |
 |                                               |                                 |                                                 | measurement set.                                                      |
 +-----------------------------------------------+---------------------------------+-------------------------------------------------+-----------------------------------------------------------------------+
-| ``TILENCHAN_AV``                              | 18                              | stman.tilenchan (:doc:`../calim/mssplit`)       | The number of channels in the tile size used for the averaged MS.     |
+| ``TILENCHAN_AV``                              | 1                               | stman.tilenchan (:doc:`../calim/mssplit`)       | The number of channels in the tile size used for the averaged MS.     |
 +-----------------------------------------------+---------------------------------+-------------------------------------------------+-----------------------------------------------------------------------+
 | **Initial flagging**                          |                                 |                                                 |                                                                       |
 +-----------------------------------------------+---------------------------------+-------------------------------------------------+-----------------------------------------------------------------------+

@@ -82,7 +82,7 @@ is only the latter that are passsed to CASDA).
 | ``SELAVY_NSUBX``                    | 6                                        | nsubx                               | Number of divisions in the x-direction that divide the image|
 |                                     |                                          | (:doc:`../analysis/selavy`)         | up, allowing parallel processing in the source-detection.   |
 +-------------------------------------+------------------------------------------+-------------------------------------+-------------------------------------------------------------+
-| ``SELAVY_NSUBY``                    | 3                                        | nsuby                               | Number of divisions in the y-direction that divide the image|
+| ``SELAVY_NSUBY``                    | 6                                        | nsuby                               | Number of divisions in the y-direction that divide the image|
 |                                     |                                          | (:doc:`../analysis/selavy`)         | up, allowing parallel processing in the source-detection.   |
 +-------------------------------------+------------------------------------------+-------------------------------------+-------------------------------------------------------------+
 | ``SELAVY_OVERLAPX``                 | 0                                        | overlapx                            | The overlap (in pixels) between neighbouring divisions in   |

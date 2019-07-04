@@ -97,7 +97,7 @@ scripts, and they are detailed here.
 |                                  |                                                |                                 | image.XXX.alt.restored (in the latter's case, if present) will  |
 |                                  |                                                |                                 | also be processed.                                              |
 +----------------------------------+------------------------------------------------+---------------------------------+-----------------------------------------------------------------+
-| ``ARCHIVE_SPECTRAL_MS``          | true                                           | none                            | Whether the individual full-spectral-resolution measurement sets|
+| ``ARCHIVE_SPECTRAL_MS``          | false                                          | none                            | Whether the individual full-spectral-resolution measurement sets|
 |                                  |                                                |                                 | should be included in the archiving.                            |
 +----------------------------------+------------------------------------------------+---------------------------------+-----------------------------------------------------------------+
 | ``ARCHIVE_BEAM_IMAGES``          | false                                          | none                            | Whether the individual beam images should be included in the    |

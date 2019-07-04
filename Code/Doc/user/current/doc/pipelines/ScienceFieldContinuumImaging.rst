@@ -145,7 +145,7 @@ the ``DO_CONVERT_TO_FITS`` flag, which makes use of the
 |                                            |                                     |                                                        | although 'fits' can only be given in conjunction with         |
 |                                            |                                     |                                                        | ``DO_ALT_IMAGER_CONTCUBE=true``.                              |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
-| ```MULTI_JOB_SELFCAL``                     | true                                | none                                                   | Whether to break the selfcal up into separate slurm jobs for  |
+| ```MULTI_JOB_SELFCAL``                     | false                               | none                                                   | Whether to break the selfcal up into separate slurm jobs for  |
 |                                            |                                     |                                                        | each imaging and calibration task (``true``) or whether to    |
 |                                            |                                     |                                                        | combine them all into a single slurm job.                     |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
@@ -266,6 +266,9 @@ the ``DO_CONVERT_TO_FITS`` flag, which makes use of the
 |                                            | (``GRIDDER_SNAPSHOT_IMAGING=true``) | (:doc:`../calim/gridder`)                              | depends on whether snapshot imaging is invoked or not         |
 |                                            | or 1024                             |                                                        | (``GRIDDER_SNAPSHOT_IMAGING``).                               |
 |                                            | (``GRIDDER_SNAPSHOT_IMAGING=false``)|                                                        |                                                               |
++--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
+| ``GRIDDER_SHARECF``                        | true                                | WProject.sharecf (:doc:`../calim/gridder`)             | Whether to use a (static) cache for the convolution functions |
+|                                            |                                     |                                                        | in the WProject gridder.                                      |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
 | **Cleaning parameters**                    |                                     |                                                        |                                                               |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+

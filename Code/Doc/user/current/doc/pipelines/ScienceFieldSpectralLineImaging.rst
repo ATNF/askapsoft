@@ -85,11 +85,8 @@ produced by setting ``ALT_IMAGER_SINGLE_FILE=true``.
 +-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
 | ``CHAN_RANGE_SL_SCIENCE``                     | "1-``NUM_CHAN_SCIENCE``"            | channel (:doc:`../calim/mssplit`)  | The range of channels to copy from the original dataset (1-based).|
 +-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
-| ``TILENCHAN_SL``                              | 18                                  | stman.tilenchan                    | The number of channels in the tile size used for the new MS. The  |
-|                                               |                                     | (:doc:`../calim/mssplit`)          | tile size defines the minimum amount read at a time. Although the |
-|                                               |                                     |                                    | simager will only process single channels, the default is made    |
-|                                               |                                     |                                    | larger than 1 (the default for mssplit) so that the mssplit job   |
-|                                               |                                     |                                    | completes in a reasonable length of time.                         |
+| ``TILENCHAN_SL``                              | 1                                   | stman.tilenchan                    | The number of channels in the tile size used for the new MS. The  |
+|                                               |                                     | (:doc:`../calim/mssplit`)          | tile size defines the minimum amount read at a time.              |
 +-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
 | ``DO_APPLY_CAL_SL``                           | true                                | none                               | Whether to apply the gains calibration determined from the        |
 |                                               |                                     |                                    | continuum self-calibration (see ``GAINS_CAL_TABLE`` in            |
@@ -205,6 +202,9 @@ produced by setting ``ALT_IMAGER_SINGLE_FILE=true``.
 |                                               | (``GRIDDER_SNAPSHOT_IMAGING=true``) | (:doc:`../calim/gridder`)          | depends on whether snapshot imaging is invoked or not             |
 |                                               | or 1024                             |                                    | (``GRIDDER_SNAPSHOT_IMAGING``).                                   |
 |                                               | (``GRIDDER_SNAPSHOT_IMAGING=false``)|                                    |                                                                   |
++-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
+| ``GRIDDER_SPECTRAL_SHARECF``                  | true                                | WProject.sharecf                   | Whether to use a (static) cache for the convolution functions     |
+|                                               |                                     | (:doc:`../calim/gridder`)          | in the WProject gridder.                                          |
 +-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
 | **Cleaning**                                  |                                     |                                    |                                                                   |
 +-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+

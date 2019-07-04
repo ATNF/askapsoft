@@ -155,10 +155,10 @@ successfully. If the averaging fails it is not removed.
 | ``BUCKET_SIZE``           | 1048576 | The bucketsize passed to mssplit (as "stman.bucketsize") in |
 |                           |         | units of bytes.                                             |
 +---------------------------+---------+-------------------------------------------------------------+
-| ``TILE_NCHAN_SCIENCE``    | 54      | The number of channels in the measurement set tile for the  |
+| ``TILE_NCHAN_SCIENCE``    | 1       | The number of channels in the measurement set tile for the  |
 |                           |         | science data, once the local version is created.            |
 +---------------------------+---------+-------------------------------------------------------------+
-| ``TILE_NCHAN_1934``       | 54      | The number of channels in the measurement set tile for the  |
+| ``TILE_NCHAN_1934``       | 1       | The number of channels in the measurement set tile for the  |
 |                           |         | bandpass calibrator data, once the local version is created.|
 +---------------------------+---------+-------------------------------------------------------------+
 | ``PURGE_INTERIM_MS_SCI``  | true    | Whether to remove the interim science MSs created when      |
