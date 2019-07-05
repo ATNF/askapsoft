@@ -173,7 +173,7 @@ std::pair<double,double> LinearSolver::solveSubsetOfNormalEquations(Params &para
     ASKAPTRACE("LinearSolver::solveSubsetOfNormalEquations");
     std::pair<double,double> result(0.,0.);
 
-// Solving A^T Q^-1 V = (A^T Q^-1 A) P
+    // Solving A^T Q^-1 V = (A^T Q^-1 A) P
 
     int nParameters = 0;
 
@@ -181,23 +181,22 @@ std::pair<double,double> LinearSolver::solveSubsetOfNormalEquations(Params &para
     std::map<string, int> indicesMap;
 
     {
-      std::vector<std::pair<string, int> >::iterator it = indices.begin();
-      for (vector<string>::const_iterator cit=names.begin(); cit!=names.end(); ++cit,++it)
-      {
-        ASKAPDEBUGASSERT(it != indices.end());
-        it->second = nParameters;
-        it->first = *cit;
+        std::vector<std::pair<string, int> >::iterator it = indices.begin();
+        for (vector<string>::const_iterator cit=names.begin(); cit!=names.end(); ++cit,++it) {
+            ASKAPDEBUGASSERT(it != indices.end());
+            it->second = nParameters;
+            it->first = *cit;
 
-        indicesMap[it->first] = it->second;
+            indicesMap[it->first] = it->second;
 
-        ASKAPLOG_DEBUG_STR(logger, "Processing "<<*cit<<" "<<nParameters);
-        const casa::uInt newParameters = normalEquations().dataVector(*cit).nelements();
-        nParameters += newParameters;
-        ASKAPDEBUGASSERT((params.isFree(*cit) ? params.value(*cit).nelements() : newParameters) == newParameters);
-      }
+            ASKAPLOG_DEBUG_STR(logger, "Processing " << *cit << " " << nParameters);
+            const casa::uInt newParameters = normalEquations().dataVector(*cit).nelements();
+            nParameters += newParameters;
+            ASKAPDEBUGASSERT((params.isFree(*cit) ? params.value(*cit).nelements() : newParameters) == newParameters);
+        }
     }
     ASKAPLOG_DEBUG_STR(logger, "Done");
-    ASKAPCHECK(nParameters>0, "No free parameters in a subset of normal equations");
+    ASKAPCHECK(nParameters > 0, "No free parameters in a subset of normal equations");
 
     ASKAPDEBUGASSERT(indices.size() > 0);
 
@@ -211,6 +210,11 @@ std::pair<double,double> LinearSolver::solveSubsetOfNormalEquations(Params &para
         B = gsl_vector_alloc (nParameters);
         X = gsl_vector_alloc (nParameters);
     }
+
+    const GenericNormalEquations& gne = dynamic_cast<const GenericNormalEquations&>(normalEquations());
+    size_t nElements = gne.getNumberElements();
+
+    ASKAPLOG_INFO_STR(logger, "Linear solver nParameters = " << nParameters << ", nElements = " << nElements);
 
     //------------------------------------------------------------------------------
     // Define LSQR solver sparse matrix.
@@ -232,22 +236,28 @@ std::pair<double,double> LinearSolver::solveSubsetOfNormalEquations(Params &para
 
     size_t ncolumms = nParameters;
     size_t nrows = nParameters;
-    size_t nnz = nParameters * nParameters;
+    size_t nnz;
+
+    // Define approximate number of nonzero elements.
+    // Note: nElements may contain elements which are not currently being solved for.
+    if (nElements <= nParameters * nParameters) {
+        nnz = nElements;
+    } else {
+        nnz = nParameters * nParameters;
+    }
 
     if (addSmoothnessConstraints) {
         nrows += nParameters;
         nnz += 2 * nParameters;
     }
 
-    lsqr::SparseMatrix matrix(nrows, nnz, NULL);
+    lsqr::SparseMatrix matrix(nrows, nnz, comm);
 
     //--------------------------------------------------------------------------------------------
     // Copy matrix elements from normal matrix (map of map of matrixes) to the solver matrix:
     //      - to gsl NxN matrix, for SVD solver;
     //      - to sparse matrix (CSR format), for LSQR solver.
     //--------------------------------------------------------------------------------------------
-
-    const GenericNormalEquations& gne = dynamic_cast<const GenericNormalEquations&>(normalEquations());
 
     // Loop over matrix rows.
     for (std::vector<std::pair<string, int> >::const_iterator indit1 = indices.begin();
@@ -256,25 +266,27 @@ std::pair<double,double> LinearSolver::solveSubsetOfNormalEquations(Params &para
         std::map<string, casa::Matrix<double> >::const_iterator colItBeg = gne.getNormalMatrixRowBegin(indit1->first);
         std::map<string, casa::Matrix<double> >::const_iterator colItEnd = gne.getNormalMatrixRowEnd(indit1->first);
 
-        const casa::uInt nrow = normalEquations().dataVector(indit1->first).nelements();
+        ASKAPCHECK(colItBeg != colItEnd, "Normal matrix has no elements for row = " << indit1->first << ", this shouldn't happen!");
+
+        const casa::uInt nrow = colItBeg->second.nrow();
+
         for (size_t row = 0; row < nrow; ++row) {
 
             if (algorithm() == "LSQR") {
                 matrix.NewRow();
             }
 
-            std::map<string, casa::Matrix<double> >::const_iterator colIt = colItBeg;
-
-            ASKAPCHECK(colIt != colItEnd, "Normal matrix has no elements for row = " << indit1->first << ", this shouldn't happen!");
-
             // Loop over column elements.
-            for (; colIt != colItEnd; ++colIt) {
+            for (std::map<string, casa::Matrix<double> >::const_iterator colIt = colItBeg;
+                    colIt != colItEnd; ++colIt) {
 
                 if (indicesMap.find(colIt->first) != indicesMap.end()) {
                 // It is a parameter to solve for, adding it to the matrix.
 
                     int colIndex = indicesMap[colIt->first];
                     const casa::Matrix<double>& nm = colIt->second;
+
+                    ASKAPCHECK(nrow == nm.nrow(), "Not consistent normal matrix element element dimension!");
 
                     for (size_t col = 0; col < nm.ncolumn(); ++col) {
                          const double elem = nm(row, col);

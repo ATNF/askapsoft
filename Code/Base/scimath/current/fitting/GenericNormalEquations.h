@@ -168,6 +168,11 @@ struct GenericNormalEquations : public INormalEquations {
   /// @param[in] par the name of the parameter describing the matrix row
   std::map<string, casa::Matrix<double> >::const_iterator getNormalMatrixRowEnd(const std::string &par) const;
 
+  /// @brief Returns the number of (scalar) elements in the normal matrix.
+  /// @details This should be close to the number of non zero elements,
+  /// depending if the elements-matrices (casa::Matrix) have non diagonal nonzero elements (or leakages).
+  size_t getNumberElements() const;
+
   /// @brief data vector for a given parameter
   /// @details In the current framework, parameters are essentially 
   /// vectors, not scalars. Each element of such vector is treated
