@@ -232,12 +232,11 @@ function setSelavyDirs()
 {
     type=$1
     # remove .fits extension if present
-    im=${imageName%%.fits}
     if [ "${type}" == "cont" ]; then
-        selavyDir=selavy-cont-${im}
+        selavyDir=selavy-cont-${imageName%%.fits}
         selavyPolDir="${selavyDir}/PolData"
     elif [ "${type}" == "spectral" ]; then
-        selavyDir=selavy-spectral-${im}
+        selavyDir=selavy-spectral-${imageName%%.fits}
         selavySpectraDir="${selavyDir}/Spectra"
         selavyMomentsDir="${selavyDir}/Moments"
         selavyCubeletsDir="${selavyDir}/Cubelets"

@@ -174,11 +174,10 @@ EOFINNER
             if [ "\${NUM_FIELDS}" -eq 1 ]; then
         
                 #  just do a simple copy
-                if [ "\${IMAGETYPE_CONTCUBE}" == "fits" ]; then
-                    im="\${imageName}"
-                    wt="\${weightsImage}"
-                fi
+                im="\${imageName}"
+                wt="\${weightsImage}"
                 FIELD="."
+                TILE="ALL"
                 setImageProperties contcube
                 echo "Copying \${im} to form \${imageName}"
                 cp -r \${im} ../\${imageName}

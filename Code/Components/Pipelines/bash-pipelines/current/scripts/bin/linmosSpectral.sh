@@ -179,11 +179,10 @@ EOFINNER
     if [ "\${NUM_FIELDS}" -eq 1 ]; then
     
         #  just do a simple copy
-        if [ "\${IMAGETYPE_SPECTRAL}" == "fits" ]; then
-            im="\${imageName}"
-            wt="\${weightsImage}"
-        fi
+        im="\${imageName}"
+        wt="\${weightsImage}"
         FIELD="."
+        TILE="ALL"
         setImageProperties spectral
         echo "Copying \${im} to form \${imageName}"
         cp -r \${im} ../\${imageName}
