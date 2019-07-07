@@ -501,6 +501,17 @@ namespace askap {
             if (!doT1) doT2=false;
             T toPut;
 
+            IPosition ref(2);
+            Vector<double> offset(2);
+            Vector<double> inc(2);
+            T offsetAngle;
+            
+            ref[0] = inDC.referencePixel()[0];
+            ref[1] = inDC.referencePixel()[1];
+            
+            inc[0] = inDC.increment()[0];
+            inc[1] = inDC.increment()[1];
+         
             for (int y=0; y < taylor1.shape()[1];++y) {
                 for (int x=0; x < taylor1.shape()[0];++x) {
 
@@ -508,16 +519,25 @@ namespace askap {
                     fullpos[1] = y;
 
                     // get the current pixel location and distance from beam centre
-                    pixel[0] = double(x);
-                    pixel[1] = double(y);
-                    outDC.toWorld(world1,pixel);
-                    offsetBeam = world0.separation(world1);
+                    // pixel[0] = double(x);
+                    // pixel[1] = double(y);
+                    // outDC.toWorld(world1,pixel);
+                    // offsetBeam = world0.separation(world1);
+
+                    // Better way to get offsets - no toWorld calls (see loadAndWeightInputBuffers())
+                    offset[0] = inc[0] * double(fullpos[0]-ref[0]);
+                    offset[1] = inc[1] * double(fullpos[1]-ref[1]);
+                    offsetBeam = asin( sqrt( offset[0]*offset[0] + offset[1]*offset[1] ) );
+                    offsetAngle = atan2(offset[0],offset[1]);
+                    
                     //
                     // set the alpha
                     // this assumes that the reference frequency is the current
                     // frequency.
                     //
-                    alpha = -8. * log(2.) * pow((offsetBeam/fwhm),2.);
+                    // Use the PrimaryBeam interface
+                    alpha = 2. * log(itsPB->evaluateAtOffset(offsetAngle,offsetBeam,freq));
+//                    alpha = -8. * log(2.) * pow((offsetBeam/fwhm),2.);
                     // ASKAPLOG_INFO_STR(linmoslogger, "alpha " << alpha);
 
                     if (doT1){
