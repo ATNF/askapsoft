@@ -219,38 +219,37 @@ std::pair<double,double> LinearSolver::solveSubsetOfNormalEquations(Params &para
     //------------------------------------------------------------------------------
     // Define LSQR solver sparse matrix.
     //------------------------------------------------------------------------------
-    // TODO: do it only for the LSQR solver.
-
     void* comm = NULL;
+    size_t nrows = 0;
+    size_t nnz = 0;
+    bool addSmoothnessConstraints = false;
+
+    if (algorithm() == "LSQR") {
 
 #ifdef HAVE_MPI
-    MPI_Comm comm_world = MPI_COMM_WORLD;
-    comm = (void *)&comm_world;
+        MPI_Comm comm_world = MPI_COMM_WORLD;
+        comm = (void *)&comm_world;
 #endif
 
-    bool addSmoothnessConstraints = false;
-    if (parameters().count("smoothing") > 0
-        && parameters().at("smoothing") == "true") {
-        addSmoothnessConstraints = true;
+        // Define approximate number of nonzero elements.
+        // Note: nElements may contain elements which are not currently being solved for.
+        if (nElements <= nParameters * nParameters) {
+            nnz = nElements;
+        } else {
+            nnz = nParameters * nParameters;
+        }
+
+        nrows = nParameters;
+        if (parameters().count("smoothing") > 0
+            && parameters().at("smoothing") == "true") {
+            addSmoothnessConstraints = true;
+        }
+
+        if (addSmoothnessConstraints) {
+            nrows += nParameters;
+            nnz += 2 * nParameters;
+        }
     }
-
-    size_t ncolumms = nParameters;
-    size_t nrows = nParameters;
-    size_t nnz;
-
-    // Define approximate number of nonzero elements.
-    // Note: nElements may contain elements which are not currently being solved for.
-    if (nElements <= nParameters * nParameters) {
-        nnz = nElements;
-    } else {
-        nnz = nParameters * nParameters;
-    }
-
-    if (addSmoothnessConstraints) {
-        nrows += nParameters;
-        nnz += 2 * nParameters;
-    }
-
     lsqr::SparseMatrix matrix(nrows, nnz, comm);
 
     //--------------------------------------------------------------------------------------------
@@ -595,6 +594,8 @@ std::pair<double,double> LinearSolver::solveSubsetOfNormalEquations(Params &para
             ASKAPLOG_INFO_STR(logger, "Smoothness constraints cost (weighted) = " << cost);
             ASKAPLOG_INFO_STR(logger, "Smoothness constraints cost = " << cost / (smoothingWeight * smoothingWeight));
         }
+        size_t ncolumms = nParameters;
+
         // Completed the matrix building.
         matrix.Finalize(ncolumms);
 
