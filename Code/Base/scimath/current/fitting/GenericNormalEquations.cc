@@ -451,6 +451,11 @@ void GenericNormalEquations::add(const ComplexDiffMatrix &cdm, const PolXProduct
        // it requires access to the size of the result anyway, therefore
        // it is not too bad to calculate all elements in the row before
        // merging them with itsNormalMatrix
+       //
+       // TODO: Added a condition below to skip adding zero elements, since we moved
+       //       to sparse matrix storage. So the above comment is no longer correct.
+       //       Also, it would be better to avoid performing any calculations for such elements,
+       //       instead of checking if they are zero after the calculations.
        MapOfMatrices normalMatrix; // normal matrix buffer for this row
 
        // iterate over all parameters (columns of the normal matrix) filling
@@ -489,9 +494,13 @@ void GenericNormalEquations::add(const ComplexDiffMatrix &cdm, const PolXProduct
                       }
                  }
             }
-            // the following is effectively a copy of the matrix because we don't use nmElementBuf 
-            // again and it goes out of scope
-            normalMatrix.insert(std::make_pair(*iterCol,nmElementBuf));
+            if (!(nmElementBuf(0,0) == 0 && nmElementBuf(0,1) == 0
+                  && nmElementBuf(1,0) == 0 && nmElementBuf(1,1) == 0)) {
+            // Do not add zero elements into the normal matrix.
+                // the following is effectively a copy of the matrix because we don't use nmElementBuf
+                // again and it goes out of scope
+                normalMatrix.insert(std::make_pair(*iterCol,nmElementBuf));
+            }
        }
        // now add this row to the normal equations
        addParameterSparsely(*iterRow, normalMatrix, dataVector, 2);
