@@ -191,25 +191,39 @@ EOFINNER
     NUM_FIELDS=${NUM_FIELDS}
     if [ "\${NUM_FIELDS}" -eq 1 ]; then
 
-        #  just do a simple copy
-        im="\${imageName}"
-        wt="\${weightsImage}"
-        FIELD="."
-        TILE="ALL"
-        setImageProperties cont
-        echo "Copying \${im} to form \${imageName}"
-        cp -r \${im} ../\${imageName}
-        err=\$?
-        if [ \$err != 0 ]; then
-            echo "Error copying mosaic file \$im"
-            exit $err
-        fi
-        cp -r \${wt} ../\${weightsImage}
-        err=\$?
-        if [ \$err != 0 ]; then
-            echo "Error copying mosaic weights file \$wt"
-            exit $err
-        fi
+        mosaic="\${imageName}"
+        mosaicWt="\${weightsImage}"
+
+        #  just do a simple copy, looping over all taylor terms
+        for((t=0;t<\${NUM_TAYLOR_TERMS};t++)); do
+
+            if [ \${NUM_TAYLOR_TERMS} -gt 1 ]; then
+                sedstr="s/taylor\.0/taylor\.${t}/g"
+                im="echo \${mosaic} | sed -e \${sedstr}"
+                wt="echo \${mosaicWt} | sed -e \${sedstr}"
+            else
+                im="\${mosaic}"
+                wt="\${mosaicWt}"
+            fi
+
+            FIELD="."
+            TILE="ALL"
+            setImageProperties cont
+            echo "Copying \${im} to form \${imageName}"
+            cp -r \${im} ../\${imageName}
+            err=\$?
+            if [ \$err != 0 ]; then
+                echo "Error copying mosaic file \$im"
+                exit $err
+            fi
+            cp -r \${wt} ../\${weightsImage}
+            err=\$?
+            if [ \$err != 0 ]; then
+                echo "Error copying mosaic weights file \$wt"
+                exit $err
+            fi
+
+        done
 
     fi
 
