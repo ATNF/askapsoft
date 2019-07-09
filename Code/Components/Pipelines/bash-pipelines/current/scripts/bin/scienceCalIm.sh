@@ -143,20 +143,20 @@ for FIELD in ${FIELD_LIST}; do
                     findScienceMSnames
                     FIELDBEAM=$(echo "$FIELD_ID" "$BEAM" "$TimeWindow" | awk '{printf "F%02d_B%s_TW%02d",$1,$2,$3}')
                     # an empty file that will indicate that the flagging has been done
-                    FLAG_CHECK_FILE="${OUTPUT}/Checkfiles/FLAGGING_DONE_BEAM${FIELDBEAM}"
+                    FLAG_CHECK_FILE="${OUTPUT}/Checkfiles/FLAGGING_DONE_${FIELDBEAM}"
                     # the same, but for the averaged dataset
-                    FLAG_AV_CHECK_FILE="${OUTPUT}/Checkfiles/FLAGGING_AVERAGED_DATA_DONE_BEAM${FIELDBEAM}"
+                    FLAG_AV_CHECK_FILE="${OUTPUT}/Checkfiles/FLAGGING_AVERAGED_DATA_DONE_${FIELDBEAM}"
                     # an empty file that will indicate that the bandpass has been done
-                    BANDPASS_CHECK_FILE="${OUTPUT}/Checkfiles/BANDPASS_APPLIED_BEAM${FIELDBEAM}"
+                    BANDPASS_CHECK_FILE="${OUTPUT}/Checkfiles/BANDPASS_APPLIED_${FIELDBEAM}"
                     # an empty file that will indicate the gains have been applied to
                     # the averaged (continuum) dataset
-                    CONT_GAINS_CHECK_FILE="${OUTPUT}/Checkfiles/GAINS_APPLIED_CONT_BEAM${FIELDBEAM}"
+                    CONT_GAINS_CHECK_FILE="${OUTPUT}/Checkfiles/GAINS_APPLIED_CONT_${FIELDBEAM}"
                     # an empty file that will indicate the gains have been applied to
                     # the spectral-line dataset
-                    SL_GAINS_CHECK_FILE="${OUTPUT}/Checkfiles/GAINS_APPLIED_SL_BEAM${FIELDBEAM}"
+                    SL_GAINS_CHECK_FILE="${OUTPUT}/Checkfiles/GAINS_APPLIED_SL_${FIELDBEAM}"
                     # an empty file that will indicate the continuum has been
                     # subtracted from the spectral-line dataset
-                    CONT_SUB_CHECK_FILE="${OUTPUT}/Checkfiles/CONT_SUB_SL_BEAM${FIELDBEAM}"
+                    CONT_SUB_CHECK_FILE="${OUTPUT}/Checkfiles/CONT_SUB_SL_${FIELDBEAM}"
 
                     . "${PIPELINEDIR}/prepareScienceData.sh"
 		    . "${PIPELINEDIR}/applyBandpassScience.sh"
