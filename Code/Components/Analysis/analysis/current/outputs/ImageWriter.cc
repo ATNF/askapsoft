@@ -42,6 +42,7 @@
 
 #include <casainterface/CasaInterface.h>
 #include <casacore/casa/aipstype.h>
+#include <casacore/fits/FITS/fits.h>
 
 #include <imageaccess/ImageAccessFactory.h>
 ///@brief Where the log messages go.
@@ -162,9 +163,19 @@ void ImageWriter::writeMask(const casa::Array<bool> &mask,
     ASKAPASSERT(mask.ndim() == itsShape.size());
     ASKAPASSERT(loc.size() == itsShape.size());
     boost::shared_ptr<accessors::IImageAccess> imageAcc = accessors::imageAccessFactory(itsParset);
-    imageAcc->makeDefaultMask(itsImageName);
-    imageAcc->writeMask(itsImageName, mask, loc);
 
+    if (itsParset.getString("imagetype","casa") == "fits"){
+        casa::Array<float> arr = read(loc,mask.shape());
+        for(size_t i=0;i<arr.size();i++){
+            if(!mask.data()[i]){
+                setNaN(arr.data()[i]);
+            }
+        }
+        imageAcc->write(itsImageName,arr,loc);
+    } else {
+        imageAcc->makeDefaultMask(itsImageName);
+        imageAcc->writeMask(itsImageName, mask, loc);
+    }
 }
 
 casa::Array<casa::Float>
