@@ -386,50 +386,63 @@ casa::uInt GenericNormalEquations::parameterDimension(const MapOfMatrices &nmRow
 void GenericNormalEquations::add(const ComplexDiffMatrix &cdm, const PolXProducts &pxp)
 {
   if (pxp.nPol() == 0) {
-      return; // nothing to process     
+      return; // nothing to process
   }
   ASKAPDEBUGASSERT(pxp.nPol() == cdm.nRow());
   ASKAPDEBUGASSERT(cdm.nRow() == cdm.nColumn());
   const casa::uInt nDataPoints = pxp.nPol();
-  
+
+  std::vector<std::vector<casa::DComplex> > modelProductMatrix;
+  modelProductMatrix.resize(nDataPoints, std::vector<casa::DComplex>(nDataPoints));
+
+  // Pre-calculate the array frequently used in the embedded loops.
+  for (casa::uInt p1 = 0; p1 < nDataPoints; ++p1) {
+      for (casa::uInt p2 = 0; p2 < nDataPoints; ++p2) {
+          modelProductMatrix[p1][p2] = pxp.getModelProduct(p1, p2);
+      }
+  }
+
   // iterate over all parameters (rows of the normal matrix)
   for (ComplexDiffMatrix::parameter_iterator iterRow = cdm.paramBegin(); 
        iterRow != cdm.paramEnd(); ++iterRow) {
-              
-       // first, form the projected data vector for this row       
-      
+
+       // first, form the projected data vector for this row
+
        // data vector buffer for this row (size of 2 - all parameters are complex)
        // elements correspond to real and imaginary part derivatives of projected residual
-       casa::Vector<double> dataVector(2,0.);       
-       
+       casa::Vector<double> dataVector(2,0.);
+
        // the first loop is over polarisations, essentially summing over
        // data points in the calculation of normal matrix
        for (casa::uInt p = 0; p<nDataPoints; ++p) {
-            
+
             // two inner loops are from matrix multiplication of cdm to a vector
             // for Y and A^T parts in the product forming the element of the data
             // vector (projected). We can optimise this for speed later, if proved to be a problem.
             for (casa::uInt p1 = 0; p1<nDataPoints; ++p1) {
-                      
+
                  const ComplexDiff &cd1 = cdm(p,p1);
                  const casa::DComplex rowParDerivRe1 = cd1.derivRe(*iterRow);
                  const casa::DComplex rowParDerivIm1 = cd1.derivIm(*iterRow);
                  const casa::DComplex measProduct = pxp.getModelMeasProduct(p1,p);
+
                  dataVector[0] += real(conj(rowParDerivRe1) * measProduct);
                  dataVector[1] += real(conj(rowParDerivIm1) * measProduct);
-                                            
+
                  for (casa::uInt p2 = 0; p2<nDataPoints; ++p2) {
                       const ComplexDiff &cd2 = cdm(p,p2);
                       const casa::DComplex val2 = cd2.value();
-                      const casa::DComplex modelProduct = pxp.getModelProduct(p1,p2);
-                      dataVector[0] -= real(conj(rowParDerivRe1) * val2 * modelProduct);
-                      dataVector[1] -= real(conj(rowParDerivIm1) * val2 * modelProduct);
+                      const casa::DComplex modelProduct = modelProductMatrix[p1][p2];
+                      const casa::DComplex val2_modelProduct = val2 * modelProduct;
+
+                      dataVector[0] -= real(conj(rowParDerivRe1) * val2_modelProduct);
+                      dataVector[1] -= real(conj(rowParDerivIm1) * val2_modelProduct);
                  }
             }
        }
 
        // now form the row of normal matrix
-       
+
        // it looks unnecessary from the first glance to fill the map
        // of matrices for the whole row. However, the input equation can
        // have less parameters than used by this normal equation
@@ -439,12 +452,12 @@ void GenericNormalEquations::add(const ComplexDiffMatrix &cdm, const PolXProduct
        // it is not too bad to calculate all elements in the row before
        // merging them with itsNormalMatrix
        MapOfMatrices normalMatrix; // normal matrix buffer for this row
-               
+
        // iterate over all parameters (columns of the normal matrix) filling
        // the buffer for this particular row
        for (ComplexDiffMatrix::parameter_iterator iterCol = cdm.paramBegin(); 
             iterCol != cdm.paramEnd(); ++iterCol) {
-                                  
+
             // buffer for the element of normal matrix
             // treat all parameters as complex here to simplify the logic
             // (and they're complex anyway) -> 2x2 matrix
@@ -452,29 +465,27 @@ void GenericNormalEquations::add(const ComplexDiffMatrix &cdm, const PolXProduct
             // the first loop is over polarisations, essentially summing over
             // data points in the calculation of normal matrix
             for (casa::uInt p = 0; p<nDataPoints; ++p) {
-            
+
                  // two inner loops are from matrix multiplication of cdm to a vector
                  // for A and A^T parts in the product forming the element of the normal
                  // matrix. We can optimise this for speed later, if proved to be a problem.
                  for (casa::uInt p1 = 0; p1<nDataPoints; ++p1) {
-                      
                       const ComplexDiff &cd1 = cdm(p,p1);
                       const casa::DComplex rowParDerivRe1 = cd1.derivRe(*iterRow);
-                      //const casa::DComplex colParDerivRe1 = cd1.derivRe(*iterCol);
                       const casa::DComplex rowParDerivIm1 = cd1.derivIm(*iterRow);
-                      //const casa::DComplex colParDerivIm1 = cd1.derivIm(*iterCol);
-                                            
+
                       for (casa::uInt p2 = 0; p2<nDataPoints; ++p2) {
                            const ComplexDiff &cd2 = cdm(p,p2);
-                           //const casa::DComplex rowParDerivRe2 = cd2.derivRe(*iterRow);
                            const casa::DComplex colParDerivRe2 = cd2.derivRe(*iterCol);
-                           //const casa::DComplex rowParDerivIm2 = cd2.derivIm(*iterRow);
                            const casa::DComplex colParDerivIm2 = cd2.derivIm(*iterCol);
-                           const casa::DComplex modelProduct = pxp.getModelProduct(p1,p2);
-                           nmElementBuf(0,0) += real(conj(rowParDerivRe1) * colParDerivRe2 * modelProduct);
-                           nmElementBuf(0,1) += real(conj(rowParDerivRe1) * colParDerivIm2 * modelProduct);
-                           nmElementBuf(1,0) += real(conj(rowParDerivIm1) * colParDerivRe2 * modelProduct);
-                           nmElementBuf(1,1) += real(conj(rowParDerivIm1) * colParDerivIm2 * modelProduct);
+                           const casa::DComplex modelProduct = modelProductMatrix[p1][p2];
+                           const casa::DComplex colParDerivRe2_modelProduct = colParDerivRe2 * modelProduct;
+                           const casa::DComplex colParDerivIm2_modelProduct = colParDerivIm2 * modelProduct;
+
+                           nmElementBuf(0,0) += real(conj(rowParDerivRe1) * colParDerivRe2_modelProduct);
+                           nmElementBuf(0,1) += real(conj(rowParDerivRe1) * colParDerivIm2_modelProduct);
+                           nmElementBuf(1,0) += real(conj(rowParDerivIm1) * colParDerivRe2_modelProduct);
+                           nmElementBuf(1,1) += real(conj(rowParDerivIm1) * colParDerivIm2_modelProduct);
                       }
                  }
             }
