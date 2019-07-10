@@ -768,6 +768,38 @@ function find1934MSmetadataFile()
     fi
 }
 
+# Set the names of the check files, that indicate work has been done
+# on measurement sets that do not result in new artifacts being
+# created.
+# Required inputs:
+#   * FIELDBEAM
+#   * OUTPUT
+# Defines the following:
+#   * FLAG_CHECK_FILE
+#   * FLAG_AV_CHECK_FILE
+#   * BANDPASS_CHECK_FILE
+#   * CONT_GAINS_CHECK_FILE
+#   * SL_GAINS_CHECK_FILE
+#   * CONT_SUB_CHECK_FILE
+function setCheckfiles()
+{
+    # an empty file that will indicate that the flagging has been done
+    FLAG_CHECK_FILE="${OUTPUT}/Checkfiles/FLAGGING_DONE_${FIELDBEAM}"
+    # the same, but for the averaged dataset
+    FLAG_AV_CHECK_FILE="${OUTPUT}/Checkfiles/FLAGGING_AVERAGED_DATA_DONE_${FIELDBEAM}"
+    # an empty file that will indicate that the bandpass has been done
+    BANDPASS_CHECK_FILE="${OUTPUT}/Checkfiles/BANDPASS_APPLIED_${FIELDBEAM}"
+    # an empty file that will indicate the gains have been applied to
+    # the averaged (continuum) dataset
+    CONT_GAINS_CHECK_FILE="${OUTPUT}/Checkfiles/GAINS_APPLIED_CONT_${FIELDBEAM}"
+    # an empty file that will indicate the gains have been applied to
+    # the spectral-line dataset
+    SL_GAINS_CHECK_FILE="${OUTPUT}/Checkfiles/GAINS_APPLIED_SL_${FIELDBEAM}"
+    # an empty file that will indicate the continuum has been
+    # subtracted from the spectral-line dataset
+    CONT_SUB_CHECK_FILE="${OUTPUT}/Checkfiles/CONT_SUB_SL_${FIELDBEAM}"
+}
+
 
 # Function to return a list of polarisations, separated by
 # spaces, converted from the user-input list of comma-separated

@@ -38,7 +38,7 @@ if [ "$DO_SPECTRAL_IMAGING" == "true" ]; then
 	fi
 fi
  
-if [ "$DO_IT" == "true" ] && [ -e "$MSCONCAT_SCI_SPECTRAL_CHECK_FILE" ]; then
+if [ "$DO_IT" == "true" ] && [ -e "${msSciFull}" ]; then
     echo "The TimeWise split spectral msdata for beam $BEAM of the science observation has already been concatenated - not re-doing"
     DO_IT=false
 fi
@@ -72,15 +72,13 @@ log=${logs}/msconcat_SciSpectral_${FIELDBEAM}_\${SLURM_JOB_ID}.log
 STARTTIME=\$(date +%FT%T)
 NCORES=${NUM_CORES_MSCONCAT_SCI_SPECTRAL}
 NPPN=${NPPN_MSCONCAT_SCI_SPECTRAL}
-srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} /usr/bin/time -p -o "\${log}.timing" ${msconcat} -o $msconcatFile $inputs2MSconcatSL > "\$log"
+srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} /usr/bin/time -p -o "\${log}.timing" ${msconcat} -o $msSciFull $inputs2MSconcatSL > "\$log"
 err=\$?
 rejuvenate ${msconcatFile}
 echo "STARTTIME=\${STARTTIME}" >> "\${log}.timing"
 extractStatsNonStandard "\${log}" \${NCORES} "\${SLURM_JOB_ID}" \${err} ${jobname} "txt,csv"
 if [ \$err != 0 ]; then
     exit \$err
-else
-    touch "$MSCONCAT_SCI_SPECTRAL_CHECK_FILE"
 fi
 
 # Remove interim MSs if required.

@@ -31,7 +31,7 @@ ID_MSCONCAT_SCI_AV=""
 
 DO_IT=$DO_SPLIT_TIMEWISE
  
-if [ "$DO_IT" == "true" ] && [ -e "$MSCONCAT_SCI_AV_CHECK_FILE" ]; then
+if [ "$DO_IT" == "true" ] && [ -e "${msSciAvFull}" ]; then
     echo "The averaged TimeWise split msdata for beam $BEAM of the science observation has already been concatenated - not re-doing"
     DO_IT=false
 fi
@@ -65,15 +65,13 @@ log=${logs}/msconcat_SciAv_${FIELDBEAM}_\${SLURM_JOB_ID}.log
 STARTTIME=\$(date +%FT%T)
 NCORES=${NUM_CORES_MSCONCAT_SCI_AV}
 NPPN=${NPPN_MSCONCAT_SCI_AV}
-srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} /usr/bin/time -p -o "\${log}.timing" ${msconcat} -o $msconcatFile $inputs2MSconcat > "\$log"
+srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} /usr/bin/time -p -o "\${log}.timing" ${msconcat} -o $msSciAvFull $inputs2MSconcat > "\$log"
 err=\$?
 rejuvenate ${msconcatFile}
 echo "STARTTIME=\${STARTTIME}" >> "\${log}.timing"
 extractStatsNonStandard "\${log}" \${NCORES} "\${SLURM_JOB_ID}" \${err} ${jobname} "txt,csv"
 if [ \$err != 0 ]; then
     exit \$err
-else
-    touch "$MSCONCAT_SCI_AV_CHECK_FILE"
 fi
 
 # Remove interim MSs if required.

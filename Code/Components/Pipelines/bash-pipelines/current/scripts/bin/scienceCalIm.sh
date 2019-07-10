@@ -86,10 +86,6 @@ for FIELD in ${FIELD_LIST}; do
             echo "----------"
             
             mkdir -p "${OUTPUT}/Checkfiles"
-            # an empty file that will indicate that msconcat has been done for averaged Science
-            MSCONCAT_SCI_AV_CHECK_FILE="${OUTPUT}/Checkfiles/MSCONCCAT_SCI_AV_BEAM${BEAM}"
-            # an empty file that will indicate that msconcat has been done for spectral Science
-            MSCONCAT_SCI_SPECTRAL_CHECK_FILE="${OUTPUT}/Checkfiles/MSCONCCAT_SCI_SPECTRAL_BEAM${BEAM}"
 
             if [ "${DIRECTION_SCI}" != "" ]; then
                 # User has requested a particular image direction
@@ -142,22 +138,7 @@ for FIELD in ${FIELD_LIST}; do
 		    # Output ms: 
                     findScienceMSnames
                     FIELDBEAM=$(echo "$FIELD_ID" "$BEAM" "$TimeWindow" | awk '{printf "F%02d_B%s_TW%02d",$1,$2,$3}')
-                    # an empty file that will indicate that the flagging has been done
-                    FLAG_CHECK_FILE="${OUTPUT}/Checkfiles/FLAGGING_DONE_${FIELDBEAM}"
-                    # the same, but for the averaged dataset
-                    FLAG_AV_CHECK_FILE="${OUTPUT}/Checkfiles/FLAGGING_AVERAGED_DATA_DONE_${FIELDBEAM}"
-                    # an empty file that will indicate that the bandpass has been done
-                    BANDPASS_CHECK_FILE="${OUTPUT}/Checkfiles/BANDPASS_APPLIED_${FIELDBEAM}"
-                    # an empty file that will indicate the gains have been applied to
-                    # the averaged (continuum) dataset
-                    CONT_GAINS_CHECK_FILE="${OUTPUT}/Checkfiles/GAINS_APPLIED_CONT_${FIELDBEAM}"
-                    # an empty file that will indicate the gains have been applied to
-                    # the spectral-line dataset
-                    SL_GAINS_CHECK_FILE="${OUTPUT}/Checkfiles/GAINS_APPLIED_SL_${FIELDBEAM}"
-                    # an empty file that will indicate the continuum has been
-                    # subtracted from the spectral-line dataset
-                    CONT_SUB_CHECK_FILE="${OUTPUT}/Checkfiles/CONT_SUB_SL_${FIELDBEAM}"
-
+                    setCheckfiles
                     . "${PIPELINEDIR}/prepareScienceData.sh"
 		    . "${PIPELINEDIR}/applyBandpassScience.sh"
                     
@@ -185,21 +166,7 @@ for FIELD in ${FIELD_LIST}; do
 		DO_SPLIT_TIMEWISE=false
                 findScienceMSnames
                 FIELDBEAM=$(echo "$FIELD_ID" "$BEAM" | awk '{printf "F%02d_B%s",$1,$2}')
-                # an empty file that will indicate that the flagging has been done
-                FLAG_CHECK_FILE="${OUTPUT}/Checkfiles/FLAGGING_DONE_BEAM${FIELDBEAM}"
-                # the same, but for the averaged dataset
-                FLAG_AV_CHECK_FILE="${OUTPUT}/Checkfiles/FLAGGING_AVERAGED_DATA_DONE_BEAM${FIELDBEAM}"
-                # an empty file that will indicate that the bandpass has been done
-                BANDPASS_CHECK_FILE="${OUTPUT}/Checkfiles/BANDPASS_APPLIED_BEAM${FIELDBEAM}"
-                # an empty file that will indicate the gains have been applied to
-                # the averaged (continuum) dataset
-                CONT_GAINS_CHECK_FILE="${OUTPUT}/Checkfiles/GAINS_APPLIED_CONT_BEAM${FIELDBEAM}"
-                # an empty file that will indicate the gains have been applied to
-                # the spectral-line dataset
-                SL_GAINS_CHECK_FILE="${OUTPUT}/Checkfiles/GAINS_APPLIED_SL_BEAM${FIELDBEAM}"
-                # an empty file that will indicate the continuum has been
-                # subtracted from the spectral-line dataset
-                CONT_SUB_CHECK_FILE="${OUTPUT}/Checkfiles/CONT_SUB_SL_BEAM${FIELDBEAM}"
+                setCheckfiles
                 . "${PIPELINEDIR}/prepareScienceData.sh"
                 . "${PIPELINEDIR}/applyBandpassScience.sh"
                 
