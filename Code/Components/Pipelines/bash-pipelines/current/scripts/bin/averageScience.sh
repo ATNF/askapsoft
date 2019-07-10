@@ -33,31 +33,38 @@ ID_AVERAGE_SCI=""
 
 DO_IT=$DO_AVERAGE_CHANNELS
 
-if [ "${DO_IT}" == "true" ] && [ -e "${OUTPUT}/${msSciAv}" ]; then
-    if [ "${CLOBBER}" != "true" ]; then
-        # If we aren't clobbering files, don't run anything
-        if [ "${DO_IT}" == "true" ]; then
-            echo "MS ${msSciAv} exists, so not running averaging for beam ${BEAM}"
-        fi
+if [ "${DO_IT}" == "true" ]; then
+    # Running the splitting, or having the full-resolution MS available, is a necessary precondition for running the averaging.
+    if [ "${DO_SPLIT_SCIENCE}" != "true" ] && [ ! -e "${msSci}" ]; then
+        echo "MS ${msSci} does not exist, so turning off averaging."
         DO_IT=false
-    else
-        # If we are clobbering files, removing the existing one, but
-        # only if we are going to be running the job
-        if [ "${DO_IT}" == "true" ]; then
-            rm -rf "${OUTPUT}/${msSciAv}"
-        fi
     fi
 fi
 
 if [ "${DO_IT}" == "true" ]; then
-    # Running the splitting, or having the full-resolution MS available, is a necessary precondition for running the averaging.
-    if [ "${DO_SPLIT_SCIENCE}" != "true" ]; then
-        if [ "${DO_IT}" == "true" ] && [ ! -e "${msSci}" ]; then
-            echo "MS ${msSci} does not exist, so turning off averaging."
+    if [ -e "${OUTPUT}/${msSciAv}" ]; then
+        if [ "${CLOBBER}" != "true" ]; then
+            # If we aren't clobbering files, don't run anything
+            echo "MS ${msSciAv} exists, so not running averaging for beam ${BEAM}"
             DO_IT=false
+        else
+            # If we are clobbering files, removing the existing one, but
+            # only if we are going to be running the job
+            rm -rf "${OUTPUT}/${msSciAv}"
+        fi
+    elif [ -e "${OUTPUT}/${msSciAvFull}" ]; then
+        # If the time-window MSs don't exist but the concatenated one
+        # does, turn off if we aren't clobbering things
+        if [ "${CLOBBER}" != "true" ]; then
+            echo "Concatenated MS ${msSciAvFull} exists, so not running averaging"
+            DO_IT=false
+        else
+            # if we are clobbering, remove existing concatenated MS
+            rm -rf "${OUTPUT}/${msSciAvFull}"
         fi
     fi
 fi
+
 
 if [ "${DO_IT}" == "true" ]; then
 
