@@ -755,6 +755,14 @@ EOF
         # if we are using the new imager we need to tweak this
         if [ "${DO_ALT_IMAGER_CONT}" == "true" ]; then
             NUM_CPUS_CONTIMG_SCI=$(echo "$nchanContSci" "$nworkergroupsSci" "${NCHAN_PER_CORE}" | awk '{print ($1/$3)*$2+1}')
+            isOK=$(echo $NUM_CPUS_CONTIMG_SCI | awk '{if ($1==int($1)) print "yes"; else print "no"}')
+            if [ "${isOK}" == "no" ]; then
+                echo "ERROR - non-integer number of nodes for continuum imaging - ${NUM_CPUS_CONTIMG_SCI}"
+                echo "      - There are $nchanContSci channels and $nworkergroupsSci worker groups"
+                echo "      - Suggest you change NCHAN_PER_CORE from its current value of $NCHAN_PER_CORE"
+                echo " Exiting."
+                exit 1
+            fi
         fi
 
         # total number of CPUs required for MFS continuum imaging, including the master
