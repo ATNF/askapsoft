@@ -150,15 +150,7 @@ for FIELD in ${FIELD_LIST}; do
 	            fi
 		    inputs2MSconcat="${inputs2MSconcat} ${msSciAv}"
 	        done
-		# Get the name for the msconcat file. The filename should be 
-		# the same as for the non-timeSplit case. Hence we call the 
-		# findScienceMSnames function by temporarily changing the 
-		# DO_SPLIT_TIMEWISE variable to false. 
-		DO_SPLIT_TIMEWISE=false
-		findScienceMSnames
-		DO_SPLIT_TIMEWISE=true
                 FIELDBEAM=$(echo "$FIELD_ID" "$BEAM" | awk '{printf "F%02d_B%s",$1,$2}')
-		msconcatFile=${msSciAv}
                 . "${PIPELINEDIR}/msconcatTimeSplitScienceAveraged.sh"
 	    else 
 		# Entire Data to be processed at once
@@ -219,20 +211,9 @@ for FIELD in ${FIELD_LIST}; do
 			inputs2MSconcatSL="${inputs2MSconcatSL} ${msSciSL}"
 			# Now msconcat the timeWise split calibrated raw datasets (for each beam)
 		    done
-		    # Get the name for the msconcat file. The filename should be 
-		    # the same as for the non-timeSplit case. Hence we call the 
-		    # findScienceMSnames function by temporarily changing the 
-		    # DO_SPLIT_TIMEWISE variable to false. 
-		    DO_SPLIT_TIMEWISE=false
-		    findScienceMSnames
-		    DO_SPLIT_TIMEWISE=true
                     FIELDBEAM=$(echo "$FIELD_ID" "$BEAM" | awk '{printf "F%02d_B%s",$1,$2}')
-		    msconcatFile=${msSciSL}
                     . "${PIPELINEDIR}/msconcatTimeSplitScienceSpectral.sh"
 	        else
-		    # DO_SPLIT_TIMEWISE=false
-	            # Output ms: 
-                    findScienceMSnames
                     FIELDBEAM=$(echo "$FIELD_ID" "$BEAM" | awk '{printf "F%02d_B%s",$1,$2}')
 		    DO_SPLIT_TIMEWISE=false
 		    . "${PIPELINEDIR}/prepareSpectralData.sh"

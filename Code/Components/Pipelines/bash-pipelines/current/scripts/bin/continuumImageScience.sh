@@ -170,7 +170,7 @@ fi
 for im in *.${imageBase}*; do
     rejuvenate "\$im"
 done
-rejuvenate "${OUTPUT}"/"${msSciAv}"
+rejuvenate "${OUTPUT}"/"${msSciAvFull}"
 extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} ${jobname} "txt,csv"
 if [ \$err != 0 ]; then
     exit \$err

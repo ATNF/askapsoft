@@ -237,7 +237,7 @@ fi
 parset="${parsets}/science_spectral_imager_${FIELDBEAM}_\${SLURM_JOB_ID}.in"
 
 cat > "\$parset" << EOF
-${Imager}.dataset                                 = ${msSciSL}
+${Imager}.dataset                                 = ${msSciSLFull}
 ${Imager}.imagetype                               = ${IMAGETYPE_SPECTRAL}
 ${dataSelection}
 #
@@ -285,7 +285,7 @@ if [ "\${doProfiling}" == "true" ]; then
     mv profile.*.${imageBase}* \${dir}
 fi
 
-rejuvenate ${msSciSL}
+rejuvenate ${msSciSLFull}
 for im in *.${imageBase}*; do
     rejuvenate \$im
 done

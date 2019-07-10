@@ -189,7 +189,7 @@ Cimager.Images.writeAtMajorCycle                = ${CLEAN_WRITE_AT_MAJOR_CYCLE}
 
 
 cimagerParams="#Standard Parameter set for Cimager
-Cimager.dataset                                 = ${msSciAv}
+Cimager.dataset                                 = ${msSciAvFull}
 Cimager.datacolumn                              = ${DATACOLUMN}
 Cimager.imagetype                               = ${IMAGETYPE_CONT}
 #

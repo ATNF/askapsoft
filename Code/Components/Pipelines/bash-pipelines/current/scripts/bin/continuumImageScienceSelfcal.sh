@@ -449,7 +449,7 @@ ${CmodelParset}
 ## Calibration using selavy's component parset
 ##
 # parameters for calibrator
-Ccalibrator.dataset                             = ${OUTPUT}/${msSciAv}
+Ccalibrator.dataset                             = ${OUTPUT}/${msSciAvFull}
 \${dataSelectionParamsCal}
 Ccalibrator.nAnt                                = ${NUM_ANT}
 Ccalibrator.nBeam                               = 1
@@ -587,7 +587,7 @@ EOFINNER
         rejuvenate "\$im"
     done
     rejuvenate "${OUTPUT}"/"${gainscaltab}"
-    rejuvenate "${OUTPUT}"/"${msSciAv}"
+    rejuvenate "${OUTPUT}"/"${msSciAvFull}"
     extractStats "\${log}" \${NCORES} "\${SLURM_JOB_ID}" \${err} ${jobname}_L\${LOOP} "txt,csv"
     if [ \$err != 0 ]; then
         exit \$err

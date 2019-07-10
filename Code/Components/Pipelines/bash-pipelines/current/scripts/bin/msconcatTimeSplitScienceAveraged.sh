@@ -67,7 +67,7 @@ NCORES=${NUM_CORES_MSCONCAT_SCI_AV}
 NPPN=${NPPN_MSCONCAT_SCI_AV}
 srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} /usr/bin/time -p -o "\${log}.timing" ${msconcat} -o $msSciAvFull $inputs2MSconcat > "\$log"
 err=\$?
-rejuvenate ${msconcatFile}
+rejuvenate ${msSciAvFull}
 echo "STARTTIME=\${STARTTIME}" >> "\${log}.timing"
 extractStatsNonStandard "\${log}" \${NCORES} "\${SLURM_JOB_ID}" \${err} ${jobname} "txt,csv"
 if [ \$err != 0 ]; then

@@ -572,7 +572,17 @@ function getMSname()
 #   * GAINS_CAL_TABLE
 #   * DO_SELFCAL
 #   * DO_APPLY_CAL_SL
-#   *
+#   * DO_SPLIT_TIMEWISE
+#   * TimeWindow
+# Defines these:
+#   * msSci (current full-res MS, incorporating time window if needed)
+#   * msSciFull (current full-res MS, after concat if needed)
+#   * msSciSL (spectral-line MS, incorporating time window and channel cut if needed)
+#   * msSciSLFull(spectral-line MS, after concat if needed)
+#   * msSciAv (channel-averaged MS, incorporating time window if needed)
+#   * msSciAvFull (channel-averaged MS, after concat if needed)
+#   * msSciAvCal (calibrated channel-averaged MS, after concat if needed)
+#   * gainscaltab (calibration table produced by self-cal)
 function findScienceMSnames()
 {
 
@@ -613,9 +623,11 @@ function findScienceMSnames()
         # spectral-line imaging
         sedstr="s/\.ms/_SL\.ms/g"
         msSciSL=$(echo "${msSci}" | sed -e "$sedstr")
+        msSciSLFull=$(echo "${msSciFull}" | sed -e "$sedstr")
     else
         # If we aren't copying, just use the original full-resolution dataset
         msSciSL=${msSci}
+        msSciSLFull=${msSciFull}
     fi
 
     # 2. Get the value for $msSciAv (after averaging)
@@ -668,10 +680,10 @@ function findScienceMSnames()
     if [ "${KEEP_RAW_AV_MS}" == "true" ]; then
         # If we are keeping the raw data, need a new MS name
         sedstr="s/\.ms$/_cal\.ms/g"
-        msSciAvCal=$(echo "$msSciAv" | sed -e "$sedstr")
+        msSciAvCal=$(echo "$msSciAvFull" | sed -e "$sedstr")
     else
         # Otherwise, apply the calibration to the raw data
-        msSciAvCal=$msSciAv
+        msSciAvCal=$msSciAvFull
     fi
 
     if [ "${GAINS_CAL_TABLE}" == "" ]; then
@@ -703,6 +715,7 @@ function findScienceMSnames()
     # Replace any spaces (e.g. from the FIELD name) with an underscore
     gainscaltab=$(echo $gainscaltab | sed -e 's/ /_/g')
 
+    unset sedstr
 }
 
 function find1934MSnames()

@@ -66,7 +66,12 @@ if [ "\${keepRaw}" == "true" ]; then
   # we need to make a copy that we will then apply the cal to
   NCORES=1
   NPPN=1
-  srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} cp -r ${msSciAv} ${msSciAvCal}
+  srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} cp -r ${msSciAvFull} ${msSciAvCal}
+  err=\$?
+  if [ \${err} != 0 ]; then
+    echo "Error copying ${msSciAvFull} to ${msSciAvCal}. Exiting."
+    exit \$err
+  fi
 fi
 
 parset="${parsets}/apply_gains_cal_cont_${FIELDBEAM}_\${SLURM_JOB_ID}.in"
