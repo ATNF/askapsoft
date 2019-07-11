@@ -145,31 +145,39 @@ true, but is turned off if any of the spectral-line processing tasks
 are turned on (``DO_COPY_SL``, ``DO_APPLY_CAL_SL``,
 ```DO_CONT_SUB_SL`` or ``DO_SPECTRAL_IMAGING``). The deletion is done
 in the averaging job, once the averaging has completed
-successfully. If the averaging fails it is not removed. 
+successfully. If the averaging fails it is not removed.
+Similarly, if ``DO_COPY_SL=true`` (so that a channel range is copied
+out of the spectral dataset), there is an option to remove the full MS
+after the copying has completed successfully - set
+``PURGE_FULL_MS_AFTER_COPY=true`` to have this.
 
-+---------------------------+---------+-------------------------------------------------------------+
-| Variable                  | Default | Description                                                 |
-+===========================+=========+=============================================================+
-| ``LUSTRE_STRIPING``       | 4       | The stripe count to assign to the data directories          |
-+---------------------------+---------+-------------------------------------------------------------+
-| ``BUCKET_SIZE``           | 1048576 | The bucketsize passed to mssplit (as "stman.bucketsize") in |
-|                           |         | units of bytes.                                             |
-+---------------------------+---------+-------------------------------------------------------------+
-| ``TILE_NCHAN_SCIENCE``    | 1       | The number of channels in the measurement set tile for the  |
-|                           |         | science data, once the local version is created.            |
-+---------------------------+---------+-------------------------------------------------------------+
-| ``TILE_NCHAN_1934``       | 1       | The number of channels in the measurement set tile for the  |
-|                           |         | bandpass calibrator data, once the local version is created.|
-+---------------------------+---------+-------------------------------------------------------------+
-| ``PURGE_INTERIM_MS_SCI``  | true    | Whether to remove the interim science MSs created when      |
-|                           |         | splitting and merging is required.                          |
-+---------------------------+---------+-------------------------------------------------------------+
-| ``PURGE_INTERIM_MS_1934`` | true    | Whether to remove the interim bandpass calibrator MSs       |
-|                           |         | created when splitting and merging is required.             |
-+---------------------------+---------+-------------------------------------------------------------+
-| ``PURGE_FULL_MS``         | true    | Whether to remove the full-spectral-resolution measurement  |
-|                           |         | set once the averaging has been done. See notes above.      |
-+---------------------------+---------+-------------------------------------------------------------+
++------------------------------+---------+-------------------------------------------------------------+
+| Variable                     | Default | Description                                                 |
++==============================+=========+=============================================================+
+| ``LUSTRE_STRIPING``          | 4       | The stripe count to assign to the data directories          |
++------------------------------+---------+-------------------------------------------------------------+
+| ``BUCKET_SIZE``              | 1048576 | The bucketsize passed to mssplit (as "stman.bucketsize") in |
+|                              |         | units of bytes.                                             |
++------------------------------+---------+-------------------------------------------------------------+
+| ``TILE_NCHAN_SCIENCE``       | 1       | The number of channels in the measurement set tile for the  |
+|                              |         | science data, once the local version is created.            |
++------------------------------+---------+-------------------------------------------------------------+
+| ``TILE_NCHAN_1934``          | 1       | The number of channels in the measurement set tile for the  |
+|                              |         | bandpass calibrator data, once the local version is created.|
++------------------------------+---------+-------------------------------------------------------------+
+| ``PURGE_INTERIM_MS_SCI``     | true    | Whether to remove the interim science MSs created when      |
+|                              |         | splitting and merging is required.                          |
++------------------------------+---------+-------------------------------------------------------------+
+| ``PURGE_INTERIM_MS_1934``    | true    | Whether to remove the interim bandpass calibrator MSs       |
+|                              |         | created when splitting and merging is required.             |
++------------------------------+---------+-------------------------------------------------------------+
+| ``PURGE_FULL_MS``            | true    | Whether to remove the full-spectral-resolution measurement  |
+|                              |         | set once the averaging has been done. See notes above.      |
++------------------------------+---------+-------------------------------------------------------------+
+| ``PURGE_FULL_MS_AFTER_COPY`` | false   | Whether to remove the full-spectral-resolution measurement  |
+|                              |         | set once the copying of a channel range of the spectral data|
+|                              |         | has completed.                                              |
++------------------------------+---------+-------------------------------------------------------------+
 
 
 Control of Online Services

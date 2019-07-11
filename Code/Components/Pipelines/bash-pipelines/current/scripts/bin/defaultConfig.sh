@@ -473,6 +473,11 @@ FLAG_AUTOCORRELATION_SCIENCE=false
 #      desired we change to false)
 PURGE_FULL_MS=true
 
+# Set this to true to remove the full spectral MS after a channel
+# range has been copied from it. If DO_COPY_SL=false, this has no
+# effect.
+PURGE_FULL_MS_AFTER_COPY=false
+
 # Run flagging after averaging, as well as after bandpass application
 FLAG_AFTER_AVERAGING=true
 # Whether to do dynamic flagging on the averaged data
