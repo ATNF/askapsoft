@@ -307,6 +307,12 @@ std::pair<double,double> LinearSolver::solveSubsetOfNormalEquations(Params &para
         }
     }
 
+    if (algorithmLSQR) {
+        size_t nonzeros = matrix.GetNumberElements();
+        ASKAPLOG_INFO_STR(logger, "Linear solver Jacobian nonzeros = " << nonzeros);
+        ASKAPLOG_INFO_STR(logger, "Linear solver Jacobian sparsity = " << (double)(nonzeros) / (double)(nParameters * nParameters));
+    }
+
     if (!algorithmLSQR) {
         for (std::vector<std::pair<string, int> >::const_iterator indit1=indices.begin();indit1!=indices.end(); ++indit1) {
             const casa::Vector<double> &dv = normalEquations().dataVector(indit1->first);
@@ -314,7 +320,6 @@ std::pair<double,double> LinearSolver::solveSubsetOfNormalEquations(Params &para
                  const double elem = dv(row);
                  ASKAPCHECK(!std::isnan(elem), "Data vector seems to have NaN for row = "<<row<<", this shouldn't happen!");
                  gsl_vector_set(B, row+(indit1->second), elem);
-    //          std::cout << "B " << row << " " << dv(row) << std::endl;
             }
         }
     }
