@@ -42,6 +42,7 @@
 #include <casacore/casa/Arrays/Array.h>
 #include <casacore/casa/Arrays/Matrix.h>
 #include <casacore/casa/Arrays/Vector.h>
+#include <casacore/casa/OS/Timer.h>
 
 #include <gsl/gsl_matrix.h>
 #include <gsl/gsl_vector.h>
@@ -611,8 +612,6 @@ std::pair<double,double> LinearSolver::solveSubsetOfNormalEquations(Params &para
         // A simple approximation for the upper bound of the rank of the  A'A matrix.
         size_t rank_approx = matrix.GetNumberNonemptyRows();
 
-        //std::cout << "Matrix sparsity: " << (double)matrix.GetNumberElements() / (double)(nrows * ncolumms) << std::endl;
-
         //-----------------------------------------------
         // Adding damping.
         //-----------------------------------------------
@@ -663,10 +662,15 @@ std::pair<double,double> LinearSolver::solveSubsetOfNormalEquations(Params &para
         //-----------------------------------------------
         // Solving the matrix system.
         //-----------------------------------------------
+        casa::Timer timer;
+        timer.mark();
+
         lsqr::Vector x(ncolumms, 0.0);
         lsqr::LSQRSolver solver(matrix.GetCurrentNumberRows(), ncolumms);
 
         solver.Solve(niter, rmin, matrix, b_RHS, x, myrank, nbproc, suppress_output);
+
+        ASKAPLOG_INFO_STR(logger, "Completed LSQR in " << timer.real() << " seconds");
 
         //------------------------------------------------------------------------
         // Update the parameters for the calculated changes.
