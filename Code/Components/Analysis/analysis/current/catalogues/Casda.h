@@ -32,6 +32,7 @@
 #include <string>
 #include <Blob/BlobIStream.h>
 #include <Blob/BlobOStream.h>
+#include <sourcefitting/RadioSource.h>
 
 namespace askap {
 
@@ -116,6 +117,13 @@ const int precPfrac = 2;
 const int precStats = 2;
 /// Precision for solid angle measurements
 const int precSolidangle = 2;
+
+
+// Standard way to get an Island ID
+std::string getIslandID(sourcefitting::RadioSource &obj);
+// Standard way to get a Component ID
+std::string getComponentID(sourcefitting::RadioSource &obj, const unsigned int fitNumber);
+
 
 class ValueError
 {

@@ -78,13 +78,16 @@ CasdaComponent::CasdaComponent(sourcefitting::RadioSource &obj,
     casa::Vector<Double> errors = obj.fitResults(fitType).errors(fitNumber);
     itsFlag4 = !obj.fitResults(fitType).isGood();
 
-    ASKAPLOG_DEBUG_STR(logger, "Defining island to go with component for source " << obj.getName() << ", fit #"<<fitNumber);
-    CasdaIsland theIsland(obj, parset);
-    ASKAPLOG_DEBUG_STR(logger, "Done - have island " << theIsland.id());
+//    ASKAPLOG_DEBUG_STR(logger, "Defining island to go with component for source " << obj.getName() << ", fit #"<<fitNumber);
+//    CasdaIsland theIsland(obj, parset);
+//    ASKAPLOG_DEBUG_STR(logger, "Done - have island " << theIsland.id());
 
-    itsIslandID = theIsland.id();
+//    itsIslandID = theIsland.id();
     std::stringstream id;
-    id << itsIDbase << "component_" << obj.getID() << getSuffix(fitNumber);
+    id << itsIDbase << casda::getIslandID(obj);
+    itsIslandID = id.str();
+    id.str("");
+    id << itsIDbase << casda::getComponentID(obj,fitNumber);
     itsComponentID = id.str();
 
     // Add a catch for errors that have not converged properly. Check for position error of >1000 pix

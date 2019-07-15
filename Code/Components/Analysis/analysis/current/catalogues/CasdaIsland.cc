@@ -96,7 +96,7 @@ CasdaIsland::CasdaIsland(sourcefitting::RadioSource &obj,
     itsComment("")
 {
     std::stringstream id;
-    id << itsIDbase << "island_" << obj.getID();
+    id << itsIDbase << casda::getIslandID(obj);
     itsIslandID = id.str();
 
     // Convert the header class to use FREQ type and the appropriate unit
@@ -148,6 +148,8 @@ CasdaIsland::CasdaIsland(sourcefitting::RadioSource &obj,
     itsMeanResidual = islanddata.residualMean() * peakFluxscale;
     itsStddevResidual = islanddata.residualStddev() * peakFluxscale;
     itsRMSResidual = islanddata.residualRMS() * peakFluxscale;
+
+    ASKAPLOG_DEBUG_STR(logger, "Have: " << itsMeanBackground << " " << itsBackgroundNoise << " " << itsMaxResidual << " " << itsMinResidual << " " << itsMeanResidual << " " << itsStddevResidual << " " << itsRMSResidual);
 
     // Convert npix to solid angle
     itsSolidAngle = itsNumPix * pixelToSolidAngle;

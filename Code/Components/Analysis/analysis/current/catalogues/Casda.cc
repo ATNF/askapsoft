@@ -29,12 +29,29 @@
 #include <catalogues/Casda.h>
 #include <Blob/BlobIStream.h>
 #include <Blob/BlobOStream.h>
+#include <sourcefitting/RadioSource.h>
+#include <outputs/CataloguePreparation.h>
 
 namespace askap {
 
 namespace analysis {
 
 namespace casda {
+
+std::string getIslandID(sourcefitting::RadioSource &obj)
+{
+    std::stringstream id;
+    id << "island_" << obj.getID();
+    return id.str();
+}
+
+std::string getComponentID(sourcefitting::RadioSource &obj, const unsigned int fitNumber)
+{
+    std::stringstream id;
+    id << "component_" << obj.getID() << getSuffix(fitNumber);
+    return id.str();
+}
+
 
 ValueError::ValueError():
     itsValue(0.),
