@@ -199,8 +199,8 @@ EOFINNER
 
             if [ \${NUM_TAYLOR_TERMS} -gt 1 ]; then
                 sedstr="s/taylor\.0/taylor\.\${t}/g"
-                im="$(echo \${mosaic} | sed -e \${sedstr})"
-                wt="$(echo \${mosaicWt} | sed -e \${sedstr})"
+                im="\$(echo \${mosaic} | sed -e \${sedstr})"
+                wt="\$(echo \${mosaicWt} | sed -e \${sedstr})"
             else
                 im="\${mosaic}"
                 wt="\${mosaicWt}"
