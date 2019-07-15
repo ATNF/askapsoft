@@ -195,10 +195,10 @@ EOFINNER
         mosaicWt="\${weightsImage}"
 
         #  just do a simple copy, looping over all taylor terms
-        for((t=0;t<\${NUM_TAYLOR_TERMS};t++)); do
+        for((TTERM=0;TTERM<\${NUM_TAYLOR_TERMS};TTERM++)); do
 
             if [ \${NUM_TAYLOR_TERMS} -gt 1 ]; then
-                sedstr="s/taylor\.0/taylor\.\${t}/g"
+                sedstr="s/taylor\.0/taylor\.\${TTERM}/g"
                 im="\$(echo \${mosaic} | sed -e \${sedstr})"
                 wt="\$(echo \${mosaicWt} | sed -e \${sedstr})"
             else
