@@ -1380,12 +1380,12 @@ void DuchampParallel::setThreshold()
 duchamp::OUTCOME DuchampParallel::getCASA(DATATYPE typeOfData, bool useSubimageInfo)
 {
 
-    const boost::shared_ptr<ImageInterface<Float> > imagePtr =
+    boost::shared_ptr<ImageInterface<Float> > imagePtr =
         openImage(itsCube.pars().getImageFile());
 
     // Define the subimage - need to be done before metadata, as the
     // latter needs the subsection & offsets
-    const boost::shared_ptr<SubImage<Float> > sub =
+    boost::shared_ptr<SubImage<Float> > sub =
         this->getSubimage(imagePtr, useSubimageInfo);
 
     if (this->getCasaMetadata(sub, typeOfData) == duchamp::FAILURE) {
@@ -1433,6 +1433,9 @@ duchamp::OUTCOME DuchampParallel::getCASA(DATATYPE typeOfData, bool useSubimageI
         itsCube.saveArray(subarray.data(), subarray.size());
 
     }
+
+    imagePtr.reset();
+    sub.reset();
 
     return duchamp::SUCCESS;
 

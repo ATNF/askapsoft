@@ -87,6 +87,10 @@ void RMData::calculate(RMSynthesis *rmsynth)
 {
     const casa::Vector<casa::Complex> fdf = rmsynth->fdf();
     casa::Vector<float> fdf_p = casa::amplitude(fdf);
+
+    ASKAPLOG_DEBUG_STR(logger, fdf);
+    ASKAPLOG_DEBUG_STR(logger, fdf_p);
+
     const casa::Vector<float> phi_rmsynth = rmsynth->phi();
     const float noise = rmsynth->fdf_noise();
     const float RMSF_FWHM = rmsynth->rmsf_width();
@@ -165,6 +169,9 @@ void RMData::calculate(RMSynthesis *rmsynth)
         float meanp = casa::mean(p);
         float varp = casa::variance(p);
         itsComplexityConstant = casa::sum((p - meanp) * (p - meanp)) / ((p.size() - 1) * varp);
+        if (isNaN(itsComplexityConstant)) {
+            itsComplexityConstant = 0.;
+        }
 
         // Find the second complexity metric. From the POSSUM-62 document:
         // "The second metric measures the residual structure in the
@@ -176,6 +183,9 @@ void RMData::calculate(RMSynthesis *rmsynth)
         casa::Vector<float> qmodel = p * casa::cos(args);
         casa::Vector<float> umodel = p * casa::sin(args);
         itsComplexityResidual = casa::sum((q - qmodel) * (q - qmodel) + (u - umodel) * (u - umodel)) / ((p.size() - 1) * varp);
+        if (isNaN(itsComplexityResidual)) {
+            itsComplexityResidual = 0.;
+        }
 
     } else {
 

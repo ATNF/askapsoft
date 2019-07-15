@@ -138,6 +138,13 @@ void RMSynthesis::calculate(const casa::Vector<float> &lsq,
     } else {
         itsWeights = casa::Vector<float>(noise.size(), 1.);
     }
+    // Get rid of NaNs for now
+    for(size_t i=0;i<itsFracPolSpectrum.size();i++){
+        if (isNaN(q[i]) || isNaN(u[i]) || isInf(q[i]) || isInf(u[i])){
+            itsFracPolSpectrum[i] = casa::Complex(0.,0.);
+            itsWeights[i] = 0.;
+        }
+    }
     ASKAPLOG_DEBUG_STR(logger, "Noise = " << noise);
     ASKAPLOG_DEBUG_STR(logger, "Weights = " << itsWeights);
 
@@ -160,11 +167,22 @@ void RMSynthesis::calculate(const casa::Vector<float> &lsq,
         casa::Vector<casa::Complex> sampling = casa::makeComplex(itsWeights * cos(phase),
                                                itsWeights * sin(phase));
         itsFaradayDF[j] = itsNormalisation * casa::sum(itsFracPolSpectrum * sampling);
+        ASKAPLOG_DEBUG_STR(logger, j << " " << itsNormalisation);
+        ASKAPLOG_DEBUG_STR(logger, phase);
+        ASKAPLOG_DEBUG_STR(logger, sampling);
+        ASKAPLOG_DEBUG_STR(logger, itsFracPolSpectrum);
+        ASKAPLOG_DEBUG_STR(logger, itsFracPolSpectrum*sampling);
+        ASKAPLOG_DEBUG_STR(logger, itsFaradayDF[j]);
     }
+
+    ASKAPLOG_DEBUG_STR(logger, itsFaradayDF);
 
     // Put back into Jy by multiplying by the Stokes I model at the reference wavelength
     float nuRef = QC::c.getValue() / sqrt(itsRefLambdaSquared);
     itsFaradayDF *= itsImodel.flux(nuRef);
+
+    ASKAPLOG_DEBUG_STR(logger, "nuRef="<<nuRef);
+    ASKAPLOG_DEBUG_STR(logger, itsFaradayDF);
 
     // Compute RMSF
     for (size_t j = 0; j < 2.*itsNumPhiChan; j++) {

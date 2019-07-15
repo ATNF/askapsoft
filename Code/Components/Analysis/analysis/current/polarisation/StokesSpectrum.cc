@@ -41,6 +41,7 @@
 using namespace LOFAR::TYPES;
 #include <casacore/casa/Arrays/Vector.h>
 #include <casacore/casa/Arrays/ArrayMath.h>
+#include <casacore/casa/Arrays/ArrayLogical.h>
 #include <casacore/measures/Measures/Stokes.h>
 
 ///@brief Where the log messages go.
@@ -122,7 +123,15 @@ void StokesSpectrum::extractSpectrum()
     itsSpecExtractor->setSource(itsComponent);
     itsSpecExtractor->extract();
     itsSpectrum = casa::Vector<float>(itsSpecExtractor->array());
-    itsMedianValue = casa::median(itsSpectrum);
+//    itsMedianValue = casa::median(itsSpectrum(!isNaN(itsSpectrum)).getArray());
+    std::vector<float> vec;
+    for(size_t i=0;i<itsSpectrum.size();i++){
+        if (!isNaN(itsSpectrum[i]) && !isInf(itsSpectrum[i])){
+            vec.push_back(i);
+        }
+    }
+    casa::Vector<float> newvec(vec);
+    itsMedianValue = casa::median(newvec);
 
     itsFrequencies = itsSpecExtractor->frequencies();
 
@@ -134,7 +143,15 @@ void StokesSpectrum::extractNoise()
     itsNoiseExtractor->setSource(itsComponent);
     itsNoiseExtractor->extract();
     itsNoiseSpectrum = casa::Vector<float>(itsNoiseExtractor->array());
-    itsMedianNoise = casa::median(itsNoiseSpectrum);
+    //itsMedianNoise = casa::median(itsNoiseSpectrum(!isNaN(itsNoiseSpectrum)).getArray());
+    std::vector<float> vec = itsNoiseSpectrum.tovector();
+    for(std::vector<float>::iterator i=vec.begin();i<vec.end();i++){
+        if (isNaN(*i)){
+            vec.erase(i);
+        }
+    }
+    casa::Vector<float> newvec(vec);
+    itsMedianNoise = casa::median(newvec);
 
 }
 

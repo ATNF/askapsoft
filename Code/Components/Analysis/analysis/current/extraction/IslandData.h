@@ -48,7 +48,7 @@ class IslandData {
     public:
         IslandData(const LOFAR::ParameterSet &parset,
                    const std::string fitType);
-        virtual ~IslandData() {};
+    virtual ~IslandData();
 
         /// @brief Set the source to be used.
         void setSource(RadioSource *src) {itsSource = src;};

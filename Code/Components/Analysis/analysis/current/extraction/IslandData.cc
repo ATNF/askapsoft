@@ -96,6 +96,14 @@ IslandData::IslandData(const LOFAR::ParameterSet &parset, const std::string fitT
 
 }
 
+IslandData::~IslandData()
+{
+    itsImageExtractor.reset();
+    itsMeanExtractor.reset();
+    itsNoiseExtractor.reset();
+    itsResidualExtractor.reset();
+}
+
 void IslandData::findVoxelStats()
 {
     findBackground();
@@ -117,6 +125,7 @@ void IslandData::findBackground()
                            << " voxels for mean background determination");
         itsBackground = 0.;
         std::vector<PixelInfo::Voxel>::iterator vox = voxelList.begin();
+        size_t size=0;
         for (; vox < voxelList.end(); vox++) {
             //float flux = vox->getF();
             if (itsSource->isInObject(*vox)) {
@@ -134,11 +143,18 @@ void IslandData::findBackground()
                     }
                 }
 //                ASKAPLOG_DEBUG_STR(logger, "loc="<<loc<<", start="<<start<<", shape of meanArray="<<meanArray.shape());
-                itsBackground += meanArray(loc - start);
+                float flux = meanArray(loc - start);
+                ASKAPLOG_DEBUG_STR(logger, flux);
+                if (!isNaN(flux) && !isInf(flux) && (fabs(flux)<1.e6)){
+                    itsBackground += flux;
+                    size++;
+                }
             }
         }
-        float size = float(voxelList.size());
-        itsBackground /= size;
+//        float size = float(voxelList.size());
+        if (size > 0) {
+            itsBackground /= float(size);
+        }
 
     } else {
         itsBackground = 0.;
@@ -159,6 +175,7 @@ void IslandData::findNoise()
         ASKAPLOG_DEBUG_STR(logger, "Have " << voxelList.size() 
                            << " voxels for noise determination");
         itsNoise = 0.;
+        size_t size = 0;
         std::vector<PixelInfo::Voxel>::iterator vox = voxelList.begin();
         for (; vox < voxelList.end(); vox++) {
             //float flux = vox->getF();
@@ -178,11 +195,18 @@ void IslandData::findNoise()
                     }
                 }
 //                ASKAPLOG_DEBUG_STR(logger, "loc="<<loc<<", start="<<start<<", shape of noiseArray="<<noiseArray.shape());
-                itsNoise += noiseArray(loc - start);
+                float flux = noiseArray(loc - start);
+                ASKAPLOG_DEBUG_STR(logger, flux);
+                if (!isNaN(flux) && !isInf(flux) && (fabs(flux)<1.e6)){
+                    itsNoise += flux;
+                    size++;
+                }
             }
         }
-        float size = float(voxelList.size());
-        itsNoise /= size;
+//        float size = float(voxelList.size());
+        if (size > 0) {
+            itsNoise /= float(size);
+        }
 
     } else {
         itsNoise = 0.;
@@ -207,9 +231,10 @@ void IslandData::findResidualStats()
     std::vector<PixelInfo::Voxel> voxelList = itsSource->getPixelSet();
     ASKAPLOG_DEBUG_STR(logger, "Have " << voxelList.size() 
                        << " voxels for residual stats determination");
-    float max, min, sumf = 0., sumff = 0.;
+    float max=0., min=0., sumf = 0., sumff = 0.;
     casa::Vector<double> pos(2);
     std::vector<PixelInfo::Voxel>::iterator vox = voxelList.begin();
+    size_t size=0;
     for (; vox < voxelList.end(); vox++) {
         //float flux = vox->getF();
 //            ASKAPLOG_DEBUG_STR(logger, "Residual calcs: voxel: " << *vox);
@@ -229,30 +254,37 @@ void IslandData::findResidualStats()
             }
 //                ASKAPLOG_DEBUG_STR(logger, "loc="<<loc<<", start="<<start<<", shape of array="<<array.shape());
             float flux = array(loc - start);
-            std::vector<casa::Gaussian2D<Double> > gaussians = itsSource->gaussFitSet(itsFitType);
-            for (int g = 0; g < gaussians.size(); g++) {
-                pos(0) = vox->getX() * 1.;
-                pos(1) = vox->getY() * 1.;
-                flux -= gaussians[g](pos);
+            ASKAPLOG_DEBUG_STR(logger, flux);
+            if(!isNaN(flux) && !isInf(flux) && fabs(flux)<1.e6 && fabs(flux)>0.){
+                std::vector<casa::Gaussian2D<Double> > gaussians = itsSource->gaussFitSet(itsFitType);
+                for (size_t g = 0; g < gaussians.size(); g++) {
+                    pos(0) = vox->getX() * 1.;
+                    pos(1) = vox->getY() * 1.;
+                    flux -= gaussians[g](pos);
+                }
+//                if (vox == voxelList.begin()) {
+                if (size == 0){
+                    min = max = flux;
+                } else {
+                    min = std::min(min, flux);
+                    max = std::max(max, flux);
+                }
+                sumf += flux;
+                sumff += flux * flux;
+                size++;
             }
-            if (vox == voxelList.begin()) {
-                min = max = flux;
-            } else {
-                min = std::min(min, flux);
-                max = std::max(max, flux);
-            }
-            sumf += flux;
-            sumff += flux * flux;
         }
     }
-    float size = float(voxelList.size());
-    itsResidualMax = max;
-    itsResidualMin = min;
-    itsResidualMean = sumf / size;
-    itsResidualStddev = sqrt(sumff / size - sumf * sumf / size / size);
-    itsResidualRMS = sqrt(sumff / size);
+//    float size = float(voxelList.size());
+    if (size > 0) {
+        itsResidualMax = max;
+        itsResidualMin = min;
+        itsResidualMean = sumf / float(size);
+        itsResidualStddev = sqrt(sumff / float(size) - sumf * sumf / float(size) / float(size));
+        itsResidualRMS = sqrt(sumff / float(size));
+    }
 
-    ASKAPLOG_DEBUG_STR(logger, "Residual stats on island: max=" << itsResidualMax << " min=" << itsResidualMin << " mean=" << itsResidualMean << " stddev=" << itsResidualStddev << " rms=" << itsResidualRMS << " size="<<size<<" ("<<voxelList.size()<<")");
+    ASKAPLOG_DEBUG_STR(logger, "Residual stats on island " << itsSource->getName() << ": max=" << itsResidualMax << " min=" << itsResidualMin << " mean=" << itsResidualMean << " stddev=" << itsResidualStddev << " rms=" << itsResidualRMS << " size="<<size<<" ("<<voxelList.size()<<")");
 
 }
 
