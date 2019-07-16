@@ -1,0 +1,13 @@
+Unsynced commit '36f64829d4853f31804cf9610744168187e52770' referred by 'branch svn-sync' has been detected at July 16, 2019;
+Git and Subversion repositories are out of sync at the moment.
+
+To translate this unsynced commit to Subversion and restore synchronized state do:
+
+1. Fetch unsynced commit to your local Git clone
+    $ git fetch origin refs/subgit/unsynced/heads/svn-sync/1:refs/subgit/unsynced/heads/svn-sync/1
+
+2. Merge fetched ref to 'branch svn-sync'
+    $ git merge refs/subgit/unsynced/heads/svn-sync/1 refs/heads/svn-sync
+
+3. Push merged commit back to the Git repository
+    $ git push origin refs/heads/svn-sync
