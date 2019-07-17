@@ -56,17 +56,28 @@ void doReadOnlyTest(const ICalSolutionConstSource &src)
    const long id = src.mostRecentSolution();
    boost::shared_ptr<ICalSolutionConstAccessor> acc = src.roSolution(id);
    ASKAPASSERT(acc);
+   const bool doBandpass = false;
    const casa::uInt nAnt = 36;
-   const casa::uInt nChan = 288;
-   for (casa::uInt chan = 0; chan < nChan; ++chan) {
-        std::cout<<chan;
-        for (casa::uInt ant = 0; ant < nAnt; ++ant) {
-             const JonesIndex index(ant, 0);
-             const JonesJTerm value = acc->bandpass(index, chan);
-             std::cout<<" "<<casa::abs(value.g1())<<" "<<casa::arg(value.g1()) / casa::C::pi * 180.<<" "<<value.g1IsValid() << " " <<
-                        casa::abs(value.g2())<<" "<<casa::arg(value.g2()) / casa::C::pi * 180.<<" "<<value.g2IsValid();
-        }
-        std::cout<<std::endl;
+   if (doBandpass) {
+       const casa::uInt nChan = 288;
+       for (casa::uInt chan = 0; chan < nChan; ++chan) {
+            std::cout<<chan;
+            for (casa::uInt ant = 0; ant < nAnt; ++ant) {
+                 const JonesIndex index(ant, 0);
+                 const JonesJTerm value = acc->bandpass(index, chan);
+                 std::cout<<" "<<casa::abs(value.g1())<<" "<<casa::arg(value.g1()) / casa::C::pi * 180.<<" "<<value.g1IsValid() << " " <<
+                            casa::abs(value.g2())<<" "<<casa::arg(value.g2()) / casa::C::pi * 180.<<" "<<value.g2IsValid();
+            }
+            std::cout<<std::endl;
+       }
+   } else {
+       for (casa::uInt ant = 0; ant < nAnt; ++ant) {
+            const JonesIndex index(ant, 0);
+            const JonesJTerm value = acc->gain(index);
+            std::cout<<casa::abs(value.g1())<<" "<<casa::arg(value.g1()) / casa::C::pi * 180.<<" "<<value.g1IsValid() << " " <<
+                        casa::abs(value.g2())<<" "<<casa::arg(value.g2()) / casa::C::pi * 180.<<" "<<value.g2IsValid()<<std::endl;
+       }
+       
    }
 }
 
