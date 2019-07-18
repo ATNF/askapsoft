@@ -37,7 +37,6 @@ contWeights=$weightsImage
 pol="%p"
 setImageProperties contcube
 contCube=$imageName
-beamlog=beamlog.${imageName}.txt
 
 # lower-case list of polarisations to use
 polList=$(echo "${POL_LIST}" | tr '[:upper:]' '[:lower:]')
@@ -216,6 +215,9 @@ if [ "\${useContCube}" == "true" ] ||
     done
 fi
 
+selavyDir=${selavyDir}
+mkdir -p \${selavyDir}
+
 if [ "\${imlist}" != "" ]; then
     for im in \${imlist}; do 
         casaim="\${im%%.fits}"
@@ -232,8 +234,7 @@ if [ "\${imlist}" != "" ]; then
         # Selavy. This gets the referencing correct in the catalogue
         # metadata 
         if [ "\${HAVE_IMAGES}" == "true" ]; then
-            mkdir -p ${selavyDir}
-            cd ${selavyDir}
+            cd \${selavyDir}
             ln -s "\${fitsim}" .
             cd ..
         fi
@@ -246,15 +247,47 @@ if [ "\${HAVE_IMAGES}" == "true" ]; then
     log="${logs}/science_selavy_cont_${FIELDBEAM}_\${SLURM_JOB_ID}.log"
 
     # Directory for extracted polarisation data products
-    mkdir -p $selavyPolDir
+    selavyPolDir=${selavyPolDir}
+    mkdir -p \$selavyPolDir
 
     # Move to the working directory
-    cd $selavyDir
+    cd \$selavyDir
 
+    if [ "\${useContCube}" == "true" ] || [ "\${doRM}" == "true" ]; then
+        # Determine the beamlog to use
+        FIELD_LIST="${FIELD_LIST}"
+        FIELD=$(echo \$FIELD_LIST | awk '{print \$1}')
+        FIELD_DIR=${ORIGINAL_OUTPUT}/\${FIELD}
+        if [ "\${BEAM}" == "all" ]; then
+            beamlogList=""
+            for BEAM in \${BEAMS_TO_USE}; do
+                setImageProperties contcube
+                blog="\${FIELD_DIR}/beamlog.\${imageName%%.fits}.txt"
+                if [ -e "\${blog}" ]; then
+                    if [ "\${beamlogList}" == "" ]; then
+                        beamlogList="\${blog}"
+                    else
+                        beamlogList="\${beamlogList},\${blog}"
+                    fi
+                fi
+            done
+            psfref=${LINMOS_PSF_REF}
+            beamlog=\$(echo \$beamlogList \$psfref | awk '{split(\$1,a,","); print a[\$2+1]}')
+            beamlogPol=\$(echo \$beamlog | sed -e 's/\.i\./%p/g')
+        else
+            beamlogPol=\${FIELD_DIR}/beamlog.\${contcube%%.fits}.txt
+            beamlog=\$(echo \$beamlogPol | sed -e 's/%p/\.i\./g')
+        fi
+
+    fi
+
+    # Set the spectral-index-measuring options
     if [ "\${useContCube}" == "true" ]; then
+
         # Set the parameter for using contcube to measure spectral-index
         SpectralTermUse="Selavy.spectralTermsFromTaylor                  = false
 Selavy.spectralTerms.cube                       = ${OUTPUT}/\$contcube
+Selavy.spectralTerms.beamlog                    = \${beamlog}
 Selavy.spectralTerms.nterms                     = ${SELAVY_NUM_SPECTRAL_TERMS}"
     else
         haveT1=false
@@ -276,12 +309,13 @@ Selavy.spectralTerms.nterms                     = ${SELAVY_NUM_SPECTRAL_TERMS}"
 Selavy.findSpectralTerms                        = [\${haveT1}, \${haveT2}]"
     fi
     
+    # Set the RM synthesis options
     if [ "\${doRM}" == "true" ]; then
         rmSynthParams="# RM Synthesis on extracted spectra from continuum cube
 Selavy.RMSynthesis                              = \${doRM}
 Selavy.RMSynthesis.cube                         = ${OUTPUT}/\$contcube
-Selavy.RMSynthesis.beamLog                      = ${beamlog}
-Selavy.RMSynthesis.outputBase                   = ${OUTPUT}/${selavyPolDir}/${SELAVY_POL_OUTPUT_BASE}
+Selavy.RMSynthesis.beamLog                      = ${beamlogPol}
+Selavy.RMSynthesis.outputBase                   = ${OUTPUT}/\${selavyPolDir}/${SELAVY_POL_OUTPUT_BASE}
 Selavy.RMSynthesis.writeSpectra                 = ${SELAVY_POL_WRITE_SPECTRA}
 Selavy.RMSynthesis.writeComplexFDF              = ${SELAVY_POL_WRITE_COMPLEX_FDF}
 Selavy.RMSynthesis.boxwidth                     = ${SELAVY_POL_BOX_WIDTH}
@@ -300,6 +334,7 @@ Selavy.RMSynthesis.phiZero                      = ${SELAVY_POL_PHI_ZERO}"
 Selavy.RMSynthesis                              = \${doRM}"
     fi
 
+    # Define the full parset
     cat > "\$parset" <<EOFINNER
 Selavy.image                                    = \${fitsimage}
 Selavy.sbid                                     = ${SB_SCIENCE}
@@ -378,8 +413,8 @@ EOFINNER
             loadModule continuum_validation_env
             log="${logs}/continuum_validation_${FIELDBEAM}_\${SLURM_JOB_ID}.log"
             validateArgs="\${fitsimage%%.fits}.fits"
-            validateArgs="\${validateArgs} -S ${selavyDir}/selavy-\${fitsimage%%.fits}.components.xml"
-            validateArgs="\${validateArgs} -N ${selavyDir}/${noiseMap%%.fits}.fits "
+            validateArgs="\${validateArgs} -S \${selavyDir}/selavy-\${fitsimage%%.fits}.components.xml"
+            validateArgs="\${validateArgs} -N \${selavyDir}/${noiseMap%%.fits}.fits "
             validateArgs="\${validateArgs} -C NVSS_config.txt,SUMSS_config.txt"          
             STARTTIME=\$(date +%FT%T)
             NCORES=1
