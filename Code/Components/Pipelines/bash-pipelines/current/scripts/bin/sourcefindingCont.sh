@@ -165,6 +165,11 @@ cp "\$thisfile" "\$(echo "\$thisfile" | sed -e "\$sedstr")"
 HAVE_IMAGES=true
 BEAM=$BEAM
 NUM_TAYLOR_TERMS=${NUM_TAYLOR_TERMS}
+IMAGE_BASE_CONT=${IMAGE_BASE_CONT}
+IMAGE_BASE_CONTCUBE=${IMAGE_BASE_CONTCUBE}
+DO_ALT_IMAGER_CONTCUBE=${DO_ALT_IMAGER_CONTCUBE}
+ALT_IMAGER_SINGLE_FILE_CONTCUBE=${ALT_IMAGER_SINGLE_FILE_CONTCUBE}
+imageCode=restored
 doRM=${doRM}
 useContCube=${useContCube}
 
@@ -262,6 +267,7 @@ if [ "\${HAVE_IMAGES}" == "true" ]; then
         if [ "\${BEAM}" == "all" ]; then
             beamlogList=""
             for BEAM in \${BEAMS_TO_USE}; do
+                pol="i"
                 setImageProperties contcube
                 blog="\${FIELD_DIR}/beamlog.\${imageName%%.fits}.txt"
                 if [ -e "\${blog}" ]; then
@@ -272,6 +278,7 @@ if [ "\${HAVE_IMAGES}" == "true" ]; then
                     fi
                 fi
             done
+            BEAM="all"
             psfref=${LINMOS_PSF_REF}
             beamlog=\$(echo \$beamlogList \$psfref | awk '{split(\$1,a,","); print a[\$2+1]}')
             beamlogPol=\$(echo \$beamlog | sed -e 's/\.i\./%p/g')
