@@ -94,7 +94,7 @@ cp "\$thisfile" "\$(echo "\$thisfile" | sed -e "\$sedstr")"
 DO_ALT_IMAGER_CONTCUBE="${DO_ALT_IMAGER_CONTCUBE}"
 ALT_IMAGER_SINGLE_FILE_CONTCUBE="${ALT_IMAGER_SINGLE_FILE_CONTCUBE}"
 IMAGE_BASE_CONTCUBE=${IMAGE_BASE_CONTCUBE}
-FIELD=${FIELD}
+THISFIELD=${FIELD}
 POL_LIST="${POL_LIST}"
 BEAMS_TO_USE="${BEAMS_TO_USE}"
 imageCode=${imageCode}
@@ -103,6 +103,7 @@ IMAGETYPE_CONTCUBE="${IMAGETYPE_CONTCUBE}"
 for POLN in \$POL_LIST; do
 
     pol=\$(echo "\$POLN" | tr '[:upper:]' '[:lower:]')
+    FIELD=\${THISFIELD}
 
     for subband in ${SUBBAND_WRITER_LIST_CONTCUBE}; do
     
