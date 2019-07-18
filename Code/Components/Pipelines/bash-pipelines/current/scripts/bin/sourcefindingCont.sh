@@ -165,6 +165,8 @@ cp "\$thisfile" "\$(echo "\$thisfile" | sed -e "\$sedstr")"
 HAVE_IMAGES=true
 BEAM=$BEAM
 NUM_TAYLOR_TERMS=${NUM_TAYLOR_TERMS}
+doRM=${doRM}
+useContCube=${useContCube}
 
 # List of images to convert to FITS in the Selavy job
 imlist=""
@@ -176,11 +178,13 @@ contcube=${contCube}
 
 imlist="\${imlist} ${OUTPUT}/\${image}"
 
-for((n=1;n<\${NUM_TAYLOR_TERMS};n++)); do
-    sedstr="s/\.taylor\.0/\.taylor\.\$n/g"
-    im=\$(echo \$image | sed -e \$sedstr)
-    imlist="\${imlist} ${OUTPUT}/\${im}"
-done
+if [ "\${useContCube}" == "false" ]; then
+    for((n=1;n<\${NUM_TAYLOR_TERMS};n++)); do
+        sedstr="s/\.taylor\.0/\.taylor\.\$n/g"
+        im=\$(echo \$image | sed -e \$sedstr)
+        imlist="\${imlist} ${OUTPUT}/\${im}"
+    done
+fi
 
 if [ "\${BEAM}" == "all" ]; then
     imlist="\${imlist} ${OUTPUT}/\${weights}"
@@ -189,9 +193,6 @@ Selavy.Weights.weightsCutoff                    = ${SELAVY_WEIGHTS_CUTOFF}"
 else
     weightpars="#"
 fi
-
-doRM=${doRM}
-useContCube=${useContCube}
 
 if [ "\${useContCube}" == "true" ] || 
       [ "\${doRM}" == "true" ]; then
@@ -256,7 +257,7 @@ if [ "\${HAVE_IMAGES}" == "true" ]; then
     if [ "\${useContCube}" == "true" ] || [ "\${doRM}" == "true" ]; then
         # Determine the beamlog to use
         FIELD_LIST="${FIELD_LIST}"
-        FIELD=$(echo \$FIELD_LIST | awk '{print \$1}')
+        FIELD=\$(echo \$FIELD_LIST | awk '{print \$1}')
         FIELD_DIR=${ORIGINAL_OUTPUT}/\${FIELD}
         if [ "\${BEAM}" == "all" ]; then
             beamlogList=""
