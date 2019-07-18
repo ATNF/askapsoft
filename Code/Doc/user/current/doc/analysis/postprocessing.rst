@@ -767,6 +767,9 @@ Parameters for spectral term measurement
 +----------------------------------+---------------+-------------------------------+-----------------------------------------------------------------------+
 |Selavy.spectralTerms.cube         |string         |""                             |The name of the continuum cube from which spectra should be extracted. |
 +----------------------------------+---------------+-------------------------------+-----------------------------------------------------------------------+
+|Selavy.spectralTerms.beamlog      |string         |""                             |The name of the beamlog file, that describes how the PSF changes as a  |
+|                                  |               |                               |function of spectral channel.                                          |
++----------------------------------+---------------+-------------------------------+-----------------------------------------------------------------------+
 |Selavy.spectralTerms.nterms       |int            |3                              |The number of terms to fit to in the continuum cube spectrum. Valid    |
 |                                  |               |                               |values are 1 (only I_0), 2 (I_0 &alpha), or 3 (I_0, alpha &            |
 |                                  |               |                               |beta). Larger values are set to 3, smaller values to 1.                |

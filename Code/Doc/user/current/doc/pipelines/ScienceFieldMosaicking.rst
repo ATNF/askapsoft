@@ -183,8 +183,9 @@ primary beam at the centre of each image.
 | ``LINMOS_CUTOFF``                  | 0.2                                | linmos.cutoff           | The primary beam cutoff, as a fraction of the peak           |
 |                                    |                                    | (:doc:`../calim/linmos`)|                                                              |
 +------------------------------------+------------------------------------+-------------------------+--------------------------------------------------------------+
-| ``LINMOS_PSF_REF``                 | 0                                  | linmos.psfref           | Reference beam for PSF (0-based) - which beam to take the    |
-|                                    |                                    | (:doc:`../calim/linmos`)| PSF information from.                                        |
+| ``LINMOS_PSF_REF``                 | 0                                  | linmos.psfref           | Reference beam for PSF (0-based index of the list of beams,  |
+|                                    |                                    | (:doc:`../calim/linmos`)| *not* the beam number) - which beam to take the PSF          |
+|                                    |                                    |                         | information from.                                            |
 +------------------------------------+------------------------------------+-------------------------+--------------------------------------------------------------+
 | ``LINMOS_SINGLE_FIELD_WEIGHTTYPE`` | Combined                           | linmos.weighttype       | How to do the weighting in the first stage of mosaicking (all|
 |                                    |                                    | (:doc:`../calim/linmos`)| beams of a single field). Can be either "Combined" or        |
