@@ -268,41 +268,52 @@ std::pair<double,double> LinearSolver::solveSubsetOfNormalEquations(Params &para
         const std::map<string, casa::Matrix<double> >::const_iterator colItBeg = gne.getNormalMatrixRowBegin(indit1->first);
         const std::map<string, casa::Matrix<double> >::const_iterator colItEnd = gne.getNormalMatrixRowEnd(indit1->first);
 
-        ASKAPCHECK(colItBeg != colItEnd, "Normal matrix has no elements for row = " << indit1->first << ", this shouldn't happen!");
+        if (colItBeg != colItEnd) {
 
-        const casa::uInt nrow = colItBeg->second.nrow();
+            const size_t nrow = colItBeg->second.nrow();
 
-        for (size_t row = 0; row < nrow; ++row) {
+            for (size_t row = 0; row < nrow; ++row) {
 
-            if (algorithmLSQR) {
-                matrix.NewRow();
+                if (algorithmLSQR) {
+                    matrix.NewRow();
+                }
+
+                // Loop over column elements.
+                for (std::map<string, casa::Matrix<double> >::const_iterator colIt = colItBeg;
+                        colIt != colItEnd; ++colIt) {
+
+                    const std::map<string, size_t>::const_iterator indicesMapIt = indicesMap.find(colIt->first);
+                    if (indicesMapIt != indicesMap.end()) {
+                    // It is a parameter to solve for, adding it to the matrix.
+
+                        const size_t colIndex = indicesMapIt->second;
+                        const casa::Matrix<double>& nm = colIt->second;
+
+                        ASKAPCHECK(nrow == nm.nrow(), "Not consistent normal matrix element element dimension!");
+
+                        const size_t ncolumn = nm.ncolumn();
+                        for (size_t col = 0; col < ncolumn; ++col) {
+                             const double elem = nm(row, col);
+                             ASKAPCHECK(!std::isnan(elem), "Normal matrix seems to have NaN for row = "<< row << " and col = " << col << ", this shouldn't happen!");
+
+                             if (algorithmLSQR) {
+                                 matrix.Add(elem, col + colIndex);
+
+                             } else {
+                                 gsl_matrix_set(A, row + (indit1->second), col + colIndex, elem);
+                             }
+                        }
+                    }
+                }
             }
 
-            // Loop over column elements.
-            for (std::map<string, casa::Matrix<double> >::const_iterator colIt = colItBeg;
-                    colIt != colItEnd; ++colIt) {
-
-                const std::map<string, size_t>::const_iterator indicesMapIt = indicesMap.find(colIt->first);
-                if (indicesMapIt != indicesMap.end()) {
-                // It is a parameter to solve for, adding it to the matrix.
-
-                    const size_t colIndex = indicesMapIt->second;
-                    const casa::Matrix<double>& nm = colIt->second;
-
-                    ASKAPCHECK(nrow == nm.nrow(), "Not consistent normal matrix element element dimension!");
-
-                    const size_t ncolumn = nm.ncolumn();
-                    for (size_t col = 0; col < ncolumn; ++col) {
-                         const double elem = nm(row, col);
-                         ASKAPCHECK(!std::isnan(elem), "Normal matrix seems to have NaN for row = "<< row << " and col = " << col << ", this shouldn't happen!");
-
-                         if (algorithmLSQR) {
-                             matrix.Add(elem, col + colIndex);
-
-                         } else {
-                             gsl_matrix_set(A, row + (indit1->second), col + colIndex, elem);
-                         }
-                    }
+        } else {
+        // Empty normal matrix row.
+            if (algorithmLSQR) {
+                // Need to add corresponding empty rows in the sparse matrix.
+                const size_t nrow = normalEquations().dataVector(indit1->first).nelements();
+                for (size_t i = 0; i < nrow; ++i) {
+                    matrix.NewRow();
                 }
             }
         }
@@ -752,6 +763,7 @@ std::pair<double,double> LinearSolver::solveSubsetOfNormalEquations(Params &para
             solveSubsetOfNormalEquations(params, quality, names);
         } else {
             while (names.size() > 0) {
+                ASKAPLOG_INFO_STR(logger, "Solving independent subset of parameters");
                 const std::vector<std::string> subsetNames = getIndependentSubset(names,1e-6);
                 solveSubsetOfNormalEquations(params, quality, subsetNames);
             }
