@@ -322,7 +322,7 @@ std::pair<double,double> LinearSolver::solveSubsetOfNormalEquations(Params &para
     if (algorithmLSQR) {
         size_t nonzeros = matrix.GetNumberElements();
         ASKAPLOG_INFO_STR(logger, "Linear solver Jacobian nonzeros = " << nonzeros);
-        ASKAPLOG_INFO_STR(logger, "Linear solver Jacobian sparsity = " << (double)(nonzeros) / (double)(nParameters * nParameters));
+        ASKAPLOG_INFO_STR(logger, "Linear solver Jacobian sparsity = " << (double)(nonzeros) / (double)(nParameters) / (double)(nParameters));
     }
 
     if (!algorithmLSQR) {
