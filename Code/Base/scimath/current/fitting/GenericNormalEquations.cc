@@ -319,13 +319,14 @@ size_t GenericNormalEquations::getNumberElements() const {
     size_t nElements = 0;
     for (std::map<std::string, MapOfMatrices>::const_iterator it = itsNormalMatrix.begin();
          it != itsNormalMatrix.end(); ++it) {
-        ASKAPCHECK(it->second.begin() != it->second.end(), "No row elements in the normal matrix for parameter = " << it->first);
 
-        size_t parRowDim = it->second.begin()->second.nrow();
-        size_t parColDim = it->second.begin()->second.ncolumn();
+        if (it->second.begin() != it->second.end()) {
+            size_t parRowDim = it->second.begin()->second.nrow();
+            size_t parColDim = it->second.begin()->second.ncolumn();
 
-        // All row elements should have the same dimension, hence multiply by the number of elements.
-        nElements += (parRowDim * parColDim) * it->second.size();
+            // All row elements should have the same dimension, hence multiply by the number of elements.
+            nElements += (parRowDim * parColDim) * it->second.size();
+        }
     }
     return nElements;
 }
