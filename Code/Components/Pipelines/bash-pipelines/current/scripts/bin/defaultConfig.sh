@@ -1013,6 +1013,9 @@ USE_CONTCUBE_FOR_SPECTRAL_INDEX=false
 # If using contcube, this is the number of terms to solve for (1=just
 # I_0, 2 = I_0 & alpha, 3 = I_0, alpha, beta)
 SELAVY_NUM_SPECTRAL_TERMS=3
+# Thresholds for measuring spectral indices - not applied if not defined
+SELAVY_SPECTRAL_INDEX_THRESHOLD=""
+SELAVY_SPECTRAL_INDEX_THRESHOLD_SNR=""
 #
 # Whether to use contiguous pixels in the islands
 SELAVY_FLAG_ADJACENT=true

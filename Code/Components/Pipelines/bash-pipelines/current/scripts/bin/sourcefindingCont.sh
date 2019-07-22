@@ -291,10 +291,23 @@ if [ "\${HAVE_IMAGES}" == "true" ]; then
     fi
 
     # Set the spectral-index-measuring options
+
+    SpectralTermUse="# These parameters define the measurement of spectral indices
+    alphaThreshold="${SELAVY_SPECTRAL_INDEX_THRESHOLD}"
+    alphaThresholdSNR="${SELAVY_SPECTRAL_INDEX_THRESHOLD_SNR}"
+    if [ "\${alphaThreshold}" != "" ]; then
+        SpectralTermUse="\${SpectralTermUse}
+Selavy.spectralTerms.threshold = \${alphaThreshold}"
+    elif [ "\${alphaThresholdSNR}" != "" ]; then
+        SpectralTermUse="\${SpectralTermUse}
+Selavy.spectralTerms.thresholdSNR = \${alphaThresholdSNR}"
+    fi
+
     if [ "\${useContCube}" == "true" ]; then
 
         # Set the parameter for using contcube to measure spectral-index
-        SpectralTermUse="Selavy.spectralTermsFromTaylor                  = false
+        SpectralTermUse="\${SpectralTermUse}
+Selavy.spectralTermsFromTaylor                  = false
 Selavy.spectralTerms.cube                       = ${OUTPUT}/\$contcube
 Selavy.spectralTerms.beamlog                    = \${beamlog}
 Selavy.spectralTerms.nterms                     = ${SELAVY_NUM_SPECTRAL_TERMS}"
@@ -314,7 +327,8 @@ Selavy.spectralTerms.nterms                     = ${SELAVY_NUM_SPECTRAL_TERMS}"
             fi
         fi
         # Set the flag indicating whether to measure from Taylor-term images
-        SpectralTermUse="Selavy.spectralTermsFromTaylor                  = true
+        SpectralTermUse="\${SpectralTermUse}
+Selavy.spectralTermsFromTaylor                  = true
 Selavy.findSpectralTerms                        = [\${haveT1}, \${haveT2}]"
     fi
     
