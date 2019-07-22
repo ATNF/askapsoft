@@ -222,6 +222,11 @@ class CasdaComponent : public CatalogueEntry {
         /// A comment string, not used as yet.
         std::string itsComment;
 
+    /// Not used in the catalogue, but a scale factor for pixel fluxes
+    double itsPeakFluxscale;
+    /// Not used in the catalogue, but a scale factor for integrated fluxes
+    double itsIntFluxscale;
+
         /// The following are not in the CASDA component catalogue at
         /// v1.7, but are reported in the fit catalogues of Selavy
         /// {

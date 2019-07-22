@@ -130,9 +130,9 @@ CasdaComponent::CasdaComponent(sourcefitting::RadioSource &obj,
     itsDEC.error() = errors[2] * pixscale;
     itsName = newHead_freq.getIAUName(itsRA.value(), itsDEC.value());
 
-    double peakFluxscale = getPeakFluxConversionScale(newHead_freq, casda::fluxUnit);
-    itsFluxPeak.value() = gauss.height() * peakFluxscale;
-    itsFluxPeak.error() = errors[0] * peakFluxscale;
+    itsPeakFluxscale = getPeakFluxConversionScale(newHead_freq, casda::fluxUnit);
+    itsFluxPeak.value() = gauss.height() * itsPeakFluxscale;
+    itsFluxPeak.error() = errors[0] * itsPeakFluxscale;
 
     itsMaj.value() = gauss.majorAxis() * pixscale;
     itsMaj.error() = errors[3] * pixscale;
@@ -141,8 +141,8 @@ CasdaComponent::CasdaComponent(sourcefitting::RadioSource &obj,
     itsPA.value() = gauss.PA() * 180. / M_PI;
     itsPA.error() = errors[5] * 180. / M_PI;
 
-    double intFluxscale = getIntFluxConversionScale(newHead_freq, casda::intFluxUnitContinuum);
-    itsFluxInt.value() = gauss.flux() * intFluxscale;
+    itsIntFluxscale = getIntFluxConversionScale(newHead_freq, casda::intFluxUnitContinuum);
+    itsFluxInt.value() = gauss.flux() * itsIntFluxscale;
     // To calculate error on integrated flux of Gaussian, use Eq.42 from Condon (1997, PASP 109, 166).
     double beamScaling = newHead_freq.getBeam().maj() * newHead_freq.getBeam().min() * pixscale * pixscale /
                          (itsMaj.value() * itsMin.value());
@@ -161,9 +161,9 @@ CasdaComponent::CasdaComponent(sourcefitting::RadioSource &obj,
     itsPA_deconv.error() = deconv[5] * 180. / M_PI;
 
     itsChisq = results.chisq();
-    itsRMSfit = results.RMS() * peakFluxscale;
+    itsRMSfit = results.RMS() * itsPeakFluxscale;
 
-    itsRMSimage = obj.noiseLevel() * peakFluxscale;
+    itsRMSimage = obj.noiseLevel() * itsPeakFluxscale;
 
     if (useAlphaBeta()){
         itsAlpha.value() = obj.alphaValues(fitType)[fitNumber];
@@ -191,8 +191,8 @@ CasdaComponent::CasdaComponent(sourcefitting::RadioSource &obj,
     itsLocalID = localid.str();
     itsXpos = gauss.xCenter();
     itsYpos = gauss.yCenter();
-    itsFluxInt_island = obj.getIntegFlux() * intFluxscale;
-    itsFluxPeak_island = obj.getPeakFlux() * peakFluxscale;
+    itsFluxInt_island = obj.getIntegFlux() * itsIntFluxscale;
+    itsFluxPeak_island = obj.getPeakFlux() * itsPeakFluxscale;
     itsNfree_fit = results.numFreeParam();
     itsNDoF_fit = results.ndof();
     itsNpix_fit = results.numPix();
@@ -204,7 +204,7 @@ bool CasdaComponent::useAlphaBeta()
 {
     if ( itsParset.isDefined("spectralTerms.threshold") ) {
         float threshold = itsParset.getFloat("spectralTerms.threshold");
-        return itsFluxPeak.value() > threshold;
+        return itsFluxPeak.value()/itsPeakFluxscale > threshold;
     }
     else {
         float thresholdSNR = itsParset.getFloat("spectralTerms.thresholdSNR",0.0);
