@@ -99,7 +99,7 @@ CasdaComponent::CasdaComponent(sourcefitting::RadioSource &obj,
         }
     }
     
-   duchamp::FitsHeader newHead_freq = changeSpectralAxis(obj.header(), "FREQ", casda::freqUnit);
+    duchamp::FitsHeader newHead_freq = changeSpectralAxis(obj.header(), "FREQ", casda::freqUnit);
 
     double thisRA, thisDec, zworld;
     ASKAPLOG_DEBUG_STR(logger, "About to convert pixels to world:" << gauss.xCenter() << " " << gauss.yCenter() << " " << obj.getZcentre());
@@ -163,12 +163,20 @@ CasdaComponent::CasdaComponent(sourcefitting::RadioSource &obj,
     itsChisq = results.chisq();
     itsRMSfit = results.RMS() * peakFluxscale;
 
-    itsAlpha.value() = obj.alphaValues(fitType)[fitNumber];
-    itsBeta.value() = obj.betaValues(fitType)[fitNumber];
-    itsAlpha.error() = obj.alphaErrors(fitType)[fitNumber];
-    itsBeta.error() = obj.betaErrors(fitType)[fitNumber];
-
     itsRMSimage = obj.noiseLevel() * peakFluxscale;
+
+    if (useAlphaBeta()){
+        itsAlpha.value() = obj.alphaValues(fitType)[fitNumber];
+        itsBeta.value() = obj.betaValues(fitType)[fitNumber];
+        itsAlpha.error() = obj.alphaErrors(fitType)[fitNumber];
+        itsBeta.error() = obj.betaErrors(fitType)[fitNumber];
+    }
+    else {
+        itsAlpha.value() = sourcefitting::defaultAlpha;
+        itsBeta.value() = sourcefitting::defaultBeta;
+        itsAlpha.error() = 0.;
+        itsBeta.error() = 0.;
+    }
 
     itsFlagGuess = results.fitIsGuess() ? 1 : 0;
     itsFlagSiblings = obj.numFits(fitType) > 1 ? 1 : 0;
@@ -190,6 +198,19 @@ CasdaComponent::CasdaComponent(sourcefitting::RadioSource &obj,
     itsNpix_fit = results.numPix();
     itsNpix_island = obj.getSize();
 
+}
+
+bool CasdaComponent::useAlphaBeta()
+{
+    if ( itsParset.isDefined("spectralTerms.threshold") ) {
+        float threshold = itsParset.getFloat("spectralTerms.threshold");
+        return itsFluxPeak.value() > threshold;
+    }
+    else {
+        float thresholdSNR = itsParset.getFloat("spectralTerms.thresholdSNR",0.0);
+        return itsFluxPeak.value()/itsRMSimage > thresholdSNR;
+    }
+        
 }
 
 const float CasdaComponent::ra()

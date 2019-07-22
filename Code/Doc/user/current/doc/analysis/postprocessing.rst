@@ -358,7 +358,10 @@ the best fit for a given number of Gaussians should not be affected
 (although the second of our acceptance criteria might have to change).
 
 Output files
-............
+~~~~~~~~~~~~
+
+Component Catalogue
+...................
 
 Several files are produced to show the results of the Gaussian
 fitting. The first is a CASDA-compliant components catalogue. In
@@ -395,8 +398,8 @@ The columns are:
   "SB<SBID>\_" prefix will be omitted.
 * The position is indicated by the *component_name* (J2000 IAU
   format), as well as HMS/DMS-format strings and decimal degree values
-  for both RA and DEC. Errors in the position will also be given in
-  time (not yet implemented fully).
+  for both RA and DEC. Errors in the position are also given, derived
+  from the errors in the fitting.
 * *freq* shows the frequency of the image.
 * The peak and integrated fluxes are shown, with their errors.
 * The size and orientation of the fitted Gaussian is shown by the
@@ -408,7 +411,10 @@ The columns are:
   *rms_fit_gauss*.
 * The fitted spectral index and spectral curvature are shown when
   calculated. This is only done when the appropriate flags are set -
-  see `Spectral Terms`_. Errors are given for these as well.
+  see `Spectral Terms`_. Errors are given for these as well. If a
+  value is not given - either the fitting failed, or it falls below
+  one of the thresholds for the spectral terms - then the value in
+  this column will be -99, with a zero error.
 * *rms_image* shows the measurement of the local noise.
 * Several flags are reported:
   
@@ -423,6 +429,10 @@ The columns are:
     formally bad - it doesn't meet the chi-squared criterion, but is
     the best fit possible.
 
+
+Annotation files & maps of components
+.....................................
+    
 Along with the components catalogue, a matching Karma/CASA/DS9
 annotation (region) file will be produced showing the location & size
 of the components (each Gaussian component is indicated by an ellipse
@@ -440,6 +450,10 @@ files, unless **Fitter.imagetype=casa** is given. If *imagename* is
 the input image given to Selavy, the name of these images will be
 componentMap_*imagename*.fits and componentResidual_*imagename*.fits
 (with no ".fits" extension for casa images),
+
+
+General fit results catalogue
+.............................
 
 A similar output file is the fit Results catalogue. This is only
 produced when **writeFitResults=true**. This shows the fit results
@@ -522,6 +536,9 @@ Two types of annotation files will also be produced:
   boxes were not used, ie. **fitJustDetection=true**, this file is not
   created). 
 
+Component parset
+................
+  
 The user can request that a component parset be created,
 showing the fitted components. Such a file could be used in tasks such
 as :doc:`../calim/ccalibrator`, for self-calibration, or
@@ -537,17 +554,11 @@ to be point sources by setting
 :doc:`../calim/csimulator` for details on how components should be
 specified.
 
-Additionally, images showing the fitted Gaussians and the residual map
-after subtracting these Gaussians from the input image are always
-created when *doFit=true*. These will be named to match the input
-image: the map of fitted Gaussians will have **componentMap_** prepended
-to the image name, and the residual map will have **componentResidual_**
-prepended.
 
 .. _Spectral Terms: postprocessing.html#spectral-index-curvature
 
 Parameters for fitting
-......................
+~~~~~~~~~~~~~~~~~~~~~~
 
 +-----------------------------------------------+---------------+----------------------------+-----------------------------------------------------------------------------------------+
 |*Parameter*                                    |*Type*         |*Default*                   |*Description*                                                                            |
@@ -721,14 +732,15 @@ If the additional Taylor maps are not available, or the
 for spectral-index and spectral-curvature will be set to the special
 value of -99.
 
-Measuring spectral terms from a continuum cube
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Measuring spectral terms from a cube
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Selavy provides an alternative method for obtaining the spectral
-terms. If a continuum cube is available (that is, a cube that
-preserves the individual channels, rather than collapsing them to form
-the Taylor images), then spectra can be extracted from it and the
-spectral terms determined via fitting.
+terms. If a cube is available (that is, a 3D image cube that preserves
+the individual channels, rather than collapsing them to form the
+Taylor images), then spectra can be extracted from it and the spectral
+terms determined via fitting. The cube need not have the same pixel
+grid - extraction is done based on the RA/Dec location.
 
 Each component has its spectrum extracted in the same manner as for
 the Rotation Measure Synthesis (see below, and on :doc:`extraction`).
@@ -740,7 +752,17 @@ and beta will be fit, but this can be set to 1 or 2 instead.
 The user can also impose a threshold S/N value on a
 component-by-component basis, below which no fitting will be done.
 This defaults to zero, however, meaning all components will have their
-spectra fitted. 
+spectra fitted.
+
+Thresholding the reporting of spectral terms
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+In both the taylor-term and cube-based methods, a threshold can be
+applied to either the peak flux or the peak signal-to-noise ratio, so
+that alpha & beta values for components below that threshold are not
+reported in the component catalogue. The calculations will still be
+performed, but the values will not be reported in the catalogue - the
+special value of -99 will be used instead.
 
 
 Parameters for spectral term measurement
@@ -751,6 +773,14 @@ Parameters for spectral term measurement
 +==================================+===============+===============================+=======================================================================+
 |Selavy.spectralTermsFromTaylor    |bool           |true                           |Which mode to use to measure the spectral terms. True means use the    |
 |                                  |               |                               |Taylor-term images, while false means use a continuum cube.            |
++----------------------------------+---------------+-------------------------------+-----------------------------------------------------------------------+
+|Selavy.spectralTerms.threshold    |float          |*none*                         |Peak flux threshold for components, above which we report the spectral |
+|                                  |               |                               |terms in the component catlaogue. If not given, then the               |
+|                                  |               |                               |**thresholdSNR** parameter will be used instead.                       |
++----------------------------------+---------------+-------------------------------+-----------------------------------------------------------------------+
+|Selavy.spectralTerms.thresholdSNR |float          |0.0                            |Peak signal-to-noise threshold for components, above which we report   |
+|                                  |               |                               |the spectral terms in the component catlaogue. The noise level here is |
+|                                  |               |                               |the image noise                                                        |
 +----------------------------------+---------------+-------------------------------+-----------------------------------------------------------------------+
 |**Taylor-term images**            |               |                               |                                                                       |
 +----------------------------------+---------------+-------------------------------+-----------------------------------------------------------------------+
@@ -763,16 +793,16 @@ Parameters for spectral term measurement
 |Selavy.spectralTermImages         |vector<string> |Derived from image name - see  |You can explicitly set the images for each term like so:               |
 |                                  |               |text                           |**spectralTermImages = [image1, image2]**.                             |
 +----------------------------------+---------------+-------------------------------+-----------------------------------------------------------------------+
-|**Continuum-cube**                |               |                               |                                                                       |
+|**Cube-based extraction**         |               |                               |                                                                       |
 +----------------------------------+---------------+-------------------------------+-----------------------------------------------------------------------+
-|Selavy.spectralTerms.cube         |string         |""                             |The name of the continuum cube from which spectra should be extracted. |
+|Selavy.spectralTerms.cube         |string         |""                             |The name of the cube from which spectra should be extracted.           |
 +----------------------------------+---------------+-------------------------------+-----------------------------------------------------------------------+
 |Selavy.spectralTerms.beamlog      |string         |""                             |The name of the beamlog file, that describes how the PSF changes as a  |
 |                                  |               |                               |function of spectral channel.                                          |
 +----------------------------------+---------------+-------------------------------+-----------------------------------------------------------------------+
-|Selavy.spectralTerms.nterms       |int            |3                              |The number of terms to fit to in the continuum cube spectrum. Valid    |
-|                                  |               |                               |values are 1 (only I_0), 2 (I_0 &alpha), or 3 (I_0, alpha &            |
-|                                  |               |                               |beta). Larger values are set to 3, smaller values to 1.                |
+|Selavy.spectralTerms.nterms       |int            |3                              |The number of terms to fit to in the component spectrum. Valid values  |
+|                                  |               |                               |are 1 (only I_0), 2 (I_0 &alpha), or 3 (I_0, alpha & beta). Larger     |
+|                                  |               |                               |values are set to 3, smaller values to 1.                              |
 +----------------------------------+---------------+-------------------------------+-----------------------------------------------------------------------+
 |Selavy.spectralTerms.snrThreshold |float          |0.                             |The threshold in component signal-to-noise ratio, below which no       |
 |                                  |               |                               |fitting is done to the spectra.                                        |

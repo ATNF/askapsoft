@@ -100,6 +100,14 @@ class CasdaComponent : public CatalogueEntry {
         /// Return the spectral curvature error
         const double betaErr();
 
+    /// @brief Determine whether to report the spectral index &
+    /// curvature values in the catalogue.
+    /// @details Base this on either the flux peak or the
+    /// flux_peak/rms_image value, comparing to the parset parameter
+    /// spectralTerms.threshold or spectralTerms.thresholdSNR
+    /// respectively.
+    bool useAlphaBeta();
+    
         ///  Print a row of values for the Component into an
         ///  output table. Each column from the catalogue
         ///  specification is sent to printTableEntry for output.
