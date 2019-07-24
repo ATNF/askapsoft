@@ -64,7 +64,10 @@ class ComplexDiffMatrixTest : public CppUnit::TestFixture
   CPPUNIT_TEST(testMultiply);
   CPPUNIT_TEST(testMatrixMultiply);
   CPPUNIT_TEST(testBlockMultiply);
+#ifdef ASKAP_DEBUG
+  // Note: Assertion in this test is only triggered in the debug mode.
   CPPUNIT_TEST_EXCEPTION(testBlockMultiplyFail, AskapError);
+#endif
   CPPUNIT_TEST(testBlockMultiplyRectangular);
   CPPUNIT_TEST(testBlockExtract);
   CPPUNIT_TEST(testBlockAdd);
