@@ -501,19 +501,19 @@ void GenericNormalEquations::add(const ComplexDiffMatrix &cdm, const PolXProduct
                       }
                  }
             }
-            if (!(nmElementBuf(0,0) == 0 && nmElementBuf(0,1) == 0
-                  && nmElementBuf(1,0) == 0 && nmElementBuf(1,1) == 0)) {
-            // Do not add zero elements into the normal matrix.
+
+            if (!allMatrixElementsAreZeros(nmElementBuf)) {
+            // Do not add zero elements into the sparse normal matrix.
                 // the following is effectively a copy of the matrix because we don't use nmElementBuf
                 // again and it goes out of scope
-                normalMatrix.insert(std::make_pair(*iterCol,nmElementBuf));
+                normalMatrix.insert(std::make_pair(*iterCol, nmElementBuf));
             }
        }
        // now add this row to the normal equations
        addParameterSparsely(*iterRow, normalMatrix, dataVector);
   }
 }
- 
+
 /// @brief Add a design matrix to the normal equations
 /// @details This method computes the contribution to the normal matrix 
 /// using a given design matrix and adds it.
@@ -525,7 +525,7 @@ void GenericNormalEquations::add(const DesignMatrix& dm)
   if (!nDataSet) {
       return; // nothing to process
   }
-  
+
   // Loop over all parameters defined by the design matrix.
   // It may be better to write an iterator over parameters defined in
   // the design matrix instead of building a set or list. 
@@ -537,9 +537,9 @@ void GenericNormalEquations::add(const DesignMatrix& dm)
        DMBVector::const_iterator residualIt = dm.residual().begin();
        ASKAPDEBUGASSERT(residualIt != dm.residual().end());
        ASKAPDEBUGASSERT(derivMatricesIt->ncolumn());
-       
+
        casa::Vector<double> dataVector; // data vector buffer for this row 
-       
+
        // it looks unnecessary from the first glance to fill the map
        // of matrices for the whole row. However, the design matrix can
        // be defined for a subset of parameters used by this normal equation
@@ -549,33 +549,54 @@ void GenericNormalEquations::add(const DesignMatrix& dm)
        // it is not too bad to calculate all elements in the row before
        // merging them with itsNormalMatrix
        MapOfMatrices normalMatrix; // normal matrix buffer for this row
-       
+
        // the first contribution
        dataVector = dvElement(*derivMatricesIt, *residualIt);
-       
+
        for (std::set<string>::const_iterator iterCol = names.begin();
                 iterCol != names.end(); ++iterCol) {
-                
-            normalMatrix.insert(std::make_pair(*iterCol, 
-                 nmElement(*derivMatricesIt, extractDerivatives(dm,*iterCol,0))));         
+
+           const casa::Matrix<double> elem = nmElement(*derivMatricesIt, extractDerivatives(dm, *iterCol, 0));
+           normalMatrix.insert(std::make_pair(*iterCol, elem));
        }
-      
+
        // now add up all other data points
        ++derivMatricesIt;
        for(casa::uInt dataPoint = 1; derivMatricesIt != derivMatrices.end() ;
                                ++dataPoint,++derivMatricesIt) {
            dataVector += dvElement(*derivMatricesIt, *residualIt);
-          
+
            for (MapOfMatrices::iterator iterCol = normalMatrix.begin();
                                iterCol != normalMatrix.end(); ++iterCol) {
-                    
-                iterCol->second += nmElement(*derivMatricesIt, 
+
+                iterCol->second += nmElement(*derivMatricesIt,
                            extractDerivatives(dm,iterCol->first,dataPoint));
            }
        }
-      addParameter(*iterRow, normalMatrix, dataVector); 
+
+       // Erase zero elements. We don't want to store them in the sparse normal matrix.
+       for (MapOfMatrices::iterator iterCol = normalMatrix.begin();
+            iterCol != normalMatrix.end();) {
+           if (allMatrixElementsAreZeros(iterCol->second)) {
+               normalMatrix.erase(iterCol++);
+           } else {
+               iterCol++;
+           }
+       }
+       addParameterSparsely(*iterRow, normalMatrix, dataVector);
   }
-    
+}
+
+bool GenericNormalEquations::allMatrixElementsAreZeros(const casa::Matrix<double>& matrix)
+{
+    for (size_t row = 0; row < matrix.nrow(); ++row) {
+         for (size_t col = 0; col < matrix.ncolumn(); ++col) {
+              if (matrix(row, col) != 0.) {
+                  return false;
+              }
+         }
+    }
+    return true;
 }
 
 /// @brief Extract derivatives from design matrix

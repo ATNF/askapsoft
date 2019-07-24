@@ -301,7 +301,7 @@ protected:
   /// @return element of the right-hand side of the normal equations
   static casa::Vector<double> dvElement(const casa::Matrix<double> &dm,
               const casa::Vector<double> &dv); 
-  
+
   /// @brief Extract derivatives from design matrix
   /// @details This method extracts an appropriate derivative matrix
   /// from the given design matrix. Effectively, it implements
@@ -317,6 +317,12 @@ protected:
 private:
   // Adding the data vector for a parameter.
   void addDataVector(const std::string &par, const casa::Vector<double>& inDV);
+
+  /// @brief test that all matrix elements are zero
+  /// @details This is a helper method to test all matrix elements
+  /// @param[in] matrix matrix to test
+  /// @return true if all elements are zero
+  static bool allMatrixElementsAreZeros(const casa::Matrix<double>& matrix);
 
   /// @brief normal matrix
   /// @details Normal matrices stored as a map or maps of Matrixes - 
