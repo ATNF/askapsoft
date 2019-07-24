@@ -62,7 +62,7 @@ scons test
 # Run the solver test
 #
 cd $WORKSPACE/trunk/Code/Components/Synthesis/testdata/current/simulation/synthregression
-python calibratortest.py
+python calibratortest.py -p
 ERROR=$?
 if [ $ERROR -ne 0 ]; then
     echo "calibratortest.py returned errorcode $ERROR"
