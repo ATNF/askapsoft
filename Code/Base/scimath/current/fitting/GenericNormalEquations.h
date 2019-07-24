@@ -263,9 +263,8 @@ protected:
   /// @param[in] par name of the parameter to work with
   /// @param[in] inNM input normal matrix
   /// @param[in] inDV input data vector
-  /// @param[in] parDim parameter dimension
   void addParameterSparsely(const std::string &par, const MapOfMatrices &inNM,
-                            const casa::Vector<double>& inDV, size_t parDim);
+                            const casa::Vector<double>& inDV);
 
   /// @brief extract dimension of a parameter from the given row
   /// @details This helper method analyses the matrices stored in the supplied

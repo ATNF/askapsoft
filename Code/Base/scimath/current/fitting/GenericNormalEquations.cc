@@ -201,7 +201,7 @@ void GenericNormalEquations::mergeParameter(const std::string &par,
    const MapOfVectors::const_iterator srcItData = src.itsDataVector.find(par);
    ASKAPDEBUGASSERT(srcItData != src.itsDataVector.end());
 
-   addParameterSparsely(par, srcItRow->second, srcItData->second, 2);
+   addParameterSparsely(par, srcItRow->second, srcItData->second);
 }
 
 /// @brief Add/update one parameter using given matrix and data vector
@@ -281,7 +281,7 @@ void GenericNormalEquations::addParameter(const std::string &par,
 }
 
 void GenericNormalEquations::addParameterSparsely(const std::string &par,
-           const MapOfMatrices &inNM, const casa::Vector<double>& inDV, size_t parDim)
+           const MapOfMatrices &inNM, const casa::Vector<double>& inDV)
 {
   // First, process normal matrix.
   // nmRowIt is an iterator over rows (the outer map) of the normal matrix stored in this class
@@ -297,10 +297,16 @@ void GenericNormalEquations::addParameterSparsely(const std::string &par,
       // Search for an appropriate parameter in the normal matrix.
       MapOfMatrices::iterator nmColIt = nmRowIt->second.find(inNMIt->first);
       if (nmColIt == nmRowIt->second.end()) {
+
+          // Extract parameter dimensions.
+          const casa::uInt rowParDim = inNMIt->second.nrow();
+          const casa::uInt colParDim = inNMIt->second.ncolumn();
+
           // Initialize a column with an empty matrix.
           // Note: only the columns used in the calculation get initialized.
           nmColIt = nmRowIt->second.insert(
-                        std::make_pair(inNMIt->first, casa::Matrix<double>(parDim, parDim, 0.))).first;
+                        std::make_pair(inNMIt->first,
+                                       casa::Matrix<double>(rowParDim, colParDim, 0.))).first;
       }
 
       // Work with cross-terms if the input matrix have them.
@@ -504,7 +510,7 @@ void GenericNormalEquations::add(const ComplexDiffMatrix &cdm, const PolXProduct
             }
        }
        // now add this row to the normal equations
-       addParameterSparsely(*iterRow, normalMatrix, dataVector, 2);
+       addParameterSparsely(*iterRow, normalMatrix, dataVector);
   }
 }
  
