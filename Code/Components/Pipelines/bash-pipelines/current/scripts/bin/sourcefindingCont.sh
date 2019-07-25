@@ -292,7 +292,7 @@ if [ "\${HAVE_IMAGES}" == "true" ]; then
 
     # Set the spectral-index-measuring options
 
-    SpectralTermUse="# These parameters define the measurement of spectral indices
+    SpectralTermUse="# These parameters define the measurement of spectral indices"
     alphaThreshold="${SELAVY_SPECTRAL_INDEX_THRESHOLD}"
     alphaThresholdSNR="${SELAVY_SPECTRAL_INDEX_THRESHOLD_SNR}"
     if [ "\${alphaThreshold}" != "" ]; then
