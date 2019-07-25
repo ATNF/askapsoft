@@ -48,8 +48,14 @@ The following is a list of files included in the upload to CASDA:
 * Measurement sets: all continuum measurement sets are included as
   individual files, along with all spectral measurement sets if
   requested. These will be tarred for access through CASDA. The
-  pipeline metadata directory will be copied into the measurement set,
-  where it will appear as a directory called ASKAP_METADATA.
+  pipeline metadata directory (see :doc:`pipelineUsage`) will be
+  copied into the measurement set, where it will appear as a directory
+  called **ASKAP_METADATA**. Note that since this is a directory of
+  text files, rather than a table, it will not be programmatically
+  accessible in the same way as other MS tables. It is simply provided
+  as a way of co-locating the metadata information with the rest of
+  the MS, to ensure that a CASDA user can acquire information such as
+  the beam footprint at the same time as the MS.
 * Catalogues: all Selavy catalogues created for the final mosaics, in
   VOTable/XML format, along with any catalogues used for the continuum
   subtraction (if the components method is used).

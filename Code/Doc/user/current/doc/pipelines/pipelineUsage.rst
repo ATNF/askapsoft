@@ -120,7 +120,7 @@ files. These are:
   to the queue via the sbatch command. When a job is run, it makes a
   copy of the file that is labelled with the job ID.
 * *metadata/* – information about the measurement sets and the beam
-  footprint are written to files here.
+  footprint are written to files here. See below for details on files. 
 * *parsets/* – any parameter sets used by the askapsoft applications
   are written here. These contain the actual parameters that are used
   by the various programs. These are labeled by the job ID.
@@ -150,6 +150,49 @@ files. These are:
   skip certain stages, if required by the user. A version of this
   directory is put in each field directory.
 
+
+Metadata directory
+~~~~~~~~~~~~~~~~~~
+
+The metadata directory contains a number of files that hold important
+metadata describing the observation that is not yet available through
+the measurement set. These files are used at various stages in the
+processing. The files are:
+
+* *mslist-<timestamp><index>.txt* - Results of running mslist
+  (:doc:`../calim/mslist`) on a measurement set. This summarises the
+  metadata of the observation, including: time range; spectral window
+  (frequency range, number of channels, etc); field list (where the
+  telescope was pointing); list of antennas used. When the observation
+  has more than one raw MS, only one is used (as they should all have
+  the same metadata), and the *<index>* addition will indicate which
+  file was used. If there is a single MS in the raw directory, there
+  will only be a timestamp. There may be other mslist files created
+  for the intermediate MSs created during the pipeline processing,
+  depending on the modes used.
+* *mslist-cal-<timestamp>.txt* - As above, but for the bandpass
+  calibration observation.
+* *mslist-<timestamp><index>.txt.timerange* - When the
+  ``DO_SPLIT_TIMEWISE=true`` option is used, this lists the boundaries
+  (start and end) of each time range that the data will be split into. 
+* *fieldlist-<timestamp><index>.txt* - Extracted from the mslist
+  output, this is the list of fields for the science observation. This
+  is used to define the footprint positions.
+* *schedblock-info-<SBID>.txt* - Summary of the information from the
+  scheduling block database. For each SBID, this lists the summary
+  information, the parameters and the variables. This includes the
+  specification for the beam footprint, which is used to form the next
+  file.
+* *footprintOutput-sb<SBID>-<FIELD>.txt* - A list of the locations and
+  offsets of each beam in the footprint used for a given field of the
+  science observation. Each field (ie. pointing direction) in the MS
+  gets its own footprint file. This is used by the pipeline to define
+  the locations of the individual beam images.
+
+As detailed in :doc:`archiving`, the metadata folder will be copied
+into each archived MS prior to it being tarred, and also provided in
+the evaluation files made available in CASDA.
+  
 Measurement sets
 ----------------
 
