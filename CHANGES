@@ -1,8 +1,7 @@
-0.24.2 (TBC)
-------------
+0.24.2 (25 July 2019)
+---------------------
 
-This is planned as a patch release, and the following items have been
-fixed:
+This is largely a patch release, with a few minor additional features.
 
 Pipelines:
 
@@ -10,13 +9,34 @@ Pipelines:
    smooth out the memory usage a little.
  * Use the bptool module to identify antennas to flag based on the
    bandpass calibration table. Triggered by the new parameter
-   DO_PREFLAG_SCIENCE.
+   DO_PREFLAG_SCIENCE. The bptool module is now assumed to be in the
+   same place as other ASKAP modules.
  * Checkfiles will now indicate the time-window where appropriate, to
    better distinguish work that has been done on datasets.
  * Checks for spectral-line parameters are now only done when
    DO_SPECTRAL_PROCESSING is set to true as well as DO_SPECTRAL_IMAGING. 
  * Time-split data will now no longer be regenerated if the merged
    dataset is present.
+ * The second mosaicking job is now only done if there is more than
+   one field. There are also better error checking done for the
+   copying of the mosaic in the case of a single field.
+ * The altrestored mosaicking jobs are not launched when this mode is
+   not used.
+ * When restarting a partially failed imaging pipeline, the selfcal
+   gains table is also searched for to see if a given beam needs
+   re-doing (previously it was only looking for the image, which meant
+   a partially-completed selfcal job could look like it was complete).
+ * The gatherStats slurm job now has a longer time request, to prevent
+   it timing out for SBs with large numbers of fields.
+ * Additional checks are made when restarting selfcal, so that the
+   gains table needs to be present (as well as the image) for the
+   selfcal to be skipped.
+ * When measuring the spectral indices from the continuum cubes, the
+   pipeline scripts will now use the reference-beam's beamLog to
+   correctly scale the spectra prior to fitting.
+ * When archiving measurement sets, the metadata directory is now
+   copied into the MS prior to it being tarred, where it is called
+   ASKAP_METADATA.
  * New or changed pipeline default parameters:
 
    - DO_PREFLAG_SCIENCE (true)
@@ -27,21 +47,46 @@ Pipelines:
    - SELAVY_NSUBY is now 6
    - ARCHIVE_SPECTRAL_MS is now false
    - MULTI_JOB_SELFCAL is now false
-
+   - SELAVY_SPECTRAL_INDEX_THRESHOLD and
+     SELAVY_SPECTRAL_INDEX_THRESHOLD_SNR, for the new Selavy threshold
+     parameters (see below).
+   - PURGE_FULL_MS_AFTER_COPY to remove the full spectral MS after
+     copying a nominated channel range.
+     
 Processing:
 
- * A fix to Selavy to allow computation of spectral indices from
-   extracted spectra - this was failing due to uninitialised memory.
- * There are numerous performance enhancements to imaging and
-   linear-mosaicking, resulting in faster processing times.
- * The linear-mosaicking will now correct higher-order Taylor-term
-   images for primary beam variation with frequency, through the use
-   of the removebeam parameter.
- * The WProject gridder will now discard data above the wmax limit,
-   rather than throwing an exception.
- * The WProject gridder now has the option of using a static cache of
-   convolution functions, rather than re-generating for every instance
-   of a gridder.
+ * Selavy:
+
+   - Images created by Selavy, such as noise maps, will now have the
+     same image mask as the input image.
+   - There are new parameters "Selavy.spectralTerms.threshold" and
+     "Selavy.spectralTerms.thresholdSNR" to provide a minimum flux or
+     signal-to-noise ratio for the spectral index/curvature to be
+     reported in the component catalogue (components fainter than this
+     threshold will not have a spectral index/curvature value).
+   - A fix to the computation of spectral indices from extracted
+     spectra - this was failing due to uninitialised memory.
+
+ * MFS imaging:
+
+   - The higher-order Taylor-term residual images are now
+     appropriately scaled to take into account the coupling with the
+     Taylor-0 residual. The behaviour is now consistent with CASA. For
+     reliable spectral indices, it is recommended to measure from
+     cleaned sources.
+   - The linear-mosaicking will now correct higher-order Taylor-term
+     images for primary beam variation with frequency, through the use
+     of the removebeam parameter.
+
+ * General imaging:
+     
+   - There are numerous performance enhancements to imaging and
+     linear-mosaicking, resulting in faster processing times.
+   - The WProject gridder will now discard data above the wmax limit,
+     rather than throwing an exception.
+   - The WProject gridder now has the option of using a static cache
+     of convolution functions, rather than re-generating for every
+     instance of a gridder.
 
 0.24.1 (8 May 2019)
 -------------------
