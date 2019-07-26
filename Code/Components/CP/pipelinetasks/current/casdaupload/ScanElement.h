@@ -56,7 +56,11 @@ class ScanElement {
                     const casa::Vector<casa::Int> polarisations,
                     const int numchan,
                     const casa::Quantity& centrefreq,
-                    const casa::Quantity& channelwidth);
+                    const casa::Quantity& channelwidth,
+                    const unsigned int numTimeSteps,
+                    const float &majorAxis,
+                    const float &minorAxis,
+                    const float &positionAngle);
 
         xercesc::DOMElement* toXmlElement(xercesc::DOMDocument& doc) const;
 
@@ -70,6 +74,10 @@ class ScanElement {
         int itsNumChan;
         casa::Quantity itsCentreFreq;
         casa::Quantity itsChannelWidth;
+    unsigned int itsNumTimeSteps;
+    float itsMajorAxis;
+    float itsMinorAxis;
+    float itsPositionAngle;
 };
 
 }

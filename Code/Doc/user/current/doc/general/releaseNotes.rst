@@ -95,6 +95,15 @@ Processing:
      of convolution functions, rather than re-generating for every
      instance of a gridder.
 
+ * CASDA upload:
+
+   - The number of time steps for each scan in the measurement set are
+     now reported to CASDA via the observation.xml file.
+   - Each scan also has a field-of-view reported. It is currently the
+     FWHM of the beam (1.09 lambda/D), evaluated at the centre
+     frequency.
+
+
 
 0.24.1 (8 May 2019)
 -------------------

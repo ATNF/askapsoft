@@ -59,7 +59,11 @@ ScanElement::ScanElement(const int id,
                          const casa::Vector<casa::Int> polarisations,
                          const int numchan,
                          const casa::Quantity& centrefreq,
-                         const casa::Quantity& channelwidth)
+                         const casa::Quantity& channelwidth,
+                         const unsigned int numTimeSteps,
+                         const float &majorAxis,
+                         const float &minorAxis,
+                         const float &positionAngle)
     : itsId(id),
       itsScanStart(scanstart),
       itsScanEnd(scanend),
@@ -68,7 +72,11 @@ ScanElement::ScanElement(const int id,
       itsPolarisations(polarisations),
       itsNumChan(numchan),
       itsCentreFreq(centrefreq),
-      itsChannelWidth(channelwidth)
+      itsChannelWidth(channelwidth),
+      itsNumTimeSteps(numTimeSteps),
+      itsMajorAxis(majorAxis),
+      itsMinorAxis(minorAxis),
+      itsPositionAngle(positionAngle)
 {
 }
 
@@ -116,6 +124,13 @@ xercesc::DOMElement* ScanElement::toXmlElement(xercesc::DOMDocument& doc) const
     child = XercescUtils::addTextElement(*e, "chanwidth",
                                          toString(static_cast<uint64_t>(round(fabs(itsChannelWidth.getValue(FREQ_UNITS.c_str()))))));
     child->setAttribute(XercescString("units"), XercescString(FREQ_UNITS));
+
+    XercescUtils::addTextElement(*e, "timeSteps", toString(itsNumTimeSteps));
+
+    XercescUtils::addTextElement(*e, "majAxis", toString(itsMajorAxis));
+    XercescUtils::addTextElement(*e, "minAxis", toString(itsMinorAxis));
+    XercescUtils::addTextElement(*e, "posAng", toString(itsPositionAngle));
+    
 
     return e;
 }

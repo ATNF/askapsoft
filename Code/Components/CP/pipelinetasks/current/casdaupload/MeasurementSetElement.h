@@ -40,6 +40,7 @@
 // Local package includes
 #include "ProjectElementBase.h"
 #include "ScanElement.h"
+#include "PrimaryBeamEstimator.h"
 
 namespace askap {
 namespace cp {
@@ -67,6 +68,8 @@ class MeasurementSetElement : public ProjectElementBase {
         casa::MEpoch itsObsStart;
         casa::MEpoch itsObsEnd;
         std::vector<ScanElement> itsScans;
+
+    PrimaryBeamEstimator itsPB;
 };
 
 }

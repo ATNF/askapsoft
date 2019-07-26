@@ -53,6 +53,7 @@
 
 // Local package includes
 #include "casdaupload/ScanElement.h"
+#include "casdaupload/PrimaryBeamEstimator.h"
 
 // Using
 using namespace std;
@@ -65,7 +66,8 @@ using askap::accessors::XercescUtils;
 ASKAP_LOGGER(logger, ".MeasurementSetElement");
 
 MeasurementSetElement::MeasurementSetElement(const LOFAR::ParameterSet &parset)
-    : ProjectElementBase(parset)
+    : ProjectElementBase(parset),
+      itsPB(parset)
 {
     itsName = "measurement_set";
     itsFormat = "tar";
@@ -139,9 +141,11 @@ void MeasurementSetElement::extractData()
     // Iterate over all rows, creating a ScanElement for each scan
     casa::Int lastScanId = -1;
     casa::uInt row = 0;
+    ASKAPLOG_INFO_STR(logger, "Iterating over " << msc.nrow() << " rows to extract scans");
     while (row < msc.nrow()) {
         const casa::Int scanNum = msc.scanNumber()(row);
         if (scanNum > lastScanId) {
+            ASKAPLOG_INFO_STR(logger, "New scan number " << scanNum);
             lastScanId = scanNum;
             // 1: Collect scan metadata that is expected to remain constant for the whole scan
             const casa::MEpoch startTime = msc.timeMeas()(row);
@@ -169,11 +173,33 @@ void MeasurementSetElement::extractData()
             }
             const casa::Vector<double> chanWidth = spwc.chanWidth()(descSpwId);
 
-            // 2: Find the final timestamp for this scan
+            // 2: Find the final timestamp for this scan, along with the count of distinct timesteps
+            unsigned int nTimeSteps=0;
+	    MEpoch previousTime=startTime;
+            ASKAPLOG_INFO_STR(logger, "Starting to search for all these scan rows, from row="<<row);
             while (row < msc.nrow() && msc.scanNumber()(row) == scanNum) {
                 ++row;
+                if (row==msc.nrow()){
+                    nTimeSteps++;
+                }
+                else{ 
+                    const MEpoch thisTime = msc.timeMeas()(row);
+                    if(thisTime.getValue() != previousTime.getValue()){
+                        nTimeSteps++;
+                    }
+                    previousTime = thisTime;
+                }
             }
+            ASKAPLOG_INFO_STR(logger, "Got up to row="<<row-1 << " with " << nTimeSteps << " time steps");
             const MEpoch endTime = msc.timeMeas()(row - 1);
+
+
+            ASKAPLOG_INFO_STR(logger, "Defining primary beam size & shape");
+            itsPB.define(centreFreq);
+            const float major=itsPB.major();
+            const float minor=itsPB.minor();
+            const float pa=itsPB.pa();
+            ASKAPLOG_INFO_STR(logger, "Got beam of " << major <<"x"<<minor <<", PA="<<pa);
 
             // 3: Store the ScanElement
             itsScans.push_back(ScanElement(scanNum,
@@ -184,7 +210,11 @@ void MeasurementSetElement::extractData()
                                            stokesTypesInt,
                                            nChan,
                                            Quantity(centreFreq, "Hz"),
-                                           Quantity(chanWidth(0), "Hz")));
+                                           Quantity(chanWidth(0), "Hz"),
+                                           nTimeSteps,
+                                           major,
+                                           minor,
+                                           pa));
         } else {
             ++row;
         }
