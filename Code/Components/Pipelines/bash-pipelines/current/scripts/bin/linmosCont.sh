@@ -156,6 +156,14 @@ if [ "\${imList}" != "" ]; then
             weightsImage="\${weightsImage}.fits"
         fi
     fi
+
+    removeBeamParams="# Single Taylor-term, so no removebeam parameter set"
+    if [ "\${NUM_TAYLOR_TERMS}" -gt 1 ]; then
+        removeBeamParams="# Mosaicking multiple Taylor-terms, and removing the spectral beam effect
+linmos.removebeam       = true
+linmos.nterms           = \${NUM_TAYLOR_TERMS}"
+    fi
+
     echo "Mosaicking to form \${imageName} using weighttype=${LINMOS_SINGLE_FIELD_WEIGHTTYPE}"
     echo "Image list = \${imList}"
     parset="${parsets}/science_\${jobCode}_${FIELDBEAM}_\${SLURM_JOB_ID}.in"
@@ -171,8 +179,7 @@ linmos.weightstate      = Inherent
 ${reference}
 linmos.psfref           = ${LINMOS_PSF_REF}
 linmos.cutoff           = ${LINMOS_CUTOFF}
-linmos.removebeam       = true
-linmos.nterms           = \${NUM_TAYLOR_TERMS}
+\${removeBeamParams}
 EOFINNER
 
     NCORES=1
