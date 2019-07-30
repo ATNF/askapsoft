@@ -27,10 +27,6 @@
 /// @author Tim Cornwell <tim.cornwell@csiro.au>
 /// @author Vitaliy Ogarko <vogarko@gmail.com>
 ///
-#ifdef HAVE_MPI
-#include <mpi.h>
-#endif
-
 #include <fitting/LinearSolver.h>
 #include <fitting/GenericNormalEquations.h>
 
@@ -85,7 +81,9 @@ namespace askap
     /// threshold is not allowed and will cause an exception.
     LinearSolver::LinearSolver(double maxCondNumber) : 
            itsMaxCondNumber(maxCondNumber),
-           itsWorkersComm(NULL),
+#ifdef HAVE_MPI
+           itsWorkersComm(MPI_COMM_NULL),
+#endif
            itsMajorLoopIterationNumber(0)
     {
       ASKAPASSERT(itsMaxCondNumber!=0);
@@ -778,7 +776,14 @@ std::pair<double,double> LinearSolver::solveSubsetOfNormalEquations(Params &para
 
     void LinearSolver::SetWorkersCommunicator(void *comm)
     {
-        itsWorkersComm = comm;
+#ifdef HAVE_MPI
+        if (comm != NULL) {
+            MPI_Comm *mpicomm = static_cast<MPI_Comm*>(comm);
+
+            // Duplicate the communicator with a new context.
+            MPI_Comm_dup(*mpicomm, &itsWorkersComm);
+        }
+#endif
     }
 
     void LinearSolver::SetMajorLoopIterationNumber(size_t it)

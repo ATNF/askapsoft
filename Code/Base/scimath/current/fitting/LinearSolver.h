@@ -30,6 +30,10 @@
 #ifndef SCIMATHLINEARSOLVER_H_
 #define SCIMATHLINEARSOLVER_H_
 
+#ifdef HAVE_MPI
+#include <mpi.h>
+#endif
+
 #include <fitting/Solver.h>
 #include <fitting/INormalEquations.h>
 #include <fitting/DesignMatrix.h>
@@ -120,8 +124,10 @@ namespace askap
          /// taken into account in the svd method
          double itsMaxCondNumber;
 
+#ifdef HAVE_MPI
          // MPI communicator of all workers (for LSQR solver).
-         void *itsWorkersComm;
+         MPI_Comm itsWorkersComm;
+#endif
 
          // Iteration number in the major loop (for LSQR solver with constraints).
          size_t itsMajorLoopIterationNumber;
