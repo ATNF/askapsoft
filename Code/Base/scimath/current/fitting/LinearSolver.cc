@@ -48,6 +48,7 @@
 #include <lsqr_solver/SparseMatrix.h>
 #include <lsqr_solver/LSQRSolver.h>
 #include <lsqr_solver/ModelDamping.h>
+#include <lsqr_solver/ParallelTools.h>
 
 #include <askap/AskapLogging.h>
 ASKAP_LOGGER(logger, ".linearsolver");
@@ -215,23 +216,47 @@ std::pair<double,double> LinearSolver::solveSubsetOfNormalEquations(Params &para
     const GenericNormalEquations& gne = dynamic_cast<const GenericNormalEquations&>(normalEquations());
     size_t nElements = gne.getNumberElements();
 
-    ASKAPLOG_INFO_STR(logger, "Linear solver nParameters = " << nParameters << ", nElements = " << nElements);
+    ASKAPLOG_INFO_STR(logger, "nParameters = " << nParameters << ", nElements = " << nElements);
+
+    //------------------------------------------------------------------------------
+    // Define MPI partitioning (needed for LSQR solver).
+    //------------------------------------------------------------------------------
+    void* comm = NULL;
+    int myrank = 0;
+    int nbproc = 1;
+
+    bool matrixIsParallel = false;
+    if (parameters().count("parallelMatrix") > 0
+        && parameters().at("parallelMatrix") == "true") {
+        ASKAPCHECK(algorithmLSQR, "Parallel matrix is only supported for the LSQR solver!");
+        matrixIsParallel = true;
+    }
+
+    if (algorithmLSQR) {
+#ifdef HAVE_MPI
+        if (matrixIsParallel) {
+        // The parallel matrix case - need to define the parallel partitioning.
+            ASKAPCHECK(itsWorkersComm != MPI_COMM_NULL, "Workers communicator is not defined!");
+            comm = (void *)&itsWorkersComm;
+            MPI_Comm_rank(itsWorkersComm, &myrank);
+            MPI_Comm_size(itsWorkersComm, &nbproc);
+        } else {
+            MPI_Comm comm_world = MPI_COMM_WORLD;
+            comm = (void *)&comm_world;
+        }
+#endif
+        ASKAPLOG_INFO_STR(logger, "it, matrixIsParallel, myrank = " << itsMajorLoopIterationNumber << ", " << matrixIsParallel << ", " << myrank);
+    }
 
     //------------------------------------------------------------------------------
     // Define LSQR solver sparse matrix.
     //------------------------------------------------------------------------------
-    void* comm = NULL;
     size_t nrows = 0;
     size_t nnz = 0;
     bool addSmoothnessConstraints = false;
+    size_t nParametersTotal = nParameters;
 
     if (algorithmLSQR) {
-
-#ifdef HAVE_MPI
-        MPI_Comm comm_world = MPI_COMM_WORLD;
-        comm = (void *)&comm_world;
-#endif
-
         // Define approximate number of nonzero elements.
         // Note: nElements may contain elements which are not currently being solved for.
         if (nElements <= nParameters * nParameters) {
@@ -240,14 +265,20 @@ std::pair<double,double> LinearSolver::solveSubsetOfNormalEquations(Params &para
             nnz = nParameters * nParameters;
         }
 
-        nrows = nParameters;
+        // Total number of parameters on all CPUs.
+        if (matrixIsParallel) {
+            nParametersTotal = lsqr::ParallelTools::get_total_number_elements(nParameters, nbproc, &itsWorkersComm);
+        }
+        ASKAPLOG_INFO_STR(logger, "nParametersTotal = " << nParametersTotal);
+
+        nrows = nParametersTotal;
         if (parameters().count("smoothing") > 0
             && parameters().at("smoothing") == "true") {
             addSmoothnessConstraints = true;
         }
 
         if (addSmoothnessConstraints) {
-            nrows += nParameters;
+            nrows += nParametersTotal;
             nnz += 2 * nParameters;
         }
     }
@@ -258,6 +289,13 @@ std::pair<double,double> LinearSolver::solveSubsetOfNormalEquations(Params &para
     //      - to gsl NxN matrix, for the SVD solver;
     //      - to sparse matrix (CSR format), for the LSQR solver.
     //--------------------------------------------------------------------------------------------
+    if (algorithmLSQR && matrixIsParallel) {
+        // Adding staring matrix empty rows, i.e., the rows in a big block-diagonal matrix above the current block.
+        size_t nParametersSmaller = lsqr::ParallelTools::get_nsmaller(nParameters, myrank, nbproc, &itsWorkersComm);
+        for (size_t i = 0; i < nParametersSmaller; ++i) {
+            matrix.NewRow();
+        }
+    }
 
     // Loop over matrix rows.
     for (std::vector<std::pair<string, int> >::const_iterator indit1 = indices.begin();
@@ -318,9 +356,24 @@ std::pair<double,double> LinearSolver::solveSubsetOfNormalEquations(Params &para
     }
 
     if (algorithmLSQR) {
+        if (matrixIsParallel) {
+            size_t nParametersSmaller = lsqr::ParallelTools::get_nsmaller(nParameters, myrank, nbproc, &itsWorkersComm);
+            ASKAPCHECK(matrix.GetCurrentNumberRows() == (nParametersSmaller + nParameters), "Wrong number of matrix rows!");
+
+            // Adding ending matrix empty rows, i.e., the rows in a big block-diagonal matrix below the current block.
+            size_t nEndRows = nParametersTotal - nParametersSmaller - nParameters;
+            for (size_t i = 0; i < nEndRows; ++i) {
+                matrix.NewRow();
+            }
+        }
+        ASKAPCHECK(matrix.GetCurrentNumberRows() == nParametersTotal, "Wrong number of matrix rows!");
+    }
+
+    //----------------------------------------------------------------------------------------------------------------------------
+    if (algorithmLSQR) {
         size_t nonzeros = matrix.GetNumberElements();
-        ASKAPLOG_INFO_STR(logger, "Linear solver Jacobian nonzeros = " << nonzeros);
-        ASKAPLOG_INFO_STR(logger, "Linear solver Jacobian sparsity = " << (double)(nonzeros) / (double)(nParameters) / (double)(nParameters));
+        double sparsity = (double)(nonzeros) / (double)(nParameters) / (double)(nParameters);
+        ASKAPLOG_INFO_STR(logger, "Jacobian nonzeros, sparsity = " << nonzeros << ", " << sparsity << " on rank " << myrank);
     }
 
     if (!algorithmLSQR) {
@@ -472,26 +525,33 @@ std::pair<double,double> LinearSolver::solveSubsetOfNormalEquations(Params &para
     else if (algorithmLSQR) {
         ASKAPLOG_INFO_STR(logger, "Solving normal equations using the LSQR solver");
 
-        int myrank = 0;
-        int nbproc = 1;
-
-        lsqr::Vector b_RHS(nrows, 0.);
-
+        //----------------------------------------------------
         // Define the right-hand side (the data misfit part).
+        //----------------------------------------------------
+        lsqr::Vector b_RHS(nParametersTotal, 0.);
+
+        size_t nDataAdded = 0;
         for (std::vector<std::pair<string, int> >::const_iterator indit1=indices.begin();indit1!=indices.end(); ++indit1) {
             const casa::Vector<double> &dv = normalEquations().dataVector(indit1->first);
-            for (size_t row=0; row<dv.nelements(); ++row) {
+            for (size_t row = 0; row < dv.nelements(); ++row) {
                  const double elem = dv(row);
-                 ASKAPCHECK(!std::isnan(elem), "Data vector seems to have NaN for row = "<<row<<", this shouldn't happen!");
-                 //gsl_vector_set(B, row+(indit1->second), elem);
+                 ASKAPCHECK(!std::isnan(elem), "Data vector seems to have NaN for row = " << row << ", this shouldn't happen!");
                  b_RHS[row+(indit1->second)] = elem;
+                 nDataAdded++;
             }
+        }
+        ASKAPCHECK(nDataAdded == nParameters, "Wrong number of data added on rank " << myrank);
+
+        if (matrixIsParallel) {
+            lsqr::ParallelTools::get_full_array_in_place(nParameters, b_RHS, true, myrank, nbproc, &itsWorkersComm);
         }
 
         if (addSmoothnessConstraints) {
         //-----------------------------------------------
         // Adding smoothness constraints.
         //-----------------------------------------------
+            b_RHS.resize(b_RHS.size() + nParametersTotal);
+
             // Setting the smoothing weight.
             double smoothingWeight = 0.;
             if (addSmoothnessConstraints) {
@@ -679,7 +739,7 @@ std::pair<double,double> LinearSolver::solveSubsetOfNormalEquations(Params &para
 
         solver.Solve(niter, rmin, matrix, b_RHS, x, myrank, nbproc, suppress_output);
 
-        ASKAPLOG_INFO_STR(logger, "Completed LSQR in " << timer.real() << " seconds");
+        ASKAPLOG_INFO_STR(logger, "Completed LSQR in " << timer.real() << " seconds on rank " << myrank);
 
         //------------------------------------------------------------------------
         // Update the parameters for the calculated changes.
