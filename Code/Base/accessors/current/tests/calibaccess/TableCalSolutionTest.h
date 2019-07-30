@@ -50,6 +50,7 @@ class TableCalSolutionTest : public CppUnit::TestFixture
    CPPUNIT_TEST_SUITE(TableCalSolutionTest);
    CPPUNIT_TEST(testCreate);
    CPPUNIT_TEST(testRead);
+   CPPUNIT_TEST(testBlankEntries);
    CPPUNIT_TEST(testChanAdapterRead);
    CPPUNIT_TEST_EXCEPTION(testChanAdapterUndefinedBandpass, AskapError);
    CPPUNIT_TEST_EXCEPTION(testUndefinedGains, AskapError);
@@ -160,23 +161,10 @@ public:
             }
        }
    }
-   
-   void testRead() {
-       // rerun the code creating a table, although we could've just relied on the fact that testCreate() is executed
-       // just before this test
-       testCreate();
-       const boost::shared_ptr<ICalSolutionConstSource> css = roSource();
-       CPPUNIT_ASSERT(css);
-       const long sID = css->mostRecentSolution();
-       CPPUNIT_ASSERT_EQUAL(2l, sID);
-       for (long id = 0; id<3; ++id) {
-            CPPUNIT_ASSERT_EQUAL(id, css->solutionID(0.5+60.*id));
-       }
-       const boost::shared_ptr<ICalSolutionConstAccessor> acc = css->roSolution(sID);
+   // common code testing bandpass calibration data
+   // it is used in both normal source/accessor test 
+   void doBandpassTest(const boost::shared_ptr<ICalSolutionConstAccessor> &acc) {
        CPPUNIT_ASSERT(acc);
-       doGainAndLeakageTest(acc);
-
-       // test bandpasses
        for (casa::uInt ant = 0; ant<6; ++ant) {
             for (casa::uInt beam = 0; beam<3; ++beam) {
                  const JonesIndex index(ant,beam);
@@ -197,6 +185,65 @@ public:
                  }
             }
        }       
+   }
+   
+   void testBlankEntries() {
+       // rerun the code creating a table to ensure we always get the same starting point in the spirit of unit tests
+       testCreate();
+       // although not strictly necessary, run the following code inside the block to ensure destructors are called
+       {
+          const boost::shared_ptr<ICalSolutionSource> css = rwSource(false);
+          for (long id = 3; id < 10; ++id) {
+               const long newID = css->newSolutionID(60. * id);
+               CPPUNIT_ASSERT_EQUAL(id, newID);
+               // eliberatly don't set any calibration information for this solution ID
+          }
+          const long newID = css->newSolutionID(600.);
+          CPPUNIT_ASSERT_EQUAL(10l, newID);
+          boost::shared_ptr<ICalSolutionAccessor> acc = css->rwSolution(newID);
+          acc->setGain(JonesIndex(0u,0u),JonesJTerm(casa::Complex(1.0,-1.0),true,casa::Complex(-1.0,1.0),true));
+          acc->setLeakage(JonesIndex(2u,1u),JonesDTerm(casa::Complex(0.1,-0.1),true,casa::Complex(-0.1,0.4),false));
+          acc->setBandpass(JonesIndex(1u,1u),JonesJTerm(casa::Complex(1.0,-0.2),true,casa::Complex(0.9,-0.1),true),1u);       
+       }
+       // reading
+       const boost::shared_ptr<ICalSolutionConstSource> css = roSource();
+       CPPUNIT_ASSERT(css);
+       {
+          const long sID = css->mostRecentSolution();
+          CPPUNIT_ASSERT_EQUAL(10l, sID);
+          const boost::shared_ptr<ICalSolutionConstAccessor> acc = css->roSolution(sID);
+          CPPUNIT_ASSERT(acc);
+          doGainAndLeakageTest(acc);
+          doBandpassTest(acc);
+       }
+       // rows with empty cells
+       for (long id = 9; id >= 3; --id) {
+            const long sID = css->solutionID(60. * id);
+            CPPUNIT_ASSERT_EQUAL(id, sID);
+            const boost::shared_ptr<ICalSolutionConstAccessor> acc = css->roSolution(sID);
+            CPPUNIT_ASSERT(acc);
+            doGainAndLeakageTest(acc);
+            doBandpassTest(acc);
+       }
+   }
+   
+   void testRead() {
+       // rerun the code creating a table, although we could've just relied on the fact that testCreate() is executed
+       // just before this test
+       testCreate();
+       const boost::shared_ptr<ICalSolutionConstSource> css = roSource();
+       CPPUNIT_ASSERT(css);
+       const long sID = css->mostRecentSolution();
+       CPPUNIT_ASSERT_EQUAL(2l, sID);
+       for (long id = 0; id<3; ++id) {
+            CPPUNIT_ASSERT_EQUAL(id, css->solutionID(0.5+60.*id));
+       }
+       const boost::shared_ptr<ICalSolutionConstAccessor> acc = css->roSolution(sID);
+       CPPUNIT_ASSERT(acc);
+       doGainAndLeakageTest(acc);
+
+       // test bandpasses
+       doBandpassTest(acc);
    }
 
    void testChanAdapterRead() {
