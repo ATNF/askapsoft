@@ -17,7 +17,7 @@
 
 namespace askap { namespace lsqr { namespace ParallelTools {
 
-void get_number_elements_on_other_cpus(size_t nelements, IVector& nelements_at_cpu, int nbproc, void *comm)
+void get_number_elements_on_other_cpus(size_t nelements, IVector& nelements_at_cpu, int nbproc, const void *comm)
 {
     if (nelements_at_cpu.size() != size_t(nbproc))
     {
@@ -31,7 +31,7 @@ void get_number_elements_on_other_cpus(size_t nelements, IVector& nelements_at_c
     }
 
 #ifdef HAVE_MPI
-    MPI_Comm *mpi_comm = static_cast<MPI_Comm*>(comm);
+    const MPI_Comm *mpi_comm = static_cast<const MPI_Comm*>(comm);
 
     MPI_Gather(&nelements, 1, MPI_INTEGER, nelements_at_cpu.data(), 1, MPI_INTEGER, 0, *mpi_comm);
     MPI_Bcast(nelements_at_cpu.data(), nbproc, MPI_INTEGER, 0, *mpi_comm);
@@ -41,7 +41,7 @@ void get_number_elements_on_other_cpus(size_t nelements, IVector& nelements_at_c
 #endif
 }
 
-size_t get_total_number_elements(size_t nelements, int nbproc, void *comm)
+size_t get_total_number_elements(size_t nelements, int nbproc, const void *comm)
 {
     if (nbproc == 1)
     {
@@ -59,7 +59,7 @@ size_t get_total_number_elements(size_t nelements, int nbproc, void *comm)
     return nelements_total;
 }
 
-size_t get_nsmaller(size_t nelements, int myrank, int nbproc, void *comm)
+size_t get_nsmaller(size_t nelements, int myrank, int nbproc, const void *comm)
 {
     if (nbproc == 1)
     {
@@ -77,7 +77,7 @@ size_t get_nsmaller(size_t nelements, int myrank, int nbproc, void *comm)
     return nsmaller;
 }
 
-void get_mpi_partitioning(size_t nelements, IVector& displs, IVector& nelements_at_cpu, int nbproc, void *comm)
+void get_mpi_partitioning(size_t nelements, IVector& displs, IVector& nelements_at_cpu, int nbproc, const void *comm)
 {
     // Sanity check.
     if (displs.size() != size_t(nbproc) || nelements_at_cpu.size() != size_t(nbproc))
@@ -93,7 +93,7 @@ void get_mpi_partitioning(size_t nelements, IVector& displs, IVector& nelements_
     }
 }
 
-void get_full_array(const Vector& localArray, size_t nelements, Vector& fullArray, bool bcast, int nbproc, void *comm)
+void get_full_array(const Vector& localArray, size_t nelements, Vector& fullArray, bool bcast, int nbproc, const void *comm)
 {
     if (nbproc == 1)
     { // Single CPU: no MPI needed.
@@ -102,7 +102,7 @@ void get_full_array(const Vector& localArray, size_t nelements, Vector& fullArra
     }
 
 #ifdef HAVE_MPI
-    MPI_Comm *mpi_comm = static_cast<MPI_Comm*>(comm);
+    const MPI_Comm *mpi_comm = static_cast<const MPI_Comm*>(comm);
 
     IVector displs(nbproc);
     IVector nelements_at_cpu(nbproc);
@@ -130,7 +130,7 @@ void get_full_array(const Vector& localArray, size_t nelements, Vector& fullArra
 #endif
 }
 
-void get_full_array_in_place(size_t nelements, Vector& array, bool bcast, int myrank, int nbproc, void *comm)
+void get_full_array_in_place(size_t nelements, Vector& array, bool bcast, int myrank, int nbproc, const void *comm)
 {
     if (nbproc == 1)
     { // Single CPU: no MPI needed.
@@ -138,7 +138,7 @@ void get_full_array_in_place(size_t nelements, Vector& array, bool bcast, int my
     }
 
 #ifdef HAVE_MPI
-    MPI_Comm *mpi_comm = static_cast<MPI_Comm*>(comm);
+    const MPI_Comm *mpi_comm = static_cast<const MPI_Comm*>(comm);
 
     IVector displs(nbproc);
     IVector nelements_at_cpu(nbproc);
