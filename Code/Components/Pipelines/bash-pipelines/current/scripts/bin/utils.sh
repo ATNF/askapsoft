@@ -395,11 +395,13 @@ function setImageProperties()
         fi
     fi
 
+    polSuffix="Stokes $(echo $pol | tr '[:upper:]' '[:lower:]')"
+
     base="${band}${imageBase}${imSuffix}"
 
     weightsImage="weights.${base}${extension}"
     weightsType="${typebase}_weight_$typeSuffix"
-    weightsLabel="Weights image, $beamSuffix"
+    weightsLabel="Weights image, $polSuffix, $beamSuffix"
 
     # Set the imageName according to the image code.
     # For the restored images, we need to have image.restored.$base
@@ -414,7 +416,7 @@ function setImageProperties()
             imageName="image.${base}.restored"
         fi
         imageType="${typebase}_restored_$typeSuffix"
-        label="Restored ${labelbase}, $beamSuffix"
+        label="Restored ${labelbase}, $polSuffix, $beamSuffix"
     elif [ "$imageCode" == "contsub" ]; then
         if [ "${doAlt}" == "true" ] && [ "${type}" != "cont" ]; then
             imageName="image.restored.${base%%.fits}.contsub"
@@ -422,7 +424,7 @@ function setImageProperties()
             imageName="image.${base%%.fits}.restored.contsub"
         fi
         imageType="${typebase}_restored_$typeSuffix"
-        label="Restored, Continuum-subtracted ${labelbase}, $beamSuffix"
+        label="Restored, Continuum-subtracted ${labelbase}, $polSuffix, $beamSuffix"
     elif [ "$imageCode" == "altrestored" ]; then
         if [ "${doAlt}" == "true" ] && [ "${type}" != "cont" ]; then
             imageName="image.restored.${base}.alt"
@@ -430,27 +432,27 @@ function setImageProperties()
             imageName="image.${base}.alt.restored"
         fi
         imageType="${typebase}_restored_$typeSuffix"
-        label="Restored ${labelbase}, $beamSuffix"
+        label="Restored ${labelbase}, $polSuffix, $beamSuffix"
     elif [ "$imageCode" == "image" ]; then
         imageName="image.${base}"
         imageType="${typebase}_cleanmodel_$typeSuffix"
-        label="Clean model ${labelbase}, $beamSuffix"
+        label="Clean model ${labelbase}, $polSuffix, $beamSuffix"
     elif [ "$imageCode" == "residual" ]; then
         imageName="residual.${base}"
         imageType="${typebase}_residual_$typeSuffix"
-        label="Clean residual ${labelbase}, $beamSuffix"
+        label="Clean residual ${labelbase}, $polSuffix, $beamSuffix"
     elif [ "$imageCode" == "sensitivity" ]; then
         imageName="sensitivity.${base}"
         imageType="${typebase}_sensitivity_$typeSuffix"
-        label="Sensitivity ${labelbase}, $beamSuffix"
+        label="Sensitivity ${labelbase}, $polSuffix, $beamSuffix"
     elif [ "$imageCode" == "psf" ]; then
         imageName="psf.${base}"
         imageType="${typebase}_psfnat_$typeSuffix"
-        label="PSF ${labelbase}, $beamSuffix"
+        label="PSF ${labelbase}, $polSuffix, $beamSuffix"
     elif [ "$imageCode" == "psfimage" ]; then
         imageName="psf.image.${base}"
         imageType="${typebase}_psfprecon_$typeSuffix"
-        label="Preconditioned PSF ${labelbase}, $beamSuffix"
+        label="Preconditioned PSF ${labelbase}, $polSuffix, $beamSuffix"
     else
         echo "WARNING - unknown image code \"${imageCode}\""
     fi
