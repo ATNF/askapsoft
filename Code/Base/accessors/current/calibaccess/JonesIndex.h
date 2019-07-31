@@ -33,7 +33,7 @@
 namespace askap {
 namespace accessors {
 
-/// @brief antenna/beam indices combined in a class to be used as an index 
+/// @brief antenna/beam indices combined in a class to be used as an index
 /// @details Key type used for indexing into the calibration solution maps for the
 /// GainSolution, LeakageSolution and BandpassSolution classes.
 /// @ingroup calibaccess
@@ -47,14 +47,14 @@ class JonesIndex {
         /// @param[in] beam     ID of the beam. Again, must map to an actual
         ///                     beam.
         JonesIndex(const casa::Short antenna, casa::Short beam);
-        
+
         /// @brief constructor accepting uInt
         /// @param[in] antenna  ID of the antenna. This must be the physical
         ///                     antenna ID.
         /// @param[in] beam     ID of the beam. Again, must map to an actual
         ///                     beam.
         JonesIndex(const casa::uInt antenna, casa::uInt beam);
-        
+
 
         /// Obtain the antenna ID
         /// @return the antenna ID
@@ -78,8 +78,11 @@ class JonesIndex {
         casa::Short itsBeam;
 };
 
+    inline casa::Short JonesIndex::antenna(void) const { return itsAntenna;}
+
+    inline casa::Short JonesIndex::beam(void) const { return itsBeam;}
+
 };
 };
 
 #endif // #ifndef ASKAP_ACCESSORS_JONES_INDEX_H
-

@@ -35,7 +35,7 @@ namespace askap {
 namespace accessors {
 
 /// @brief JonesJTerm (parallel-hand gain)
-/// @details This class is also used to represent bandpass (with a separate instance 
+/// @details This class is also used to represent bandpass (with a separate instance
 /// for each spectral channel)
 /// @ingroup calibaccess
 class JonesJTerm {
@@ -46,7 +46,10 @@ class JonesJTerm {
         /// for instance to populate a vector or matrix with default values.
         /// This constructor will set g1Valid and g2Valid to false, indicating
         /// the data is not valid.
-        JonesJTerm();
+        JonesJTerm()
+            : itsG1(-1.0, -1.0), itsG1Valid(false),
+            itsG2(-1.0, -1.0), itsG2Valid(false)
+        {}
 
         /// @brief Constructor.
         /// @param[in] g1 gain for polarision 1;
@@ -60,23 +63,25 @@ class JonesJTerm {
         JonesJTerm(const casa::Complex& g1,
                    const casa::Bool g1Valid,
                    const casa::Complex& g2,
-                   const casa::Bool g2Valid);
+                   const casa::Bool g2Valid)
+           : itsG1(g1), itsG1Valid(g1Valid), itsG2(g2), itsG2Valid(g2Valid)
+        {}
 
         /// Returns the gain for polarisation 1.
         /// @return the gain for polarisation 1.
-        casa::Complex g1(void) const;
+        casa::Complex g1(void) const { return itsG1; }
 
         /// Returns a flag indicating the validity of the data g1;
         /// @return true if g1 contains a valid gain, otherwise false.
-        casa::Bool g1IsValid(void) const;
+        casa::Bool g1IsValid(void) const { return itsG1Valid; }
 
         /// Returns the gain for polarisation 2.
         /// @return the gain for polarisation 2.
-        casa::Complex g2(void) const;
+        casa::Complex g2(void) const { return itsG2; }
 
         /// Returns a flag indicating the validity of the data g2;
         /// @return true if g2 contains a valid gain, otherwise false.
-        casa::Bool g2IsValid(void) const;
+        casa::Bool g2IsValid(void) const { return itsG2Valid; }
 
     private:
         casa::Complex itsG1;

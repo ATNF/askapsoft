@@ -58,6 +58,7 @@
 #include "casacore/casa/Quanta/MVTime.h"
 #include "casacore/tables/Tables/TableDesc.h"
 #include "casacore/tables/Tables/SetupNewTab.h"
+#include "casacore/tables/Tables/TableIter.h"
 #include "casacore/tables/DataMan/IncrementalStMan.h"
 #include "casacore/tables/DataMan/StandardStMan.h"
 #include "casacore/tables/DataMan/TiledShapeStMan.h"
@@ -85,7 +86,7 @@ MsSplitApp::MsSplitApp()
 boost::shared_ptr<casa::MeasurementSet> MsSplitApp::create(
     const std::string& filename, const casa::Bool addSigmaSpec,
     casa::uInt bucketSize, casa::uInt tileNcorr, casa::uInt tileNchan,
-    casa::uInt nRow)
+    casa::uInt nRowInt, casa::uInt nRow)
 {
     if (bucketSize < 8192) bucketSize = 8192;
 
@@ -137,14 +138,23 @@ boost::shared_ptr<casa::MeasurementSet> MsSplitApp::create(
         // For small tables avoid having tiles larger than the table
         // TODO: If we are using selection we should really use nRowsOut here
         const int bytesPerRow = sizeof(casa::Complex) * tileNcorr * tileNchan;
-        const int tileNrow = std::min(nRow,std::max(1u, bucketSize / bytesPerRow));
-
+        casa::uInt tileNrow = std::min(nRow,std::max(1u, bucketSize / bytesPerRow));
+        // Make tileNrow a multiple of the number of rows per integration
+        if (tileNrow > nRowInt) {
+            tileNrow = std::max(1u, nRowInt * (tileNrow / nRowInt));
+        } else {
+            // or make tileNrow divide into nRowInt evenly
+            for (; nRowInt % tileNrow; tileNrow--);
+        }
         TiledShapeStMan dataMan("TiledData",
                                 IPosition(3, tileNcorr, tileNchan, tileNrow));
         newMS.bindColumn(MeasurementSet::columnName(MeasurementSet::DATA),
                          dataMan);
+        // It appears that storing less than 8 flag bits per row is slow
+        casa::uInt tileNchanFlag = tileNchan;
+        if (tileNcorr*tileNchanFlag<8) tileNchanFlag = 8 / tileNcorr;
         TiledShapeStMan dataManF("TiledFlag",
-                                                 IPosition(3, tileNcorr, tileNchan, tileNrow));
+                                IPosition(3, tileNcorr, tileNchanFlag, tileNrow));
         newMS.bindColumn(MeasurementSet::columnName(MeasurementSet::FLAG),
                          dataManF);
         if (addSigmaSpec) {
@@ -856,6 +866,11 @@ int MsSplitApp::split(const std::string& invis, const std::string& outvis,
     // Open the input measurement set
     const casa::MeasurementSet in(invis);
 
+    // Find out how many rows per integration we have
+    casa::TableIterator tabIterator=casa::TableIterator(in,"TIME",
+       casa::TableIterator::Ascending,casa::TableIterator::NoSort);
+    const casa::uInt nRowInt = tabIterator.table().nrow();
+
     // Verify split parameters that require input MS info
     const casa::uInt totChanIn = ROScalarColumn<casa::Int>(in.spectralWindow(),"NUM_CHAN")(0);
     if ((startChan<1) || (endChan > totChanIn)) {
@@ -884,20 +899,19 @@ int MsSplitApp::split(const std::string& invis, const std::string& outvis,
     // Adjust bucketsize if needed - avoid creating MSs that take forever to
     // read or write due to poor caching of buckets.
     // Assumption: we have lots of memory for caching - up to ~4 GB for worst case
-    const casa::uLong maxBuf = parset.getUint32("bufferMB",4000u) * 1024 * 1024ul;
-    ASKAPLOG_INFO_STR(logger, "Max buffer size " << maxBuf);
+    const casa::uInt maxBuf = parset.getUint32("bufferMB",2000u) * 1024 * 1024;
     const casa::uInt nChanOut = nChanIn/width;
     const casa::uInt nTilesPerRow = (nChanOut-1)/tileNchan+1;
     // We may exceed maxBuf if needed to keep bucketsize >= 8192.
-    const casa::uLong maxBucketSize = std::max(8192ul,maxBuf/nTilesPerRow);
-    if ((casa::uLong)bucketSize > maxBucketSize) {
+    const casa::uInt maxBucketSize = std::max(8192u,maxBuf/nTilesPerRow);
+    if (bucketSize > maxBucketSize) {
         bucketSize = maxBucketSize;
         ASKAPLOG_INFO_STR(logger, "Reducing output bucketsize to " << bucketSize <<
         " to limit memory use and improve caching");
     }
 
     boost::shared_ptr<casa::MeasurementSet>
-        out(create(outvis, addSigmaSpec, bucketSize, tileNcorr, tileNchan, in.nrow()));
+        out(create(outvis, addSigmaSpec, bucketSize, tileNcorr, tileNchan, nRowInt, in.nrow()));
 
     // Copy ANTENNA
     ASKAPLOG_INFO_STR(logger,  "Copying ANTENNA table");

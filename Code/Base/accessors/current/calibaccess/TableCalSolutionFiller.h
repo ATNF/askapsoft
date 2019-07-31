@@ -117,15 +117,15 @@ public:
 
   /// @brief check for gain solution
   /// @return true, if there is no gain solution, false otherwise
-  virtual bool noGain() const;
+  virtual bool noGain() const { return !itsGainsExists;}
 
   /// @brief check for leakage solution
   /// @return true, if there is no leakage solution, false otherwise
-  virtual bool noLeakage() const;
+  virtual bool noLeakage() const { return !itsLeakageExists;}
 
   /// @brief check for bandpass solution
   /// @return true, if there is no bandpass solution, false otherwise
-  virtual bool noBandpass() const;
+  virtual bool noBandpass() const { return !itsBandpassExists;}
 
   /// @brief flush the table to disk
   virtual bool flush() { table().flush(); return true; }
@@ -172,6 +172,9 @@ private:
   /// @brief Caches the existance of columns as the implementation
   /// for columnExists() is quite expensive
   mutable std::map<std::string, bool> itsColumnExistsCache;
+
+  /// @brief Cache existance of gains, leakage and bandpass
+  bool itsGainsExists, itsLeakageExists, itsBandpassExists;
 
   /// @brief true if a new row is to be created
   bool itsCreateNew;
