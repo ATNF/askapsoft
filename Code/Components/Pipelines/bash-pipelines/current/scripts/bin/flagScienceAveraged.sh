@@ -32,7 +32,7 @@
 
 ID_FLAG_SCI_AV=""
 
-DO_IT=$DO_FLAG_SCIENCE
+DO_IT=$FLAG_AFTER_AVERAGING
 
 if [ -e "${FLAG_AV_CHECK_FILE}" ]; then
     if [ "${DO_IT}" == "true" ]; then

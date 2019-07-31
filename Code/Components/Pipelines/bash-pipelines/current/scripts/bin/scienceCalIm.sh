@@ -145,9 +145,7 @@ for FIELD in ${FIELD_LIST}; do
                     . "${PIPELINEDIR}/flagScience.sh"
                     
                     . "${PIPELINEDIR}/averageScience.sh"
-		    if [ "${FLAG_AFTER_AVERAGING}" == "true" ]; then
-			. "${PIPELINEDIR}/flagScienceAveraged.sh"
-	            fi
+		    . "${PIPELINEDIR}/flagScienceAveraged.sh"
 		    inputs2MSconcat="${inputs2MSconcat} ${msSciAv}"
 	        done
                 FIELDBEAM=$(echo "$FIELD_ID" "$BEAM" | awk '{printf "F%02d_B%s",$1,$2}')
@@ -165,9 +163,7 @@ for FIELD in ${FIELD_LIST}; do
 		. "${PIPELINEDIR}/flagScience.sh"
 		    
 		. "${PIPELINEDIR}/averageScience.sh"
-		if [ "${FLAG_AFTER_AVERAGING}" == "true" ]; then
-		    . "${PIPELINEDIR}/flagScienceAveraged.sh"
-	        fi
+		. "${PIPELINEDIR}/flagScienceAveraged.sh"
 	    fi
             
 	    # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
