@@ -47,8 +47,14 @@ void ModelDamping::Add(double alpha,
         throw std::invalid_argument("MPI communicator not defined in ModelDamping::Add!");
     }
 
-    size_t nelementsTotal = ParallelTools::get_total_number_elements(nelements, nbproc, matrix.GetComm());
-    size_t nsmaller = ParallelTools::get_nsmaller(nelements, myrank, nbproc, matrix.GetComm());
+#ifdef HAVE_MPI
+    MPI_Comm *comm = static_cast<MPI_Comm *>(matrix.GetComm());
+    size_t nelementsTotal = ParallelTools::get_total_number_elements(nelements, nbproc, *comm);
+    size_t nsmaller = ParallelTools::get_nsmaller(nelements, myrank, nbproc, *comm);
+#else
+    size_t nelementsTotal = nelements;
+    size_t nsmaller = 0;
+#endif
 
     // Extend matrix and right-hand size for adding damping.
     matrix.Extend(nelementsTotal, nelements);
@@ -105,7 +111,9 @@ void ModelDamping::Add(double alpha,
     //------------------------------------------------------------------------------
     // Set the full right-hand side.
     //------------------------------------------------------------------------------
-    ParallelTools::get_full_array_in_place(nelements, b_loc, true, myrank, nbproc, matrix.GetComm());
+#ifdef HAVE_MPI
+    ParallelTools::get_full_array_in_place(nelements, b_loc, true, myrank, nbproc, *comm);
+#endif
 
     for (size_t i = 0; i < nelementsTotal; ++i)
     {

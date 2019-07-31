@@ -224,16 +224,15 @@ std::pair<double,double> LinearSolver::solveSubsetOfNormalEquations(Params &para
     void* comm = NULL;
     int myrank = 0;
     int nbproc = 1;
-
     bool matrixIsParallel = false;
-    if (parameters().count("parallelMatrix") > 0
-        && parameters().at("parallelMatrix") == "true") {
-        ASKAPCHECK(algorithmLSQR, "Parallel matrix is only supported for the LSQR solver!");
-        matrixIsParallel = true;
-    }
 
     if (algorithmLSQR) {
 #ifdef HAVE_MPI
+        if (parameters().count("parallelMatrix") > 0
+            && parameters().at("parallelMatrix") == "true") {
+            matrixIsParallel = true;
+        }
+
         if (matrixIsParallel) {
         // The parallel matrix case - need to define the parallel partitioning.
             ASKAPCHECK(itsWorkersComm != MPI_COMM_NULL, "Workers communicator is not defined!");
@@ -254,22 +253,23 @@ std::pair<double,double> LinearSolver::solveSubsetOfNormalEquations(Params &para
     size_t nrows = 0;
     size_t nnz = 0;
     bool addSmoothnessConstraints = false;
+#ifdef HAVE_MPI
+    size_t nParametersTotal = lsqr::ParallelTools::get_total_number_elements(nParameters, nbproc, itsWorkersComm);
+    size_t nParametersSmaller = lsqr::ParallelTools::get_nsmaller(nParameters, myrank, nbproc, itsWorkersComm);
+#else
     size_t nParametersTotal = nParameters;
+    size_t nParametersSmaller = 0;
+#endif
+    ASKAPLOG_INFO_STR(logger, "nParametersTotal = " << nParametersTotal);
 
     if (algorithmLSQR) {
         // Define approximate number of nonzero elements.
         // Note: nElements may contain elements which are not currently being solved for.
-        if (nElements <= nParameters * nParameters) {
+        if (nElements <= (size_t)(nParameters * nParameters)) {
             nnz = nElements;
         } else {
             nnz = nParameters * nParameters;
         }
-
-        // Total number of parameters on all CPUs.
-        if (matrixIsParallel) {
-            nParametersTotal = lsqr::ParallelTools::get_total_number_elements(nParameters, nbproc, &itsWorkersComm);
-        }
-        ASKAPLOG_INFO_STR(logger, "nParametersTotal = " << nParametersTotal);
 
         nrows = nParametersTotal;
         if (parameters().count("smoothing") > 0
@@ -290,8 +290,6 @@ std::pair<double,double> LinearSolver::solveSubsetOfNormalEquations(Params &para
     //      - to sparse matrix (CSR format), for the LSQR solver.
     //--------------------------------------------------------------------------------------------
     if (algorithmLSQR && matrixIsParallel) {
-        // Adding staring matrix empty rows, i.e., the rows in a big block-diagonal matrix above the current block.
-        size_t nParametersSmaller = lsqr::ParallelTools::get_nsmaller(nParameters, myrank, nbproc, &itsWorkersComm);
         for (size_t i = 0; i < nParametersSmaller; ++i) {
             matrix.NewRow();
         }
@@ -356,10 +354,8 @@ std::pair<double,double> LinearSolver::solveSubsetOfNormalEquations(Params &para
     }
 
     if (algorithmLSQR) {
+        ASKAPCHECK(matrix.GetCurrentNumberRows() == (nParametersSmaller + nParameters), "Wrong number of matrix rows!");
         if (matrixIsParallel) {
-            size_t nParametersSmaller = lsqr::ParallelTools::get_nsmaller(nParameters, myrank, nbproc, &itsWorkersComm);
-            ASKAPCHECK(matrix.GetCurrentNumberRows() == (nParametersSmaller + nParameters), "Wrong number of matrix rows!");
-
             // Adding ending matrix empty rows, i.e., the rows in a big block-diagonal matrix below the current block.
             size_t nEndRows = nParametersTotal - nParametersSmaller - nParameters;
             for (size_t i = 0; i < nEndRows; ++i) {
@@ -540,10 +536,12 @@ std::pair<double,double> LinearSolver::solveSubsetOfNormalEquations(Params &para
                  nDataAdded++;
             }
         }
-        ASKAPCHECK(nDataAdded == nParameters, "Wrong number of data added on rank " << myrank);
+        ASKAPCHECK(nDataAdded == (size_t)(nParameters), "Wrong number of data added on rank " << myrank);
 
         if (matrixIsParallel) {
-            lsqr::ParallelTools::get_full_array_in_place(nParameters, b_RHS, true, myrank, nbproc, &itsWorkersComm);
+#ifdef HAVE_MPI
+            lsqr::ParallelTools::get_full_array_in_place(nParameters, b_RHS, true, myrank, nbproc, itsWorkersComm);
+#endif
         }
 
         if (addSmoothnessConstraints) {
@@ -834,17 +832,12 @@ std::pair<double,double> LinearSolver::solveSubsetOfNormalEquations(Params &para
       return Solver::ShPtr(new LinearSolver(*this));
     }
 
-    void LinearSolver::SetWorkersCommunicator(void *comm)
-    {
 #ifdef HAVE_MPI
-        if (comm != NULL) {
-            MPI_Comm *mpicomm = static_cast<MPI_Comm*>(comm);
-
-            // Duplicate the communicator with a new context.
-            MPI_Comm_dup(*mpicomm, &itsWorkersComm);
-        }
-#endif
+    void LinearSolver::SetWorkersCommunicator(const MPI_Comm &comm)
+    {
+        MPI_Comm_dup(comm, &itsWorkersComm);
     }
+#endif
 
     void LinearSolver::SetMajorLoopIterationNumber(size_t it)
     {
