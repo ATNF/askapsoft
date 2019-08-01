@@ -51,6 +51,7 @@ class TableCalSolutionTest : public CppUnit::TestFixture
    CPPUNIT_TEST(testCreate);
    CPPUNIT_TEST(testRead);
    CPPUNIT_TEST(testBlankEntries);
+   CPPUNIT_TEST(testTrailingBlankEntry);
    CPPUNIT_TEST(testChanAdapterRead);
    CPPUNIT_TEST_EXCEPTION(testChanAdapterUndefinedBandpass, AskapError);
    CPPUNIT_TEST_EXCEPTION(testUndefinedGains, AskapError);
@@ -187,6 +188,32 @@ public:
        }       
    }
    
+   void testTrailingBlankEntry() {
+       // reuse generation code which initialises 3 entries with all available products between them
+       testCreate();
+       const boost::shared_ptr<ICalSolutionSource> css = rwSource(false);
+       CPPUNIT_ASSERT(css);
+       const long newID = css->newSolutionID(180.);
+       CPPUNIT_ASSERT_EQUAL(3l, newID);
+
+       // reading as most recent solution
+       {
+          const long sID = css->mostRecentSolution();
+          CPPUNIT_ASSERT_EQUAL(newID, sID);
+          const boost::shared_ptr<ICalSolutionConstAccessor> acc = css->roSolution(sID);
+          CPPUNIT_ASSERT(acc);
+          doGainAndLeakageTest(acc);
+          doBandpassTest(acc);
+       }
+       // reading by giving solution ID directly
+       {
+          const boost::shared_ptr<ICalSolutionConstAccessor> acc = css->roSolution(newID);
+          CPPUNIT_ASSERT(acc);
+          doGainAndLeakageTest(acc);
+          doBandpassTest(acc);
+       }
+   }
+   
    void testBlankEntries() {
        // rerun the code creating a table to ensure we always get the same starting point in the spirit of unit tests
        testCreate();
@@ -198,16 +225,19 @@ public:
                CPPUNIT_ASSERT_EQUAL(id, newID);
                // eliberatly don't set any calibration information for this solution ID
           }
+          
           const long newID = css->newSolutionID(600.);
           CPPUNIT_ASSERT_EQUAL(10l, newID);
           boost::shared_ptr<ICalSolutionAccessor> acc = css->rwSolution(newID);
           acc->setGain(JonesIndex(0u,0u),JonesJTerm(casa::Complex(1.0,-1.0),true,casa::Complex(-1.0,1.0),true));
           acc->setLeakage(JonesIndex(2u,1u),JonesDTerm(casa::Complex(0.1,-0.1),true,casa::Complex(-0.1,0.4),false));
           acc->setBandpass(JonesIndex(1u,1u),JonesJTerm(casa::Complex(1.0,-0.2),true,casa::Complex(0.9,-0.1),true),1u);       
+          
        }
        // reading
        const boost::shared_ptr<ICalSolutionConstSource> css = roSource();
        CPPUNIT_ASSERT(css);
+       
        {
           const long sID = css->mostRecentSolution();
           CPPUNIT_ASSERT_EQUAL(10l, sID);
@@ -216,6 +246,7 @@ public:
           doGainAndLeakageTest(acc);
           doBandpassTest(acc);
        }
+       
        // rows with empty cells
        for (long id = 9; id >= 3; --id) {
             const long sID = css->solutionID(60. * id);

@@ -88,7 +88,8 @@ public:
   /// @brief obtain read-only accessor for a given solution ID
   /// @details This method returns a shared pointer to the solution accessor, which
   /// can be used to read the parameters. If a solution with the given ID doesn't 
-  /// exist, an exception is thrown. Existing solutions with undefined parameters 
+  /// exist, a backwards search is performed. An exception is thrown if the top of the table is teached or id is outside the table.
+  /// Existing solutions with undefined parameters 
   /// are managed via validity flags of gains, leakages and bandpasses
   /// @param[in] id solution ID to read
   /// @return shared pointer to an accessor object

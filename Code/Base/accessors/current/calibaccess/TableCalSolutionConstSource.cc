@@ -84,13 +84,14 @@ long TableCalSolutionConstSource::solutionID(const double time) const
            return long(row) - 1;
        }
   }
-  ASKAPTHROW(AskapError, "Unable to find solution matching the time "<<time<<", the table doesn't go that far into past");
+  ASKAPTHROW(AskapError, "Unable to find solution matching the time "<<time<<", the table doesn't go that far in the past");
 }
   
 /// @brief obtain read-only accessor for a given solution ID
 /// @details This method returns a shared pointer to the solution accessor, which
 /// can be used to read the parameters. If a solution with the given ID doesn't 
-/// exist, an exception is thrown. Existing solutions with undefined parameters 
+/// exist, a backwards search is performed. An exception is thrown if the top of the table is reached or id is outside the table.
+//  Existing solutions with undefined parameters 
 /// are managed via validity flags of gains, leakages and bandpasses
 /// @param[in] id solution ID to read
 /// @return shared pointer to an accessor object
