@@ -58,7 +58,11 @@ fi
 if [ "${USE_CONTCUBE_FOR_SPECTRAL_INDEX}" == "true" ] ||
        [ "${DO_RM_SYNTHESIS}" == "true" ]; then
     if [ "$FIELD" == "." ]; then
-        DEP=$(addDep "$DEP" "$ID_LINMOS_CONTCUBE_ALL_RESTORED")
+        if [ "${NUM_FIELDS}" -eq 1 ]; then
+            DEP=$(addDep "$DEP" "$ID_LINMOS_CONTCUBE_RESTORED")
+        else
+            DEP=$(addDep "$DEP" "$ID_LINMOS_CONTCUBE_ALL_RESTORED")
+        fi
     elif [ "$BEAM" == "all" ]; then
         DEP=$(addDep "$DEP" "$ID_LINMOS_CONTCUBE_RESTORED")
     else
