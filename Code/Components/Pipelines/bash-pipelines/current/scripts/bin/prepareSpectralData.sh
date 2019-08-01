@@ -58,6 +58,23 @@ if [ -e "${OUTPUT}/${msSciSL}" ]; then
             rm -f "${CONT_SUB_CHECK_FILE}"
         fi
     fi
+elif [ -e "${OUTPUT}/${msSciSLFull}" ]; then
+    # If the time-window MSs don't exist but the concatenated one
+    # does, turn off if we aren't clobbering things
+    if [ "${CLOBBER}" != "true" ]; then
+        if [ "${DO_IT}" == "true" ]; then
+            echo "Concatenated MS ${msSciAvFull} exists, so not running averaging"
+        fi
+        DO_IT=false
+    else
+        # if we are clobbering, remove existing concatenated MS, but
+        # only if we are going to be running the job
+        if [ "${DO_IT}" == "true" ]; then
+            rm -rf "${OUTPUT}/${msSciSLFull}"
+            rm -f "${SL_GAINS_CHECK_FILE}"
+            rm -f "${CONT_SUB_CHECK_FILE}"
+        fi
+    fi
 fi
 
 
