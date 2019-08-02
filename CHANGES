@@ -1,3 +1,45 @@
+0.24.3 (2 August 2019)
+----------------------
+
+A small release providing a patch to the processing software and a new option to the pipeline scripts.
+
+Processing software:
+
+ * 0.24.2 had an issue with the application of self-cal gains. If
+   integrations were substantially flagged, they would have a null row
+   in the calibration table, and this could result in errors during
+   the application, whether this was done from within the imaging or
+   by ccalapply.
+   
+   The new code is much more robust against flagged data, and
+   completely flagged integrations will be left out of the table. This
+   allows the application of the solutions to proceed without error.
+
+
+Pipelines:
+
+ * There is a new option to produce MFS images in different
+   polarisations, following the application of the self-cal gains to
+   the averaged dataset. The default set of polarisations is "I,V"
+   (although I is done in the self-cal procedure and not repeated),
+   and there are new parameters to govern the deconvolution for these
+   images - consult the documentation for coverage and default values.
+ * This also includes a script to invert the sign of the pixel values
+   in the Stokes V images, to make the values accord with the
+   definition of Stokes V from IAU/IEEE. This can be turned off by
+   setting INVERT_SIGN_STOKES_V_IMAGE=false.
+ * For consistency, there is a similar one for the continuum cubes:
+   INVERT_SIGN_STOKES_V_CONTCUBE. These are kept separate to allow
+   them to be switched on independently, in case (for instance) the
+   memory requirements of the cubes mean you want to do it separately.
+ * Additionally, the pipeline scripts now allow the averaged dataset
+   to be flagged when the full-spectral-resolution dataset is not.
+ * There are checks made at the start of the spectral splitting, to
+   ensure we don't do it when the concatenated version of the MS is
+   present (similar to the change made in 0.24.2).
+
+
+
 0.24.2 (25 July 2019)
 ---------------------
 
