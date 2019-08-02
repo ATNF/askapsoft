@@ -33,6 +33,7 @@
 # cmodel to create the corresponding continuum model image, which
 # is then subtracted from the MS
 
+pol="i"
 imageCode=restored
 setImageProperties cont
 contImage=$imageName

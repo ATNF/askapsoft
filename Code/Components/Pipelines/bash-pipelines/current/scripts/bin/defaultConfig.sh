@@ -215,6 +215,7 @@ DO_SELFCAL=true
 MULTI_JOB_SELFCAL=false
 DO_APPLY_CAL_CONT=true
 DO_CONTCUBE_IMAGING=false
+DO_CONTPOL_IMAGING=false
 DO_SPECTRAL_PROCESSING=false
 DO_COPY_SL=false
 DO_APPLY_CAL_SL=true
@@ -760,6 +761,50 @@ DO_POSITION_OFFSET=false
 # Position offsets in arcsec
 RA_POSITION_OFFSET=0
 DEC_POSITION_OFFSET=0
+
+
+####################
+# Parameters for continuum polarisation imaging
+
+# base name for continuum polarisations: if IMAGE_BASE_CONT=i.blah then we'll
+# get image.i.blah, image.i.blah.restored, psf.i.blah etc
+# Polarisations will replace the .i. in the image name using the list
+# in CONTIMG_POLARISATIONS
+# Cleaning parameters for continuum PolImaging
+CONTIMG_POLARISATIONS="I,V"
+CLEAN_CONTPOL_ALGORITHM=BasisfunctionMFS
+CLEAN_CONTPOL_MINORCYCLE_NITER="800"
+CLEAN_CONTPOL_GAIN=0.2
+CLEAN_CONTPOL_PSFWIDTH=256
+CLEAN_CONTPOL_SCALES="[0,3,10]"
+CLEAN_CONTPOL_THRESHOLD_MINORCYCLE="[30%, 0.5mJy, 0.03mJy]"
+# If true, this will write out intermediate images at the end of each
+# major cycle
+CLEAN_CONTPOL_WRITE_AT_MAJOR_CYCLE=false
+
+# solution type for continuum cleaning - either MAXCHISQ or MAXBASE
+CLEAN_CONTPOL_SOLUTIONTYPE="MAXBASE"
+
+# Array-capable pol-dependent parameters
+#   These parameters can be given as either a single value (eg. "300")
+#   which is replicated for all pol loops, or as an array
+#   (eg. "[1800,900,300]"), allowing a different value for each pol.
+#
+# The number of major cycles in the deconvolution
+CLEAN_CONTPOL_NUM_MAJORCYCLES="3"
+# The maximum residual to stop the major-cycle deconvolution (if not
+# reached, or negative, CLEAN_NUM_MAJORCYCLES cycles are used)
+CLEAN_CONTPOL_THRESHOLD_MAJORCYCLE="0.035mJy"
+CIMAGER_CONTPOL_MINUV=0
+CIMAGER_CONTPOL_MAXUV=0
+###################
+
+# Whether we should invert the sign of Stokes V after it has been imaged.
+# This is to be used while ASKAP/ASKAPsoft is producing Stokes V
+# images with the opposite sign to that described by the IEEE/IAU
+# definition.
+INVERT_SIGN_STOKES_V_IMAGE=true
+INVERT_SIGN_STOKES_V_CONTCUBE=true
 
 ###################
 # Parameters for continuum cube imaging

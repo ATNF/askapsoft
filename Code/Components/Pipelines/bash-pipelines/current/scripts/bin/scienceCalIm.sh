@@ -75,7 +75,9 @@ for FIELD in ${FIELD_LIST}; do
         fi
 
         FLAG_IMAGING_DEP=""
+        FLAG_POLIMAGING_DEP=""
         DEP_CONTCUBE=""
+        DEP_CONTPOL_IMG=""
         DEP_SPECIMG=""
         DEP_SPECIMCONTSUB=""
 
@@ -182,6 +184,7 @@ for FIELD in ${FIELD_LIST}; do
             . "${PIPELINEDIR}/applyCalContinuumScience.sh"
 
             . "${PIPELINEDIR}/continuumCubeImagingScience.sh"
+            . "${PIPELINEDIR}/continuumPolImagingScience.sh"
 
             if [ "${DO_SOURCE_FINDING_BEAMWISE}" == "true" ]; then
                 . "${PIPELINEDIR}/sourcefindingCont.sh"
@@ -234,6 +237,7 @@ for FIELD in ${FIELD_LIST}; do
         FIELDBEAM=$(echo "$FIELD_ID" | awk '{printf "F%02d",$1}')
 
         . "${PIPELINEDIR}/linmosCont.sh"
+        #. "${PIPELINEDIR}/linmosContPol.sh"
         . "${PIPELINEDIR}/linmosContCube.sh"
         . "${PIPELINEDIR}/linmosSpectral.sh"
         

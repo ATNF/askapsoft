@@ -163,6 +163,7 @@ IMAGE_BASE_CONT="${IMAGE_BASE_CONT}"
 IMAGE_BASE_CONTCUBE="${IMAGE_BASE_CONTCUBE}"
 IMAGE_BASE_SPECTRAL="${IMAGE_BASE_SPECTRAL}"
 GAINS_CAL_TABLE="${GAINS_CAL_TABLE}"
+CONTPOL_LIST="${CONTPOL_LIST}"
 POL_LIST="${POL_LIST}"
 DO_RM_SYNTHESIS="${DO_RM_SYNTHESIS}"
 PREPARE_FOR_CASDA="\${PREPARE_FOR_CASDA}"
@@ -217,84 +218,96 @@ ALL"
         for BEAM in \${theBeamList}; do
                 
             # Gather lists of continuum images
+
+            for POLN in \${CONTPOL_LIST}; do
+
+                pol=\$(echo "\${POLN}" | tr '[:upper:]' '[:lower:]')
         
-            for imageCode in ${imageCodeList}; do
-        
-                for((TTERM=0;TTERM<NUM_TAYLOR_TERMS;TTERM++)); do
-        
-                    for((LOOP=0;LOOP<=NUM_LOOPS;LOOP++)); do
-
-                        if [ \$LOOP -gt 0 ] || [ "\$BEAM" == "all" ]; then
-
-                            setImageProperties cont
-
-                            if [ \$LOOP -gt 0 ]; then
-                                if [ "\${IMAGETYPE_CONT}" == "fits" ]; then
-                                    imageName="\${imageName%%.fits}.SelfCalLoop\${LOOP}.fits"
-                                    weightsImage="\${weightsImage%%.fits}.SelfCalLoop\${LOOP}.fits"
-                                else
-                                    imageName="\${imageName}.SelfCalLoop\${LOOP}"
-                                    weightsImage="\${weightsImage}.SelfCalLoop\${LOOP}"
-                                fi
-                            fi
-
-                            if [ -e "\${FIELD}/\${imageName}" ]; then
-                                casdaTwoDimImageNames+=("\${FIELD}/\${imageName}")
-                                casdaTwoDimImageTypes+=("\${imageType}")
-                                casdaTwoDimThumbTitles+=("\${label}")
-                                if [ "\${BEAM}" == "all" ] && [ "\${imageCode}" == "restored" ]; then
-                                    casdaTwoDimImageNames+=("\${FIELD}/\${weightsImage}")
-                                    casdaTwoDimImageTypes+=("\${weightsType}")
-                                    casdaTwoDimThumbTitles+=("\${weightsLabel}")
-                                fi
-                            fi
-
-                            if [ \$LOOP -gt 0 ]; then
-                                if [ "\${IMAGETYPE_CONT}" == "fits" ]; then
-                                    noiseMap="\${noiseMap%%.fits}.SelfCalLoop\${LOOP}.fits"
-                                    compMap="\${compMap%%.fits}.SelfCalLoop\${LOOP}.fits"
-                                    compResidual="\${compResidual%%.fits}.SelfCalLoop\${LOOP}.fits"
-                                else
-                                    noiseMap="\${noiseMap%%.fits}.SelfCalLoop\${LOOP}"
-                                    compMap="\${compMap%%.fits}.SelfCalLoop\${LOOP}"
-                                    compResidual="\${compResidual%%.fits}.SelfCalLoop\${LOOP}"
-                                fi
-                            fi
-                            if [ -e "\${FIELD}/\${selavyDir}/\${noiseMap}" ]; then
-                                casdaTwoDimImageNames+=("\${FIELD}/\${selavyDir}/\${noiseMap}")
-                                casdaTwoDimImageTypes+=(\${noiseType})
-                                casdaTwoDimThumbTitles+=("\${noiseLabel}")
-                                casdaTwoDimImageNames+=("\${FIELD}/\${selavyDir}/\${compMap}")
-                                casdaTwoDimImageTypes+=(\${compMapType})
-                                casdaTwoDimThumbTitles+=("\${compMapLabel}")
-                                casdaTwoDimImageNames+=("\${FIELD}/\${selavyDir}/\${compResidual}")
-                                casdaTwoDimImageTypes+=(\${compResidualType})
-                                casdaTwoDimThumbTitles+=("\${compResidualLabel}")
-                            fi
-
+                for imageCode in ${imageCodeList}; do
+            
+                    for((TTERM=0;TTERM<NUM_TAYLOR_TERMS;TTERM++)); do
+            
+                        if [ "\$POLN" == "I" ]; then
+                            maxLoop=\${NUM_LOOPS}
+                        else
+                            maxLoop=0
                         fi
 
+                        for((LOOP=0;LOOP<=maxLoop;LOOP++)); do
+    
+                            if [ \$LOOP -gt 0 ] || [ "\$BEAM" == "all" ]; then
+    
+                                setImageProperties cont
+    
+                                if [ \$LOOP -gt 0 ]; then
+                                    if [ "\${IMAGETYPE_CONT}" == "fits" ]; then
+                                        imageName="\${imageName%%.fits}.SelfCalLoop\${LOOP}.fits"
+                                        weightsImage="\${weightsImage%%.fits}.SelfCalLoop\${LOOP}.fits"
+                                    else
+                                        imageName="\${imageName}.SelfCalLoop\${LOOP}"
+                                        weightsImage="\${weightsImage}.SelfCalLoop\${LOOP}"
+                                    fi
+                                fi
+    
+                                if [ -e "\${FIELD}/\${imageName}" ]; then
+                                    casdaTwoDimImageNames+=("\${FIELD}/\${imageName}")
+                                    casdaTwoDimImageTypes+=("\${imageType}")
+                                    casdaTwoDimThumbTitles+=("\${label}")
+                                    if [ "\${BEAM}" == "all" ] && [ "\${imageCode}" == "restored" ]; then
+                                        casdaTwoDimImageNames+=("\${FIELD}/\${weightsImage}")
+                                        casdaTwoDimImageTypes+=("\${weightsType}")
+                                        casdaTwoDimThumbTitles+=("\${weightsLabel}")
+                                    fi
+                                fi
+    
+                                if [ \$LOOP -gt 0 ]; then
+                                    if [ "\${IMAGETYPE_CONT}" == "fits" ]; then
+                                        noiseMap="\${noiseMap%%.fits}.SelfCalLoop\${LOOP}.fits"
+                                        compMap="\${compMap%%.fits}.SelfCalLoop\${LOOP}.fits"
+                                        compResidual="\${compResidual%%.fits}.SelfCalLoop\${LOOP}.fits"
+                                    else
+                                        noiseMap="\${noiseMap%%.fits}.SelfCalLoop\${LOOP}"
+                                        compMap="\${compMap%%.fits}.SelfCalLoop\${LOOP}"
+                                        compResidual="\${compResidual%%.fits}.SelfCalLoop\${LOOP}"
+                                    fi
+                                fi
+                                if [ -e "\${FIELD}/\${selavyDir}/\${noiseMap}" ]; then
+                                    casdaTwoDimImageNames+=("\${FIELD}/\${selavyDir}/\${noiseMap}")
+                                    casdaTwoDimImageTypes+=(\${noiseType})
+                                    casdaTwoDimThumbTitles+=("\${noiseLabel}")
+                                    casdaTwoDimImageNames+=("\${FIELD}/\${selavyDir}/\${compMap}")
+                                    casdaTwoDimImageTypes+=(\${compMapType})
+                                    casdaTwoDimThumbTitles+=("\${compMapLabel}")
+                                    casdaTwoDimImageNames+=("\${FIELD}/\${selavyDir}/\${compResidual}")
+                                    casdaTwoDimImageTypes+=(\${compResidualType})
+                                    casdaTwoDimThumbTitles+=("\${compResidualLabel}")
+                                fi
+    
+                            fi
+    
+                        done
+            
+                        # Get the continuum models used for continuum subtraction
+                        setContsubFilenames
+                        if [ "\${CONTSUB_METHOD}" == "CleanModel" ]; then
+                            if [ -e "\${FIELD}/\${contsubDir}/\${contsubCleanModelImage}" ]; then
+                                casdaTwoDimImageNames+=("\${FIELD}/\${contsubDir}/\${contsubCleanModelImage}")
+                                casdaTwoDimImageTypes+=(\${contsubCleanModelType})
+                                casdaTwoDimThumbTitles+=("\${contsubCleanModelLabel}")
+                            fi
+                        fi
+                        if [ "\${CONTSUB_METHOD}" == "Cmodel" ]; then
+                            if [ -e "\${FIELD}/\${contsubDir}/\${contsubCmodelImage}" ]; then
+                                casdaTwoDimImageNames+=("\${FIELD}/\${contsubDir}/\${contsubCmodelImage}")
+                                casdaTwoDimImageTypes+=(\${contsubCmodelType})
+                                casdaTwoDimThumbTitles+=("\${contsubCmodelLabel}")
+                            fi
+                        fi
+    
                     done
-        
-                    # Get the continuum models used for continuum subtraction
-                    setContsubFilenames
-                    if [ "\${CONTSUB_METHOD}" == "CleanModel" ]; then
-                        if [ -e "\${FIELD}/\${contsubDir}/\${contsubCleanModelImage}" ]; then
-                            casdaTwoDimImageNames+=("\${FIELD}/\${contsubDir}/\${contsubCleanModelImage}")
-                            casdaTwoDimImageTypes+=(\${contsubCleanModelType})
-                            casdaTwoDimThumbTitles+=("\${contsubCleanModelLabel}")
-                        fi
-                    fi
-                    if [ "\${CONTSUB_METHOD}" == "Cmodel" ]; then
-                        if [ -e "\${FIELD}/\${contsubDir}/\${contsubCmodelImage}" ]; then
-                            casdaTwoDimImageNames+=("\${FIELD}/\${contsubDir}/\${contsubCmodelImage}")
-                            casdaTwoDimImageTypes+=(\${contsubCmodelType})
-                            casdaTwoDimThumbTitles+=("\${contsubCmodelLabel}")
-                        fi
-                    fi
-
+            
                 done
-        
+
             done
         
         

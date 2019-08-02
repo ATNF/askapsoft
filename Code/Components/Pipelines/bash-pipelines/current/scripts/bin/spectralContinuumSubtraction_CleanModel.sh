@@ -29,6 +29,7 @@
 # @author Matthew Whiting <Matthew.Whiting@csiro.au>
 #
 
+pol="i"
 setContsubFilenames
 
 # If we're here, then CONTSUB_METHOD=CleanModel

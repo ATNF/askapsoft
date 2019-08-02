@@ -282,6 +282,32 @@ if [ \${err} -ne 0 ]; then
     exit 1
 fi
 
+# Invert the sign of the pixels in the Stokes V cube
+pol=${pol}
+IMAGE_BASE_CONTCUBE=${IMAGE_BASE_CONTCUBE}
+BEAM=${BEAM}
+FIELD=${FIELD}
+IMAGETYPE_CONTCUBE=${IMAGETYPE_CONTCUBE}
+DO_ALT_IMAGER_CONTCUBE=${DO_ALT_IMAGER_CONTCUBE}
+ALT_IMAGER_SINGLE_FILE_CONTCUBE=${ALT_IMAGER_SINGLE_FILE_CONTCUBE}
+invertStokesV=${INVERT_SIGN_STOKES_V_CONTCUBE}
+if [ "\${invertStokesV}" == "true" ] && [ "\${pol}" == "v" ]; then
+    # Need to invert the sign of the pixel values to get correct V
+    for imageCode in restored residual image; do
+        setImageProperties contcube
+        cube=${imageName}
+        echo "Inverting the sign of the pixels for image \$imageName"
+        srun --export=ALL --ntasks=1 ${PIPELINEDIR}/fixVsign.py -i \$cube
+        err=\$?
+        echo "Complete"
+        if [ \$err != 0 ]; then
+            echo "ERROR (error code \$err) when running fixVsign.py on \$cube"
+            exit \$err
+        fi
+    done
+fi
+
+
 # Find the cube statistics
 loadModule mpi4py
 cube=${imageName}

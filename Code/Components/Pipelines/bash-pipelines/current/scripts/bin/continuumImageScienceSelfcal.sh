@@ -33,6 +33,8 @@
 #
 
 # Define the Cimager parset and associated parameters
+msToUse=${msSciAvFull}
+pol="i"
 . "${PIPELINEDIR}/getContinuumCimagerParams.sh"
 
 ID_CONTIMG_SCI_SC=""

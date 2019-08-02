@@ -1,6 +1,9 @@
 User Parameters - Continuum imaging
 ===================================
 
+Summary
+-------
+
 The parameters listed here allow the user to configure the parset and
 the slurm job for continuum imaging of the science field. The defaults
 have been set based on experience with science commissioning and ASKAP
@@ -113,21 +116,36 @@ given as different.
 
 
 A note on the imagers and the output formats. The default approach is
-to use **cimager** for the continuum imaging and **simager** for the
-continuum cubes. The new imager application **imager**
-(:doc:`../calim/imager`) can be used by setting ``DO_ALT_IMAGER_CONT``
-or ``DO_ALT_IMAGER_CONTCUBE``, or the main switch ``DO_ALT_IMAGER`` to
-true (this is now the default). The latter is the switch controlling
-all types of imaging, but can be overridden by the type-specific
-versions, if they are provided.
+to now use **imager** (:doc:`../calim/imager`) for both continuum and
+spectral imaging. The use of **simager** for spectral imaging (in this
+case, the continuum cubes) is to be discouraged, as imager provides
+much better functionality for integration into the pipeline. The use
+of **cimager** for the MFS imaging is possible, although it provides
+less flexibility in how the job can be distributed across nodes. The
+choice of imaging task is governed by ``DO_ALT_IMAGER_CONT`` or
+``DO_ALT_IMAGER_CONTCUBE``, with the main switch ``DO_ALT_IMAGER``
+taking precedence.
 
-The default output format is CASA images, although FITS files can be
-written directly by setting ``IMAGETYPE_CONT`` or
-``IMAGETYPE_CONTCUBE`` to ``fits`` (rather than ``casa``). This mode
-is still in development, so may not be completely reliable. The
-recommended method for getting images into FITS format is still to use
-the ``DO_CONVERT_TO_FITS`` flag, which makes use of the
-:doc:`../calim/imagetofits` application.
+The default output format is FITS images, although CASA files can be
+written instead by setting ``IMAGETYPE_CONT`` or
+``IMAGETYPE_CONTCUBE`` to ``casa`` (rather than ``fits``). 
+
+This version allows continuum imaging of various polarisation products. 
+The self-calibration stage is used for Stokes-I imaging. The calibrated 
+uv-data is then used to make images of other polarisations. Users need 
+to specify the list of polarisation using ``CONTIMG_POLARISATIONS`` in 
+their pipeline configuration file. In a later version, we aim to separate 
+the self-calibration from the imaging, so that ALL pols including Stokes-I 
+is imaged alongwith the other polarisations.
+
+
+Basic imaging parameters
+------------------------
+
+This table summarises the fundamental parameters that govern the
+continuum imaging, and that are used in most of the different types of
+imaging jobs. This also has specific parameters related to the use of
+:doc:`../calim/imager`.
 
 
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
@@ -270,6 +288,61 @@ the ``DO_CONVERT_TO_FITS`` flag, which makes use of the
 | ``GRIDDER_SHARECF``                        | true                                | WProject.sharecf (:doc:`../calim/gridder`)             | Whether to use a (static) cache for the convolution functions |
 |                                            |                                     |                                                        | in the WProject gridder.                                      |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
+| **Preconditioning parameters**             |                                     |                                                        |                                                               |
++--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
+| ``PRECONDITIONER_LIST``                    | ``"[Wiener]"``                      | preconditioner.Names                                   | List of preconditioners to apply.                             |
+|                                            |                                     | (:doc:`../calim/solver`)                               |                                                               |
++--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
+| ``PRECONDITIONER_GAUSS_TAPER``             | ``"[10arcsec, 10arcsec, 0deg]"``    | preconditioner.GaussianTaper                           | Size of the Gaussian taper - either single value (for         |
+|                                            |                                     | (:doc:`../calim/solver`)                               | circular taper) or 3 values giving an elliptical size.        |
++--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
+| ``PRECONDITIONER_WIENER_ROBUSTNESS``       | -0.5                                | preconditioner.Wiener.robustness                       | Robustness value for the Wiener filter.                       |
+|                                            |                                     | (:doc:`../calim/solver`)                               |                                                               |
++--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
+| ``PRECONDITIONER_WIENER_TAPER``            | ``""``                              | preconditioner.Wiener.taper                            | Size of gaussian taper applied in image domain to Wiener      |
+|                                            |                                     | (:doc:`../calim/solver`)                               | filter. Ignored if blank (ie. “”).                            |
++--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
+| ``RESTORE_PRECONDITIONER_LIST``            | ``""``                              | restore.preconditioner.Names                           | List of preconditioners to apply at the restore stage, to     |
+|                                            |                                     | (:doc:`../calim/cimager` & :doc:`../calim/solver`)     | produce an additional restored image.                         |
++--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
+| ``RESTORE_PRECONDITIONER_GAUSS_TAPER``     | ``"[10arcsec, 10arcsec, 0deg]"``    | restore.preconditioner.GaussianTaper                   | Size of the Gaussian taper for the restore preconditioning -  |
+|                                            |                                     | (:doc:`../calim/cimager` & :doc:`../calim/solver`)     | either single value (for circular taper) or 3 values giving   |
+|                                            |                                     |                                                        | an elliptical size.                                           |
++--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
+|``RESTORE_PRECONDITIONER_WIENER_ROBUSTNESS``| -2                                  | restore.preconditioner.Wiener.robustness               | Robustness value for the Wiener filter in the restore         |
+|                                            |                                     | (:doc:`../calim/cimager` & :doc:`../calim/solver`)     | preconditioning.                                              |
++--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
+| ``RESTORE_PRECONDITIONER_WIENER_TAPER``    | ``""``                              | restore.preconditioner.Wiener.taper                    | Size of gaussian taper applied in image domain to Wiener      |
+|                                            |                                     | (:doc:`../calim/cimager` & :doc:`../calim/solver`)     | filter in the restore preconditioning. Ignored if blank       |
+|                                            |                                     |                                                        | (ie. “”).                                                     |
++--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
+| ***New imager parameters**                 |                                     |                                                        |                                                               |
++--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
+| ``DO_ALT_IMAGER_CONT``                     | ``""``                              | none                                                   | If true, the continuum imaging is done by imager              |
+|                                            |                                     |                                                        | (:doc:`../calim/imager`). If false, it is done by cimager     |
+|                                            |                                     |                                                        | (:doc:`../calim/cimager`). If left blank (the default), the   |
+|                                            |                                     |                                                        | value is given by the overall parameter ``DO_ALT_IMAGER`` (see|
+|                                            |                                     |                                                        | :doc:`ControlParameters`).                                    |
++--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
+| ``USE_TMPFS``                              | false                               | usetmpfs (:doc:`../calim/imager`)                      | Whether to store the visibilities in shared memory.This will  |
+|                                            |                                     |                                                        | give a performance boost at the expense of memory             |
+|                                            |                                     |                                                        | usage. Better used for processing continuum data.             |
++--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
+| ``TMPFS``                                  | /dev/shm                            | tmpfs (:doc:`../calim/imager`)                         | Location of the shared memory.                                |
++--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
+
+
+Self-calibration
+----------------
+
+This table summarises the parameters related to stokes-I imaging and the self-calibration procedure. The Stokes I imaging gets its own set of deconvolution (cleaning) parameters (the Stokes I images will be made in the self-cal part, not the "contpol" part of the pipeline). There are parameters related to the source-finding and calibration parts of the self-calibration
+
+
+
+
++--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
+| Variable                                   | Default                             | Parset equivalent                                      | Description                                                   |
++============================================+=====================================+========================================================+===============================================================+
 | **Cleaning parameters**                    |                                     |                                                        |                                                               |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
 | ``SOLVER``                                 | Clean                               | solver                                                 | Which solver to use. You will mostly want to leave this as    |
@@ -317,73 +390,7 @@ the ``DO_CONVERT_TO_FITS`` flag, which makes use of the
 | ``CLEAN_SOLUTIONTYPE``                     | MAXBASE                             | Clean.solutiontype (see discussion at                  | The type of peak finding algorithm to use in the              |
 |                                            |                                     | :doc:`../recipes/Imaging`)                             | deconvolution. Choices are MAXCHISQ, MAXTERM0, or MAXBASE.    |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
-| **Preconditioning parameters**             |                                     |                                                        |                                                               |
-+--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
-| ``PRECONDITIONER_LIST``                    | ``"[Wiener]"``                      | preconditioner.Names                                   | List of preconditioners to apply.                             |
-|                                            |                                     | (:doc:`../calim/solver`)                               |                                                               |
-+--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
-| ``PRECONDITIONER_GAUSS_TAPER``             | ``"[10arcsec, 10arcsec, 0deg]"``    | preconditioner.GaussianTaper                           | Size of the Gaussian taper - either single value (for         |
-|                                            |                                     | (:doc:`../calim/solver`)                               | circular taper) or 3 values giving an elliptical size.        |
-+--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
-| ``PRECONDITIONER_WIENER_ROBUSTNESS``       | -0.5                                | preconditioner.Wiener.robustness                       | Robustness value for the Wiener filter.                       |
-|                                            |                                     | (:doc:`../calim/solver`)                               |                                                               |
-+--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
-| ``PRECONDITIONER_WIENER_TAPER``            | ``""``                              | preconditioner.Wiener.taper                            | Size of gaussian taper applied in image domain to Wiener      |
-|                                            |                                     | (:doc:`../calim/solver`)                               | filter. Ignored if blank (ie. “”).                            |
-+--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
-| ``RESTORE_PRECONDITIONER_LIST``            | ``""``                              | restore.preconditioner.Names                           | List of preconditioners to apply at the restore stage, to     |
-|                                            |                                     | (:doc:`../calim/cimager` & :doc:`../calim/solver`)     | produce an additional restored image.                         |
-+--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
-| ``RESTORE_PRECONDITIONER_GAUSS_TAPER``     | ``"[10arcsec, 10arcsec, 0deg]"``    | restore.preconditioner.GaussianTaper                   | Size of the Gaussian taper for the restore preconditioning -  |
-|                                            |                                     | (:doc:`../calim/cimager` & :doc:`../calim/solver`)     | either single value (for circular taper) or 3 values giving   |
-|                                            |                                     |                                                        | an elliptical size.                                           |
-+--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
-|``RESTORE_PRECONDITIONER_WIENER_ROBUSTNESS``| -2                                  | restore.preconditioner.Wiener.robustness               | Robustness value for the Wiener filter in the restore         |
-|                                            |                                     | (:doc:`../calim/cimager` & :doc:`../calim/solver`)     | preconditioning.                                              |
-+--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
-| ``RESTORE_PRECONDITIONER_WIENER_TAPER``    | ``""``                              | restore.preconditioner.Wiener.taper                    | Size of gaussian taper applied in image domain to Wiener      |
-|                                            |                                     | (:doc:`../calim/cimager` & :doc:`../calim/solver`)     | filter in the restore preconditioning. Ignored if blank       |
-|                                            |                                     |                                                        | (ie. “”).                                                     |
-+--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
-| ***New imager parameters**                 |                                     |                                                        |                                                               |
-+--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
-| ``DO_ALT_IMAGER_CONT``                     | ``""``                              | none                                                   | If true, the continuum imaging is done by imager              |
-|                                            |                                     |                                                        | (:doc:`../calim/imager`). If false, it is done by cimager     |
-|                                            |                                     |                                                        | (:doc:`../calim/cimager`). When true, the following           |
-|                                            |                                     |                                                        | parameters are used. If left blank (the default), the value   |
-|                                            |                                     |                                                        | is given by the overall parameter ``DO_ALT_IMAGER`` (see      |
-|                                            |                                     |                                                        | :doc:`ControlParameters`).                                    |
-+--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
-| ``DO_ALT_IMAGER_CONTCUBE``                 | ``""``                              | none                                                   | If true, the continuum cube imaging is done by imager         |
-|                                            |                                     |                                                        | (:doc:`../calim/imager`). If false, it is done by cimager     |
-|                                            |                                     |                                                        | (:doc:`../calim/cimager`). When true, the following           |
-|                                            |                                     |                                                        | parameters are used. If left blank (the default), the value   |
-|                                            |                                     |                                                        | is given by the overall parameter ``DO_ALT_IMAGER``.          |
-+--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
-| ``NCHAN_PER_CORE``                         | 12                                  | nchanpercore                                           | The number of channels each core will process.                |
-|                                            |                                     | (:doc:`../calim/imager`)                               |                                                               |
-+--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
-| ``USE_TMPFS``                              | false                               | usetmpfs (:doc:`../calim/imager`)                      | Whether to store the visibilities in shared memory.This will  |
-|                                            |                                     |                                                        | give a performance boost at the expense of memory             |
-|                                            |                                     |                                                        | usage. Better used for processing continuum data.             |
-+--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
-| ``TMPFS``                                  | /dev/shm                            | tmpfs (:doc:`../calim/imager`)                         | Location of the shared memory.                                |
-+--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
-| ``NUM_SPECTRAL_WRITERS_CONTCUBE``          | ``""``                              | nwriters (:doc:`../calim/imager`)                      | The number of writers used by imager. Unless                  |
-|                                            |                                     |                                                        | ``ALT_IMAGER_SINGLE_FILE_CONTCUBE=true``, this will equate to |
-|                                            |                                     |                                                        | the number of distinct spectral cubes produced.In the case of |
-|                                            |                                     |                                                        | multiple cubes, each will be a sub-band of the full           |
-|                                            |                                     |                                                        | bandwidth. No combination of the sub-cubes is currently       |
-|                                            |                                     |                                                        | done. The number of writers will be reduced to the number of  |
-|                                            |                                     |                                                        | workers in the job if necessary. If a single image is         |
-|                                            |                                     |                                                        | produced, the default is to have the same number of writers as|
-|                                            |                                     |                                                        | workers.                                                      |
-+--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
-| ``ALT_IMAGER_SINGLE_FILE_CONTCUBE``        | true                                | singleoutputfile                                       | Whether to write a single cube, even with multiple writers    |
-|                                            |                                     | (:doc:`../calim/imager`)                               | (ie. ``NUM_SPECTRAL_WRITERS_CONTCUBE>1``). Only works when    |
-|                                            |                                     |                                                        | ``IMAGETYPE_SPECTRAL=fits``                                   |
-+--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
-| **Self-calibration**                       |                                     |                                                        |                                                               |
+| **Self-calibration - basics**              |                                     |                                                        |                                                               |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
 | ``DO_SELFCAL``                             | true                                | none                                                   | Whether to self-calibrate the science data when imaging.      |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
@@ -402,11 +409,49 @@ the ``DO_CONVERT_TO_FITS`` flag, which makes use of the
 |                                            |                                     |                                                        | loop, as for the default, or a single value that applies to   |
 |                                            |                                     |                                                        | each loop.                                                    |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
+| ``GAINS_CAL_TABLE``                        | cont_gains_cal_SB%s_%b.tab          | none (directly)                                        | The table name to hold the final gains solution. Once         |
+|                                            |                                     |                                                        | the self-cal loops have completed, the cal table in the       |
+|                                            |                                     |                                                        | final loop is copied to a table of this name in the base      |
+|                                            |                                     |                                                        | directory. This can then be used for the spectral-line        |
+|                                            |                                     |                                                        | imaging if need be. If this is blank, both ``DO_SELFCAL``     |
+|                                            |                                     |                                                        | and ``DO_APPLY_CAL_SL`` will be set to false. The %s wildcard |
+|                                            |                                     |                                                        | will be resolved into the scehduling block ID, and the %b will|
+|                                            |                                     |                                                        | be replaced with "FIELD_beamBB", where FIELD is the field id, |
+|                                            |                                     |                                                        | and BB the (zero-based) beam number.                          |
++--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
+| ``SELFCAL_NORMALISE_GAINS``                | true                                | normalisegains                                         | Whether to normalise the amplitudes of the gains to 1,        |
+|                                            |                                     | (:doc:`../calim/ccalibrator`)                          | approximating the phase-only self-calibration approach. Can   |
+|                                            |                                     |                                                        | be given as an array with different values for each self-cal  |
+|                                            |                                     |                                                        | loop (e.g. "[true,true,false]").                              |
++--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
+| ``SELFCAL_REF_ANTENNA``                    | ``""``                              | refantenna (:doc:`../calim/ccalibrator`)               | Reference antenna to use in the calibration. Should be        |
+|                                            |                                     |                                                        | antenna number, 0 - nAnt-1, that matches the antenna          |
+|                                            |                                     |                                                        | numbering in the MS.                                          |
++--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
+| ``SELFCAL_REF_GAINS``                      | ``""``                              | refgains (:doc:`../calim/ccalibrator`)                 | Reference gains to use in the calibration - something like    |
+|                                            |                                     |                                                        | gain.g11.0.0.                                                 |
++--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
+| ``SELFCAL_SCALENOISE``                     | false                               | calibrate.scalenoise                                   | Whether the noise estimate will be scaled in accordance       |
+|                                            |                                     | (:doc:`../calim/cimager`)                              | with the applied calibrator factor to achieve proper          |
+|                                            |                                     |                                                        | weighting.                                                    |
++--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
+| ``CCALIBRATOR_MINUV``                      | 0                                   | MinUV (:doc:`../calim/data_selection`)                 | The minimum UV distance considered in the calibration - used  |
+|                                            |                                     |                                                        | to exclude the short baselines. Can be given as an array with |
+|                                            |                                     |                                                        | different values for each self-cal loop                       |
+|                                            |                                     |                                                        | (e.g. ``"[200,200,0]"``).                                     |
++--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
+| ``CCALIBRATOR_MAXUV``                      | 0                                   | MaxUV (:doc:`../calim/data_selection`)                 | The maximum UV distance considered in the calibration. Only   |
+|                                            |                                     |                                                        | used if greater than zero. Can be given as an array with      |
+|                                            |                                     |                                                        | different values for each self-cal loop                       |
+|                                            |                                     |                                                        | (e.g. ``"[200,200,0]"``).                                     |
++--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
 | ``SELFCAL_KEEP_IMAGES``                    | true                                | none                                                   | Should we keep the images from the intermediate selfcal       |
 |                                            |                                     |                                                        | loops?                                                        |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
 | ``MOSAIC_SELFCAL_LOOPS``                   | false                               | none                                                   | Should we make full-field mosaics for each loop of the        |
 |                                            |                                     |                                                        | self-calibration? This is done for each field separately.     |
++--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
+| **Self-calibration - source-finding**      |                                     |                                                        |                                                               |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
 | ``SELFCAL_SELAVY_THRESHOLD``               | 8                                   | snrCut                                                 | SNR threshold for detection with Selavy in determining        |
 |                                            |                                     | (:doc:`../analysis/selavy`)                            | selfcal sources. Can be given as an array with different      |
@@ -443,42 +488,6 @@ the ``DO_CONVERT_TO_FITS`` flag, which makes use of the
 | ``SELFCAL_MODEL_FLUX_LIMIT``               | 10uJy                               | Cmodel.flux_limit (:doc:`../calim/cmodel`)             | The minimum integrated flux for components to be included in  |
 |                                            |                                     |                                                        | the model used for self-calibration.                          |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
-| ``SELFCAL_NORMALISE_GAINS``                | true                                | normalisegains                                         | Whether to normalise the amplitudes of the gains to 1,        |
-|                                            |                                     | (:doc:`../calim/ccalibrator`)                          | approximating the phase-only self-calibration approach. Can   |
-|                                            |                                     |                                                        | be given as an array with different values for each self-cal  |
-|                                            |                                     |                                                        | loop (e.g. "[true,true,false]").                              |
-+--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
-| ``SELFCAL_REF_ANTENNA``                    | ``""``                              | refantenna (:doc:`../calim/ccalibrator`)               | Reference antenna to use in the calibration. Should be        |
-|                                            |                                     |                                                        | antenna number, 0 - nAnt-1, that matches the antenna          |
-|                                            |                                     |                                                        | numbering in the MS.                                          |
-+--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
-| ``SELFCAL_REF_GAINS``                      | ``""``                              | refgains (:doc:`../calim/ccalibrator`)                 | Reference gains to use in the calibration - something like    |
-|                                            |                                     |                                                        | gain.g11.0.0.                                                 |
-+--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
-| ``SELFCAL_SCALENOISE``                     | false                               | calibrate.scalenoise                                   | Whether the noise estimate will be scaled in accordance       |
-|                                            |                                     | (:doc:`../calim/cimager`)                              | with the applied calibrator factor to achieve proper          |
-|                                            |                                     |                                                        | weighting.                                                    |
-+--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
-| ``GAINS_CAL_TABLE``                        | cont_gains_cal_SB%s_%b.tab          | none (directly)                                        | The table name to hold the final gains solution. Once         |
-|                                            |                                     |                                                        | the self-cal loops have completed, the cal table in the       |
-|                                            |                                     |                                                        | final loop is copied to a table of this name in the base      |
-|                                            |                                     |                                                        | directory. This can then be used for the spectral-line        |
-|                                            |                                     |                                                        | imaging if need be. If this is blank, both ``DO_SELFCAL``     |
-|                                            |                                     |                                                        | and ``DO_APPLY_CAL_SL`` will be set to false. The %s wildcard |
-|                                            |                                     |                                                        | will be resolved into the scehduling block ID, and the %b will|
-|                                            |                                     |                                                        | be replaced with "FIELD_beamBB", where FIELD is the field id, |
-|                                            |                                     |                                                        | and BB the (zero-based) beam number.                          |
-+--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
-| ``CCALIBRATOR_MINUV``                      | 0                                   | MinUV (:doc:`../calim/data_selection`)                 | The minimum UV distance considered in the calibration - used  |
-|                                            |                                     |                                                        | to exclude the short baselines. Can be given as an array with |
-|                                            |                                     |                                                        | different values for each self-cal loop                       |
-|                                            |                                     |                                                        | (e.g. ``"[200,200,0]"``).                                     |
-+--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
-| ``CCALIBRATOR_MAXUV``                      | 0                                   | MaxUV (:doc:`../calim/data_selection`)                 | The maximum UV distance considered in the calibration. Only   |
-|                                            |                                     |                                                        | used if greater than zero. Can be given as an array with      |
-|                                            |                                     |                                                        | different values for each self-cal loop                       |
-|                                            |                                     |                                                        | (e.g. ``"[200,200,0]"``).                                     |
-+--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
 | ``DO_POSITION_OFFSET``                     | false                               | none                                                   | Whether to add a fixed RA & Dec offset to the positions of    |
 |                                            |                                     |                                                        | sources in the final self-calibration catalogue (prior to it  |
 |                                            |                                     |                                                        | being used to calibrate the data). This has been implemented  |
@@ -496,6 +505,17 @@ the ``DO_CONVERT_TO_FITS`` flag, which makes use of the
 |                                            |                                     |                                                        | by the continuum validation script, where the sense of the    |
 |                                            |                                     |                                                        | offset is **REFERENCE-ASKAP**.                                |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
+
+
+Applying the gains calibration
+------------------------------
+
+This table shows the parameters relevant to the job that applies the self-cal gains to the averaged dataset. This is done before the continuum-polarisation imaging and the continuum-cube imaging.
+
+
++--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
+| Variable                                   | Default                             | Parset equivalent                                      | Description                                                   |
++============================================+=====================================+========================================================+===============================================================+
 | **Application of gains calibration**       |                                     |                                                        |                                                               |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
 | ``DO_APPLY_CAL_CONT``                      | true                                | none                                                   | Whether to apply the calibration to the averaged              |
@@ -507,7 +527,112 @@ the ``DO_CONVERT_TO_FITS`` flag, which makes use of the
 |                                            |                                     |                                                        | the gains calibration (true), or to just overwrite with       |
 |                                            |                                     |                                                        | the calibrated data (false).                                  |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
-| **Continuum cube imaging**                 |                                     |                                                        |                                                               |
+
+
+Continuum Polarisation imaging
+------------------------------
+
+Once the gains have been applied, MFS imaging may be done in a
+selected set of polarisations - use ``DO_CONTPOL_IMAGING=true`` to
+turn this mode on.
+
+If "I" is given as one of them, it is not re-imaged, as we have an
+image from the self-calibration routine. The cleaning parameters are
+given separately here (as thresholds may need to be different),
+although gridding and preconditioning are assumed to be the same. Many
+of these parameters can be given as arrays, with different values for
+each polarisation. If a single value is given, that applies to all
+polarisations.
+
+
+
++--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
+| Variable                                   | Default                             | Parset equivalent                                      | Description                                                   |
++============================================+=====================================+========================================================+===============================================================+
+| **Imaging parameters**                     |                                     |                                                        |                                                               |
++--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
+| ``DO_CONTPOL_IMAGING``                     | false                               | none                                                   | Whether to create continuum polarisation images               |
++--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
+| ``CONTIMG_POLARISATIONS``                  | ``"I,V"``                           | ImageName.polarisation                                 | Comma separated list of Polarisations to be imaged            |
+|                                            |                                     | (:doc:`../calim/cimager`)                              | Stokes-I is ignored here, since it is imaged in the           |
+|                                            |                                     |                                                        | self-cal loop                                                 |
++--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
+| ``INVERT_SIGN_STOKES_V_IMAGE``             | true                                | none                                                   | Whether to invert the sign of the pixel values in the Stokes V|
+|                                            |                                     |                                                        | image. This is necessary for now if you want to conform to the|
+|                                            |                                     |                                                        | IEEE/IAU definition of Stokes V.                              |
++--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
+| ``CIMAGER_CONTPOL_MINUV``                  | 0                                   | MinUV (:doc:`../calim/data_selection`)                 | The minimum UV distance considered in the imaging - used to   |
+|                                            |                                     |                                                        | exclude the short baselines. Can be given as an array with    |
+|                                            |                                     |                                                        | different values for each pol loop                            |
+|                                            |                                     |                                                        | (e.g. ``"[200,200,0]"``).                                     |
++--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
+| ``CIMAGER_CONTPOL_MAXUV``                  | 0                                   | MaxUV (:doc:`../calim/data_selection`)                 | The maximum UV distance considered in the imaging. Only used  |
+|                                            |                                     |                                                        | if greater than zero. Can be given as an array with different |
+|                                            |                                     |                                                        | values for each pol loop (e.g. ``"[200,200,0]"``).            |
++--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
+| **Cleaning parameters**                    |                                     |                                                        |                                                               |
++--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
+| ``CLEAN_CONTPOL_ALGORITHM``                |  BasisfunctionMFS                   | Clean.algorithm                                        | The name(s) of clean algorithm(s) to use.                     |
+|                                            |                                     | (:doc:`../calim/solver`)                               | To use different algorithms in different selfcal cycles, use: |
+|                                            |                                     |                                                        | ``CLEAN_CONTPOL_ALGORITHM="Hogbom,BasisfunctionMFS"``         |
+|                                            |                                     |                                                        | If the number of comma-separated algorithms is less than      |
+|                                            |                                     |                                                        | the number of pol specified, the first algorithm specified    |
+|                                            |                                     |                                                        | will be used for ALL pol loops.                               |
++--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
+| ``CLEAN_CONTPOL_MINORCYCLE_NITER``         | ``"800"``                           | Clean.niter                                            | The number of iterations for the minor cycle clean. Can be    |
+|                                            |                                     | (:doc:`../calim/solver`)                               | varied for each pol. (e.g. ``"[200,800,1000]"``)              |
++--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
+| ``CLEAN_CONTPOL_GAIN``                     | 0.2                                 | Clean.gain                                             | The loop gain (fraction of peak subtracted per minor cycle).  |
+|                                            |                                     | (:doc:`../calim/solver`)                               | Can be varied for each pol                                    |
+|                                            |                                     |                                                        | cycle. (e.g. ``"[0.1,0.2,0.1]"``)                             |
++--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
+| ``CLEAN_CONTPOL_PSFWIDTH``                 | 256                                 | Clean.psfwidth                                         | The width of the psf patch used in the minor cycle. Can be    |
+|                                            |                                     | (:doc:`../calim/solver`)                               | varied for each pol (e.g. ``"[256,512,4096]"``)               |
++--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
+| ``CLEAN_CONTPOL_SCALES``                   | ``"[0,3,10]"``                      | Clean.scales                                           | Set of scales (in pixels) to use with the multi-scale clean.  |
+|                                            |                                     | (:doc:`../calim/solver`)                               | Can be varied for each specified polarisation (e.g. ``"[0] ;  |
+|                                            |                                     |                                                        | [0,10]"``) Notice the delimiter ``" ; "`` and the spaces      |
+|                                            |                                     |                                                        | around it.                                                    |
++--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
+| ``CLEAN_CONTPOL_THRESHOLD_MINORCYCLE``     | ``"[30%, 0.5mJy, 0.03mJy]"``        | threshold.minorcycle                                   | Threshold for the minor cycle loop. Can be varied for each    |
+|                                            |                                     | (:doc:`../calim/cimager`)                              | polarisation. (e.g. ``"[30%,1.8mJy,0.03mJy] ;                 |
+|                                            |                                     | (:doc:`../calim/solver`)                               | [20%,0.5mJy,0.03mJy]"``) Notice the delimiter ``" ; "`` and   |
+|                                            |                                     |                                                        | the spaces around it.                                         |
++--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
+| ``CLEAN_CONTPOL_THRESHOLD_MAJORCYCLE``     | ``"0.035mJy"``                      | threshold.majorcycle                                   | The target peak residual. Major cycles stop if this is        |
+|                                            |                                     | (:doc:`../calim/cimager`)                              | reached. A negative number ensures all major cycles requested |
+|                                            |                                     | (:doc:`../calim/solver`)                               | are done. Can be given as an array with different values for  |
+|                                            |                                     |                                                        | each pol loop (e.g. ``"[3mJy,1mJy,-1mJy]"``).                 |
++--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
+| ``CLEAN_CONTPOL_NUM_MAJORCYCLES``          | ``"3"``                             | ncycles                                                | Number of major cycles. Can be given as an array with         |
+|                                            |                                     | (:doc:`../calim/cimager`)                              | different values for each pol loop (e.g. ``"[2,4,6]"``).      |
++--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
+| ``CLEAN_CONTPOL_WRITE_AT_MAJOR_CYCLE``     | false                               | Images.writeAtMajorCycle                               | If true, the intermediate images will be written (with a      |
+|                                            |                                     | (:doc:`../calim/cimager`)                              | .cycle suffix) after the end of each major cycle.             |
++--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
+| ``CLEAN_CONTPOL_SOLUTIONTYPE``             | MAXBASE                             | Clean.solutiontype (see discussion at                  | The type of peak finding algorithm to use in the              |
+|                                            |                                     | :doc:`../recipes/Imaging`)                             | deconvolution. Choices are MAXCHISQ, MAXTERM0, or MAXBASE.    |
++--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
+
+
+
+Continuum cube imaging
+----------------------
+
+Once the gains have been applied to the averaged dataset, it can be
+imaged as "continuum cubes" in a variety of polarisations - use
+``DO_CONTCUBE_IMAGING=true`` to turn this mode on.
+
+This table lists all relevant parameters that are different to the MFS
+imaging. Some parameters, notably gridding and preconditioning, are
+the same. There are also parameters related to the use of
+:doc:`../calim/imager`.
+
+
++--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
+| Variable                                   | Default                             | Parset equivalent                                      | Description                                                   |
++============================================+=====================================+========================================================+===============================================================+
+| **Imaging parameters**                     |                                     |                                                        |                                                               |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
 | ``DO_CONTCUBE_IMAGING``                    | false                               | none                                                   | Whether to create continuum cubes                             |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
@@ -528,6 +653,10 @@ the ``DO_CONVERT_TO_FITS`` flag, which makes use of the
 | ``CONTCUBE_POLARISATIONS``                 | ``"I"``                             | Images.polarisation (:doc:`../calim/simager`)          | List of polarisations to create cubes for. This should be a   |
 |                                            |                                     |                                                        | comma-separated list of (upper-case) polarisations. Separate  |
 |                                            |                                     |                                                        | jobs will be launched for each polarisation given.            |
++--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
+| ``INVERT_SIGN_STOKES_V_CONTCUBE``          | true                                | none                                                   | Whether to invert the sign of the pixel values in the Stokes V|
+|                                            |                                     |                                                        | cube. This is necessary for now if you want to conform to the |
+|                                            |                                     |                                                        | IEEE/IAU definition of Stokes V.                              |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
 | ``REST_FREQUENCY_CONTCUBE``                | ``""``                              | Images.restFrequency (:doc:`../calim/simager`)         | Rest frequency to be written to the continuum cube. If left   |
 |                                            |                                     |                                                        | blank, no rest frequency is written.                          |
@@ -592,4 +721,35 @@ the ``DO_CONVERT_TO_FITS`` flag, which makes use of the
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
 | ``CLEAN_CONTCUBE_SOLUTIONTYPE``            | MAXCHISQ                            | Clean.solutiontype (see discussion at                  | The type of peak finding algorithm to use in the              |
 |                                            |                                     | :doc:`../recipes/Imaging`)                             | deconvolution. Choices are MAXCHISQ, MAXTERM0, or MAXBASE.    |
++--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
+| **New imager parameters**                  |                                     |                                                        |                                                               |
++--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
+| ``DO_ALT_IMAGER_CONTCUBE``                 | ``""``                              | none                                                   | If true, the continuum cube imaging is done by imager         |
+|                                            |                                     |                                                        | (:doc:`../calim/imager`). If false, it is done by cimager     |
+|                                            |                                     |                                                        | (:doc:`../calim/cimager`). When true, the following           |
+|                                            |                                     |                                                        | parameters are used. If left blank (the default), the value   |
+|                                            |                                     |                                                        | is given by the overall parameter ``DO_ALT_IMAGER``.          |
++--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
+| ``NCHAN_PER_CORE``                         | 12                                  | nchanpercore                                           | The number of channels each core will process.                |
+|                                            |                                     | (:doc:`../calim/imager`)                               |                                                               |
++--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
+| ``USE_TMPFS``                              | false                               | usetmpfs (:doc:`../calim/imager`)                      | Whether to store the visibilities in shared memory.This will  |
+|                                            |                                     |                                                        | give a performance boost at the expense of memory             |
+|                                            |                                     |                                                        | usage. Better used for processing continuum data.             |
++--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
+| ``TMPFS``                                  | /dev/shm                            | tmpfs (:doc:`../calim/imager`)                         | Location of the shared memory.                                |
++--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
+| ``NUM_SPECTRAL_WRITERS_CONTCUBE``          | ``""``                              | nwriters (:doc:`../calim/imager`)                      | The number of writers used by imager. Unless                  |
+|                                            |                                     |                                                        | ``ALT_IMAGER_SINGLE_FILE_CONTCUBE=true``, this will equate to |
+|                                            |                                     |                                                        | the number of distinct spectral cubes produced.In the case of |
+|                                            |                                     |                                                        | multiple cubes, each will be a sub-band of the full           |
+|                                            |                                     |                                                        | bandwidth. No combination of the sub-cubes is currently       |
+|                                            |                                     |                                                        | done. The number of writers will be reduced to the number of  |
+|                                            |                                     |                                                        | workers in the job if necessary. If a single image is         |
+|                                            |                                     |                                                        | produced, the default is to have the same number of writers as|
+|                                            |                                     |                                                        | workers.                                                      |
++--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
+| ``ALT_IMAGER_SINGLE_FILE_CONTCUBE``        | true                                | singleoutputfile                                       | Whether to write a single cube, even with multiple writers    |
+|                                            |                                     | (:doc:`../calim/imager`)                               | (ie. ``NUM_SPECTRAL_WRITERS_CONTCUBE>1``). Only works when    |
+|                                            |                                     |                                                        | ``IMAGETYPE_SPECTRAL=fits``                                   |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+

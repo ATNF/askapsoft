@@ -514,7 +514,13 @@ function setImageBase()
     type="$1"
 
     if [ "$type" == "cont" ]; then
-        imageBase=${IMAGE_BASE_CONT}
+	imageBase=${IMAGE_BASE_CONT}
+	if [ "$pol" != "" ]; then
+            sedstr="s/^i\./$pol\./g"
+            imageBase=$(echo "${imageBase}" | sed -e "$sedstr")
+            sedstr="s/%p/$pol/g"
+            imageBase=$(echo "${imageBase}" | sed -e "$sedstr")
+        fi
     elif [ "$type" == "contcube" ]; then
         imageBase=${IMAGE_BASE_CONTCUBE}
         sedstr="s/^i\./$pol\./g"
@@ -828,6 +834,19 @@ function getPolList()
 
 }
 
+# Function to return a list of polarisations, separated by
+# spaces, converted from the user-input list of comma-separated
+# polarisations for the continuum data (independent of cubes).
+#  Required inputs:
+#     * CONTINUUM_POLARISATIONS - something like "I,Q,U,V"
+#  Returns: $CONT_POL_LIST (would convert above to "I Q U V")
+function getContPolList()
+{
+    CONTPOL_LIST=$(echo "$CONTIMG_POLARISATIONS" | sed -e 's/,/ /g')
+    CONTIMG_NUM_POLS=$(echo $CONTPOL_LIST | wc -w)
+
+}
+
 # Function to set the cleaning parameters that can potentially depend
 # on the self-calibration loop number. The array index is taken from
 # the value of $LOOP - if this is blank then zero (the first value) is
@@ -862,6 +881,42 @@ Cimager.solver.Clean.psfwidth                   = ${CLEAN_PSFWIDTH_ARRAY[$loopva
 Cimager.solver.Clean.scales                     = ${CLEAN_SCALES_ARRAY[$loopval]}
 "
 }
+
+# Function to set the cleaning parameters that can potentially vary 
+# as a function of Stokes parameters. The array index varies from 0-3 
+# (I=0, Q=1, U=2, V=3) and is taken from the value of $iPOL - if this 
+# is blank then zero (the first value, ie., ) is used
+# Requires/uses:
+#  * iPOL
+#  * CLEAN_CONTPOL_THRESHOLD_MAJORCYCLE_ARRAY
+#  * CLEAN_CONTPOL_NUM_MAJORCYCLES_ARRAY
+#  * CLEAN_CONTPOL_ALGORITHM_ARRAY
+#  * CLEAN_CONTPOL_MINORCYCLE_NITER_ARRAY
+#  * CLEAN_CONTPOL_THRESHOLD_MINORCYCLE_ARRAY
+#  * CLEAN_CONTPOL_GAIN_ARRAY
+#  * CLEAN_CONTPOL_PSFWIDTH_ARRAY 
+#  * CLEAN_CONTPOL_SCALES_ARRAY
+# Returns:
+#  * polParams
+function cimagerPolImagingParams()
+{
+    if [ "$iPOL" == "" ]; then
+        polINDEX=0
+    else
+        polINDEX=$iPOL
+    fi
+    polParams="# Parameters set for loop $polINDEX
+Cimager.threshold.majorcycle                    = ${CLEAN_CONTPOL_THRESHOLD_MAJORCYCLE_ARRAY[$polINDEX]}
+Cimager.ncycles                                 = ${CLEAN_CONTPOL_NUM_MAJORCYCLES_ARRAY[$polINDEX]}
+Cimager.solver.Clean.algorithm                  = ${CLEAN_CONTPOL_ALGORITHM_ARRAY[$polINDEX]}
+Cimager.solver.Clean.niter                      = ${CLEAN_CONTPOL_MINORCYCLE_NITER_ARRAY[$polINDEX]}
+Cimager.threshold.minorcycle                    = ${CLEAN_CONTPOL_THRESHOLD_MINORCYCLE_ARRAY[$polINDEX]}
+Cimager.solver.Clean.gain                       = ${CLEAN_CONTPOL_GAIN_ARRAY[$polINDEX]}
+Cimager.solver.Clean.psfwidth                   = ${CLEAN_CONTPOL_PSFWIDTH_ARRAY[$polINDEX]}
+Cimager.solver.Clean.scales                     = ${CLEAN_CONTPOL_SCALES_ARRAY[$polINDEX]}
+"
+}
+
 
 # Function to return self-calibration-loop-dependant parameters
 # governing data selection. This returns parset parameters suitable
@@ -898,6 +953,36 @@ function dataSelectionSelfcalLoop()
     fi
     if [ "$needToUnsetLoop" == "true" ]; then
         unset LOOP
+    fi
+}
+
+##############################
+# Function to return polarisation-dependant parameters
+# governing data selection. This returns parset parameters suitable
+# for Cimager (the task name is given as the
+# first argument to the function)
+# Use: dataSelectionPolImage
+# Requires/uses:
+#   * iPOL
+#   * CIMAGER_CONTPOL_MINUV_ARRAY or
+# Returns:
+#   * dataSelectionParamsPolIm
+function dataSelectionPolImage()
+{
+    dataSelectionParamsPolIm=""
+    needToUnsetPol=false
+    if [ "$iPOL" == "" ]; then
+        iPOL=0
+        needToUnsetPol=true
+    fi
+    if [ "${CIMAGER_CONTPOL_MINUV_ARRAY[$iPOL]}" -gt 0 ]; then
+        dataSelectionParamsPolIm="Cimager.MinUV   = ${CIMAGER_CONTPOL_MINUV_ARRAY[$iPOL]}"
+    fi
+    if [ "${CIMAGER_CONTPOL_MAXUV_ARRAY[$iPOL]}" -gt 0 ]; then
+        dataSelectionParamsPolIm="Cimager.MaxUV   = ${CIMAGER_CONTPOL_MAXUV_ARRAY[$iPOL]}"
+    fi
+    if [ "$needToUnsetPol" == "true" ]; then
+        unset iPOL
     fi
 }
 

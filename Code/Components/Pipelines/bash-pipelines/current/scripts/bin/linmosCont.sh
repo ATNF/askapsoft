@@ -32,58 +32,65 @@
 ID_LINMOS_CONT=""
 
 mosaicImageList="restored altrestored image residual"
+for POLN in ${CONTPOL_LIST}; do
 
-NLOOPS=0
-if [ "${DO_SELFCAL}" == "true" ] && [ "${MOSAIC_SELFCAL_LOOPS}" == "true" ]; then
-    NLOOPS=$SELFCAL_NUM_LOOPS
-fi
-BEAM=all
-for((LOOP=0;LOOP<=NLOOPS;LOOP++)); do
-    for imageCode in ${mosaicImageList}; do
+    NLOOPS=0
+    if [ "${POLN}" == "I" ] || [ "${POLN}" == "i" ]; then 
+	if [ "${DO_SELFCAL}" == "true" ] && [ "${MOSAIC_SELFCAL_LOOPS}" == "true" ]; then
+	    NLOOPS=$SELFCAL_NUM_LOOPS
+	fi
+    else
+	NLOOPS=0
+    fi
 
-        TTERM=0
-        
-            DO_IT=$DO_MOSAIC
-            if [ "$DO_CONT_IMAGING" != "true" ]; then
-                DO_IT=false
-            fi
+    pol=$(echo "${POLN}" | tr '[:upper:]' '[:lower:]')
+    BEAM=all
+    for((LOOP=0;LOOP<=NLOOPS;LOOP++)); do
+	for imageCode in ${mosaicImageList}; do
 
-            if [ $NLOOPS -gt 0 ]; then
-                tag="${imageCode}L${LOOP}"
-            else
-                tag="${imageCode}"
-            fi
-            
-            if [ "${DO_IT}" == "true" ] && [ "${CLOBBER}" != "true" ]; then
-                setImageProperties cont
-                if [ -e "${OUTPUT}/${imageName}" ]; then
-                    if [ "${DO_IT}" == "true" ]; then
-                        echo "Image ${imageName} exists, so not running continuum mosaicking"
-                    fi
-                    DO_IT=false
-                fi
-            fi
+	    TTERM=0
+	    
+	    DO_IT=$DO_MOSAIC
+	    if [ "$DO_CONT_IMAGING" != "true" ]; then
+		DO_IT=false
+	    fi
 
-            # Don't bother looking for altrestored images if we aren't doing that mode
-            if [ "${imageCode}" == "altrestored" ] && [ "${RESTORE_PRECONDITIONER_LIST}" == "" ]; then
-                DO_IT=false
-            fi
+	    if (( ${NLOOPS} > 0 )); then
+		tag="${imageCode}L${LOOP}"
+	    else
+		tag="${imageCode}"
+	    fi
+	    
+	    if [ "${DO_IT}" == "true" ] && [ "${CLOBBER}" != "true" ]; then
+		setImageProperties cont
+		if [ -e "${OUTPUT}/${imageName}" ]; then
+		    if [ "${DO_IT}" == "true" ]; then
+			echo "Image ${imageName} exists, so not running continuum mosaicking"
+		    fi
+		    DO_IT=false
+		fi
+	    fi
 
-            if [ "${DO_IT}" == "true" ]; then
+	    # Don't bother looking for altrestored images if we aren't doing that mode
+	    if [ "${imageCode}" == "altrestored" ] && [ "${RESTORE_PRECONDITIONER_LIST}" == "" ]; then
+		DO_IT=false
+	    fi
 
-                if [ "${IMAGE_AT_BEAM_CENTRES}" == "true" ] && [ "$DIRECTION_SCI" == "" ]; then
-                    reference="# No reference image or offsets, as we take the image centres"
-                else
-                    reference="# Reference image for offsets
+	    if [ "${DO_IT}" == "true" ]; then
+
+		if [ "${IMAGE_AT_BEAM_CENTRES}" == "true" ] && [ "$DIRECTION_SCI" == "" ]; then
+		    reference="# No reference image or offsets, as we take the image centres"
+		else
+		    reference="# Reference image for offsets
 linmos.feeds.centreref  = 0      
 linmos.feeds.spacing    = ${LINMOS_BEAM_SPACING}
 # Beam offsets
 ${LINMOS_BEAM_OFFSETS}"
-                fi
+		fi
 
 
-                setJob linmosCont_${tag} linmosC${tag}
-                cat > "$sbatchfile" <<EOFOUTER
+		setJob linmosCont_${tag}_${POLN} linmosC${tag}
+		cat > "$sbatchfile" <<EOFOUTER
 #!/bin/bash -l
 ${SLURM_CONFIG}
 #SBATCH --time=${JOB_TIME_LINMOS}
@@ -91,7 +98,7 @@ ${SLURM_CONFIG}
 #SBATCH --ntasks-per-node=1
 #SBATCH --job-name=${jobname}
 ${exportDirective}
-#SBATCH --output="$slurmOut/slurm-linmosC-%j.out"
+#SBATCH --output="$slurmOut/slurm-linmosC${tag}_${POLN}-%j.out"
 
 ${askapsoftModuleCommands}
 
@@ -110,6 +117,7 @@ IMAGE_BASE_CONT=${IMAGE_BASE_CONT}
 FIELD=${FIELD}
 BEAMS_TO_USE="${BEAMS_TO_USE}"
 IMAGETYPE_CONT="${IMAGETYPE_CONT}"
+pol=${pol}
 
 LOOP=$LOOP
 imageCode=$imageCode
@@ -137,7 +145,7 @@ for BEAM in \${BEAMS_TO_USE}; do
     fi
 done
 
-jobCode=${jobname}_\${imageCode}
+jobCode=${jobname}_${POLN}_\${imageCode}
 if [ "\${NUM_TAYLOR_TERMS}" -gt 1 ]; then
     jobCode=\${jobCode}_T\${TTERM}
 fi
@@ -239,25 +247,35 @@ else
 fi
 EOFOUTER
 
-                if [ "${SUBMIT_JOBS}" == "true" ]; then
-                    FLAG_IMAGING_DEP=$(echo "${FLAG_IMAGING_DEP}" | sed -e 's/afterok/afterany/g')
-	            ID_LINMOS_CONT=$(sbatch ${FLAG_IMAGING_DEP} "$sbatchfile" | awk '{print $4}')
-                    if [ "${imageCode}" == "restored" ]; then
-                        ID_LINMOS_CONT_RESTORED=${ID_LINMOS_CONT}
+		if [ "${SUBMIT_JOBS}" == "true" ]; then
+                    if [ $POLN == "I" ] || [ "${POLN}" == "i" ] ;then
+			localdep=$(echo "${FLAG_IMAGING_DEP}" | sed -e 's/afterok/afterany/g')
+		        ID_LINMOS_CONT=$(sbatch ${localdep} "$sbatchfile" | awk '{print $4}')
+		        if [ "${imageCode}" == "restored" ]; then
+			    ID_LINMOS_CONT_RESTORED=${ID_LINMOS_CONT}
+		        fi
+		        recordJob "${ID_LINMOS_CONT}" "Make a mosaic continuum ${POLN}-image of the science observation, field $FIELD, tag $tag, with flags \"${local_dep}\""
+		        FULL_LINMOS_CONT_DEP=$(addDep "${FULL_LINMOS_CONT_DEP}" "${ID_LINMOS_CONT}")
+                    else
+                        localdep=$(echo "${FLAG_POLIMAGING_DEP}" | sed -e 's/afterok/afterany/g')
+		        ID_LINMOS_CONTPOL=$(sbatch ${localdep} "$sbatchfile" | awk '{print $4}')
+		        if [ "${imageCode}" == "restored" ]; then
+			    ID_LINMOS_CONTPOL_RESTORED=${ID_LINMOS_CONTPOL}
+		        fi
+		        recordJob "${ID_LINMOS_CONTPOL}" "Make a mosaic continuum ${POLN}-image of the science observation, field $FIELD, tag $tag, with flags \"${local_dep}\""
+		        FULL_LINMOS_CONTPOL_DEP=$(addDep "${FULL_LINMOS_CONTPOL_DEP}" "${ID_LINMOS_CONTPOL}")
                     fi
-	            recordJob "${ID_LINMOS_CONT}" "Make a mosaic continuum image of the science observation, field $FIELD, tag $tag, with flags \"${FLAG_IMAGING_DEP}\""
-                    FULL_LINMOS_CONT_DEP=$(addDep "${FULL_LINMOS_CONT_DEP}" "${ID_LINMOS_CONT}")
-                else
-	            echo "Would make a mosaic image of the science observation, field $FIELD, tag $tag, with slurm file $sbatchfile"
-                fi
+		else
+		    echo "Would make a mosaic ${POLN}-image of the science observation, field $FIELD, tag $tag, with slurm file $sbatchfile"
+		fi
 
-                echo " "
+		echo " "
 
-            fi
-            
-        unset TTERM
+	    fi
+	    
+	    unset TTERM
+	done
     done
+    unset LOOP
 done
-unset LOOP
-
-
+unset POLN

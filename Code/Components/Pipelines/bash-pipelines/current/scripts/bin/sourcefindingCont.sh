@@ -30,6 +30,7 @@
 DO_IT=$DO_SOURCE_FINDING_CONT
 
 # set imageName, weightsImage etc
+pol="i"
 imageCode=restored
 setImageProperties cont
 contImage=$imageName

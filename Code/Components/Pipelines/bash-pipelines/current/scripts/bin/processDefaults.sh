@@ -61,6 +61,7 @@ if [ "$PROCESS_DEFAULTS_HAS_RUN" != "true" ]; then
         DO_APPLY_CAL_CONT=false
         DO_APPLY_CAL_SL=false
         DO_CONTCUBE_IMAGING=false
+        DO_CONTPOL_IMAGING=false
         DO_SPECTRAL_IMAGING=false
         DO_SPECTRAL_IMSUB=false
         DO_MOSAIC=true
@@ -859,6 +860,18 @@ Cimager.Channels                                = ${CHANNEL_SELECTION_CONTIMG_SC
             getPolList
         fi
 
+	# Set the polarisation list for the continuum images
+        if [ "${CONTIMG_POLARISATIONS}" == "" ]; then
+            if [ "$DO_CONTPOL_IMAGING" == "true" ]; then
+                echo "WARNING - No polarisation given for continuum polarisation imaging. Turning off DO_CONTPOL_IMAGING. No imaging on self-calibrated msdata will be done."
+                DO_CONTPOL_IMAGING=false
+            fi
+        else
+            # set the CONTPOL_LIST parameter
+            getContPolList
+        fi
+
+
         # Set the number of cores for the continuum cube imaging. Either
         # set to the number of averaged channels + 1, or use that given in
         # the config file, limiting to no bigger than this number
@@ -1321,7 +1334,8 @@ Cimager.Channels                                = ${CHANNEL_SELECTION_CONTIMG_SC
         #  or not
         if [ "${DO_CONT_IMAGING}" == "true" ]; then
 
-            expectedArrSize=$((SELFCAL_NUM_LOOPS + 1))
+	    expectedArrSize=$((SELFCAL_NUM_LOOPS + 1))
+	    expectedPolArrSize=$((CONTIMG_NUM_POLS))
 
             if [ "${DO_SELFCAL}" == "true" ]; then
 
@@ -1379,7 +1393,7 @@ Cimager.Channels                                = ${CHANNEL_SELECTION_CONTIMG_SC
                     done
                 fi
 
-            fi
+            fi # End of selfcal loop
 
             if [ "$(echo "${CLEAN_NUM_MAJORCYCLES}" | grep "\[")" != "" ]; then
                 # Have entered a comma-separate array in square brackets
@@ -1677,6 +1691,246 @@ Cimager.Channels                                = ${CHANNEL_SELECTION_CONTIMG_SC
                 fi
 
             fi
+	    #+++ww++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+	    # Parameters to control CONTINUUM POL IMAGING (will facilitate independent 
+	    # setting up of final imaging of the self-calibrated msdata):
+            if [ "$(echo "${CLEAN_CONTPOL_NUM_MAJORCYCLES}" | grep "\[")" != "" ]; then
+                # Have entered a comma-separate array in square brackets
+                arrSize=$(echo "${CLEAN_CONTPOL_NUM_MAJORCYCLES}" | sed -e 's/[][,]/ /g' | wc -w)
+                if [ "$arrSize" -ne "$expectedPolArrSize" ]; then
+                    echo "ERROR - CLEAN_CONTPOL_NUM_MAJORCYCLES ($CLEAN_CONTPOL_NUM_MAJORCYCLES) needs to be of size $expectedPolArrSize (since CONTIMG_NUM_POLS=$CONTIMG_NUM_POLS)"
+                    exit 1
+                fi
+                CLEAN_CONTPOL_NUM_MAJORCYCLES_ARRAY=()
+                for a in $(echo "${CLEAN_CONTPOL_NUM_MAJORCYCLES}" | sed -e 's/[][,]/ /g'); do
+                    CLEAN_CONTPOL_NUM_MAJORCYCLES_ARRAY+=($a)
+                done
+            else
+                CLEAN_CONTPOL_NUM_MAJORCYCLES_ARRAY=()
+                for((i=0;i<CONTIMG_NUM_POLS;i++)); do
+                    CLEAN_CONTPOL_NUM_MAJORCYCLES_ARRAY+=($CLEAN_CONTPOL_NUM_MAJORCYCLES)
+                done
+            fi
+
+            if [ "$(echo "${CLEAN_CONTPOL_THRESHOLD_MAJORCYCLE}" | grep "\[")" != "" ]; then
+                # Have entered a comma-separate array in square brackets
+                arrSize=$(echo "${CLEAN_CONTPOL_THRESHOLD_MAJORCYCLE}" | sed -e 's/[][,]/ /g' | wc -w)
+                if [ "$arrSize" -ne "$expectedPolArrSize" ]; then
+                    echo "ERROR - CLEAN_CONTPOL_THRESHOLD_MAJORCYCLE ($CLEAN_CONTPOL_THRESHOLD_MAJORCYCLE) needs to be of size $expectedPolArrSize (since CONTIMG_NUM_POLS=$CONTIMG_NUM_POLS)"
+                    exit 1
+                fi
+                CLEAN_CONTPOL_THRESHOLD_MAJORCYCLE_ARRAY=()
+                for a in $(echo "${CLEAN_CONTPOL_THRESHOLD_MAJORCYCLE}" | sed -e 's/[][,]/ /g'); do
+                    CLEAN_CONTPOL_THRESHOLD_MAJORCYCLE_ARRAY+=($a)
+                done
+            else
+                CLEAN_CONTPOL_THRESHOLD_MAJORCYCLE_ARRAY=()
+                for((i=0;i<CONTIMG_NUM_POLS;i++)); do
+                    CLEAN_CONTPOL_THRESHOLD_MAJORCYCLE_ARRAY+=($CLEAN_CONTPOL_THRESHOLD_MAJORCYCLE)
+                done
+            fi
+
+            if [ "$(echo "${CIMAGER_CONTPOL_MINUV}" | grep "\[")" != "" ]; then
+                # Have entered a comma-separate array in square brackets
+                arrSize=$(echo "${CIMAGER_CONTPOL_MINUV}" | sed -e 's/[][,]/ /g' | wc -w)
+                if [ "$arrSize" -ne "$expectedPolArrSize" ]; then
+                    echo "ERROR - CIMAGER_CONTPOL_MINUV ($CIMAGER_CONTPOL_MINUV) needs to be of size $expectedPolArrSize (since CONTIMG_NUM_POLS=$CONTIMG_NUM_POLS)"
+                    exit 1
+                fi
+                CIMAGER_CONTPOL_MINUV_ARRAY=()
+                for a in $(echo "${CIMAGER_CONTPOL_MINUV}" | sed -e 's/[][,]/ /g'); do
+                    CIMAGER_CONTPOL_MINUV_ARRAY+=($a)
+                done
+            else
+                CIMAGER_CONTPOL_MINUV_ARRAY=()
+                for((i=0;i<CONTIMG_NUM_POLS;i++)); do
+                    CIMAGER_CONTPOL_MINUV_ARRAY+=($CIMAGER_CONTPOL_MINUV)
+                done
+            fi
+
+            if [ "$(echo "${CIMAGER_CONTPOL_MAXUV}" | grep "\[")" != "" ]; then
+                # Have entered a comma-separate array in square brackets
+                arrSize=$(echo "${CIMAGER_CONTPOL_MAXUV}" | sed -e 's/[][,]/ /g' | wc -w)
+                if [ "$arrSize" -ne "$expectedPolArrSize" ]; then
+                    echo "ERROR - CIMAGER_CONTPOL_MAXUV ($CIMAGER_CONTPOL_MAXUV) needs to be of size $expectedPolArrSize (since CONTIMG_NUM_POLS=$CONTIMG_NUM_POLS)"
+                    exit 1
+                fi
+                CIMAGER_CONTPOL_MAXUV_ARRAY=()
+                for a in $(echo "${CIMAGER_CONTPOL_MAXUV}" | sed -e 's/[][,]/ /g'); do
+                    CIMAGER_CONTPOL_MAXUV_ARRAY+=($a)
+                done
+            else
+                CIMAGER_CONTPOL_MAXUV_ARRAY=()
+                for((i=0;i<CONTIMG_NUM_POLS;i++)); do
+                    CIMAGER_CONTPOL_MAXUV_ARRAY+=($CIMAGER_CONTPOL_MAXUV)
+                done
+            fi
+	    # 1. CLEAN_ALGORITHM 
+	    # expected input: CLEAN_ALGORITHM="[Hogbom,BasisFunctionMFS]"
+            if [ "$(echo "${CLEAN_CONTPOL_ALGORITHM}" | grep "\[")" != "" ]; then
+                # Have entered a comma-separate array in square brackets
+                arrSize=$(echo "${CLEAN_CONTPOL_ALGORITHM}" | sed -e 's/[][,]/ /g' | wc -w)
+                if [ "$arrSize" -ne "$expectedPolArrSize" ]; then
+                    echo "ERROR - CLEAN_CONTPOL_ALGORITHM ($CLEAN_CONTPOL_ALGORITHM) needs to be of size $expectedPolArrSize (since CONTIMG_NUM_POLS=$CONTIMG_NUM_POLS)"
+                    exit 1
+                fi
+                CLEAN_CONTPOL_ALGORITHM_ARRAY=()
+                for a in $(echo "${CLEAN_CONTPOL_ALGORITHM}" | sed -e 's/[][,]/ /g'); do
+                    CLEAN_CONTPOL_ALGORITHM_ARRAY+=($a)
+                done
+            else
+                CLEAN_CONTPOL_ALGORITHM_ARRAY=()
+                for((i=0;i<CONTIMG_NUM_POLS;i++)); do
+                    CLEAN_CONTPOL_ALGORITHM_ARRAY+=($CLEAN_CONTPOL_ALGORITHM)
+                done
+            fi
+
+	    # 2. CLEAN_MINORCYCLE_NITER  
+	    # expected input: CLEAN_CONTPOL_MINORCYCLE_NITER="[200,800]"
+            if [ "$(echo "${CLEAN_CONTPOL_MINORCYCLE_NITER}" | grep "\[")" != "" ]; then
+                # Have entered a comma-separate array in square brackets
+                arrSize=$(echo "${CLEAN_CONTPOL_MINORCYCLE_NITER}" | sed -e 's/[][,]/ /g' | wc -w)
+                if [ "$arrSize" -ne "$expectedPolArrSize" ]; then
+                    echo "ERROR - CLEAN_CONTPOL_MINORCYCLE_NITER ($CLEAN_CONTPOL_MINORCYCLE_NITER) needs to be of size $expectedPolArrSize (since CONTIMG_NUM_POLS=$CONTIMG_NUM_POLS)"
+                    exit 1
+                fi
+                CLEAN_CONTPOL_MINORCYCLE_NITER_ARRAY=()
+                for a in $(echo "${CLEAN_CONTPOL_MINORCYCLE_NITER}" | sed -e 's/[][,]/ /g'); do
+                    CLEAN_CONTPOL_MINORCYCLE_NITER_ARRAY+=($a)
+                done
+            else
+                CLEAN_CONTPOL_MINORCYCLE_NITER_ARRAY=()
+                for((i=0;i<CONTIMG_NUM_POLS;i++)); do
+                    CLEAN_CONTPOL_MINORCYCLE_NITER_ARRAY+=($CLEAN_CONTPOL_MINORCYCLE_NITER)
+                done
+            fi
+	    # 3. CLEAN_GAIN
+	    # expected input: CLEAN_CONTPOL_GAIN="[0.1,0.2]"
+            if [ "$(echo "${CLEAN_CONTPOL_GAIN}" | grep "\[")" != "" ]; then
+                # Have entered a comma-separate array in square brackets
+                arrSize=$(echo "${CLEAN_CONTPOL_GAIN}" | sed -e 's/[][,]/ /g' | wc -w)
+                if [ "$arrSize" -ne "$expectedPolArrSize" ]; then
+                    echo "ERROR - CLEAN_CONTPOL_GAIN ($CLEAN_CONTPOL_GAIN) needs to be of size $expectedPolArrSize (since CONTIMG_NUM_POLS=$CONTIMG_NUM_POLS)"
+                    exit 1
+                fi
+                CLEAN_CONTPOL_GAIN_ARRAY=()
+                for a in $(echo "${CLEAN_CONTPOL_GAIN}" | sed -e 's/[][,]/ /g'); do
+                    CLEAN_CONTPOL_GAIN_ARRAY+=($a)
+                done
+            else
+                CLEAN_CONTPOL_GAIN_ARRAY=()
+                for((i=0;i<CONTIMG_NUM_POLS;i++)); do
+                    CLEAN_CONTPOL_GAIN_ARRAY+=($CLEAN_CONTPOL_GAIN)
+                done
+            fi
+	    # 4. CLEAN_PSFWIDTH 
+	    # expected input: CLEAN_CONTPOL_PSFWIDTH="[256,6144]"
+            if [ "$(echo "${CLEAN_CONTPOL_PSFWIDTH}" | grep "\[")" != "" ]; then
+                # Have entered a comma-separate array in square brackets
+                arrSize=$(echo "${CLEAN_CONTPOL_PSFWIDTH}" | sed -e 's/[][,]/ /g' | wc -w)
+                if [ "$arrSize" -ne "$expectedPolArrSize" ]; then
+                    echo "ERROR - CLEAN_CONTPOL_PSFWIDTH ($CLEAN_CONTPOL_PSFWIDTH) needs to be of size $expectedPolArrSize (since CONTIMG_NUM_POLS=$CONTIMG_NUM_POLS)"
+                    exit 1
+                fi
+                CLEAN_CONTPOL_PSFWIDTH_ARRAY=()
+                for a in $(echo "${CLEAN_CONTPOL_PSFWIDTH}" | sed -e 's/[][,]/ /g'); do
+                    CLEAN_CONTPOL_PSFWIDTH_ARRAY+=($a)
+                done
+            else
+                CLEAN_CONTPOL_PSFWIDTH_ARRAY=()
+                for((i=0;i<CONTIMG_NUM_POLS;i++)); do
+                    CLEAN_CONTPOL_PSFWIDTH_ARRAY+=($CLEAN_CONTPOL_PSFWIDTH)
+                done
+            fi
+	    # 5. CLEAN_SCALES 
+	    IFS=';'
+	    # expected input: CLEAN_CONTPOL_SCALES="[0] ; [0,3,10] ; [0,3,10,480,960]"
+	    # Note the "space" characters around ";" are crucial when you want to specify 
+	    # an array of scales. This scheme is backward compatible with older pipeline 
+	    # versions where one could not use different scales for different selfcal loops.
+	    declare -a CLEAN_CONTPOL_SCALES_ARRAY=(${CLEAN_CONTPOL_SCALES})
+	    unset IFS
+	    arrSize=${#CLEAN_CONTPOL_SCALES_ARRAY[@]}
+	    if [ "$arrSize" -le "0" ]; then 
+		echo "ERROR - CLEAN_CONTPOL_SCALES_ARRAY ($CLEAN_CONTPOL_SCALES_ARRAY) needs to be of size > 0"
+		exit 1
+	    fi
+            if [ "$arrSize" -eq 1 ]; then
+                for((i=0;i<CONTIMG_NUM_POLS;i++)); do
+                    CLEAN_CONTPOL_SCALES_ARRAY[$i]=${CLEAN_CONTPOL_SCALES_ARRAY[0]}
+                done
+	    elif [ "$arrSize" -ne "$expectedPolArrSize" ]; then 
+                echo "ERROR - CLEAN_CONTPOL_SCALES ($CLEAN_CONTPOL_SCALES) needs to be of size $expectedPolArrSize (since CONTIMG_NUM_POLS=$CONTIMG_NUM_POLS)"
+                exit 1
+            fi
+	    # 6. CLEAN_THRESHOLD_MINORCYCLE 
+	    # expected input: CLEAN_CONTPOL_THRESHOLD_MINORCYCLE="[45%,2mJy] ; [25%,1mJy,0.03mJy]"
+	    IFS=';'
+	    declare -a CLEAN_CONTPOL_THRESHOLD_MINORCYCLE_ARRAY=(${CLEAN_CONTPOL_THRESHOLD_MINORCYCLE})
+	    arrSize=${#CLEAN_CONTPOL_THRESHOLD_MINORCYCLE_ARRAY[@]}
+	    unset IFS
+	    if [ "$arrSize" -le "0" ]; then 
+		echo "ERROR - CLEAN_CONTPOL_THRESHOLD_MINORCYCLE_ARRAY ($CLEAN_CONTPOL_THRESHOLD_MINORCYCLE_ARRAY) needs to be of size > 0"
+		exit 1
+	    fi
+	    if [ "$arrSize" -eq 1 ]; then
+                for((i=0;i<CONTIMG_NUM_POLS;i++)); do
+                    CLEAN_CONTPOL_THRESHOLD_MINORCYCLE_ARRAY[$i]=${CLEAN_CONTPOL_THRESHOLD_MINORCYCLE_ARRAY[0]}
+                done
+	    elif [ "$arrSize" -lt "$expectedPolArrSize" ]; then 
+                echo "ERROR - CLEAN_CONTPOL_THRESHOLD_MINORCYCLE ($CLEAN_CONTPOL_THRESHOLD_MINORCYCLE) needs to be of size $expectedPolArrSize (since CONTIMG_NUM_POLS=$CONTIMG_NUM_POLS)"
+                exit 1
+            fi
+
+	    #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+            # Validate that all these arrays are the same length as
+            # CONTIMG_NUM_POLS, as long as the latter is >0
+            if [ "${CONTIMG_NUM_POLS}" -gt 0 ]; then
+                arraySize=$((CONTIMG_NUM_POLS))
+
+                if [ "${#CLEAN_CONTPOL_NUM_MAJORCYCLES_ARRAY[@]}" -ne "$arraySize" ]; then
+                    echo "ERROR! Size of CLEAN_CONTPOL_NUM_MAJORCYCLES (${CLEAN_CONTPOL_NUM_MAJORCYCLES}) needs to be CONTIMG_NUM_POLS ($arraySize). Exiting."
+                    exit 1
+                fi
+                if [ "${#CLEAN_CONTPOL_THRESHOLD_MAJORCYCLE_ARRAY[@]}" -ne "$arraySize" ]; then
+                    echo "ERROR! Size of CLEAN_CONTPOL_THRESHOLD_MAJORCYCLE (${CLEAN_CONTPOL_THRESHOLD_MAJORCYCLE}) needs to be CONTIMG_NUM_POLS ($arraySize). Exiting."
+                    exit 1
+                fi
+                if [ "${#CIMAGER_CONTPOL_MINUV_ARRAY[@]}" -ne "$arraySize" ]; then
+                    echo "ERROR! Size of CIMAGER_CONTPOL_MINUV (${CIMAGER_CONTPOL_MINUV}) needs to be CONTIMG_NUM_POLS ($arraySize). Exiting."
+                    exit 1
+                fi
+                if [ "${#CIMAGER_CONTPOL_MAXUV_ARRAY[@]}" -ne "$arraySize" ]; then
+                    echo "ERROR! Size of CIMAGER_CONTPOL_MAXUV (${CIMAGER_CONTPOL_MAXUV}) needs to be CONTIMG_NUM_POLS ($arraySize). Exiting."
+                    exit 1
+                fi
+                if [ "${#CLEAN_CONTPOL_ALGORITHM_ARRAY[@]}" -ne "$arraySize" ]; then
+                    echo "ERROR! Size of CLEAN_CONTPOL_ALGORITHM (${CLEAN_CONTPOL_ALGORITHM}) needs to be CONTIMG_NUM_POLS ($arraySize). Exiting."
+                    exit 1
+                fi
+                if [ "${#CLEAN_CONTPOL_MINORCYCLE_NITER_ARRAY[@]}" -ne "$arraySize" ]; then
+                    echo "ERROR! Size of CLEAN_CONTPOL_MINORCYCLE_NITER (${CLEAN_CONTPOL_MINORCYCLE_NITER}) needs to be CONTIMG_NUM_POLS ($arraySize). Exiting."
+                    exit 1
+                fi
+                if [ "${#CLEAN_CONTPOL_GAIN_ARRAY[@]}" -ne "$arraySize" ]; then
+                    echo "ERROR! Size of CLEAN_CONTPOL_GAIN (${CLEAN_CONTPOL_GAIN}) needs to be CONTIMG_NUM_POLS ($arraySize). Exiting."
+                    exit 1
+                fi
+                if [ "${#CLEAN_CONTPOL_PSFWIDTH_ARRAY[@]}" -ne "$arraySize" ]; then
+                    echo "ERROR! Size of CLEAN_CONTPOL_PSFWIDTH (${CLEAN_CONTPOL_PSFWIDTH}) needs to be CONTIMG_NUM_POLS ($arraySize). Exiting."
+                    exit 1
+                fi
+                if [ "${#CLEAN_CONTPOL_SCALES_ARRAY[@]}" -ne "$arraySize" ]; then
+                    echo "ERROR! Size of CLEAN_CONTPOL_SCALES (${CLEAN_CONTPOL_SCALES}) needs to be CONTIMG_NUM_POLS ($arraySize). Exiting."
+                    exit 1
+                fi
+                if [ "${#CLEAN_CONTPOL_THRESHOLD_MINORCYCLE_ARRAY[@]}" -ne "$arraySize" ]; then
+                    echo "ERROR! Size of CLEAN_CONTPOL_THRESHOLD_MINORCYCLE (${CLEAN_CONTPOL_THRESHOLD_MINORCYCLE}) needs to be CONTIMG_NUM_POLS ($arraySize). Exiting."
+                    exit 1
+                fi
+
+            fi
+	    #+++ww++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
         fi
 
