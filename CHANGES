@@ -37,6 +37,8 @@ Pipelines:
  * There are checks made at the start of the spectral splitting, to
    ensure we don't do it when the concatenated version of the MS is
    present (similar to the change made in 0.24.2).
+ * The dependencies for the continuum source-finding job are fixed so
+   that the single-field cont-cube mosaicking job is included.
 
 
 
