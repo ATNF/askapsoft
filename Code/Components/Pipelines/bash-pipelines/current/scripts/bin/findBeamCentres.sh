@@ -95,14 +95,14 @@ if [ "$DO_SCIENCE_FIELD" == "true" ] && [ "$NEED_BEAM_CENTRES" == "true" ]; then
             fi
             
         fi
-        defaultFPname=$(grep "%d.footprint.name" "${sbinfo}" | awk '{print $3}')
-        defaultFPpitch=$(grep "%d.footprint.pitch" "${sbinfo}" | awk '{print $3}')
-        defaultFPangle=$(grep "%d.pol_axis" "${sbinfo}" | awk '{print $4}' | sed -e 's/\]//g')
+        defaultFPname=$(getparsetvalue "${sbinfo}" "common.target.src%d.footprint.name" 2>/dev/null)
+        defaultFPpitch=$(getparsetvalue "${sbinfo}" "common.target.src%d.footprint.pitch" 2>/dev/null)
+        defaultFPangle=$(getparsetvalue "${sbinfo}" "common.target.src%d.pol_axis" 1 2>/dev/null)
 
         # The reference rotation angle - this is what the footprint
         # was made with. Any pol_axis value is added to this reference
         # value. 
-        FProtation=$(grep "%d.footprint.rotation" "${sbinfo}" | awk '{print $3}')
+        FProtation=$(getparsetvalue "${sbinfo}" "common.target.src%d.footprint.rotation" 2>/dev/null)
         if [ "$FProtation" == "" ]; then
             # footprint.rotation is not in the schedblock parset, so
             # need to set a value manually 
@@ -172,9 +172,9 @@ if [ "$DO_SCIENCE_FIELD" == "true" ] && [ "$NEED_BEAM_CENTRES" == "true" ]; then
             srcstr=$(awk -F " = " "$awkcomp" "$sbinfo" | awk -F".field_name" '{print $1}')
 
             # Use that to get the footprint info for that particular field
-            FP_NAME=$(grep "$srcstr.footprint.name" "$sbinfo" | awk '{print $3}')
-            FP_PITCH=$(grep "$srcstr.footprint.pitch" "$sbinfo" | awk '{print $3}')
-            FP_PA=$(grep "$srcstr.pol_axis" "$sbinfo" | awk '{print $4}' | sed -e 's/\]//g')
+            FP_NAME=$(getparsetvalue "${sbinfo}" "$srcstr.footprint.name" 2>/dev/null)
+            FP_PITCH=$(getparsetvalue "${sbinfo}" "$srcstr.footprint.pitch" 2>/dev/null)
+            FP_PA=$(getparsetvalue "${sbinfo}" "$srcstr.pol_axis" 1 2>/dev/null)
         fi
 
         # If we didn't find them, fall back to the previously-defined

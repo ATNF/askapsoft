@@ -256,7 +256,7 @@ EOF
             
         fi
         if [ -e "${sbinfoCal}" ]; then
-            FP_NAME_CAL=$(grep footprint.name "$sbinfoCal" | awk '{print $3}' | sort | uniq | tail)
+            FP_NAME_CAL=$(getparsetvalue "$sbinfoCal" "common.target.src%d.footprint.name" 2>/dev/null)
             if [ "${FP_NAME_CAL}" != "" ]; then
                 # Get the number of beams in this footprint
                 if [ "${USE_CLI}" == "true" ]; then
