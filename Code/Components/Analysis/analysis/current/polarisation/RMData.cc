@@ -114,9 +114,6 @@ void RMData::calculate(RMSynthesis *rmsynth)
         if (itsSNR > itsDebiasThreshold) {
             itsPintPeakEff = sqrt(itsPintPeak * itsPintPeak - 2.3 * noise * noise);
         }
-        else {
-            itsPintPeakEff = itsPintPeak;
-        }
 
         itsPhiPeak = phi_rmsynth(locMax);
         itsPhiPeak_err = RMSF_FWHM * noise / (2. * itsPintPeak);
@@ -193,7 +190,7 @@ void RMData::calculate(RMSynthesis *rmsynth)
     } else {
 
         itsPintPeak = noise * itsDetectionThreshold;
-        itsPintPeakEff = itsPintPeak;
+        itsPintPeakEff = -1.;
         if (itsSNR > itsDebiasThreshold) {
             itsPintPeakEff = sqrt(itsPintPeak * itsPintPeak - 2.3 * noise * noise);
         }

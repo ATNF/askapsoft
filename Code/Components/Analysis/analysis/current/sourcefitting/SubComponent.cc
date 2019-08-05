@@ -48,14 +48,22 @@ namespace analysis {
 
 namespace sourcefitting {
 
-SubComponent::SubComponent():
-    itsXpos(0.),
-    itsYpos(0.),
-    itsPeakFlux(0.),
-    itsMajorAxis(0.),
-    itsMinorAxis(0.),
-    itsPositionAngle(0.)
+SubComponent::SubComponent(const SubComponent& c)
 {
+    operator=(c);
+}
+
+SubComponent& SubComponent::operator= (const SubComponent& c)
+{
+    if (this == &c) return *this;
+
+    itsXpos = c.itsXpos;
+    itsYpos = c.itsYpos;
+    itsPeakFlux = c.itsPeakFlux;
+    itsMajorAxis = c.itsMajorAxis;
+    itsMinorAxis = c.itsMinorAxis;
+    itsPositionAngle = c.itsPositionAngle;
+    return *this;
 }
 
 SubComponent::SubComponent(const casa::Gaussian2D<casa::Double> &g)

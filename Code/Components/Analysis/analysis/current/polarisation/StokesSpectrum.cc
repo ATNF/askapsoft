@@ -133,8 +133,6 @@ void StokesSpectrum::extractSpectrum()
     casa::Vector<float> newvec(vec);
     itsMedianValue = casa::median(newvec);
 
-//    itsMedianValue = casa::median(itsSpectrum(isNaN(itsSpectrum)));
-
     itsFrequencies = itsSpecExtractor->frequencies();
 
 }

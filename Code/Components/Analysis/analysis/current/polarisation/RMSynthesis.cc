@@ -131,12 +131,6 @@ void RMSynthesis::calculate(const casa::Vector<float> &lsq,
 
     // p = q + iu
     itsFracPolSpectrum = casa::makeComplex(q, u);
-    // Get rid of NaNs for now
-    for(size_t i=0;i<itsFracPolSpectrum.size();i++){
-        if (isNaN(q[i]) || isNaN(u[i])){
-            itsFracPolSpectrum[i] = 0.;
-        }
-    }
 
     if (itsWeightType == "variance") {
         itsWeights = casa::Vector<float>(noise.size(), 0.);

@@ -43,7 +43,6 @@
 #include <casacore/coordinates/Coordinates/DirectionCoordinate.h>
 #include <casacore/coordinates/Coordinates/SpectralCoordinate.h>
 #include <imageaccess/CasaImageAccess.h>
-#include <imageaccess/FitsImageAccess.h>
 #include <duchamp/Detection/finders.hh>
 #include <duchamp/PixelMap/Object2D.hh>
 #include <casainterface/CasaInterface.h>
@@ -70,16 +69,14 @@ class SourceSpectrumExtractionTest : public CppUnit::TestFixture {
 
     private:
         SourceSpectrumExtractor extractor;
-        LOFAR::ParameterSet parsetCasa; // used for defining the subdef
-        LOFAR::ParameterSet parsetFits; // used for defining the subdef
-    std::string tempImage, tempImageGauss, tempImagePL, tempImageMask, tempBeamfile;
+        LOFAR::ParameterSet parset; // used for defining the subdef
+        std::string tempImage, tempImageGauss, tempImagePL, tempBeamfile;
         std::string basePolList;
         std::string outfile;
         RadioSource object, gaussobject;
         float alpha;
         casa::IPosition cubeShape, outShape;
         // std::vector<double> beam;
-    std::string imagetype[2];
 
     public:
 
@@ -92,10 +89,7 @@ class SourceSpectrumExtractionTest : public CppUnit::TestFixture {
             tempImage = "tempImageForExtractionTest";
             tempImagePL = "tempImagePowerlawForExtractionTest";
             tempImageGauss = "tempImageGaussianForExtractionTest";
-            tempImageMask = "tempImageWithMaskForExtractionTest";
             tempBeamfile = "tempBeamFileForExtractionTest";
-            imagetype[0] = "casa";
-            imagetype[1] = "fits";
             outfile = "tempOutputFromExtractionTest";
             basePolList = "IQUV";
             alpha = 0.5;
@@ -135,7 +129,7 @@ class SourceSpectrumExtractionTest : public CppUnit::TestFixture {
             casa::IPosition shape(cubeShape), shapeSml(cubeShape);
             shapeSml(2) = 1;
             shapeSml(3) = 1;
-            casa::Array<Float> array(shape), arrSml(shapeSml), arrayPL(shape), arrayMasked(shape);
+            casa::Array<Float> array(shape), arrSml(shapeSml), arrayPL(shape);
             for (int s = 0; s < 4; s++) {
                 for (int y = 0; y < 9; y++) {
                     for (int x = 0; x < 9; x++) {
@@ -149,17 +143,7 @@ class SourceSpectrumExtractionTest : public CppUnit::TestFixture {
                     }
                 }
             }
-            arrayMasked = array;
-            int zMask=5;
-            for (int s = 0; s < 4; s++) {
-                for (int y = 0; y < 9; y++) {
-                    for (int x = 0; x < 9; x++) {
-                        casa::IPosition loc(4, x, y, s, zMask);
-                        setNaN(arrayMasked(loc));
-                    }
-                }
-            }
-            
+
             accessors::CasaImageAccess ia;
             ia.create(tempImage, shape, coo);
             ia.write(tempImage, array);
@@ -167,22 +151,12 @@ class SourceSpectrumExtractionTest : public CppUnit::TestFixture {
             ia.create(tempImagePL, shape, coo);
             ia.write(tempImagePL, arrayPL);
             ia.setUnits(tempImagePL, "Jy/beam");
-            accessors::FitsImageAccess iaf;
-            iaf.create(tempImage, shape, coo);
-            iaf.write(tempImage, array);
-            iaf.setUnits(tempImage, "Jy/beam");
-            iaf.create(tempImagePL, shape, coo);
-            iaf.write(tempImagePL, arrayPL);
-            iaf.setUnits(tempImagePL, "Jy/beam");
-            iaf.create(tempImageMask, shape, coo);
-            iaf.write(tempImageMask, arrayMasked);
-            iaf.setUnits(tempImageMask, "Jy/beam");
 
-            std::vector<bool> objmask(81, false); //just the first channel
+            std::vector<bool> mask(81, false); //just the first channel
             for (size_t i = 0; i < 81; i++) {
-                objmask[i] = (arrSml.data()[i] > 0.5);
+                mask[i] = (arrSml.data()[i] > 0.5);
             }
-            std::vector<PixelInfo::Object2D> objlist = duchamp::lutz_detect(objmask, 9, 9, 1);
+            std::vector<PixelInfo::Object2D> objlist = duchamp::lutz_detect(mask, 9, 9, 1);
             CPPUNIT_ASSERT(objlist.size() == 1);
             object.addChannel(0, objlist[0]);
             size_t dim[2]; dim[0] = dim[1] = 9;
@@ -225,13 +199,6 @@ class SourceSpectrumExtractionTest : public CppUnit::TestFixture {
                            bmin * 10. / 3600.*M_PI / 180.,
                            bpa);
             ia.setUnits(tempImageGauss, "Jy/beam");
-            iaf.create(tempImageGauss, shape, coo);
-            iaf.write(tempImageGauss, gaussarray);
-            iaf.setBeamInfo(tempImageGauss,
-                           bmaj * 10. / 3600.*M_PI / 180.,
-                           bmin * 10. / 3600.*M_PI / 180.,
-                           bpa);
-            iaf.setUnits(tempImageGauss, "Jy/beam");
             std::ofstream beamfile(tempBeamfile.c_str());
             for (int z = 0; z < 10; z++) {
                 beamfile << z << " " << "channel_" << z <<
@@ -241,31 +208,20 @@ class SourceSpectrumExtractionTest : public CppUnit::TestFixture {
             }
             beamfile.close();
 
-            objmask = std::vector<bool>(81, false); //just the first channel
-            for (size_t i = 0; i < 81; i++) objmask[i] = (gaussarrSml.data()[i] > 0.9);
-            objlist = duchamp::lutz_detect(objmask, 9, 9, 1);
+            mask = std::vector<bool>(81, false); //just the first channel
+            for (size_t i = 0; i < 81; i++) mask[i] = (gaussarrSml.data()[i] > 0.9);
+            objlist = duchamp::lutz_detect(mask, 9, 9, 1);
             CPPUNIT_ASSERT(objlist.size() == 1);
             gaussobject.addChannel(0, objlist[0]);
             gaussobject.calcFluxes(gaussarrSml.data(), dim); // should now have the peak position.
             gaussobject.calcWCSparams(head);
             gaussobject.setID(1);
 
-            for(int i=0;i<2;i++){
-                LOFAR::ParameterSet *parset;
-                if(imagetype[i]=="casa"){
-                    parset = &parsetCasa;
-                    parset->add("spectralCube", "[" + tempImage + "]");
-                }
-                else{
-                    parset = &parsetFits;
-                    parset->add("spectralCube", "[" + tempImage + ".fits]");
-                }
-                parset->add("imagetype",imagetype[i]);
-                parset->add(LOFAR::KVpair("spectralBoxWidth", 5));
-                parset->add(LOFAR::KVpair("scaleSpectraByBeam", doScale));
-                parset->add("spectralOutputBase", outfile);
-                parset->add("polarisation", basePolList);
-            }
+            parset.add("spectralCube", "[" + tempImage + "]");
+            parset.add(LOFAR::KVpair("spectralBoxWidth", 5));
+            parset.add(LOFAR::KVpair("scaleSpectraByBeam", doScale));
+            parset.add("spectralOutputBase", outfile);
+            parset.add("polarisation", basePolList);
 
             ASKAPLOG_DEBUG_STR(logger, "---------------------------------");
         }
@@ -274,30 +230,17 @@ class SourceSpectrumExtractionTest : public CppUnit::TestFixture {
         {
             ASKAPLOG_DEBUG_STR(logger, "================================");
             ASKAPLOG_DEBUG_STR(logger, "=== EXTRACTION TEST: readParset");
-            for(int i=0;i<2;i++){
-                LOFAR::ParameterSet *parset;
-                std::string im;
-                if(imagetype[i]=="casa"){
-                    parset = &parsetCasa;
-                    im=tempImage;
-                }
-                else{
-                    parset = &parsetFits;
-                    im=tempImage+".fits";
-                }
-                
-                ASKAPLOG_DEBUG_STR(logger, "Parset follows: " << *parset);
-                extractor = SourceSpectrumExtractor(*parset);
-                CPPUNIT_ASSERT(extractor.inputCubeList().size() == 1);
-                CPPUNIT_ASSERT(extractor.inputCubeList()[0] == im);
-                CPPUNIT_ASSERT(extractor.outputFileBase() == outfile);
-                CPPUNIT_ASSERT(extractor.boxWidth() == 5);
-                CPPUNIT_ASSERT(extractor.doScale() == doScale);
-                std::vector<std::string> pols = extractor.polarisations();
-                std::string pollist;
-                for (size_t i = 0; i < pols.size(); i++) pollist += pols[i];
-                CPPUNIT_ASSERT(pollist == basePolList);
-            }
+            ASKAPLOG_DEBUG_STR(logger, "Parset follows: " << parset);
+            extractor = SourceSpectrumExtractor(parset);
+            CPPUNIT_ASSERT(extractor.inputCubeList().size() == 1);
+            CPPUNIT_ASSERT(extractor.inputCubeList()[0] == tempImage);
+            CPPUNIT_ASSERT(extractor.outputFileBase() == outfile);
+            CPPUNIT_ASSERT(extractor.boxWidth() == 5);
+            CPPUNIT_ASSERT(extractor.doScale() == doScale);
+            std::vector<std::string> pols = extractor.polarisations();
+            std::string pollist;
+            for (size_t i = 0; i < pols.size(); i++) pollist += pols[i];
+            CPPUNIT_ASSERT(pollist == basePolList);
             ASKAPLOG_DEBUG_STR(logger, "---------------------------------");
         }
 
@@ -305,21 +248,10 @@ class SourceSpectrumExtractionTest : public CppUnit::TestFixture {
         {
             ASKAPLOG_DEBUG_STR(logger, "================================");
             ASKAPLOG_DEBUG_STR(logger, "=== EXTRACTION TEST: loadSource");
-
-            for(int i=0;i<2;i++){
-                LOFAR::ParameterSet *parset;
-                if(imagetype[i]=="casa"){
-                    parset = &parsetCasa;
-                }
-                else{
-                    parset = &parsetFits;
-                }
-                extractor = SourceSpectrumExtractor(*parset);
-                extractor.setSource(&object);
-                std::string shouldget = outfile + "_1";
-                CPPUNIT_ASSERT(extractor.outputFile() == shouldget);
-            }
-            
+            extractor = SourceSpectrumExtractor(parset);
+            extractor.setSource(&object);
+            std::string shouldget = outfile + "_1";
+            CPPUNIT_ASSERT(extractor.outputFile() == shouldget);
             ASKAPLOG_DEBUG_STR(logger, "---------------------------------");
         }
 
@@ -327,30 +259,19 @@ class SourceSpectrumExtractionTest : public CppUnit::TestFixture {
         {
             ASKAPLOG_DEBUG_STR(logger, "================================");
             ASKAPLOG_DEBUG_STR(logger, "=== EXTRACTION TEST: extractSpectrum");
-
-            for(int i=0;i<2;i++){
-                LOFAR::ParameterSet *parset;
-                if(imagetype[i]=="casa"){
-                    parset = &parsetCasa;
-                }
-                else{
-                    parset = &parsetFits;
-                }
-                extractor = SourceSpectrumExtractor(*parset);
-                extractor.setSource(&object);
-                for (int width = 1; width <= 9; width += 2) {
-                    extractor.setBoxWidth(width);
-                    extractor.extract();
-                    CPPUNIT_ASSERT(extractor.array().shape() == outShape);
-                    for (int s = 0; s < outShape(2); s++) {
-                        for (int z = 0; z < outShape(3); z++) {
-                            IPosition pos(4, 0, 0, s, z);
-                            CPPUNIT_ASSERT(fabs(extractor.array()(pos) - width) < 1.e-5);
-                        }
-                    }
-                }
+            extractor = SourceSpectrumExtractor(parset);
+            extractor.setSource(&object);
+            for (int width = 1; width <= 9; width += 2) {
+                extractor.setBoxWidth(width);
+                extractor.extract();
+                CPPUNIT_ASSERT(extractor.array().shape() == outShape);
+                // for (int s = 0; s < outShape(2); s++) {
+                //     for (int z = 0; z < outShape(3); z++) {
+                //         IPosition pos(4, 0, 0, s, z);
+                //         CPPUNIT_ASSERT(fabs(extractor.array()(pos) - width) < 1.e-5);
+                //     }
+                // }
             }
-            
             ASKAPLOG_DEBUG_STR(logger, "---------------------------------");
         }
 
@@ -358,32 +279,21 @@ class SourceSpectrumExtractionTest : public CppUnit::TestFixture {
         {
             ASKAPLOG_DEBUG_STR(logger, "================================");
             ASKAPLOG_DEBUG_STR(logger, "=== EXTRACTION TEST: extractSpectrumPowerlaw");
-
-            for(int i=0;i<2;i++){
-                LOFAR::ParameterSet *parset;
-                if(imagetype[i]=="casa"){
-                    parset = &parsetCasa;
-                }
-                else{
-                    parset = &parsetFits;
-                }
-                parset->replace("spectralCube", tempImagePL);
-                extractor = SourceSpectrumExtractor(*parset);
-                extractor.setSource(&object);
-                for (int width = 1; width <= 9; width += 2) {
-                    extractor.setBoxWidth(width);
-                    extractor.extract();
-                    CPPUNIT_ASSERT(extractor.array().shape() == outShape);
-                    for (int s = 0; s < outShape(2); s++) {
-                        for (int z = 0; z < outShape(3); z++) {
-                            IPosition pos(4, 0, 0, s, z);
-                            float val = extractor.array()(pos);
-                            CPPUNIT_ASSERT(fabs(val - width * pow(double(z + 1), alpha)) < 1.e-4);
-                        }
+            parset.replace("spectralCube", tempImagePL);
+            extractor = SourceSpectrumExtractor(parset);
+            extractor.setSource(&object);
+            for (int width = 1; width <= 9; width += 2) {
+                extractor.setBoxWidth(width);
+                extractor.extract();
+                CPPUNIT_ASSERT(extractor.array().shape() == outShape);
+                for (int s = 0; s < outShape(2); s++) {
+                    for (int z = 0; z < outShape(3); z++) {
+                        IPosition pos(4, 0, 0, s, z);
+                        float val = extractor.array()(pos);
+                        CPPUNIT_ASSERT(fabs(val - width * pow(double(z + 1), alpha)) < 1.e-4);
                     }
                 }
             }
-            
             ASKAPLOG_DEBUG_STR(logger, "---------------------------------");
         }
 
@@ -391,45 +301,23 @@ class SourceSpectrumExtractionTest : public CppUnit::TestFixture {
         {
             ASKAPLOG_DEBUG_STR(logger, "================================");
             ASKAPLOG_DEBUG_STR(logger, "=== EXTRACTION TEST: extractSpectrumBeam");
-
-            for(int i=0;i<2;i++){
-                LOFAR::ParameterSet *parset;
-                if(imagetype[i]=="casa"){
-                    parset = &parsetCasa;
-                }
-                else{
-                    parset = &parsetFits;
-                }
-                parset->replace("spectralCube", tempImageGauss);
-                parset->replace("scaleSpectraByBeam", "true");
-                extractor = SourceSpectrumExtractor(*parset);
-                extractor.setSource(&gaussobject);
-                for (int width = 1; width <= 9; width += 2) {
-                    ASKAPLOG_DEBUG_STR(logger, "Starting test with width = " << width);
-                    extractor.setBoxWidth(width);
-                    extractor.extract();
-                    CPPUNIT_ASSERT(extractor.array().shape() == outShape);
-                    for (int s = 0; s < outShape(2); s++) {
-                        for (int z = 0; z < outShape(3); z++) {
-                            IPosition pos(4, 0, 0, s, z);
-                            CPPUNIT_ASSERT(fabs(extractor.array()(pos) - 1.) < 1.e-5);
-                        }
+            parset.replace("spectralCube", tempImageGauss);
+            parset.replace("scaleSpectraByBeam", "true");
+            extractor = SourceSpectrumExtractor(parset);
+            extractor.setSource(&gaussobject);
+            for (int width = 1; width <= 9; width += 2) {
+                ASKAPLOG_DEBUG_STR(logger, "Starting test with width = " << width);
+                extractor.setBoxWidth(width);
+                extractor.extract();
+                CPPUNIT_ASSERT(extractor.array().shape() == outShape);
+                for (int s = 0; s < outShape(2); s++) {
+                    for (int z = 0; z < outShape(3); z++) {
+                        IPosition pos(4, 0, 0, s, z);
+                        CPPUNIT_ASSERT(fabs(extractor.array()(pos) - 1.) < 1.e-5);
                     }
                 }
             }
-            
             ASKAPLOG_DEBUG_STR(logger, "---------------------------------");
-        }
-
-    void extractMaskedSpectrum()
-        {
-            ASKAPLOG_DEBUG_STR(logger, "================================");
-            ASKAPLOG_DEBUG_STR(logger, "=== EXTRACTION TEST: extractSpectrumBeamFile");
-            LOFAR::ParameterSet parset = parset;
-
-
-
-
         }
 
         void extractSpectrumBeamFile()
@@ -437,56 +325,42 @@ class SourceSpectrumExtractionTest : public CppUnit::TestFixture {
             ASKAPLOG_DEBUG_STR(logger, "================================");
             ASKAPLOG_DEBUG_STR(logger, "=== EXTRACTION TEST: extractSpectrumBeamFile");
             ASKAPLOG_DEBUG_STR(logger, "Initialising");
-
-            for(int i=0;i<2;i++){
-                LOFAR::ParameterSet *parset;
-                if(imagetype[i]=="casa"){
-                    parset = &parsetCasa;
-                }
-                else{
-                    parset = &parsetFits;
-                }
-                parset->replace("spectralCube", tempImageGauss);
-                parset->replace("beamFile", tempBeamfile);
-                parset->replace("scaleSpectraByBeam", "true");
-                extractor = SourceSpectrumExtractor(*parset);
-                extractor.setSource(&gaussobject);
-                for (int width = 1; width <= 9; width += 2) {
-                    ASKAPLOG_DEBUG_STR(logger, "Starting test with width = " << width);
-                    extractor.setBoxWidth(width);
-                    extractor.extract();
-                    CPPUNIT_ASSERT(extractor.array().shape() == outShape);
-                    for (int s = 0; s < outShape(2); s++) {
-                        for (int z = 0; z < outShape(3); z++) {
-                            IPosition pos(4, 0, 0, s, z);
-                            CPPUNIT_ASSERT(fabs(extractor.array()(pos) - 1.) < 1.e-5);
-                        }
+            parset.replace("spectralCube", tempImageGauss);
+            parset.replace("beamFile", tempBeamfile);
+            parset.replace("scaleSpectraByBeam", "true");
+            extractor = SourceSpectrumExtractor(parset);
+            extractor.setSource(&gaussobject);
+            for (int width = 1; width <= 9; width += 2) {
+                ASKAPLOG_DEBUG_STR(logger, "Starting test with width = " << width);
+                extractor.setBoxWidth(width);
+                extractor.extract();
+                CPPUNIT_ASSERT(extractor.array().shape() == outShape);
+                for (int s = 0; s < outShape(2); s++) {
+                    for (int z = 0; z < outShape(3); z++) {
+                        IPosition pos(4, 0, 0, s, z);
+                        CPPUNIT_ASSERT(fabs(extractor.array()(pos) - 1.) < 1.e-5);
                     }
                 }
             }
-            
             ASKAPLOG_DEBUG_STR(logger, "---------------------------------");
         }
 
-        void removeFile(std::string filename)
-        {
-            std::stringstream ss;
-            ss << "rm -rf " << filename;
-            system(ss.str().c_str());
-        }
-    
         void tearDown()
         {
             ASKAPLOG_DEBUG_STR(logger, "================================");
             ASKAPLOG_DEBUG_STR(logger, "=== EXTRACTION TEST: tearDown");
-            removeFile(tempImage);
-            removeFile(tempImagePL);
-            removeFile(tempImageGauss);
-            removeFile(tempImage+".fits");
-            removeFile(tempImagePL+".fits");
-            removeFile(tempImageGauss+".fits");
-            removeFile(tempImageMask+".fits");
-            removeFile(tempBeamfile);
+            std::stringstream ss;
+            ss << "rm -rf " << tempImage;
+            system(ss.str().c_str());
+            ss.str();
+            ss << "rm -rf " << tempImagePL;
+            system(ss.str().c_str());
+            ss.str();
+            ss << "rm -rf " << tempImageGauss;
+            system(ss.str().c_str());
+            ss.str();
+            ss << "rm -rf " << tempBeamfile;
+            system(ss.str().c_str());
             ASKAPLOG_DEBUG_STR(logger, "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=");
         }
 };

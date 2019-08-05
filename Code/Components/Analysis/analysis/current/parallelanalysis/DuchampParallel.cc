@@ -289,9 +289,6 @@ DuchampParallel::DuchampParallel(askap::askapparallel::AskapParallel& comms,
 
     if (itsComms.isParallel()) {
         itsSubimageDef = SubimageDef(itsParset);
-        ASKAPCHECK(itsSubimageDef.numSubs() == (itsComms.nProcs()-1),
-                   "Number of subimages ("<<itsSubimageDef.numSubs()<<") does not match the number of workers ("<<itsComms.nProcs()-1<<")");
-        
         unsigned int ovx = itsSubimageDef.overlapx();
         unsigned int ovy = itsSubimageDef.overlapy();
         unsigned int ovz = itsSubimageDef.overlapz();
