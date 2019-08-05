@@ -53,11 +53,13 @@ class TableCalSolutionTest : public CppUnit::TestFixture
    CPPUNIT_TEST(testBlankEntries);
    CPPUNIT_TEST(testTrailingBlankEntry);
    CPPUNIT_TEST(testChanAdapterRead);
+   CPPUNIT_TEST(testDelayedWrite);
    CPPUNIT_TEST_EXCEPTION(testChanAdapterUndefinedBandpass, AskapError);
    CPPUNIT_TEST_EXCEPTION(testUndefinedGains, AskapError);
    CPPUNIT_TEST_EXCEPTION(testUndefinedLeakages, AskapError);
    CPPUNIT_TEST_EXCEPTION(testUndefinedBandpasses, AskapError);
    CPPUNIT_TEST_EXCEPTION(testUndefinedSolution, AskapError);
+   CPPUNIT_TEST_EXCEPTION(testTooFarIntoThePast, AskapError);
    CPPUNIT_TEST(testCreateManyRows);
    CPPUNIT_TEST(testCreateManyRows1);
    CPPUNIT_TEST_SUITE_END();
@@ -275,6 +277,79 @@ public:
 
        // test bandpasses
        doBandpassTest(acc);
+   }
+
+   void testDelayedWrite() {
+       // do essentially the same as testRead case but write the table in a different fashion - first request IDs for all entries then write.
+       // this test would've caught read-write vs. read-only bug we lived with for a while (see ASKAPSDP-3731)
+
+       const boost::shared_ptr<ICalSolutionSource> css = rwSource(true);
+       CPPUNIT_ASSERT(css);
+       long ids[3] = {-1l,-1l,-1l};
+       for (int row = 0; row<3; ++row) {
+            ids[row] = css->newSolutionID(60. * row);
+            CPPUNIT_ASSERT_EQUAL(static_cast<long>(row), ids[row]);
+       }
+       boost::shared_ptr<ICalSolutionAccessor> acc = css->rwSolution(ids[0]);
+       CPPUNIT_ASSERT(acc);
+       acc->setGain(JonesIndex(0u,0u),JonesJTerm(casa::Complex(1.0,-1.0),true,casa::Complex(-1.0,1.0),true));
+       acc = css->rwSolution(ids[1]);
+       acc->setLeakage(JonesIndex(2u,1u),JonesDTerm(casa::Complex(0.1,-0.1),true,casa::Complex(-0.1,0.4),false));
+       acc = css->rwSolution(ids[2]);
+       acc->setBandpass(JonesIndex(1u,1u),JonesJTerm(casa::Complex(1.0,-0.2),true,casa::Complex(0.9,-0.1),true),1u);       
+       acc.reset();
+
+       // now test the content  first try read-write accesspr
+       const long sID = css->mostRecentSolution();
+       CPPUNIT_ASSERT_EQUAL(2l, sID);
+       for (long id = 0; id<3; ++id) {
+            CPPUNIT_ASSERT_EQUAL(id, css->solutionID(0.5+60.*id));
+       }
+       boost::shared_ptr<ICalSolutionConstAccessor> accRO = css->roSolution(sID);
+       CPPUNIT_ASSERT(accRO);
+       doGainAndLeakageTest(accRO);
+       doBandpassTest(accRO);
+
+       // now open the same table with read-only access and redo the test
+       const boost::shared_ptr<ICalSolutionConstSource> cssRO = roSource();
+       CPPUNIT_ASSERT_EQUAL(sID, cssRO->mostRecentSolution());
+       for (long id = 0; id<3; ++id) {
+            CPPUNIT_ASSERT_EQUAL(id, cssRO->solutionID(0.5+60.*id));
+       }
+       accRO = cssRO->roSolution(sID);
+       CPPUNIT_ASSERT(accRO);
+       doGainAndLeakageTest(accRO);
+       doBandpassTest(accRO);
+   }
+
+   void testTooFarIntoThePast() {
+       boost::shared_ptr<ICalSolutionSource> css = rwSource(true);
+       CPPUNIT_ASSERT(css);
+       long newID = css->newSolutionID(1000.);
+       CPPUNIT_ASSERT_EQUAL(0l, newID);
+       boost::shared_ptr<ICalSolutionAccessor> acc = css->rwSolution(newID);
+       CPPUNIT_ASSERT(acc);
+       acc->setGain(JonesIndex(0u,0u),JonesJTerm(casa::Complex(1.0,-1.0),true,casa::Complex(-1.0,1.0),true));
+       newID = css->newSolutionID(1060.);
+       CPPUNIT_ASSERT_EQUAL(1l, newID);
+       acc = css->rwSolution(newID);
+       acc->setLeakage(JonesIndex(2u,1u),JonesDTerm(casa::Complex(0.1,-0.1),true,casa::Complex(-0.1,0.4),false));
+       acc.reset();
+       // add empty row
+       css->newSolutionID(1120.);
+       // first read using time within the table
+       const long id1 = css->solutionID(1000.5);
+       CPPUNIT_ASSERT_EQUAL(0l, id1);
+       const long id2 = css->solutionID(1060.5);
+       CPPUNIT_ASSERT_EQUAL(1l, id2);
+       // this should work too as we the solution remains valid until there is a new entry, i.e. forever at the end of the table
+       const long id3 = css->solutionID(1200.5);
+       CPPUNIT_ASSERT_EQUAL(2l, id3);
+       // reading test for gains and leakages should be successful too
+       boost::shared_ptr<ICalSolutionConstAccessor> accRO = css->roSolution(id3);
+       doGainAndLeakageTest(accRO);
+       // the following would cause an exception
+       css->solutionID(990.);
    }
 
    void testChanAdapterRead() {
