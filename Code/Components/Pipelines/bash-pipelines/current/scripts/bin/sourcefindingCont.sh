@@ -453,9 +453,12 @@ EOFINNER
             echo "STARTTIME=\${STARTTIME}" >> "\${log}.timing"
             extractStatsNonStandard "\${log}" \${NCORES} "\${SLURM_JOB_ID}" \${err} "validationCont" "txt,csv"
 
+            validationDirInitial=${validationDirInitial}
             validationDir=${validationDir}
-            if [ ! -e "\${validationDir}" ]; then
+            if [ ! -e "\${validationDirInitial}" ]; then
                 echo "ERROR - could not create validation directory \${validationDir}"
+            else
+                mv ${validationDirInitial} ${validationDir}
             fi
             # Place a copy in a standard place on /group
             copyLocation="${VALIDATION_ARCHIVE_DIR}"

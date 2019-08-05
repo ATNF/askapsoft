@@ -474,7 +474,8 @@ function setImageProperties()
         compResidual=componentResidual_${imageName%%.fits}${extension}
         compResidualType="cont_fitresidual_T0"
         compResidualLabel="Continuum component residual map"
-        validationDir=${imageName%%.fits}_continuum_validation_selavy_snr5.0_int
+        validationDirInitial=${imageName%%.fits}_continuum_validation_selavy_snr5.0_int
+        validationDir=validation_${imageName%%.fits}
         validationFileInitial=${PROJECT_ID}_CASDA_continuum_validation.xml
         validationFile=${PROJECT_ID}_CASDA_continuum_validation_${NOW}.xml
     elif [ "${type}" == "spectral" ]; then
