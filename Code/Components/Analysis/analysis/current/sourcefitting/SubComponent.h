@@ -99,7 +99,7 @@ class SubComponent {
         /// @brief Adjust size according to the beam for certain fit types.
         /// @details For 'psf' fit types, we fix the size of the component
         /// to be at least the size of the PSF
-        void fixSize(std::string fitType, duchamp::FitsHeader &header);
+        void fixSize(const std::string fitType, duchamp::FitsHeader &header);
 
         /// @brief Less-than function, that compares peak fluxes
         /// @details Comparison of SubComponents is done on the basis of

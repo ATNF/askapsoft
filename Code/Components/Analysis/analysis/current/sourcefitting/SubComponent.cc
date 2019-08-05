@@ -102,7 +102,7 @@ casa::Gaussian2D<casa::Double> SubComponent::asGauss()
 
 }
 
-void SubComponent::fixSize(std::string fitType, duchamp::FitsHeader &header)
+void SubComponent::fixSize(const std::string fitType, duchamp::FitsHeader &header)
 {
 
     // For any subcomponent that is smaller than the beam
@@ -110,14 +110,11 @@ void SubComponent::fixSize(std::string fitType, duchamp::FitsHeader &header)
     // size. Always do this when fitting "psf" type.
     bool knowBeam = (header.beam().originString() != "EMPTY");
     bool smallBeam = (itsMajorAxis < header.beam().maj());
+    bool isPSF = (fitType == "psf");
 
-    if ((fitType == "psf") || (knowBeam && smallBeam)) {
+    if (isPSF || (knowBeam && smallBeam)) {
         itsMajorAxis = header.beam().maj();
-    }
-    if ((fitType == "psf") || (knowBeam && smallBeam)) {
         itsMinorAxis = header.beam().min();
-    }
-    if ((fitType == "psf") || (knowBeam && smallBeam)) {
         itsPositionAngle = header.beam().pa() * M_PI / 180.;
     }
 
