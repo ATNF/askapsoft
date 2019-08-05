@@ -64,7 +64,7 @@ class StokesSpectrum {
         /// @param pol Capital-letter Stokes parameter (passed to
         /// extractor parsets).
         StokesSpectrum(const LOFAR::ParameterSet &parset, std::string pol);
-        virtual ~StokesSpectrum() {};
+        virtual ~StokesSpectrum();
 
         /// @brief Set the component to be used.
         void setComponent(CasdaComponent *src) {itsComponent = src;};

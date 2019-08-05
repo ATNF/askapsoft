@@ -224,6 +224,8 @@ std::vector<SubComponent> SubThresholder::find()
         this->incrementThreshold();
     }
 
+    theImage.reset();
+    
     if (!keepGoing) {
 
         if (objlist.size() == 0) {

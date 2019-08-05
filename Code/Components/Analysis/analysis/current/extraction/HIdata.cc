@@ -140,6 +140,14 @@ HIdata::HIdata(const LOFAR::ParameterSet &parset):
 
 }
 
+HIdata::~HIdata()
+{
+    itsSpecExtractor.reset();
+    itsNoiseExtractor.reset();
+    itsMomentExtractor.reset();
+    itsCubeletExtractor.reset();
+}
+
 void HIdata::setObjectIDs(const std::string &objid, const std::string &objectname)
 {
     itsSpecExtractor->setObjectIDs(objid,objectname);

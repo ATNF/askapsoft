@@ -151,13 +151,15 @@ void CubeletExtractor::extract()
                           " surrounding source ID " << itsSourceID <<
                           " with slicer " << itsSlicer);
 
-        const boost::shared_ptr<SubImage<Float> >
+        boost::shared_ptr<SubImage<Float> >
         sub(new SubImage<Float>(*itsInputCubePtr, itsSlicer));
 
         ASKAPASSERT(sub->size() > 0);
         const casa::MaskedArray<Float> msub(sub->get(), sub->getMask());
         ASKAPASSERT(itsArray.size() == msub.size());
         itsArray = msub;
+
+        sub.reset();
 
         this->closeInput();
     } else {

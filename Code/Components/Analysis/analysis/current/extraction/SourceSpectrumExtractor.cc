@@ -287,6 +287,7 @@ void SourceSpectrumExtractor::extract()
                     }
                 }
             }
+            sub.reset();
             this->closeInput();
         } else {
             ASKAPLOG_ERROR_STR(logger, "Could not open image \"" << itsInputCube << "\".");

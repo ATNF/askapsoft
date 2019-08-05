@@ -95,7 +95,7 @@ class DuchampParallel {
         /// @brief The parset, as used
         LOFAR::ParameterSet &parset() {return itsParset;};
 
-        virtual ~DuchampParallel() {};
+        virtual ~DuchampParallel();
 
         /// @brief Return a reference to the duchamp::Cube object
         duchamp::Cube &cube() {duchamp::Cube &rcube = itsCube; return rcube;};

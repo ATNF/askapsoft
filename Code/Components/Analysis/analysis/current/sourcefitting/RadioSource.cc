@@ -535,8 +535,8 @@ void RadioSource::getFWHMestimate(std::vector<float> fluxarray,
     float thresh = (itsDetectionThreshold + this->peakFlux) / 2.;
     smlIm->stats().setThreshold(thresh);
     std::vector<PixelInfo::Object2D> objlist = smlIm->findSources2D();
+    smlIm.reset();
     std::vector<PixelInfo::Object2D>::iterator o;
-
     for (o = objlist.begin(); o < objlist.end(); o++) {
         duchamp::Detection tempobj;
         tempobj.addChannel(0, *o);
@@ -693,6 +693,8 @@ RadioSource::getThresholdedSubComponentList(std::vector<float> fluxarray)
         objlist = smlIm->findSources2D();
         keepGoing = (objlist.size() == 1);
     } while (keepGoing && (threshCtr < numThresh));
+
+    smlIm.reset();
 
     if (!keepGoing) {
         for (obj = objlist.begin(); obj < objlist.end(); obj++) {

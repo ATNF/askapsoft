@@ -50,7 +50,7 @@ namespace analysis {
 class HIdata {
     public:
         HIdata(const LOFAR::ParameterSet &parset);
-        virtual ~HIdata() {};
+        virtual ~HIdata();
 
     /// @brief Set the source to be used.
     void setSource(RadioSource *src) {itsSource=src;};
