@@ -57,13 +57,9 @@ namespace sourcefitting {
 class SubComponent {
     public:
         /// @brief Default constructor
-        SubComponent() {};
+        SubComponent();
         /// @brief Default destructor
         virtual ~SubComponent() {};
-        /// @brief Copy constructor
-        SubComponent(const SubComponent& c);
-        /// @brief Copy function
-        SubComponent& operator= (const SubComponent& c);
     /// @brief Constructor from Gaussian2D
     SubComponent(const casa::Gaussian2D<casa::Double> &g);
 
