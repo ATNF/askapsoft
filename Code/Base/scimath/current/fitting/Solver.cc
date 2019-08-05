@@ -81,8 +81,10 @@ namespace askap
     void Solver::addNormalEquations(const INormalEquations& normeq)
     { 
       if (itsNormalEquations) {
+          std::cout << "Solver::addNormalEquations: calling merge" << std::endl;
           itsNormalEquations->merge(normeq);
       } else { 
+          std::cout << "Solver::addNormalEquations: calling clone" << std::endl;
           itsNormalEquations = normeq.clone();
       }
     }

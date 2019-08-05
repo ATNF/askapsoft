@@ -172,7 +172,10 @@ namespace askap
       ASKAPTRACE("ImagingNormalEquations::merge");
       // std::cout << "In merge" << std::endl;
 
+      std::cout << "In ImagingNormalEquations::merge: 1" << std::endl;
+
       try {
+        std::cout << "In ImagingNormalEquations::merge: 2" << std::endl;
         const ImagingNormalEquations &other =
                            dynamic_cast<const ImagingNormalEquations&>(src);
 
@@ -182,6 +185,7 @@ namespace askap
           // do nothing, src is empty
           return;
         }
+        std::cout << "In ImagingNormalEquations::merge: 3" << std::endl;
 
         // initialise an image accumulator
         imagemath::LinmosAccumulator<double> accumulator;
@@ -195,6 +199,8 @@ namespace askap
           return;
         }
 
+        std::cout << "In ImagingNormalEquations::merge: 4" << std::endl;
+
         // concatenate unique parameter names
         vector<string>::const_iterator iterCol = otherParams.begin();
         for (; iterCol != otherParams.end(); ++iterCol) {
@@ -203,15 +209,21 @@ namespace askap
           }
         }
 
+        std::cout << "In ImagingNormalEquations::merge: 5" << std::endl;
+
         // step through parameter names and add/merge new ones
         for (iterCol = names.begin(); iterCol != names.end(); ++iterCol)
         {
+
+            std::cout << "In ImagingNormalEquations::merge: 6" << std::endl;
 
           // check dataVector
           if (other.itsDataVector.find(*iterCol) == other.itsDataVector.end()) {
             // no new data for this parameter
             continue;
           }
+
+          std::cout << "In ImagingNormalEquations::merge: 7" << std::endl;
 
           // record how data are updated
           enum updateType_t{ overwrite, add, linmos };
@@ -225,8 +237,12 @@ namespace askap
           const casa::CoordinateSystem &newCoordSys = other.itsCoordSys.find(*iterCol)->second;
           const casa::IPosition &newShape = other.itsShape.find(*iterCol)->second;
 
+          std::cout << "In ImagingNormalEquations::merge: 8" << std::endl;
+
           if(itsDataVector[*iterCol].size()==0)
           {
+              std::cout << "In ImagingNormalEquations::merge: 9" << std::endl;
+
             // no old data for this parameter
             itsDataVector[*iterCol].assign(newDataVec);
             updateType = overwrite;
@@ -235,6 +251,8 @@ namespace askap
           else if(accumulator.coordinatesAreEqual(itsCoordSys[*iterCol],newCoordSys,
                                                   itsShape[*iterCol],newShape))
           {
+              std::cout << "In ImagingNormalEquations::merge: 10" << std::endl;
+
             // new and old data can be added directly for this parameter
             itsDataVector[*iterCol] += newDataVec;
             updateType = add;
@@ -244,24 +262,34 @@ namespace askap
           }
           else
           {
+              std::cout << "In ImagingNormalEquations::merge: 11" << std::endl;
+
             // new and old data cannot be added directly for this parameter
             if (itsCoordSys[*iterCol].nCoordinates() == 0) {
+                std::cout << "In ImagingNormalEquations::merge: 12" << std::endl;
+
               // no coordinate information, so just use the new data
               itsDataVector[*iterCol].assign(newDataVec);
               updateType = overwrite;
               ASKAPLOG_INFO_STR(nelogger,"In merge of " << *iterCol <<  " old data to merge - no old coordinate info");
             } else if (itsCoordSys[*iterCol].nCoordinates() != newCoordSys.nCoordinates()) {
+                std::cout << "In ImagingNormalEquations::merge: 13" << std::endl;
+
               // different dimensions, so just use the new data
               itsDataVector[*iterCol].assign(newDataVec);
               updateType = overwrite;
               ASKAPLOG_INFO_STR(nelogger,"In merge of " << *iterCol <<  " - old data to merge - dimension mismatch");
             } else {
+                std::cout << "In ImagingNormalEquations::merge: 14" << std::endl;
+
               // regrid then add (using weights)
               ASKAPLOG_INFO_STR(nelogger,"In merge of " << *iterCol <<  " old data to merge coordinates present - linmos merge beginning");
               linmosMerge(other, *iterCol);
               updateType = linmos;
             }
           }
+
+          std::cout << "In ImagingNormalEquations::merge: 15" << std::endl;
 
           // update shape and reference.
           if (updateType == overwrite)
