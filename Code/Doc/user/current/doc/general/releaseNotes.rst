@@ -5,6 +5,25 @@ This page summarises the key changes in each tagged release of
 ASKAPsoft. This replicates the CHANGES file that is included in the
 code base.
 
+0.24.4 (6 August 2019)
+----------------------
+
+A further small patch release, addressing a few critical issues:
+
+ * The determination of beam locations in the pipeline is now done in
+   a more robust way, that is insensitive to the specifics of the
+   parset formatting (making use of the LOFAR getparsetvalue command).
+ * The handling of the continuum validation directory in the CASDA
+   upload is fixed, so that the filename is recognised correctly. It
+   has also been shortened, to avoid problems with Windows
+   filesystems.
+ * The code to invert the sign of the Stokes V images in the pipeline
+   has been removed. The images are now presented as-is, and work will
+   be done to ensure the correct values are presented by the imager.
+ * Selavy has had improvements made to its memory handling, to avoid
+   out-of-memory errors due to memory leaks.
+
+
 0.24.3 (2 August 2019)
 ----------------------
 
@@ -46,6 +65,8 @@ Pipelines:
    present (similar to the change made in 0.24.2).
  * The dependencies for the continuum source-finding job are fixed so
    that the single-field cont-cube mosaicking job is included.
+ * The mosaicking now appropriately handles the continuum images when
+   nterms=1.
 
 
 
