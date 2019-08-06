@@ -367,10 +367,10 @@ ALL"
         
                     for POLN in \${POL_LIST}; do
                         TTERM=0
+                        pol="i"
                         setImageProperties cont
-                        contImage=\${imageName}
                         pol=\$(echo "\$POLN" | tr '[:upper:]' '[:lower:]')
-                        setImageProperties contcube "\$pol"
+                        setImageProperties contcube
                         if [ -e "\${FIELD}/\${imageName}" ]; then
                             casdaOtherDimImageNames+=("\${FIELD}/\${imageName}")
                             casdaOtherDimImageTypes+=("\${imageType}")
@@ -436,6 +436,7 @@ catTypes=()
 
 BEAM=all
 imageCode=restored
+pol="i"
 for FIELD in \${LOCAL_FIELD_LIST}; do
 
     if [ "\${FIELD}" == "." ]; then
@@ -594,6 +595,7 @@ if [ "\${DO_CONTINUUM_VALIDATION}" == "true" ]; then
     #   there is only a single FIELD), so need to test
     BEAM="all"
     imageCode=restored
+    pol="i"
 
     validationDirs=()
     validationFiles=()
@@ -622,7 +624,7 @@ if [ "\${DO_CONTINUUM_VALIDATION}" == "true" ]; then
         echo "Have validation directory \$dir"
         cd "\${dir##/*}/.."
         echo "Moved to \$(pwd)"
-        echo "Running: tar cvf \${dir##*/}.tar \\${dir##*/}"
+        echo "Running: tar cvf \${dir##*/}.tar \${dir##*/}"
         tar cvf "\${dir##*/}.tar" "\${dir##*/}"
         echo "Done"
         cd -
