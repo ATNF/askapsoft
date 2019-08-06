@@ -189,36 +189,6 @@ if [ \$err != 0 ]; then
     exit \$err
 fi
 
-# Invert the sign of the pixels in the Stokes V image
-pol=${pol}
-IMAGE_BASE_CONT=${IMAGE_BASE_CONT}
-BEAM=${BEAM}
-FIELD=${FIELD}
-IMAGETYPE_CONT=${IMAGETYPE_CONT}
-DO_ALT_IMAGER_CONT=${DO_ALT_IMAGER_CONT}
-NUM_TAYLOR_TERMS=${NUM_TAYLOR_TERMS}
-
-invertStokesV=${INVERT_SIGN_STOKES_V_IMAGE}
-if [ "\${invertStokesV}" == "true" ] && [ "\${pol}" == "v" ]; then
-    # Need to invert the sign of the pixel values to get correct V
-    for imageCode in restored residual image; do
-        for((TTERM=0;TTERM<=NUM_TAYLOR_TERMS;TTERM++)); do
-            setImageProperties cont
-            if [ -e \$imageName ]; then
-                echo "Inverting the sign of the pixels for image \$imageName"
-                srun --export=ALL --ntasks=1 ${PIPELINEDIR}/fixVsign.py -i \$imageName
-                err=\$?
-                echo "Complete"
-                if [ \$err != 0 ]; then
-                    echo "ERROR (error code \$err) when running fixVsign.py on \$imageName"
-                    exit \$err
-                fi
-            fi
-        done
-        unset TTERM
-    done
-fi
-
 EOFOUTER
     # 
 

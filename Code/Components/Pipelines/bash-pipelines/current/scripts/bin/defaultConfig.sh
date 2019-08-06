@@ -797,14 +797,6 @@ CLEAN_CONTPOL_NUM_MAJORCYCLES="3"
 CLEAN_CONTPOL_THRESHOLD_MAJORCYCLE="0.035mJy"
 CIMAGER_CONTPOL_MINUV=0
 CIMAGER_CONTPOL_MAXUV=0
-###################
-
-# Whether we should invert the sign of Stokes V after it has been imaged.
-# This is to be used while ASKAP/ASKAPsoft is producing Stokes V
-# images with the opposite sign to that described by the IEEE/IAU
-# definition.
-INVERT_SIGN_STOKES_V_IMAGE=true
-INVERT_SIGN_STOKES_V_CONTCUBE=true
 
 ###################
 # Parameters for continuum cube imaging

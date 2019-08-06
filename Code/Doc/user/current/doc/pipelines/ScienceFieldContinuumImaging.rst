@@ -108,8 +108,7 @@ Following this application of the gains calibration solution, one can
 optionally image the continuum dataset as a cube, preserving the
 frequency sampling. This task also allows the specification of
 multiple polarisations, with a cube created for each polarisation
-given. The **simager** task is used for the continuum cube
-imaging. Many of the imaging specifications (shape, direction etc, as
+given. Many of the imaging specifications (shape, direction etc, as
 well as gridding & preconditioning) given for continuum imaging are
 used for the continuum cube, although the cleaning parameters can be
 given as different.
@@ -135,8 +134,8 @@ The self-calibration stage is used for Stokes-I imaging. The calibrated
 uv-data is then used to make images of other polarisations. Users need 
 to specify the list of polarisation using ``CONTIMG_POLARISATIONS`` in 
 their pipeline configuration file. In a later version, we aim to separate 
-the self-calibration from the imaging, so that ALL pols including Stokes-I 
-is imaged alongwith the other polarisations.
+the self-calibration from the imaging, so that all pols including Stokes-I 
+are imaged along with the other polarisations.
 
 
 Basic imaging parameters
@@ -557,10 +556,6 @@ polarisations.
 |                                            |                                     | (:doc:`../calim/cimager`)                              | Stokes-I is ignored here, since it is imaged in the           |
 |                                            |                                     |                                                        | self-cal loop                                                 |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
-| ``INVERT_SIGN_STOKES_V_IMAGE``             | true                                | none                                                   | Whether to invert the sign of the pixel values in the Stokes V|
-|                                            |                                     |                                                        | image. This is necessary for now if you want to conform to the|
-|                                            |                                     |                                                        | IEEE/IAU definition of Stokes V.                              |
-+--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
 | ``CIMAGER_CONTPOL_MINUV``                  | 0                                   | MinUV (:doc:`../calim/data_selection`)                 | The minimum UV distance considered in the imaging - used to   |
 |                                            |                                     |                                                        | exclude the short baselines. Can be given as an array with    |
 |                                            |                                     |                                                        | different values for each pol loop                            |
@@ -653,10 +648,6 @@ the same. There are also parameters related to the use of
 | ``CONTCUBE_POLARISATIONS``                 | ``"I"``                             | Images.polarisation (:doc:`../calim/simager`)          | List of polarisations to create cubes for. This should be a   |
 |                                            |                                     |                                                        | comma-separated list of (upper-case) polarisations. Separate  |
 |                                            |                                     |                                                        | jobs will be launched for each polarisation given.            |
-+--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
-| ``INVERT_SIGN_STOKES_V_CONTCUBE``          | true                                | none                                                   | Whether to invert the sign of the pixel values in the Stokes V|
-|                                            |                                     |                                                        | cube. This is necessary for now if you want to conform to the |
-|                                            |                                     |                                                        | IEEE/IAU definition of Stokes V.                              |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
 | ``REST_FREQUENCY_CONTCUBE``                | ``""``                              | Images.restFrequency (:doc:`../calim/simager`)         | Rest frequency to be written to the continuum cube. If left   |
 |                                            |                                     |                                                        | blank, no rest frequency is written.                          |
