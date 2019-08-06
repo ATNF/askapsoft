@@ -75,8 +75,16 @@ class CPObsServiceImp(ICPObsService):
         logger.debug("Abort " + str(self.current_sbid))
         if self.proc:
             if self.proc.poll() is None:
+                logger.debug("Initiated abort for " + str(self.current_sbid))
                 self.proc.terminate()
-        logger.debug("Initiated abort for " + str(self.current_sbid))
+                self.proc = None
+            else:
+                rc = None
+                if self.proc:
+                    rc = self.proc.returncode
+                logger.debug(
+                    "abortObs ingest process returncode={}".format(rc)
+                )
 
     # will return the sbid the ingest is processing if it's running
     # otherwise return -1
@@ -88,23 +96,32 @@ class CPObsServiceImp(ICPObsService):
 
     def waitObs(self, timeout, current=None):
         if self.proc is None:  # no process is currently running
+            logger.debug("waitObs called and no ingest process running")
             return True
 
         if self.proc.poll() is not None:
+            logger.info("ingest process finished with returncode {}".format(
+                self.proc.returncode
+            ))
             return True     # process finished
 
         if timeout == 0:
             return False    # process not finished, but non blocking
 
         if timeout < 0:     # wait until ingest process has finished
+            logger.debug("Blocking until ingest process has finished")
             self.proc.wait()
             self.current_sbid = -1
+            logger.debug("Ingest process has finished")
             return True
 
-        time_left = timeout/1000
+        time_left = timeout/1000.0
         sleep_time = 0.1
 
         while time_left > 0:
+            logger.debug(
+                "waitObs with timeout - time left = {}".format(time_left)
+            )
             if time_left < sleep_time:
                 time.sleep(time_left)
             else:
@@ -113,8 +130,9 @@ class CPObsServiceImp(ICPObsService):
             time_left -= sleep_time
             if self.proc.poll() is not None:
                 self.current_sbid = -1
+                logger.debug("Ingest process has finished (after timeout)")
                 return True     # process finished
-
+        logger.debug("default return at end of waitObs")
         return False
 
     def write_config(self, file_name, sbid):
