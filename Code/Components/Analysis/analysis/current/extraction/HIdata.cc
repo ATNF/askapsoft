@@ -256,7 +256,7 @@ int HIdata::busyFunctionFit()
         noise[i] = double(itsNoiseExtractor->array().tovector()[i]);
     }
 
-    BusyFit *theFitter = new BusyFit();
+    boost::scoped_ptr<BusyFit> theFitter(new BusyFit());
 
     bool plotsTurnedOff = true;
     bool relax = false;
@@ -271,6 +271,8 @@ int HIdata::busyFunctionFit()
         theFitter->getResult(itsBFparams.data(), itsBFerrors.data(),
                              itsBFchisq, itsBFredChisq, itsBFndof);
     }
+
+    theFitter.reset();
 
     return status;
 

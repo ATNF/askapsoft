@@ -71,7 +71,7 @@ void OptimisedGrower::setFlag(int x, int y, int z, duchamp::STATE newstate)
 
 void OptimisedGrower::grow(duchamp::Detection *object)
 {
-    itsObj = object;
+    itsObj = boost::shared_ptr<duchamp::Detection>(object);
     // this->xObj = itsObj->getXPeak();
     // this->yObj = itsObj->getYPeak();
     this->xObj = int(object->getXCentroid());
@@ -87,7 +87,7 @@ void OptimisedGrower::grow(duchamp::Detection *object)
     if (this->clobberPrevious) {
         // If we are clobbering the previous object, we start with only
         // the central pixel and then grow out to the ellipse
-        itsObj = new duchamp::Detection;
+        itsObj = boost::shared_ptr<duchamp::Detection>(new duchamp::Detection);
         itsObj->addPixel(this->xObj, this->yObj, zObj);
         ASKAPLOG_DEBUG_STR(logger, "Starting with single pixel at (" <<
                            xObj << "," << yObj << "," << zObj <<
@@ -146,7 +146,7 @@ void OptimisedGrower::grow(duchamp::Detection *object)
     itsObj->calcFluxes(itsFluxArray, &(itsArrayDim[0]));
 
     if (this->clobberPrevious) {
-        *object = *itsObj;
+        object = itsObj.get();
     }
 
 }

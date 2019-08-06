@@ -37,6 +37,7 @@
 #include <duchamp/Detection/detection.hh>
 
 #include <Common/ParameterSet.h>
+#include <boost/shared_ptr.hpp>
 
 using namespace duchamp;
 
@@ -75,7 +76,7 @@ class OptimisedGrower : public duchamp::ObjectGrower {
         double ell_a, ell_b, ell_theta;
         int maxIterations;
         float totalFlux, maxFlux;
-        duchamp::Detection *itsObj;
+        boost::shared_ptr<duchamp::Detection> itsObj;
         int xObj, yObj, zmin, zmax;
         bool clobberPrevious;
 };
