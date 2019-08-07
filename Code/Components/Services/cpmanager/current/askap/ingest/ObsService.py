@@ -121,9 +121,9 @@ class CPObsServiceImp(ICPObsService):
         sleep_time = 0.1
 
         while time_left > 0:
-            logger.debug(
-                "waitObs with timeout - time left = {}".format(time_left)
-            )
+#            logger.debug(
+#                "waitObs with timeout - time left = {}".format(time_left)
+#            )
             if time_left < sleep_time:
                 time.sleep(time_left)
             else:
