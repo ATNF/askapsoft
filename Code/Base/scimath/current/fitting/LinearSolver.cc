@@ -841,7 +841,11 @@ std::pair<double,double> LinearSolver::solveSubsetOfNormalEquations(Params &para
 
     void LinearSolver::SetMajorLoopIterationNumber(size_t it)
     {
+        std::cout << "LinearSolver::SetMajorLoopIterationNumber: 1" << std::endl;
+
         itsMajorLoopIterationNumber = it;
+
+        std::cout << "LinearSolver::SetMajorLoopIterationNumber: 2" << std::endl;
     }
 
     // NOTE: Copied from "calibaccess/CalParamNameHelper.h", as currently accessors depends of scimath.
