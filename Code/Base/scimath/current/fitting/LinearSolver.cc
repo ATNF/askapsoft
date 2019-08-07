@@ -27,6 +27,8 @@
 /// @author Tim Cornwell <tim.cornwell@csiro.au>
 /// @author Vitaliy Ogarko <vogarko@gmail.com>
 ///
+#undef HAVE_MPI
+
 #include <fitting/LinearSolver.h>
 #include <fitting/GenericNormalEquations.h>
 

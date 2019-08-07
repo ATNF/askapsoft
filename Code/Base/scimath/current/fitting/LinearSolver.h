@@ -30,6 +30,8 @@
 #ifndef SCIMATHLINEARSOLVER_H_
 #define SCIMATHLINEARSOLVER_H_
 
+#undef HAVE_MPI
+
 #ifdef HAVE_MPI
 #include <mpi.h>
 #endif
