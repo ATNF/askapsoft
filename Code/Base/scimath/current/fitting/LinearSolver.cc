@@ -27,8 +27,6 @@
 /// @author Tim Cornwell <tim.cornwell@csiro.au>
 /// @author Vitaliy Ogarko <vogarko@gmail.com>
 ///
-#undef HAVE_MPI
-
 #include <fitting/LinearSolver.h>
 #include <fitting/GenericNormalEquations.h>
 
@@ -70,7 +68,7 @@ namespace askap
   namespace scimath
   {
     BOOST_CONSTEXPR_OR_CONST double LinearSolver::KeepAllSingularValues;
-    
+
     /// @brief Constructor
     /// @details Optionally, it is possible to limit the condition number of
     /// normal equation matrix to a given number.
@@ -82,22 +80,21 @@ namespace askap
     /// if you don't want to drop any singular values (may be a not very wise
     /// thing to do!). A very large threshold has the same effect. Zero
     /// threshold is not allowed and will cause an exception.
-    LinearSolver::LinearSolver(double maxCondNumber) : 
+    LinearSolver::LinearSolver(double maxCondNumber) :
            itsMaxCondNumber(maxCondNumber),
-#ifdef HAVE_MPI
-           itsWorkersComm(MPI_COMM_NULL),
-#endif
            itsMajorLoopIterationNumber(0)
+#ifdef HAVE_MPI
+           ,itsWorkersComm(MPI_COMM_NULL)
+#endif
     {
-      ASKAPASSERT(itsMaxCondNumber!=0);
+        ASKAPASSERT(itsMaxCondNumber != 0);
     };
 
-    
     void LinearSolver::init()
     {
       resetNormalEquations();
     }
-    
+
 /// @brief test that all matrix elements are below tolerance by absolute value
 /// @details This is a helper method to test all matrix elements
 /// @param[in] matr matrix to test

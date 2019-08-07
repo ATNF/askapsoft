@@ -30,8 +30,6 @@
 #ifndef SCIMATHLINEARSOLVER_H_
 #define SCIMATHLINEARSOLVER_H_
 
-#undef HAVE_MPI
-
 #ifdef HAVE_MPI
 #include <mpi.h>
 #endif
@@ -86,13 +84,13 @@ namespace askap
         /// @brief Clone this object
         virtual Solver::ShPtr clone() const;
 
+        // @brief Setter for the major loop iteration number.
+        virtual void SetMajorLoopIterationNumber(size_t it);
+
 #ifdef HAVE_MPI
         // @brief Setter for workers communicator.
         virtual void SetWorkersCommunicator(const MPI_Comm &comm);
 #endif
-
-        // @brief Setter for the major loop iteration number.
-        virtual void SetMajorLoopIterationNumber(size_t it);
 
        protected:
 
@@ -128,11 +126,6 @@ namespace askap
          /// taken into account in the svd method
          double itsMaxCondNumber;
 
-#ifdef HAVE_MPI
-         // MPI communicator of all workers (for LSQR solver).
-         MPI_Comm itsWorkersComm;
-#endif
-
          // Iteration number in the major loop (for LSQR solver with constraints).
          size_t itsMajorLoopIterationNumber;
 
@@ -143,6 +136,11 @@ namespace askap
          /// @param[in] name full name of the parameter
          /// @return a pair with extracted channel and the base parameter name
          static std::pair<casa::uInt, std::string> extractChannelInfo(const std::string &name);
+
+#ifdef HAVE_MPI
+         // MPI communicator of all workers (for LSQR solver).
+         MPI_Comm itsWorkersComm;
+#endif
     };
 
   }
