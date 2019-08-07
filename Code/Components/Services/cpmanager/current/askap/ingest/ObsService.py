@@ -92,6 +92,8 @@ class CPObsServiceImp(ICPObsService):
         if self.proc:
             if self.proc.poll() is not None:
                 self.current_sbid = -1
+        else:
+            self.current_sbid = -1
         return self.current_sbid
 
     def waitObs(self, timeout, current=None):
