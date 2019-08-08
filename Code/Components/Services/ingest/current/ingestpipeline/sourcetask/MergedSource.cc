@@ -238,6 +238,11 @@ VisChunk::ShPtr MergedSource::next(void)
                     "Skipping this cycle, metadata indicates SCANID_IDLE");
             count = -1;
         }
+
+        if (!itsMetadata && itsVisConverter.config().receiverId() >= 0) {
+            ASKAPLOG_DEBUG_STR(logger, "Received empty metadata object for stream "<<itsVisConverter.config().receiverId()<<", attempt number "<<(count + 1)<<
+                                       " out of "<<maxNoMetadataRetries);
+        }
     } 
     ASKAPCHECK(itsMetadata, "Metadata streaming ceased, unable to recover after "<<
                             maxNoMetadataRetries<<" attempts");
@@ -303,6 +308,14 @@ VisChunk::ShPtr MergedSource::next(void)
         // TosMetadata) then read VisDatagrams until they catch up
         if (itsMetadata->time() > itsVis->timestamp) {
             ASKAPDEBUGASSERT(itsVis);
+            // probably temporary hack to abort the execution if the mismatch between metadata and visibility timimg is unrealistically large
+            // this is in direct conflict with how buffers operate, so ultimately correlator/IOCs should be fixed to avoid this condition and
+            // not send data with junk time
+            ASKAPCHECK((itsMetadata->time() - itsVis->timestamp) > ONE_SECOND * 120, 
+                     "More than two minute discrepancy between metadata and visibility timestamps for stream id="<<itsVisConverter.config().receiverId()<<
+                     ", metadata time: "<<bat2epoch(itsMetadata->time()).getValue()<<
+                                           " visibility time: "<<bat2epoch(itsVis->timestamp).getValue());
+            //
             if (!logCatchup && lastCatchupVisBAT != itsVis->timestamp) {
                 logCatchup = true;
             }
