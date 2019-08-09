@@ -832,19 +832,15 @@ std::pair<double,double> LinearSolver::solveSubsetOfNormalEquations(Params &para
     }
 
 #ifdef HAVE_MPI
-    void LinearSolver::SetWorkersCommunicator(const MPI_Comm &comm)
+    void LinearSolver::setWorkersCommunicator(const MPI_Comm &comm)
     {
         MPI_Comm_dup(comm, &itsWorkersComm);
     }
 #endif
 
-    void LinearSolver::SetMajorLoopIterationNumber(size_t it)
+    void LinearSolver::setMajorLoopIterationNumber(size_t it)
     {
-        std::cout << "LinearSolver::SetMajorLoopIterationNumber: 1" << std::endl;
-
         itsMajorLoopIterationNumber = it;
-
-        std::cout << "LinearSolver::SetMajorLoopIterationNumber: 2" << std::endl;
     }
 
     // NOTE: Copied from "calibaccess/CalParamNameHelper.h", as currently accessors depends of scimath.

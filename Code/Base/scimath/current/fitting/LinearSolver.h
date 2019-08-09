@@ -85,11 +85,11 @@ namespace askap
         virtual Solver::ShPtr clone() const;
 
         // @brief Setter for the major loop iteration number.
-        virtual void SetMajorLoopIterationNumber(size_t it);
+        virtual void setMajorLoopIterationNumber(size_t it);
 
 #ifdef HAVE_MPI
         // @brief Setter for workers communicator.
-        virtual void SetWorkersCommunicator(const MPI_Comm &comm);
+        virtual void setWorkersCommunicator(const MPI_Comm &comm);
 #endif
 
        protected:
