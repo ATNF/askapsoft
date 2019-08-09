@@ -139,11 +139,15 @@ private:
    bool getNext() {
        const long TENSECONDS = 10000000;
        ASKAPASSERT(itsSrc);
-       const uint32_t nRetries = 10;
+       const uint32_t nRetries = 3;
        for (uint32_t attempt = 0; attempt<nRetries; ++attempt) {
             itsDatagram = itsSrc->next(TENSECONDS);
             if (itsDatagram) {
+                //this is very verbose, but helps to investigate issues when they are narrowed down to a particular card
+                //ASKAPLOG_DEBUG_STR(logger, "time: "<<bat2epoch(itsDatagram->timestamp)<<" BAT = "<<std::hex<<itsDatagram->timestamp);
                 return true;
+            } else {
+                ASKAPLOG_DEBUG_STR(logger, "empty datagram, i.e. nothing received before 10s timeout");
             }
        }
        if (!itsDatagram) {
