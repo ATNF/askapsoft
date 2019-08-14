@@ -24,10 +24,12 @@ double GetNorm(const Vector& x);
  */
 double GetNormSquared(const Vector& x);
 
+#ifdef HAVE_MPI
 /*
  * Returns l2-norm of a vector x that is split between CPUs.
  */
-double GetNormParallel(const Vector& x, int nbproc, void *comm);
+double GetNormParallel(const Vector& x, int nbproc, const MPI_Comm &mpi_comm);
+#endif
 
 /*
  * Multiplies vector by a scalar, and stores the result in the same vector.
@@ -46,10 +48,13 @@ void Transform(double a, Vector& x, double b, const Vector& y);
 
 /*
  * Normalizes vector x by its l2-norm.
- * inParallel - flag that defines if x is split between CPUs.
  * Also returns the vector norm.
  */
-bool Normalize(Vector& x, double& norm, bool inParallel, int nbproc, void *comm);
+bool Normalize(Vector& x, double& norm);
+#ifdef HAVE_MPI
+// For the case when x is split between CPUs.
+bool NormalizeParallel(Vector& x, double& norm, int nbproc, const MPI_Comm &mpi_comm);
+#endif
 
 }}} // namespace askap.lsqr.MathUtils
 

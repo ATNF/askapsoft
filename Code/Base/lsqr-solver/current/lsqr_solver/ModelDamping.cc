@@ -6,6 +6,7 @@
 
 #include <stdexcept>
 #include <cmath>
+#include <cassert>
 
 #include <lsqr_solver/ModelDamping.h>
 #include <lsqr_solver/ParallelTools.h>
@@ -41,16 +42,11 @@ void ModelDamping::Add(double alpha,
         throw std::runtime_error("Matrix has not been finalized yet in ModelDamping::Add!");
     }
 
-    // Sanity check.
-    if (nbproc > 1 && matrix.GetComm() == NULL)
-    {
-        throw std::invalid_argument("MPI communicator not defined in ModelDamping::Add!");
-    }
-
 #ifdef HAVE_MPI
-    MPI_Comm *comm = static_cast<MPI_Comm *>(matrix.GetComm());
-    size_t nelementsTotal = ParallelTools::get_total_number_elements(nelements, nbproc, *comm);
-    size_t nsmaller = ParallelTools::get_nsmaller(nelements, myrank, nbproc, *comm);
+    MPI_Comm mpi_comm = matrix.GetComm();
+    assert(mpi_comm != MPI_COMM_NULL);
+    size_t nelementsTotal = ParallelTools::get_total_number_elements(nelements, nbproc, mpi_comm);
+    size_t nsmaller = ParallelTools::get_nsmaller(nelements, myrank, nbproc, mpi_comm);
 #else
     size_t nelementsTotal = nelements;
     size_t nsmaller = 0;
@@ -112,7 +108,7 @@ void ModelDamping::Add(double alpha,
     // Set the full right-hand side.
     //------------------------------------------------------------------------------
 #ifdef HAVE_MPI
-    ParallelTools::get_full_array_in_place(nelements, b_loc, true, myrank, nbproc, *comm);
+    ParallelTools::get_full_array_in_place(nelements, b_loc, true, myrank, nbproc, mpi_comm);
 #endif
 
     for (size_t i = 0; i < nelementsTotal; ++i)

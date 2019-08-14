@@ -39,7 +39,12 @@ namespace askap
             double normPower = 2.0;
             size_t nelements = 3;
 
+#ifdef HAVE_MPI
+            SparseMatrix matrix(0, 0, MPI_COMM_WORLD);
+#else
             SparseMatrix matrix(0, 0);
+#endif
+
             Vector b(0);
 
             matrix.Finalize(0);

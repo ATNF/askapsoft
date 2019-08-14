@@ -5,12 +5,13 @@
  */
 
 #include <stdexcept>
+#include <cassert>
 
 #include <lsqr_solver/SparseMatrix.h>
 
 namespace askap { namespace lsqr {
 
-SparseMatrix::SparseMatrix(size_t nl, size_t nnz, void *comm) :
+SparseMatrix::SparseMatrix(size_t nl, size_t nnz) :
     finalized(false),
     nnz(nnz),
     nel(0),
@@ -18,9 +19,35 @@ SparseMatrix::SparseMatrix(size_t nl, size_t nnz, void *comm) :
     nl_current(0),
     sa(nnz),
     ija(nnz),
-    ijl(nl + 1),
-    comm(comm)
+    ijl(nl + 1)
+#ifdef HAVE_MPI
+    ,itsComm(MPI_COMM_NULL)
+#endif
 {
+}
+#ifdef HAVE_MPI
+SparseMatrix::SparseMatrix(size_t nl, size_t nnz, const MPI_Comm &comm) :
+    finalized(false),
+    nnz(nnz),
+    nel(0),
+    nl(nl),
+    nl_current(0),
+    sa(nnz),
+    ija(nnz),
+    ijl(nl + 1)
+{
+    assert(comm != MPI_COMM_NULL);
+    MPI_Comm_dup(comm, &itsComm);
+}
+#endif
+
+SparseMatrix::~SparseMatrix()
+{
+#ifdef HAVE_MPI
+    if (itsComm != MPI_COMM_NULL) {
+        MPI_Comm_free(&itsComm);
+    }
+#endif
 }
 
 bool SparseMatrix::Finalize(size_t ncolumns)
@@ -228,6 +255,13 @@ bool SparseMatrix::ValidateIndexBoundaries(size_t ncolumns)
     }
     return true;
 }
+
+#ifdef HAVE_MPI
+const MPI_Comm& SparseMatrix::GetComm() const
+{
+    return itsComm;
+}
+#endif
 
 }} // namespace askap.lsqr
 

@@ -69,31 +69,40 @@ namespace askap
   {
     BOOST_CONSTEXPR_OR_CONST double LinearSolver::KeepAllSingularValues;
 
-    /// @brief Constructor
-    /// @details Optionally, it is possible to limit the condition number of
-    /// normal equation matrix to a given number.
-    /// @param maxCondNumber maximum allowed condition number of the range
-    /// of the normal equation matrix for the SVD algorithm. Effectively this
-    /// puts the limit on the singular values, which are considered to be
-    /// non-zero (all greater than the largest singular value divided by this
-    /// condition number threshold). Default is 1e3. Put a negative number
-    /// if you don't want to drop any singular values (may be a not very wise
-    /// thing to do!). A very large threshold has the same effect. Zero
-    /// threshold is not allowed and will cause an exception.
-    LinearSolver::LinearSolver(double maxCondNumber) :
-           itsMaxCondNumber(maxCondNumber),
-           itsMajorLoopIterationNumber(0)
+/// @brief Constructor
+/// @details Optionally, it is possible to limit the condition number of
+/// normal equation matrix to a given number.
+/// @param maxCondNumber maximum allowed condition number of the range
+/// of the normal equation matrix for the SVD algorithm. Effectively this
+/// puts the limit on the singular values, which are considered to be
+/// non-zero (all greater than the largest singular value divided by this
+/// condition number threshold). Default is 1e3. Put a negative number
+/// if you don't want to drop any singular values (may be a not very wise
+/// thing to do!). A very large threshold has the same effect. Zero
+/// threshold is not allowed and will cause an exception.
+LinearSolver::LinearSolver(double maxCondNumber) :
+       itsMaxCondNumber(maxCondNumber),
+       itsMajorLoopIterationNumber(0)
 #ifdef HAVE_MPI
-           ,itsWorkersComm(MPI_COMM_NULL)
+       ,itsWorkersComm(MPI_COMM_NULL)
 #endif
-    {
-        ASKAPASSERT(itsMaxCondNumber != 0);
-    };
+{
+    ASKAPASSERT(itsMaxCondNumber != 0);
+};
 
-    void LinearSolver::init()
-    {
-      resetNormalEquations();
+LinearSolver::~LinearSolver()
+{
+#ifdef HAVE_MPI
+    if (itsWorkersComm != MPI_COMM_NULL) {
+        MPI_Comm_free(&itsWorkersComm);
     }
+#endif
+}
+
+void LinearSolver::init()
+{
+    resetNormalEquations();
+}
 
 /// @brief test that all matrix elements are below tolerance by absolute value
 /// @details This is a helper method to test all matrix elements
@@ -110,9 +119,8 @@ bool LinearSolver::allMatrixElementsAreZeros(const casa::Matrix<double> &matr, c
        }
   }
   return true;
-} 
-    
-    
+}
+
 /// @brief extract an independent subset of parameters
 /// @details This method analyses the normal equations and forms a subset of 
 /// parameters which can be solved for independently. Although the SVD is more than
@@ -128,7 +136,7 @@ std::vector<std::string> LinearSolver::getIndependentSubset(std::vector<std::str
     std::vector<std::string> resultNames;
     resultNames.reserve(names.size());
     resultNames.push_back(names[0]);
-    
+
     // this has been added to the subset, so delete it
     names.erase(names.begin());
 
@@ -170,6 +178,12 @@ std::pair<double,double> LinearSolver::solveSubsetOfNormalEquations(Params &para
                    const std::vector<std::string> &names) const
 {
     ASKAPTRACE("LinearSolver::solveSubsetOfNormalEquations");
+#ifdef HAVE_MPI
+    ASKAPLOG_INFO_STR(logger, "Started LinearSolver::solveSubsetOfNormalEquations, with HAVE_MPI defined.");
+#else
+    ASKAPLOG_INFO_STR(logger, "Started LinearSolver::solveSubsetOfNormalEquations, with HAVE_MPI NOT defined.");
+#endif
+
     std::pair<double,double> result(0.,0.);
 
     bool algorithmLSQR = (algorithm() == "LSQR");
@@ -220,10 +234,13 @@ std::pair<double,double> LinearSolver::solveSubsetOfNormalEquations(Params &para
     //------------------------------------------------------------------------------
     // Define MPI partitioning (needed for LSQR solver).
     //------------------------------------------------------------------------------
-    void* comm = NULL;
+
     int myrank = 0;
     int nbproc = 1;
     bool matrixIsParallel = false;
+#ifdef HAVE_MPI
+    MPI_Comm mpi_comm = MPI_COMM_WORLD;
+#endif
 
     if (algorithmLSQR) {
 #ifdef HAVE_MPI
@@ -235,15 +252,16 @@ std::pair<double,double> LinearSolver::solveSubsetOfNormalEquations(Params &para
         if (matrixIsParallel) {
         // The parallel matrix case - need to define the parallel partitioning.
             ASKAPCHECK(itsWorkersComm != MPI_COMM_NULL, "Workers communicator is not defined!");
-            comm = (void *)&itsWorkersComm;
             MPI_Comm_rank(itsWorkersComm, &myrank);
             MPI_Comm_size(itsWorkersComm, &nbproc);
+
+            mpi_comm = itsWorkersComm;
         } else {
-            MPI_Comm comm_world = MPI_COMM_WORLD;
-            comm = (void *)&comm_world;
+            mpi_comm = MPI_COMM_SELF;
         }
 #endif
-        ASKAPLOG_INFO_STR(logger, "it, matrixIsParallel, myrank = " << itsMajorLoopIterationNumber << ", " << matrixIsParallel << ", " << myrank);
+        ASKAPLOG_INFO_STR(logger, "it, matrixIsParallel, myrank, nbproc = " << itsMajorLoopIterationNumber
+                                   << ", " << matrixIsParallel << ", " << myrank << ", " << nbproc);
     }
 
     //------------------------------------------------------------------------------
@@ -281,7 +299,12 @@ std::pair<double,double> LinearSolver::solveSubsetOfNormalEquations(Params &para
             nnz += 2 * nParameters;
         }
     }
-    lsqr::SparseMatrix matrix(nrows, nnz, comm);
+
+#ifdef HAVE_MPI
+    lsqr::SparseMatrix matrix(nrows, nnz, mpi_comm);
+#else
+    lsqr::SparseMatrix matrix(nrows, nnz);
+#endif
 
     //--------------------------------------------------------------------------------------------
     // Copy matrix elements from normal matrix (map of map of matrixes) to the solver matrix:
@@ -734,7 +757,7 @@ std::pair<double,double> LinearSolver::solveSubsetOfNormalEquations(Params &para
         lsqr::Vector x(ncolumms, 0.0);
         lsqr::LSQRSolver solver(matrix.GetCurrentNumberRows(), ncolumms);
 
-        solver.Solve(niter, rmin, matrix, b_RHS, x, myrank, nbproc, suppress_output);
+        solver.Solve(niter, rmin, matrix, b_RHS, x, suppress_output);
 
         ASKAPLOG_INFO_STR(logger, "Completed LSQR in " << timer.real() << " seconds on rank " << myrank);
 
@@ -834,6 +857,7 @@ std::pair<double,double> LinearSolver::solveSubsetOfNormalEquations(Params &para
 #ifdef HAVE_MPI
     void LinearSolver::setWorkersCommunicator(const MPI_Comm &comm)
     {
+        assert(comm != MPI_COMM_NULL);
         MPI_Comm_dup(comm, &itsWorkersComm);
     }
 #endif

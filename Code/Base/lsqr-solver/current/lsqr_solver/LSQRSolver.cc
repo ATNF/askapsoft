@@ -38,40 +38,40 @@ void LSQRSolver::Solve(size_t niter,
         const SparseMatrix& matrix,
         const Vector& b,
         Vector& x,
-        int myrank,
-        int nbproc,
         bool suppress_output)
 {
+    int myrank = 0;
+    int nbproc = 1;
+
+#ifdef HAVE_MPI
+    MPI_Comm mpi_comm = matrix.GetComm();
+    assert(mpi_comm != MPI_COMM_NULL);
+
+    // Retrieve MPI partitioning.
+    MPI_Comm_rank(mpi_comm, &myrank);
+    MPI_Comm_size(mpi_comm, &nbproc);
+#endif
+
     // Sanity check.
-    if (matrix.GetNumberElements() == 0)
-    {
+    if (matrix.GetNumberElements() == 0) {
         ASKAPLOG_WARN_STR(logger, "Zero elements in the matrix. Exiting the solver.");
         return;
     }
 
     // Sanity check.
-    if (MathUtils::GetNormSquared(b) == 0.0)
-    {
+    if (MathUtils::GetNormSquared(b) == 0.0) {
         ASKAPLOG_WARN_STR(logger, "|b| = 0. Exiting the solver.");
         return;
     }
 
     // Sanity check.
-    if (b.size() != nlines)
-    {
+    if (b.size() != nlines) {
         throw std::invalid_argument("Wrong dimension of b in LSQRSolver::Solve!");
     }
 
     // Sanity check.
-    if (x.size() != nelements)
-    {
+    if (x.size() != nelements) {
         throw std::invalid_argument("Wrong dimension of x in LSQRSolver::Solve!");
-    }
-
-    // Sanity check.
-    if (nbproc > 1 && matrix.GetComm() == NULL)
-    {
-        throw std::invalid_argument("MPI communicator not defined in LSQRSolver::Solve!");
     }
 
     // Initialization.
@@ -79,8 +79,7 @@ void LSQRSolver::Solve(size_t niter,
     double alpha, beta;
 
     // Normalize u and initialize beta.
-    if (!MathUtils::Normalize(u, beta, false, nbproc, matrix.GetComm()))
-    {
+    if (!MathUtils::Normalize(u, beta)) {
         throw std::runtime_error("Could not normalize initial u, zero denominator!");
     }
 
@@ -94,8 +93,12 @@ void LSQRSolver::Solve(size_t niter,
     matrix.TransMultVector(u, v);
 
     // Normalize v and initialize alpha.
-    if (!MathUtils::Normalize(v, alpha, true, nbproc, matrix.GetComm()))
-    {
+#ifdef HAVE_MPI
+    if (!MathUtils::NormalizeParallel(v, alpha, nbproc, matrix.GetComm())) {
+#else
+    assert(nbproc == 1);
+    if (!MathUtils::Normalize(v, alpha)) {
+#endif
         throw std::runtime_error("Could not normalize initial v, zero denominator!");
     }
 
@@ -107,22 +110,16 @@ void LSQRSolver::Solve(size_t niter,
     double r = 1.0;
 
     // Main loop.
-    while (iter <= niter && r > rmin)
-    {
+    while (iter <= niter && r > rmin) {
         // Scale u: u = - alpha * u
         MathUtils::Multiply(u, - alpha);
 
         // Compute u = u + H.v parallel.
 #ifdef HAVE_MPI
-        if (nbproc > 1)
-        {
-            MPI_Comm *mpi_comm = static_cast<MPI_Comm*>(matrix.GetComm());
-
+        if (nbproc > 1) {
             matrix.MultVector(v, Hv_loc);
-            MPI_Allreduce(Hv_loc.data(), Hv.data(), nlines, MPI_DOUBLE, MPI_SUM, *mpi_comm);
-        }
-        else
-        {
+            MPI_Allreduce(Hv_loc.data(), Hv.data(), nlines, MPI_DOUBLE, MPI_SUM, mpi_comm);
+        } else {
             matrix.MultVector(v, Hv);
         }
 #else
@@ -134,8 +131,7 @@ void LSQRSolver::Solve(size_t niter,
         MathUtils::Add(u, Hv);
 
         // Normalize u and update beta.
-        if (!MathUtils::Normalize(u, beta, false, nbproc, matrix.GetComm()))
-        {
+        if (!MathUtils::Normalize(u, beta)) {
             // Found an exact solution.
             ASKAPLOG_WARN_STR(logger, "|u| = 0. Possibly found an exact solution in the LSQR solver!");
         }
@@ -150,8 +146,12 @@ void LSQRSolver::Solve(size_t niter,
         MathUtils::Add(v, v0);
 
         // Normalize v and update alpha.
-        if (!MathUtils::Normalize(v, alpha, true, nbproc, matrix.GetComm()))
-        {
+#ifdef HAVE_MPI
+        if (!MathUtils::NormalizeParallel(v, alpha, nbproc, matrix.GetComm())) {
+#else
+        assert(nbproc == 1);
+        if (!MathUtils::Normalize(v, alpha)) {
+#endif
             // Found an exact solution.
             ASKAPLOG_WARN_STR(logger, "|v| = 0. Possibly found an exact solution in the LSQR solver!");
         }
@@ -160,8 +160,7 @@ void LSQRSolver::Solve(size_t niter,
         double rho = sqrt(rhobar * rhobar + beta * beta);
 
         // Sanity check (avoid zero division).
-        if (rho == 0.0)
-        {
+        if (rho == 0.0) {
             ASKAPLOG_WARN_STR(logger, "rho = 0. Exiting the LSQR loop.");
             break;
         }
@@ -187,19 +186,13 @@ void LSQRSolver::Solve(size_t niter,
         r = phibar / b1;
 
         // Printing log.
-        if (!suppress_output && (iter % 10 == 0))
-        {
+        if (!suppress_output && (iter % 10 == 0)) {
             // Calculate the gradient: 2A'(Ax - b).
 #ifdef HAVE_MPI
-            if (nbproc > 1)
-            {
-                MPI_Comm *mpi_comm = static_cast<MPI_Comm*>(matrix.GetComm());
-
+            if (nbproc > 1) {
                 matrix.MultVector(x, Hv_loc);
-                MPI_Allreduce(Hv_loc.data(), Hv.data(), nlines, MPI_DOUBLE, MPI_SUM, *mpi_comm);
-            }
-            else
-            {
+                MPI_Allreduce(Hv_loc.data(), Hv.data(), nlines, MPI_DOUBLE, MPI_SUM, mpi_comm);
+            } else {
                 matrix.MultVector(x, Hv);
             }
 #else
@@ -213,28 +206,36 @@ void LSQRSolver::Solve(size_t niter,
             matrix.TransMultVector(Hv, v0);
 
             // Norm of the gradient.
+#ifdef HAVE_MPI
             double g = 2.0 * MathUtils::GetNormParallel(v0, nbproc, matrix.GetComm());
+#else
+            double g = 2.0 * MathUtils::GetNorm(v0);
+#endif
 
-            if (myrank == 0)
-            {
+            if (myrank == 0) {
                 ASKAPLOG_INFO_STR(logger, "it, r, g =" << iter << ", " << r << ", " << g);
             }
         }
 
         // To avoid floating point exception of denormal value.
         // Basically this is another stopping criterion.
-        if (fabs(rhobar) < 1.e-30)
-        {
-            if (myrank == 0) ASKAPLOG_WARN_STR(logger, "Small rhobar! Possibly algorithm has converged. Exiting the loop.");
+        if (fabs(rhobar) < 1.e-30) {
+            ASKAPLOG_INFO_STR(logger, "Small rhobar! Possibly algorithm has converged. Exiting the loop, rank = " << myrank);
             break;
         }
 
         iter += 1;
     }
 
-    if (myrank == 0)
-    {
-        ASKAPLOG_INFO_STR(logger, "Finished LSQRSolver::Solve, r =" << r << " iter =" << iter - 1);
+#ifdef HAVE_MPI
+    // Mainly for sanity reasons. E.g. if a function is mistakenly called with a vector b,
+    // that is not the same on all CPUs, then some CPUs may quit the loop while others not.
+    // Having a barrier here makes it easier to debug such bugs.
+    MPI_Barrier(mpi_comm);
+#endif
+
+    if (myrank == 0) {
+        ASKAPLOG_INFO_STR(logger, "Finished LSQRSolver::Solve, r = " << r << " iter = " << iter - 1 << ", on rank = " << myrank);
     }
 }
 

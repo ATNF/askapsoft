@@ -46,7 +46,11 @@ namespace askap
               ncols = 3;
               nrows = 2;
 
+#ifdef HAVE_MPI
+              matrix = new SparseMatrix(nrows, ncols * nrows, MPI_COMM_WORLD);
+#else
               matrix = new SparseMatrix(nrows, ncols * nrows);
+#endif
               b_RHS = new Vector(nrows, 0.0);
 
               double a[3][2];
@@ -95,9 +99,6 @@ namespace askap
         // Testing underdetermined non-damped system (defined in WunschFixture).
         void testUnderdeterminedNonDamped()
         {
-            int myrank = 0;
-            int nbproc = 1;
-
             double rmin = 1.e-13;
             size_t niter = 100;
 
@@ -106,7 +107,7 @@ namespace askap
             LSQRSolver solver(system.nrows, system.ncols);
 
             Vector x(system.ncols, 0.0);
-            solver.Solve(niter, rmin, *system.matrix, *system.b_RHS, x, myrank, nbproc, true);
+            solver.Solve(niter, rmin, *system.matrix, *system.b_RHS, x, true);
 
             double epsilon = 1.e-15;
 
@@ -149,7 +150,7 @@ namespace askap
             LSQRSolver solver(system.matrix->GetTotalNumberRows(), nelements);
 
             Vector x(system.ncols, 0.0);
-            solver.Solve(niter, rmin, *system.matrix, *system.b_RHS, x, myrank, nbproc, true);
+            solver.Solve(niter, rmin, *system.matrix, *system.b_RHS, x, true);
 
             double epsilon = 1.e-5;
 
@@ -196,7 +197,7 @@ namespace askap
             LSQRSolver solver(system.matrix->GetTotalNumberRows(), nelements);
 
             Vector x(system.ncols, 0.0);
-            solver.Solve(niter, rmin, *system.matrix, *system.b_RHS, x, myrank, nbproc, true);
+            solver.Solve(niter, rmin, *system.matrix, *system.b_RHS, x, true);
 
             double epsilon = 1.e-5;
 
@@ -227,9 +228,6 @@ namespace askap
         //---------------------------------------------------------------------
         void testOverdetermined()
         {
-            int myrank = 0;
-            int nbproc = 1;
-
             size_t nelements_total = 3;
             size_t nrows = 1000;
             double rmin = 1.e-14;
@@ -237,7 +235,11 @@ namespace askap
 
             size_t nelements = nelements_total;
 
+#ifdef HAVE_MPI
+            SparseMatrix matrix(nrows, nelements * nrows, MPI_COMM_WORLD);
+#else
             SparseMatrix matrix(nrows, nelements * nrows);
+#endif
 
             Vector b_RHS(nrows, 0.0);
 
@@ -264,7 +266,7 @@ namespace askap
             LSQRSolver solver(nrows, nelements);
 
             Vector x(nelements, 0.0);
-            solver.Solve(niter, rmin, matrix, b_RHS, x, myrank, nbproc, true);
+            solver.Solve(niter, rmin, matrix, b_RHS, x, true);
 
             double epsilon = 1.e-14;
 
@@ -278,13 +280,15 @@ namespace askap
          */
         void testNoElements()
         {
-            int myrank = 0;
-            int nbproc = 1;
-
             size_t ncols = 3;
             size_t nrows = 3;
 
+#ifdef HAVE_MPI
+            SparseMatrix matrix(nrows, ncols * nrows, MPI_COMM_WORLD);
+#else
             SparseMatrix matrix(nrows, ncols * nrows);
+#endif
+
             matrix.NewRow();
             matrix.NewRow();
             matrix.NewRow();
@@ -303,7 +307,7 @@ namespace askap
 
             LSQRSolver solver(nrows, ncols);
 
-            solver.Solve(niter, rmin, matrix, b_RHS, x, myrank, nbproc, true);
+            solver.Solve(niter, rmin, matrix, b_RHS, x, true);
 
             CPPUNIT_ASSERT_EQUAL(0.0, x[0]);
             CPPUNIT_ASSERT_EQUAL(0.0, x[1]);

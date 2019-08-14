@@ -138,8 +138,6 @@ namespace askap
         // Non-parallel.
         void testNormalize()
         {
-            int nbproc = 1;
-
             Vector vec(3);
             vec[0] = 1.0;
             vec[1] = 2.0;
@@ -150,7 +148,7 @@ namespace askap
 
             double norm = 0.0;
 
-            CPPUNIT_ASSERT(MathUtils::Normalize(vec2, norm, false, nbproc, NULL));
+            CPPUNIT_ASSERT(MathUtils::Normalize(vec2, norm));
             CPPUNIT_ASSERT_EQUAL(1.0, MathUtils::GetNorm(vec2));
             CPPUNIT_ASSERT_EQUAL(norm, MathUtils::GetNorm(vec));
         }

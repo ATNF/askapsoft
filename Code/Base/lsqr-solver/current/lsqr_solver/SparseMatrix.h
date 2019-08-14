@@ -7,9 +7,15 @@
 #ifndef SPARSEMATRIX_H_
 #define SPARSEMATRIX_H_
 
-#include <lsqr_solver/GlobalTypedefs.h>
+#ifdef HAVE_MPI
+#include <mpi.h>
+#endif
+
+#include <vector>
 
 namespace askap { namespace lsqr {
+
+typedef std::vector<double> Vector;
 
 /*
  * A class to work with sparse matrices that are stored using Compressed Sparse Row (CSR) format.
@@ -22,7 +28,12 @@ public:
      * nnz - reserved (predicted maximum) number of non-zero elements.
      * comm - MPI communicator (used when the matrix is split among CPUs).
      */
-    SparseMatrix(size_t nl, size_t nnz, void *comm = NULL);
+    SparseMatrix(size_t nl, size_t nnz);
+#ifdef HAVE_MPI
+    SparseMatrix(size_t nl, size_t nnz, const MPI_Comm &comm);
+#endif
+
+    virtual ~SparseMatrix();
 
     /*
      * Adds one element at specified position (column index).
@@ -108,15 +119,12 @@ public:
      */
     bool Finalize(size_t ncolumns);
 
+#ifdef HAVE_MPI
     /*
      * Returns the MPI communicator.
      */
-    void* GetComm() const
-    {
-        return comm;
-    }
-
-    virtual ~SparseMatrix() {};
+    const MPI_Comm& GetComm() const;
+#endif
 
 private:
     // Flag for whether the matrix has been finalized.
@@ -138,8 +146,10 @@ private:
     // The list of 'sa' indexes where each row starts.
     std::vector<size_t> ijl;
 
+#ifdef HAVE_MPI
     // MPI communicator.
-    void *comm;
+    MPI_Comm itsComm;
+#endif
 
     /*
      * Validates the boundaries of column indexes.

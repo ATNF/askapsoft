@@ -38,10 +38,13 @@
 #include <PolXProductsTest.h>
 
 #include <askap/AskapLogging.h>
+#include <askapparallel/AskapParallel.h>
 
 int main(int argc, char *argv[])
 {
     ASKAPLOG_INIT("");
+
+    askap::askapparallel::AskapParallel comms(argc, const_cast<const char**>(argv));
 
     askapdev::testutils::AskapTestRunner runner(argv[0]);
 

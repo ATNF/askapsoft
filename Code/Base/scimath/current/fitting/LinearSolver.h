@@ -55,7 +55,7 @@ namespace askap
       public:
        /// @brief no limit on the condition number
        static BOOST_CONSTEXPR_OR_CONST double KeepAllSingularValues = -1.;
-      
+
        /// @brief Constructor
        /// @details Optionally, it is possible to limit the condition number of
        /// normal equation matrix to a given number.
@@ -68,7 +68,9 @@ namespace askap
        /// thing to do!). A very large threshold has the same effect. Zero
        /// threshold is not allowed and will cause an exception.
        explicit LinearSolver(double maxCondNumber = 1e3);
-        
+
+       ~LinearSolver();
+
         /// Initialize this solver
         virtual void init();
 

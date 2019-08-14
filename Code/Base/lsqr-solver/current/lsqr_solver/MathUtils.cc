@@ -37,29 +37,22 @@ double GetNormSquared(const Vector& x)
     return accum;
 }
 
-double GetNormParallel(const Vector& x, int nbproc, void *comm)
+#ifdef HAVE_MPI
+double GetNormParallel(const Vector& x, int nbproc, const MPI_Comm &mpi_comm)
 {
-    if (nbproc == 1)
-    {
+    if (nbproc == 1) {
         return GetNorm(x);
     }
-
-#ifdef HAVE_MPI
-    MPI_Comm *mpi_comm = static_cast<MPI_Comm*>(comm);
 
     double s_loc = GetNormSquared(x);
     double s_glob = 0.;
 
-    MPI_Allreduce(&s_loc, &s_glob, 1, MPI_DOUBLE, MPI_SUM, *mpi_comm);
+    MPI_Allreduce(&s_loc, &s_glob, 1, MPI_DOUBLE, MPI_SUM, mpi_comm);
 
     double norm = sqrt(s_glob);
     return norm;
-#else
-    // Should not come here.
-    assert(false);
-    return 0.;
-#endif
 }
+#endif
 
 void Multiply(Vector& x, double s)
 {
@@ -97,32 +90,33 @@ void Transform(double a, Vector& x, double b, const Vector& y)
     }
 }
 
-bool Normalize(Vector& x, double& norm, bool inParallel, int nbproc, void *comm)
+static bool NormalizeVector(Vector& x, const double& norm)
 {
-    if (inParallel)
-    {
-        norm = GetNormParallel(x, nbproc, comm);
-    }
-    else
-    {
-        norm = GetNorm(x);
-    }
-
     double inverseNorm;
 
-    if (norm != 0.0)
-    {
+    if (norm != 0.0) {
         inverseNorm = 1.0 / norm;
-    }
-    else
-    {
+    } else {
         return false;
     }
 
     Multiply(x, inverseNorm);
-
     return true;
 }
+
+bool Normalize(Vector& x, double& norm)
+{
+    norm = GetNorm(x);
+    return NormalizeVector(x, norm);
+}
+
+#ifdef HAVE_MPI
+bool NormalizeParallel(Vector& x, double& norm, int nbproc, const MPI_Comm &mpi_comm)
+{
+    norm = GetNormParallel(x, nbproc, mpi_comm);
+    return NormalizeVector(x, norm);
+}
+#endif
 
 }}} // namespace askap.lsqr.MathUtils
 

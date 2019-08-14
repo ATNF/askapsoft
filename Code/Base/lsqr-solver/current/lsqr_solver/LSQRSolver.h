@@ -36,8 +36,6 @@ public:
             const SparseMatrix& matrix,
             const Vector& b,
             Vector& x,
-            int myrank,
-            int nbproc,
             bool suppress_output = true);
 
     virtual ~LSQRSolver() {};
