@@ -8,6 +8,7 @@
 
 #include <cstddef>
 #include <stdexcept>
+#include <cassert>
 
 #include <lsqr_solver/ParallelTools.h>
 
@@ -85,7 +86,7 @@ static void get_mpi_partitioning(size_t nelements, IVector& displs, IVector& nel
 }
 
 
-static void __get_full_array_in_place(size_t nelements, void *array, bool bcast, int myrank, int nbproc, const MPI_Comm &comm, MPI_Datatype mpi_dt)
+static void __get_full_array_in_place(size_t nelements, void *data_array, bool bcast, int myrank, int nbproc, const MPI_Comm &comm, MPI_Datatype mpi_dt)
 {
     IVector displs(nbproc);
     IVector nelements_at_cpu(nbproc);
@@ -94,25 +95,21 @@ static void __get_full_array_in_place(size_t nelements, void *array, bool bcast,
     get_mpi_partitioning(nelements, displs, nelements_at_cpu, nbproc, comm);
 
     // Gather the full vector.
-    if (myrank == 0)
-    {
-        MPI_Gatherv(MPI_IN_PLACE, nelements, mpi_dt, array,
+    if (myrank == 0) {
+        MPI_Gatherv(MPI_IN_PLACE, nelements, mpi_dt, data_array,
                     nelements_at_cpu.data(), displs.data(), mpi_dt, 0, comm);
-    }
-    else
-    {
-        MPI_Gatherv(array, nelements, mpi_dt, array,
+    } else {
+        MPI_Gatherv(data_array, nelements, mpi_dt, data_array,
                     nelements_at_cpu.data(), displs.data(), mpi_dt, 0, comm);
     }
 
-    if (bcast)
-    { // Cast the array to all CPUs.
+    if (bcast) {
+        // Cast the array to all CPUs.
         size_t nelements_total = 0;
-        for (size_t i = 0; i < size_t(nbproc); ++i)
-        {
+        for (size_t i = 0; i < size_t(nbproc); ++i) {
             nelements_total += nelements_at_cpu[i];
         }
-        MPI_Bcast(array, nelements_total, mpi_dt, 0, comm);
+        MPI_Bcast(data_array, nelements_total, mpi_dt, 0, comm);
     }
 }
 
@@ -139,6 +136,7 @@ void get_full_array_in_place(size_t nelements, std::vector<ValueType>& array, bo
     // Single CPU: no MPI needed.
         return;
     }
+    assert(get_total_number_elements(nelements, nbproc, comm) == array.size());
 
     MPI_Datatype mpi_dt = mpi_traits<ValueType>::type;
 
