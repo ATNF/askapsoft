@@ -31,18 +31,12 @@ size_t get_nsmaller(size_t nelements, int myrank, int nbproc, const MPI_Comm &co
 
 /*
  * Returns the full array (that is split between CPUs).
+ * Uses the same send and recv buffer in MPI_Gatherv.
  *     bcast = false: to only master CPU.
  *     bcast = true:  to all CPUs.
  */
-void get_full_array(const Vector& localArray, size_t nelements, Vector& fullArray, bool bcast, int nbproc, const MPI_Comm &comm);
-
-/*
- * Returns the full array (that is split between CPUs).
- * The same as get_full_array() but uses the same send and recv buffer in MPI_Gatherv.
- *     bcast = false: to only master CPU.
- *     bcast = true:  to all CPUs.
- */
-void get_full_array_in_place(size_t nelements, Vector& array, bool bcast, int myrank, int nbproc, const MPI_Comm &comm);
+template <typename ValueType>
+void get_full_array_in_place(size_t nelements, std::vector<ValueType>& array, bool bcast, int myrank, int nbproc, const MPI_Comm &comm);
 
 }}} // namespace askap.lsqr.ParallelTools
 

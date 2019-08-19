@@ -84,43 +84,9 @@ static void get_mpi_partitioning(size_t nelements, IVector& displs, IVector& nel
     }
 }
 
-void get_full_array(const Vector& localArray, size_t nelements, Vector& fullArray, bool bcast, int nbproc, const MPI_Comm &comm)
+
+static void __get_full_array_in_place(size_t nelements, void *array, bool bcast, int myrank, int nbproc, const MPI_Comm &comm, MPI_Datatype mpi_dt)
 {
-    if (nbproc == 1)
-    { // Single CPU: no MPI needed.
-        fullArray = localArray;
-        return;
-    }
-
-    IVector displs(nbproc);
-    IVector nelements_at_cpu(nbproc);
-
-    // Get partitioning for MPI_Gatherv.
-    get_mpi_partitioning(nelements, displs, nelements_at_cpu, nbproc, comm);
-
-    // Gather the full vector.
-    // Perform const cast for back compatibility, because interface was changed in OpenMPI v.1.7 (const was added to the first argument).
-    MPI_Gatherv(const_cast<Vector&>(localArray).data(), nelements, MPI_DOUBLE, fullArray.data(),
-                nelements_at_cpu.data(), displs.data(), MPI_DOUBLE, 0, comm);
-
-    if (bcast)
-    { // Cast the array to all CPUs.
-        size_t nelements_total = 0;
-        for (size_t i = 0; i < size_t(nbproc); ++i)
-        {
-            nelements_total += nelements_at_cpu[i];
-        }
-        MPI_Bcast(fullArray.data(), nelements_total, MPI_DOUBLE, 0, comm);
-    }
-}
-
-void get_full_array_in_place(size_t nelements, Vector& array, bool bcast, int myrank, int nbproc, const MPI_Comm &comm)
-{
-    if (nbproc == 1)
-    { // Single CPU: no MPI needed.
-        return;
-    }
-
     IVector displs(nbproc);
     IVector nelements_at_cpu(nbproc);
 
@@ -130,13 +96,13 @@ void get_full_array_in_place(size_t nelements, Vector& array, bool bcast, int my
     // Gather the full vector.
     if (myrank == 0)
     {
-        MPI_Gatherv(MPI_IN_PLACE, nelements, MPI_DOUBLE, array.data(),
-                    nelements_at_cpu.data(), displs.data(), MPI_DOUBLE, 0, comm);
+        MPI_Gatherv(MPI_IN_PLACE, nelements, mpi_dt, array,
+                    nelements_at_cpu.data(), displs.data(), mpi_dt, 0, comm);
     }
     else
     {
-        MPI_Gatherv(array.data(), nelements, MPI_DOUBLE, array.data(),
-                    nelements_at_cpu.data(), displs.data(), MPI_DOUBLE, 0, comm);
+        MPI_Gatherv(array, nelements, mpi_dt, array,
+                    nelements_at_cpu.data(), displs.data(), mpi_dt, 0, comm);
     }
 
     if (bcast)
@@ -146,9 +112,42 @@ void get_full_array_in_place(size_t nelements, Vector& array, bool bcast, int my
         {
             nelements_total += nelements_at_cpu[i];
         }
-        MPI_Bcast(array.data(), nelements_total, MPI_DOUBLE, 0, comm);
+        MPI_Bcast(array, nelements_total, mpi_dt, 0, comm);
     }
 }
+
+
+template <typename T>
+struct mpi_traits {
+};
+
+template<>
+struct mpi_traits<int> {
+    static const MPI_Datatype type = MPI_INT;
+};
+
+template<>
+struct mpi_traits<double> {
+    static const MPI_Datatype type = MPI_DOUBLE;
+};
+
+
+template <typename ValueType>
+void get_full_array_in_place(size_t nelements, std::vector<ValueType>& array, bool bcast, int myrank, int nbproc, const MPI_Comm &comm)
+{
+    if (nbproc == 1) {
+    // Single CPU: no MPI needed.
+        return;
+    }
+
+    MPI_Datatype mpi_dt = mpi_traits<ValueType>::type;
+
+    __get_full_array_in_place(nelements, array.data(), bcast, myrank, nbproc, comm, mpi_dt);
+}
+
+template void get_full_array_in_place<double>(size_t, std::vector<double>&, bool, int, int, const MPI_Comm &);
+template void get_full_array_in_place<int>(size_t, std::vector<int>&, bool, int, int, const MPI_Comm &);
+
 
 }}} // namespace askap.lsqr.ParallelTools
 
