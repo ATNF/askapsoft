@@ -603,7 +603,9 @@ if [ "\${DO_CONTINUUM_VALIDATION}" == "true" ]; then
         IFS="${IFS_FIELDS}"
         for FIELD in \${FIELD_LIST}; do
             setImageProperties cont
-            if [ -e "\${FIELD}/\${validationDir}/\${validationFile}" ]; then
+            if [ -e "\${FIELD}/\${validationDir}/\${validationFileInitial}" ]; then
+                # Rename the validation XML file to include the timestamp
+                cp \${validationDir}/\${validationFileInitial} \${validationDir}/\${validationFile}
                 validationDirs+=("\${FIELD}/\${validationDir}")
                 validationFiles+=("\${FIELD}/\${validationDir}/\${validationFile}")
             fi
@@ -613,7 +615,9 @@ if [ "\${DO_CONTINUUM_VALIDATION}" == "true" ]; then
         FIELD="."
         TILE="ALL"
         setImageProperties cont
-        if [ -e "\${FIELD}/\${validationDir}/\${validationFile}" ]; then
+        if [ -e "\${FIELD}/\${validationDir}/\${validationFileInitial}" ]; then
+            # Rename the validation XML file to include the timestamp
+            cp \${validationDir}/\${validationFileInitial} \${validationDir}/\${validationFile}
             validationDirs+=("./\${validationDir}")
             validationFiles+=("./\${validationDir}/\${validationFile}")
         fi

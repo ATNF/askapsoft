@@ -453,6 +453,7 @@ EOFINNER
             echo "STARTTIME=\${STARTTIME}" >> "\${log}.timing"
             extractStatsNonStandard "\${log}" \${NCORES} "\${SLURM_JOB_ID}" \${err} "validationCont" "txt,csv"
 
+            # Rename the validation directory to something shorter
             validationDirInitial=${validationDirInitial}
             validationDir=${validationDir}
             if [ ! -e "\${validationDirInitial}" ]; then
@@ -460,6 +461,7 @@ EOFINNER
             else
                 mv ${validationDirInitial} ${validationDir}
             fi
+
             # Place a copy in a standard place on /group
             copyLocation="${VALIDATION_ARCHIVE_DIR}"
             if [ "\${copyLocation}" != "" ] && [ -e "\${copyLocation}" ]; then
@@ -473,13 +475,6 @@ EOFINNER
                     rm -f \${validationDirCopy}/*.csv
                 fi
                 chmod -R g+w \${validationDirCopy}
-            fi
-
-            # Rename the validation XML file to include the timestamp
-            validationFileInitial=${validationFileInitial}
-            validationFile=${validationFile}
-            if [ -e \${validationDir}/\${validationFileInitial} ]; then
-                mv \${validationDir}/\${validationFileInitial} \${validationDir}/\${validationFile}
             fi
 
         fi
