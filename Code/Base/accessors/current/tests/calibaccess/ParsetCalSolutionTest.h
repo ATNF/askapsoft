@@ -41,7 +41,7 @@ namespace askap {
 
 namespace accessors {
 
-class ParsetCalSolutionTest : public CppUnit::TestFixture 
+class ParsetCalSolutionTest : public CppUnit::TestFixture
 {
    CPPUNIT_TEST_SUITE(ParsetCalSolutionTest);
    CPPUNIT_TEST(testReadWrite);
@@ -52,7 +52,7 @@ class ParsetCalSolutionTest : public CppUnit::TestFixture
 protected:
    static void createDummyParset(ICalSolutionAccessor &acc) {
        for (casa::uInt ant=0; ant<5; ++ant) {
-            for (casa::uInt beam=0; beam<4; ++beam) { 
+            for (casa::uInt beam=0; beam<4; ++beam) {
                  const float tag = float(ant)/100. + float(beam)/1000.;
                  acc.setJonesElement(ant,beam,casa::Stokes::XX,casa::Complex(1.1+tag,0.1));
                  acc.setJonesElement(ant,beam,casa::Stokes::YY,casa::Complex(1.1,-0.1-tag));
@@ -66,7 +66,7 @@ protected:
             }
        }
    }
-   
+
    static void createDummyParset(const std::string &fname) {
        ParsetCalSolutionAccessor acc(fname);
        createDummyParset(acc);
@@ -106,7 +106,7 @@ protected:
                  const JonesDTerm dTerm = acc.leakage(index);
                  CPPUNIT_ASSERT(dTerm.d12IsValid() && dTerm.d21IsValid());
                  testComplex(casa::Complex(0.1+tag,-0.1), dTerm.d12());
-                 testComplex(casa::Complex(-0.1,0.1+tag), dTerm.d21()); 
+                 testComplex(casa::Complex(-0.1,0.1+tag), dTerm.d21());
 
                  for (casa::uInt chan=0; chan<20; ++chan) {
                       const JonesJTerm bpTerm = acc.bandpass(index, chan);
@@ -169,7 +169,7 @@ public:
 
    void testPartiallyUndefined() {
         const std::string fname = "tmp.testparset";
-        const JonesIndex index(0u,0u); 
+        const JonesIndex index(0u,0u);
         {
           // actual write happens in destructor, hence the curly brackets
           ParsetCalSolutionAccessor acc(fname);
@@ -181,14 +181,17 @@ public:
         // now read and check
         ParsetCalSolutionAccessor acc(fname);
         CPPUNIT_ASSERT_EQUAL(false, acc.jonesAllValid(index,0));
+        CPPUNIT_ASSERT_EQUAL(false, acc.jonesValid(index,0));
         const casa::SquareMatrix<casa::Complex, 2> jones = acc.jones(index,0);
 
-        testComplex(casa::Complex(1.1,0.1), jones(0,0));
-        // undefined gain is one
+        // both pols need to be valid, otherwise we get default values back
+        // other pol invalid, gain is one
+        testComplex(casa::Complex(1.0,0.0), jones(0,0));
+        // invalid or undefined gain is one
         testComplex(casa::Complex(1.0,0.), jones(1,1));
-        // undefined leakage is zero
+        // invalid or undefined leakage is zero
         testComplex(casa::Complex(0.,0.), jones(0,1));
-        testComplex(casa::Complex(-0.14,0.11), -jones(1,0));
+        testComplex(casa::Complex(0.,0.), -jones(1,0));
    }
 
    void testSolutionSource() {
@@ -209,4 +212,3 @@ public:
 } // namespace accessors
 
 } // namespace askap
-
