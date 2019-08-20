@@ -120,13 +120,16 @@ struct mpi_traits {
 
 template<>
 struct mpi_traits<int> {
-    static const MPI_Datatype type = MPI_INT;
+    static const MPI_Datatype type;
 };
 
 template<>
 struct mpi_traits<double> {
-    static const MPI_Datatype type = MPI_DOUBLE;
+    static const MPI_Datatype type;
 };
+
+const MPI_Datatype mpi_traits<int>::type = MPI_INT;
+const MPI_Datatype mpi_traits<double>::type = MPI_DOUBLE;
 
 
 template <typename ValueType>
