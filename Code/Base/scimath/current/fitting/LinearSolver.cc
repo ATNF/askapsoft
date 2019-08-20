@@ -672,9 +672,7 @@ std::pair<double,double> LinearSolver::solveSubsetOfNormalEquations(Params &para
             size_t nChannelsLocal = nChannels / (nParametersTotal / nParameters);
 
 //            size_t nGainNames = nParametersTotal / nChannels;
-            size_t nextChannelIndexShift = nParameters - (nChannelsLocal - 1) * 2;
-
-            //size_t nextChannelIndexShift2 = (nParameters - (nChannelsLocal - 1)) * 2;
+//            size_t nextChannelIndexShift = nParameters - (nChannelsLocal - 1) * 2;
 
 //            std::cout << "nChannelsLocal = " << nChannelsLocal << std::endl;
 //            std::cout << "nGainNames = " << nGainNames << std::endl;
