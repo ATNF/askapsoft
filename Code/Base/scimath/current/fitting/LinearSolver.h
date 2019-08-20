@@ -102,8 +102,8 @@ namespace askap
         /// @param[in] quality Quality of the solution
         /// @param[in] names names for parameters to solve for
         /// @return pair of minimum and maximum eigenvalues
-        std::pair<double,double>  solveSubsetOfNormalEquations(Params &params, Quality& quality,
-                   const std::vector<std::string> &names) const;
+        std::pair<double,double> solveSubsetOfNormalEquations(Params &params, Quality& quality,
+                   const std::vector<std::string> &__names) const;
 
         /// @brief extract an independent subset of parameters
         /// @details This method analyses the normal equations and forms a subset of 
@@ -138,6 +138,8 @@ namespace askap
          /// @param[in] name full name of the parameter
          /// @return a pair with extracted channel and the base parameter name
          static std::pair<casa::uInt, std::string> extractChannelInfo(const std::string &name);
+
+         static bool compareGainNames(std::string& gainA, std::string& gainB);
 
 #ifdef HAVE_MPI
          // MPI communicator of all workers (for LSQR solver).
