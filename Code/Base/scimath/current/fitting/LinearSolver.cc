@@ -670,13 +670,9 @@ std::pair<double,double> LinearSolver::solveSubsetOfNormalEquations(Params &para
             //-----------------------------------------------------------------------------
             // Assume the same number of channels at every CPU.
             size_t nChannelsLocal = nChannels / (nParametersTotal / nParameters);
+            size_t nextChannelIndexShift = nParameters - (nChannelsLocal - 1) * 2;
 
-//            size_t nGainNames = nParametersTotal / nChannels;
-//            size_t nextChannelIndexShift = nParameters - (nChannelsLocal - 1) * 2;
-
-//            std::cout << "nChannelsLocal = " << nChannelsLocal << std::endl;
-//            std::cout << "nGainNames = " << nGainNames << std::endl;
-//            std::cout << "nextChannelIndexShift = " << nextChannelIndexShift << std::endl;
+            ASKAPLOG_INFO_STR(logger, "nChannelsLocal = " << nChannelsLocal);
 
             std::vector<int> currIndexGlobal(nParametersTotal);
             std::vector<int> nextIndexGlobal(nParametersTotal);
@@ -690,30 +686,25 @@ std::pair<double,double> LinearSolver::solveSubsetOfNormalEquations(Params &para
                 bool lastLocalChannel = (localChannelNumber == nChannelsLocal - 1);
 
                 if (lastLocalChannel) {
-//                    if (myrank == nbproc - 1) {
-//                    // Reached last global channel - do not add constraints.
-//                        // Real part.
-//                        currIndexGlobal[i] = -1;
-//                        nextIndexGlobal[i] = -1;
-//                        // Imaginary part.
-//                        currIndexGlobal[i + 1] = -1;
-//                        nextIndexGlobal[i + 1] = -1;
-//                    } else {
-//                    // Reached last local channel - shift the 'next' index.
-//                        // Real part.
-//                        currIndexGlobal[i] = i;
-//                        nextIndexGlobal[i] = i + nextChannelIndexShift;
-//                        // Imaginary part.
-//                        currIndexGlobal[i + 1] = currIndexGlobal[i] + 1;
-//                        nextIndexGlobal[i + 1] = nextIndexGlobal[i] + 1;
-//                    }
+                    size_t shiftedIndex = i + nextChannelIndexShift;
 
-                    // Real part.
-                    currIndexGlobal[i] = -1;
-                    nextIndexGlobal[i] = -1;
-                    // Imaginary part.
-                    currIndexGlobal[i + 1] = -1;
-                    nextIndexGlobal[i + 1] = -1;
+                    if (shiftedIndex < nParametersTotal) {
+                    // Reached last local channel - shift the 'next' index.
+                        // Real part.
+                        currIndexGlobal[i] = i;
+                        nextIndexGlobal[i] = shiftedIndex;
+                        // Imaginary part.
+                        currIndexGlobal[i + 1] = currIndexGlobal[i] + 1;
+                        nextIndexGlobal[i + 1] = nextIndexGlobal[i] + 1;
+                    } else {
+                    // Reached last global channel - do not add constraints - it is already coupled with previous one.
+                        // Real part.
+                        currIndexGlobal[i] = -1;
+                        nextIndexGlobal[i] = -1;
+                        // Imaginary part.
+                        currIndexGlobal[i + 1] = -1;
+                        nextIndexGlobal[i + 1] = -1;
+                    }
 
                 } else {
                     // Real part.
@@ -768,8 +759,10 @@ std::pair<double,double> LinearSolver::solveSubsetOfNormalEquations(Params &para
                 // Adding the Right-Hand Side.
                 //----------------------------------------------------
                 double b_RHS_value = 0.;
-                if (globIndex[0] >= 0 && globIndex[1] >= 0) {
-                    b_RHS_value = - smoothingWeight * (x0[globIndex[1]] - x0[globIndex[0]]);
+                if (currIndexGlobal[i] >= 0 && nextIndexGlobal[i] >= 0) {
+                    b_RHS_value = - smoothingWeight * (x0[nextIndexGlobal[i]] - x0[currIndexGlobal[i]]);
+                } else {
+                    ASKAPCHECK(currIndexGlobal[i] == -1 && nextIndexGlobal[i] == -1, "Wrong indexes!");
                 }
                 size_t b_index = matrix.GetCurrentNumberRows() - 1;
                 b_RHS[b_index] = b_RHS_value;
