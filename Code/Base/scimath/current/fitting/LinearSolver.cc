@@ -170,7 +170,7 @@ std::vector<std::string> LinearSolver::getIndependentSubset(std::vector<std::str
     return resultNames;
 }
 
-bool LinearSolver::compareGainNames(std::string& gainA, std::string& gainB) {
+bool LinearSolver::compareGainNames(const std::string& gainA, const std::string& gainB) {
     std::pair<casa::uInt, std::string> paramInfoA = LinearSolver::extractChannelInfo(gainA);
     std::pair<casa::uInt, std::string> paramInfoB = LinearSolver::extractChannelInfo(gainB);
 

@@ -139,7 +139,7 @@ namespace askap
          /// @return a pair with extracted channel and the base parameter name
          static std::pair<casa::uInt, std::string> extractChannelInfo(const std::string &name);
 
-         static bool compareGainNames(std::string& gainA, std::string& gainB);
+         static bool compareGainNames(const std::string& gainA, const std::string& gainB);
 
 #ifdef HAVE_MPI
          // MPI communicator of all workers (for LSQR solver).
