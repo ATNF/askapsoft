@@ -205,9 +205,9 @@ std::pair<double,double> LinearSolver::solveSubsetOfNormalEquations(Params &para
 {
     ASKAPTRACE("LinearSolver::solveSubsetOfNormalEquations");
 #ifdef HAVE_MPI
-    ASKAPLOG_INFO_STR(logger, "Started LinearSolver::solveSubsetOfNormalEquations, with HAVE_MPI defined.");
+    ASKAPLOG_INFO_STR(logger, "Started LinearSolver::solveSubsetOfNormalEquations, with MPI.");
 #else
-    ASKAPLOG_INFO_STR(logger, "Started LinearSolver::solveSubsetOfNormalEquations, with HAVE_MPI NOT defined.");
+    ASKAPLOG_INFO_STR(logger, "Started LinearSolver::solveSubsetOfNormalEquations, without MPI.");
 #endif
 
     std::pair<double, double> result(0.,0.);
@@ -255,11 +255,6 @@ std::pair<double,double> LinearSolver::solveSubsetOfNormalEquations(Params &para
         X = gsl_vector_alloc (nParameters);
     }
 
-    const GenericNormalEquations& gne = dynamic_cast<const GenericNormalEquations&>(normalEquations());
-    size_t nElements = gne.getNumberElements();
-
-    ASKAPLOG_INFO_STR(logger, "nParameters = " << nParameters << ", nElements = " << nElements);
-
     //------------------------------------------------------------------------------
     // Define MPI partitioning (needed for LSQR solver).
     //------------------------------------------------------------------------------
@@ -289,9 +284,16 @@ std::pair<double,double> LinearSolver::solveSubsetOfNormalEquations(Params &para
             mpi_comm = MPI_COMM_SELF;
         }
 #endif
-        ASKAPLOG_INFO_STR(logger, "it, matrixIsParallel, myrank, nbproc = " << itsMajorLoopIterationNumber
-                                   << ", " << matrixIsParallel << ", " << myrank << ", " << nbproc);
+        if (myrank == 0)
+            ASKAPLOG_DEBUG_STR(logger, "it, matrixIsParallel, nbproc = " << itsMajorLoopIterationNumber
+                                        << ", " << matrixIsParallel << ", " << nbproc);
     }
+
+    //------------------------------------------------------------------------------
+    const GenericNormalEquations& gne = dynamic_cast<const GenericNormalEquations&>(normalEquations());
+    size_t nElements = gne.getNumberElements();
+
+    if (myrank == 0) ASKAPLOG_DEBUG_STR(logger, "nParameters = " << nParameters << ", nElements = " << nElements);
 
     //------------------------------------------------------------------------------
     // Define LSQR solver sparse matrix.
@@ -306,7 +308,7 @@ std::pair<double,double> LinearSolver::solveSubsetOfNormalEquations(Params &para
     size_t nParametersTotal = nParameters;
     size_t nParametersSmaller = 0;
 #endif
-    ASKAPLOG_INFO_STR(logger, "nParametersTotal = " << nParametersTotal);
+    if (myrank == 0) ASKAPLOG_DEBUG_STR(logger, "nParametersTotal = " << nParametersTotal);
 
     if (algorithmLSQR) {
         // Define approximate number of nonzero elements.
@@ -420,7 +422,7 @@ std::pair<double,double> LinearSolver::solveSubsetOfNormalEquations(Params &para
     if (algorithmLSQR) {
         size_t nonzeros = matrix.GetNumberElements();
         double sparsity = (double)(nonzeros) / (double)(nParameters) / (double)(nParameters);
-        ASKAPLOG_INFO_STR(logger, "Jacobian nonzeros, sparsity = " << nonzeros << ", " << sparsity << " on rank " << myrank);
+        ASKAPLOG_DEBUG_STR(logger, "Jacobian nonzeros, sparsity = " << nonzeros << ", " << sparsity << " on rank " << myrank);
     }
 
     if (!algorithmLSQR) {
@@ -570,7 +572,7 @@ std::pair<double,double> LinearSolver::solveSubsetOfNormalEquations(Params &para
           gsl_matrix_free(V);
     }
     else if (algorithmLSQR) {
-        ASKAPLOG_INFO_STR(logger, "Solving normal equations using the LSQR solver");
+        if (myrank == 0) ASKAPLOG_INFO_STR(logger, "Solving normal equations using the LSQR solver");
 
         //----------------------------------------------------
         // Define the right-hand side (the data misfit part).
@@ -638,7 +640,7 @@ std::pair<double,double> LinearSolver::solveSubsetOfNormalEquations(Params &para
                     smoothingWeight = smoothingMaxWeight;
                 }
             }
-            ASKAPLOG_INFO_STR(logger, "Adding smoothness constraints, with weight = " << smoothingWeight);
+            if (myrank == 0) ASKAPLOG_INFO_STR(logger, "Adding smoothness constraints, with weight = " << smoothingWeight);
 
             // Reading the number of channels.
             size_t nChannels = 0;
@@ -672,7 +674,7 @@ std::pair<double,double> LinearSolver::solveSubsetOfNormalEquations(Params &para
             size_t nChannelsLocal = nChannels / (nParametersTotal / nParameters);
             size_t nextChannelIndexShift = nParameters - (nChannelsLocal - 1) * 2;
 
-            ASKAPLOG_INFO_STR(logger, "nChannelsLocal = " << nChannelsLocal);
+            if (myrank == 0) ASKAPLOG_DEBUG_STR(logger, "nChannelsLocal = " << nChannelsLocal);
 
             std::vector<int> currIndexGlobal(nParametersTotal);
             std::vector<int> nextIndexGlobal(nParametersTotal);
@@ -770,12 +772,12 @@ std::pair<double,double> LinearSolver::solveSubsetOfNormalEquations(Params &para
                 cost += b_RHS_value * b_RHS_value;
             }
 
-            ASKAPLOG_INFO_STR(logger, "Smoothness constraints cost = " << cost / (smoothingWeight * smoothingWeight));
+            if (myrank == 0) ASKAPLOG_INFO_STR(logger, "Smoothness constraints cost = " << cost / (smoothingWeight * smoothingWeight));
         }
         // Completed the matrix building.
         matrix.Finalize(nParameters);
 
-        ASKAPLOG_INFO_STR(logger, "Matrix nelements = " << matrix.GetNumberElements());
+        if (myrank == 0) ASKAPLOG_DEBUG_STR(logger, "Matrix nelements = " << matrix.GetNumberElements());
 
         // A simple approximation for the upper bound of the rank of the  A'A matrix.
         size_t rank_approx = matrix.GetNumberNonemptyRows();
@@ -794,7 +796,7 @@ std::pair<double,double> LinearSolver::solveSubsetOfNormalEquations(Params &para
             norm = std::atof(parameters().at("norm").c_str());
         }
 
-        ASKAPLOG_INFO_STR(logger, "Adding model damping, with alpha = " << alpha);
+        if (myrank == 0) ASKAPLOG_INFO_STR(logger, "Adding model damping, with alpha = " << alpha);
 
         lsqr::ModelDamping damping(nParameters);
         damping.Add(alpha, norm, matrix, b_RHS, NULL, NULL, NULL, myrank, nbproc);
@@ -806,7 +808,7 @@ std::pair<double,double> LinearSolver::solveSubsetOfNormalEquations(Params &para
         for (size_t i = 0; i < b_RHS.size(); ++i) {
             total_cost += b_RHS[i] * b_RHS[i];
         }
-        ASKAPLOG_INFO_STR(logger, "Total cost = " << total_cost);
+        if (myrank == 0) ASKAPLOG_INFO_STR(logger, "Total cost = " << total_cost);
 
         //-----------------------------------------------
         // Setting solver parameters.
