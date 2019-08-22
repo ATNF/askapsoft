@@ -27,6 +27,7 @@
 /// @author Matthew Whiting <Matthew.Whiting@csiro.au>
 ///
 #include <catalogues/FitCatalogue.h>
+#include <catalogues/ComponentCatalogue.h>
 #include <askap_analysis.h>
 
 #include <askap/AskapLogging.h>
@@ -57,21 +58,17 @@ FitCatalogue::FitCatalogue(std::vector<sourcefitting::RadioSource> &srclist,
     ComponentCatalogue(srclist, parset, cube, fitType)
 {
     itsVersion = ASKAP_PACKAGE_VERSION;
+    itsObjectType = "Fitted component";
     itsFitType = fitType;
+    if (itsFitType == "best") {
+        itsFilenameStub = "fitResults";
+    } else {
+        itsFilenameStub = "fitResults." + itsFitType;
+    }
+    setup();
+
     itsSpec = duchamp::Catalogues::CatalogueSpecification();
     this->defineSpec();
-
-    duchamp::Param par = parseParset(parset);
-    std::string filenameBase = par.getOutFile();
-    if (itsFitType == "best") {
-        filenameBase.replace(filenameBase.rfind(".txt"),
-                             std::string::npos, ".fitResults");
-    } else {
-        filenameBase.replace(filenameBase.rfind(".txt"),
-                             std::string::npos, ".fitResults." + itsFitType);
-    }
-    itsVotableFilename = filenameBase + ".xml";
-    itsAsciiFilename = filenameBase + ".txt";
 
 }
 
@@ -114,10 +111,10 @@ void FitCatalogue::defineSpec()
     itsSpec.addColumn("PA", "PA(fit)", "[deg]", 7, casda::precSize,
                       "phys.angSize;pos.posAng;em.radio;stat.fit",
                       "float", "col_pa", "");
-    itsSpec.addColumn("MAJERR", "maj_axis_err", "["+casda::shapeUnit+"]", casda::precSize+2, casda::precSize,
+    itsSpec.addColumn("MAJERR", "maj_axis_err", "[" + casda::shapeUnit + "]", casda::precSize + 2, casda::precSize,
                       "stat.error;phys.angSize.smajAxis;em.radio",
                       "float", "col_maj_axis_err", "");
-    itsSpec.addColumn("MINERR", "min_axis_err", "["+casda::shapeUnit+"]", casda::precSize+2, casda::precSize,
+    itsSpec.addColumn("MINERR", "min_axis_err", "[" + casda::shapeUnit + "]", casda::precSize + 2, casda::precSize,
                       "stat.error;phys.angSize.sminAxis;em.radio",
                       "float", "col_min_axis_err", "");
     itsSpec.addColumn("PAERR", "pos_ang_err", "[deg]", casda::precSize + 2, casda::precSize,

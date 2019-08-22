@@ -28,7 +28,7 @@
 ///
 #include <catalogues/CasdaIsland.h>
 #include <askap_analysis.h>
-#include <catalogues/CatalogueEntry.h>
+#include <catalogues/CasdaObject.h>
 #include <catalogues/Casda.h>
 
 #include <askap/AskapLogging.h>
@@ -52,14 +52,14 @@ namespace askap {
 namespace analysis {
 
 CasdaIsland::CasdaIsland():
-    CatalogueEntry()
+    CasdaObject()
 {
 }
 
 CasdaIsland::CasdaIsland(sourcefitting::RadioSource &obj,
                          const LOFAR::ParameterSet &parset,
                          const std::string fitType):
-    CatalogueEntry(parset),
+    CasdaObject(parset),
     itsName(obj.getName()),
     itsNumComponents(obj.numFits(casda::componentFitType)),
     itsRAs(obj.getRAs()),
@@ -173,16 +173,6 @@ const float CasdaIsland::dec()
 const std::string CasdaIsland::id()
 {
     return itsIslandID;
-}
-
-void CasdaIsland::printTableRow(std::ostream &stream,
-                                duchamp::Catalogues::CatalogueSpecification &columns)
-{
-    stream.setf(std::ios::fixed);
-    for (size_t i = 0; i < columns.size(); i++) {
-        this->printTableEntry(stream, columns.column(i));
-    }
-    stream << "\n";
 }
 
 void CasdaIsland::printTableEntry(std::ostream &stream,
@@ -361,13 +351,6 @@ void CasdaIsland::checkCol(duchamp::Catalogues::Column &column, bool checkTitle)
                    "Unknown column type " << type);
     }
 
-}
-
-void CasdaIsland::checkSpec(duchamp::Catalogues::CatalogueSpecification &spec, bool checkTitle)
-{
-    for (size_t i = 0; i < spec.size(); i++) {
-        this->checkCol(spec.column(i), checkTitle);
-    }
 }
 
 LOFAR::BlobOStream& operator<<(LOFAR::BlobOStream& blob, CasdaIsland& src)

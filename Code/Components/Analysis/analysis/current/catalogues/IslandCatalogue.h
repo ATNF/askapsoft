@@ -29,10 +29,14 @@
 #ifndef ASKAP_ANALYSIS_ISLAND_CAT_H_
 #define ASKAP_ANALYSIS_ISLAND_CAT_H_
 
+#include <catalogues/CasdaCatalogue.h>
 #include <catalogues/CasdaIsland.h>
+#include <outputs/AskapVOTableCatalogueWriter.h>
+#include <outputs/AskapAsciiCatalogueWriter.h>
 #include <sourcefitting/RadioSource.h>
 #include <Common/ParameterSet.h>
 #include <duchamp/Outputs/CatalogueSpecification.hh>
+#include <duchamp/Outputs/CatalogueWriter.hh>
 #include <vector>
 
 namespace askap {
@@ -45,7 +49,7 @@ namespace analysis {
 /// image as well as the specification detailing how the information
 /// should be written to a catalogue. It provides methods to write the
 /// information to VOTable and ASCII format files.
-class IslandCatalogue {
+class IslandCatalogue : public CasdaCatalogue {
     public:
         /// Constructor, that uses a pre-defined list of Islands, and
         /// then calls setup to set the column specification. The
@@ -70,17 +74,7 @@ class IslandCatalogue {
         /// the catalogue.
         void check(bool checkTitle);
 
-        /// Write the catalogue to the ASCII & VOTable files (acts as
-        /// a front-end to the writeVOT() and writeASCII() functions)
-        void write();
-
     protected:
-
-        /// Complete the initialisation of the catalogue - defining the
-        /// catalogue spec and setting up filenames. The filenames are set
-        /// based on the output file given in the parset.
-        void setup(const LOFAR::ParameterSet &parset);
-
 
         /// Define the vector list of Islands using the input list of
         /// RadioSource objects and the parset. One island is created
@@ -93,37 +87,17 @@ class IslandCatalogue {
         /// catalogue, using the Duchamp interface.
         void defineSpec();
 
-        /// Writes the catalogue to a VOTable that conforms to the
-        /// CASDA requirements. It has the necessary header
-        /// information, the catalogue version number, and a table
-        /// entry for each Island in the catalogue.
-        void writeVOT();
+        /// Fix the widths of the columns to a set of predefined
+        /// values. This is used to ensure compatibility with the CASDA
+        /// requirements, and is primarily aimed at the VOTable. The ASCII
+        /// table should be written out before running this command.
+        void fixWidths();
 
-        /// Writes the catalogue to an ASCII text file that is
-        /// human-readable (with space-separated and aligned
-        /// columns). It has a commented line (ie. starting with '#')
-        /// with the column titles, another with the units, then one
-        /// line for each Island.
-        void writeASCII();
+        void writeAsciiEntries(AskapAsciiCatalogueWriter *writer);
+        void writeVOTableEntries(AskapVOTableCatalogueWriter *writer);
 
         /// The list of catalogued Islands.
         std::vector<CasdaIsland> itsIslands;
-
-        /// The specification for the individual columns
-        duchamp::Catalogues::CatalogueSpecification itsSpec;
-
-        /// The duchamp::Cube, used to help instantiate the classes to
-        /// write out the ASCII and VOTable files.
-        duchamp::Cube *itsCube;
-
-        /// The filename of the VOTable output file
-        std::string itsVotableFilename;
-
-        /// The filename of the ASCII text output file.
-        std::string itsAsciiFilename;
-
-        /// The version of the catalogue specification, from CASDA.
-        std::string itsVersion;
 
 };
 

@@ -27,6 +27,7 @@
 /// @author Matthew Whiting <Matthew.Whiting@csiro.au>
 ///
 #include <catalogues/IslandCatalogue.h>
+#include <catalogues/CasdaCatalogue.h>
 #include <askap_analysis.h>
 
 #include <askap/AskapLogging.h>
@@ -41,6 +42,7 @@
 
 #include <Common/ParameterSet.h>
 #include <duchamp/Outputs/CatalogueSpecification.hh>
+#include <duchamp/Outputs/CatalogueWriter.hh>
 #include <vector>
 
 ASKAP_LOGGER(logger, ".islandcatalogue");
@@ -52,38 +54,28 @@ namespace analysis {
 IslandCatalogue::IslandCatalogue(std::vector<CasdaIsland> &islandList,
                                  const LOFAR::ParameterSet &parset,
                                  duchamp::Cube *cube):
-    itsIslands(islandList),
-    itsSpec(),
-    itsCube(cube),
-    itsVersion("casda.continuum_island_description_v0.7")
+    CasdaCatalogue(parset, cube),
+    itsIslands(islandList)
 {
-    this->setup(parset);
+    itsVersion = "casda.continuum_island_description_v0.7";
+    itsFilenameStub = "islands";
+    itsObjectType = "Island";
+    setup();
+    this->defineSpec();
 }
 
 IslandCatalogue::IslandCatalogue(std::vector<sourcefitting::RadioSource> &srclist,
                                  const LOFAR::ParameterSet &parset,
                                  duchamp::Cube *cube):
-    itsIslands(),
-    itsSpec(),
-    itsCube(cube),
-    itsVersion("casda.continuum_island_description_v0.7")
+    CasdaCatalogue(parset, cube),
+    itsIslands()
 {
-    this->defineIslands(srclist, parset);
-    this->setup(parset);
-}
-
-void IslandCatalogue::setup(const LOFAR::ParameterSet &parset)
-{
-
+    itsVersion = "casda.continuum_island_description_v0.7";
+    itsFilenameStub = "islands";
+    itsObjectType = "Island";
+    setup();
     this->defineSpec();
-
-    duchamp::Param par = parseParset(parset);
-    std::string filenameBase = par.getOutFile();
-    filenameBase.replace(filenameBase.rfind(".txt"),
-                         std::string::npos, ".islands");
-    itsVotableFilename = filenameBase + ".xml";
-    itsAsciiFilename = filenameBase + ".txt";
-
+    this->defineIslands(srclist, parset);
 }
 
 
@@ -121,9 +113,9 @@ void IslandCatalogue::defineSpec()
                       "pos.eq.dec;meta.main", "double", "col_dec_deg_cont", "J2000");
     itsSpec.addColumn("FREQ", "freq", "[MHz]", casda::precPos + 2, casda::precFreqContinuum,
                       "em.freq", "float", "col_freq", "");
-    itsSpec.addColumn("MAJ", "maj_axis", "["+casda::shapeUnit+"]", casda::precSize+2, casda::precSize,
+    itsSpec.addColumn("MAJ", "maj_axis", "[" + casda::shapeUnit + "]", casda::precSize + 2, casda::precSize,
                       "phys.angSize.smajAxis;em.radio", "float", "col_maj_axis", "");
-    itsSpec.addColumn("MIN", "min_axis", "["+casda::shapeUnit+"]", casda::precSize+2, casda::precSize,
+    itsSpec.addColumn("MIN", "min_axis", "[" + casda::shapeUnit + "]", casda::precSize + 2, casda::precSize,
                       "phys.angSize.sminAxis;em.radio", "float", "col_min_axis", "");
     itsSpec.addColumn("PA", "pos_ang", "[deg]", casda::precSize + 2, casda::precSize,
                       "phys.angSize;pos.posAng;em.radio", "float", "col_pos_ang", "");
@@ -196,6 +188,55 @@ void IslandCatalogue::defineSpec()
 
 }
 
+void IslandCatalogue::fixWidths()
+{
+    // -------------------------------------------
+    // DO NOT CHANGE UNLESS COORDINATED WITH CASDA
+    // -------------------------------------------
+
+//    fixColWidth(itsSpec.column("ID"),        255);
+    fixColWidth(itsSpec.column("NAME"),       15);
+    fixColWidth(itsSpec.column("NCOMP"),       5);
+    fixColWidth(itsSpec.column("RA"),         12);
+    fixColWidth(itsSpec.column("DEC"),        13);
+    fixColWidth(itsSpec.column("RAJD"),       12);
+    fixColWidth(itsSpec.column("DECJD"),      13);
+    fixColWidth(itsSpec.column("FREQ"),       11);
+    fixColWidth(itsSpec.column("MAJ"),         9);
+    fixColWidth(itsSpec.column("MIN"),         9);
+    fixColWidth(itsSpec.column("PA"),          8);
+    fixColWidth(itsSpec.column("FINT"),       12);
+    fixColWidth(itsSpec.column("FINTERR"),    12);
+    fixColWidth(itsSpec.column("FPEAK"),      11);
+    fixColWidth(itsSpec.column("BACKGND"),    11);
+    fixColWidth(itsSpec.column("NOISE"),      11);
+    fixColWidth(itsSpec.column("MAXRESID"),   11);
+    fixColWidth(itsSpec.column("MINRESID"),   11);
+    fixColWidth(itsSpec.column("MEANRESID"),  11);
+    fixColWidth(itsSpec.column("RMSRESID"),   11);
+    fixColWidth(itsSpec.column("STDDEVRESID"), 11);
+    fixColWidth(itsSpec.column("XMIN"),        6);
+    fixColWidth(itsSpec.column("XMAX"),        6);
+    fixColWidth(itsSpec.column("YMIN"),        6);
+    fixColWidth(itsSpec.column("YMAX"),        6);
+    fixColWidth(itsSpec.column("NPIX"),        9);
+    fixColWidth(itsSpec.column("SOLIDANGLE"),  9);
+    fixColWidth(itsSpec.column("BEAMAREA"),    9);
+    fixColWidth(itsSpec.column("XAV"),         8);
+    fixColWidth(itsSpec.column("YAV"),         8);
+    fixColWidth(itsSpec.column("XCENT"),       8);
+    fixColWidth(itsSpec.column("YCENT"),       8);
+    fixColWidth(itsSpec.column("XPEAK"),       8);
+    fixColWidth(itsSpec.column("YPEAK"),       8);
+    fixColWidth(itsSpec.column("FLAG1"),       5);
+    fixColWidth(itsSpec.column("FLAG2"),       5);
+    fixColWidth(itsSpec.column("FLAG3"),       5);
+    fixColWidth(itsSpec.column("FLAG4"),       5);
+    fixColWidth(itsSpec.column("COMMENT"),   100);
+
+}
+
+
 void IslandCatalogue::check(bool checkTitle)
 {
     std::vector<CasdaIsland>::iterator isle;
@@ -205,48 +246,15 @@ void IslandCatalogue::check(bool checkTitle)
 
 }
 
-void IslandCatalogue::write()
+
+void IslandCatalogue::writeAsciiEntries(AskapAsciiCatalogueWriter *writer)
 {
-    this->check(false);
-    this->writeVOT();
-    this->check(true);
-    this->writeASCII();
+    writer->writeEntries<CasdaIsland>(itsIslands);
 }
 
-void IslandCatalogue::writeVOT()
+void IslandCatalogue::writeVOTableEntries(AskapVOTableCatalogueWriter *writer)
 {
-    AskapVOTableCatalogueWriter vowriter(itsVotableFilename);
-    vowriter.setup(itsCube);
-    ASKAPLOG_DEBUG_STR(logger, "Writing island table to the VOTable " <<
-                       itsVotableFilename);
-    vowriter.setColumnSpec(&itsSpec);
-    vowriter.openCatalogue();
-    vowriter.setResourceName("Island catalogue from Selavy source finding");
-    vowriter.setTableName("Island catalogue");
-    vowriter.writeHeader();
-    duchamp::VOParam version("table_version", "meta.version", "char", itsVersion, itsVersion.size() + 1, "");
-    vowriter.writeParameter(version);
-    vowriter.writeParameters();
-    vowriter.writeStats();
-    vowriter.writeTableHeader();
-    vowriter.writeEntries<CasdaIsland>(itsIslands);
-    vowriter.writeFooter();
-    vowriter.closeCatalogue();
-}
-
-void IslandCatalogue::writeASCII()
-{
-
-    AskapAsciiCatalogueWriter writer(itsAsciiFilename);
-    ASKAPLOG_DEBUG_STR(logger, "Writing islands results to " << itsAsciiFilename);
-    writer.setup(itsCube);
-    writer.setColumnSpec(&itsSpec);
-    writer.openCatalogue();
-    writer.writeTableHeader();
-    writer.writeEntries<CasdaIsland>(itsIslands);
-    writer.writeFooter();
-    writer.closeCatalogue();
-
+    writer->writeEntries<CasdaIsland>(itsIslands);
 }
 
 

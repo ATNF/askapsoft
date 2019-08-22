@@ -30,7 +30,7 @@
 #define ASKAP_ANALYSIS_CASDA_HI_EMISSION_H_
 
 #include <catalogues/Casda.h>
-#include <catalogues/CatalogueEntry.h>
+#include <catalogues/CasdaObject.h>
 #include <catalogues/CasdaComponent.h>
 #include <sourcefitting/RadioSource.h>
 #include <Common/ParameterSet.h>
@@ -50,7 +50,7 @@ namespace analysis {
 /// allows extraction from a RadioSource object and provides methods
 /// to write out the Component to a VOTable or other type of catalogue
 /// file.
-class CasdaHiEmissionObject : public CatalogueEntry {
+class CasdaHiEmissionObject : public CasdaObject {
     public:
         /// Default constructor that does nothing.
         CasdaHiEmissionObject();
@@ -71,14 +71,6 @@ class CasdaHiEmissionObject : public CatalogueEntry {
         // Return the ID string
         const std::string id();
 
-        ///  Print a row of values for the objet into an
-        ///  output table. Each column from the catalogue
-        ///  specification is sent to printTableEntry for output.
-        ///  \param stream Where the output is written
-        ///  \param columns The vector list of Column objects
-        void printTableRow(std::ostream &stream,
-                           duchamp::Catalogues::CatalogueSpecification &columns);
-
         ///  Print a single value (a column) into an output table. The
         ///  column's correct value is extracted according to the
         ///  Catalogues::COLNAME key in the column given.
@@ -93,11 +85,7 @@ class CasdaHiEmissionObject : public CatalogueEntry {
         /// the COLNAME key. If a key is given that was not expected,
         /// an Askap Error is thrown. Column must be non-const as it
         /// could change.
-    void checkCol(duchamp::Catalogues::Column &column, bool checkTitle);
-
-        /// Perform the column check for all columns in
-        /// specification. 
-    void checkSpec(duchamp::Catalogues::CatalogueSpecification &spec, bool checkTitle);
+        void checkCol(duchamp::Catalogues::Column &column, bool checkTitle);
 
         /// @brief Functions allowing CasdaHiEmissionObject objects to be passed
         /// over LOFAR Blobs
@@ -124,7 +112,7 @@ class CasdaHiEmissionObject : public CatalogueEntry {
             return (lhs.id() < rhs.id());
         }
 
-protected:
+    protected:
         /// The unique ID for this object
         std::string itsObjectID;
         /// The J2000 IAU-format name

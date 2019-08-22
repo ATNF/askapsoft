@@ -27,6 +27,7 @@
 /// @author Matthew Whiting <Matthew.Whiting@csiro.au>
 ///
 #include <catalogues/RMCatalogue.h>
+#include <catalogues/CasdaCatalogue.h>
 #include <askap_analysis.h>
 
 #include <askap/AskapLogging.h>
@@ -45,6 +46,7 @@
 
 #include <Common/ParameterSet.h>
 #include <duchamp/Outputs/CatalogueSpecification.hh>
+#include <duchamp/Outputs/CatalogueWriter.hh>
 #include <vector>
 
 ASKAP_LOGGER(logger, ".rmcatalogue");
@@ -57,13 +59,14 @@ RMCatalogue::RMCatalogue(std::vector<sourcefitting::RadioSource> &srclist,
                          const LOFAR::ParameterSet &parset,
                          duchamp::Cube *cube,
                          askap::askapparallel::AskapParallel &comms):
-    itsComponents(),
-    itsSpec(),
-    itsCube(cube),
-    itsVersion("casda.polarisation_v0.7")
+    CasdaCatalogue(parset, cube),
+    itsComponents()
 {
-
+    itsVersion = "casda.polarisation_v0.7";
     ASKAPLOG_INFO_STR(logger, "Defining the RM Catalogue");
+    itsFilenameStub = "polarisation";
+    itsObjectType = "Polarisation component";
+    setup();
     this->defineSpec();
 
     DistributedRMsynthesis distribRM(comms, parset, srclist);
@@ -76,12 +79,6 @@ RMCatalogue::RMCatalogue(std::vector<sourcefitting::RadioSource> &srclist,
         ASKAPLOG_INFO_STR(logger, "Defined list of " << itsComponents.size() << " polarisation components");
     }
 
-    duchamp::Param par = parseParset(parset);
-    std::string filenameBase = par.getOutFile();
-    filenameBase.replace(filenameBase.rfind(".txt"),
-                         std::string::npos, ".polarisation");
-    itsVotableFilename = filenameBase + ".xml";
-    itsAsciiFilename = filenameBase + ".txt";
 
 }
 
@@ -222,6 +219,24 @@ void RMCatalogue::defineSpec()
 
 }
 
+void RMCatalogue::fixWidths()
+{
+    // -------------------------------------------
+    // DO NOT CHANGE UNLESS COORDINATED WITH CASDA
+    // -------------------------------------------
+
+//    fixColWidth(itsSpec.column("ID"),      256);
+    for (size_t i = 0; i < itsSpec.size(); i++) {
+
+        if (itsSpec.column(i).getWidth() > 50) {
+            if (itsSpec.column(i).type() != "ID") {
+                fixColWidth(itsSpec.column(i), 50);
+            }
+        }
+    }
+
+}
+
 void RMCatalogue::check(bool checkTitle)
 {
     std::vector<CasdaPolarisationEntry>::iterator comp;
@@ -231,47 +246,14 @@ void RMCatalogue::check(bool checkTitle)
 
 }
 
-void RMCatalogue::write()
+void RMCatalogue::writeAsciiEntries(AskapAsciiCatalogueWriter *writer)
 {
-    this->check(false);
-    this->writeVOT();
-    this->check(true);
-    this->writeASCII();
+    writer->writeEntries<CasdaPolarisationEntry>(itsComponents);
 }
 
-void RMCatalogue::writeVOT()
+void RMCatalogue::writeVOTableEntries(AskapVOTableCatalogueWriter *writer)
 {
-    AskapVOTableCatalogueWriter vowriter(itsVotableFilename);
-    vowriter.setup(itsCube);
-    ASKAPLOG_DEBUG_STR(logger, "Writing polarisation catalogue to the VOTable " <<
-                       itsVotableFilename);
-    vowriter.setColumnSpec(&itsSpec);
-    vowriter.openCatalogue();
-    vowriter.writeHeader();
-    duchamp::VOParam version("table_version", "meta.version", "char", itsVersion, itsVersion.size() + 1, "");
-    vowriter.writeParameter(version);
-    vowriter.writeParameters();
-    vowriter.writeFrequencyParam();
-    vowriter.writeStats();
-    vowriter.writeTableHeader();
-    vowriter.writeEntries<CasdaPolarisationEntry>(itsComponents);
-    vowriter.writeFooter();
-    vowriter.closeCatalogue();
-}
-
-void RMCatalogue::writeASCII()
-{
-
-    AskapAsciiCatalogueWriter writer(itsAsciiFilename);
-    ASKAPLOG_DEBUG_STR(logger, "Writing polarisation catalogue to text file " << itsAsciiFilename);
-    writer.setup(itsCube);
-    writer.setColumnSpec(&itsSpec);
-    writer.openCatalogue();
-    writer.writeTableHeader();
-    writer.writeEntries<CasdaPolarisationEntry>(itsComponents);
-    writer.writeFooter();
-    writer.closeCatalogue();
-
+    writer->writeEntries<CasdaPolarisationEntry>(itsComponents);
 }
 
 

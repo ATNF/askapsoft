@@ -27,6 +27,7 @@
 /// @author Matthew Whiting <Matthew.Whiting@csiro.au>
 ///
 #include <catalogues/HiEmissionCatalogue.h>
+#include <catalogues/CasdaCatalogue.h>
 #include <askap_analysis.h>
 
 #include <askap/AskapLogging.h>
@@ -44,6 +45,7 @@
 
 #include <Common/ParameterSet.h>
 #include <duchamp/Outputs/CatalogueSpecification.hh>
+#include <duchamp/Outputs/CatalogueWriter.hh>
 #include <vector>
 #include <map>
 
@@ -54,14 +56,16 @@ namespace askap {
 namespace analysis {
 
 HiEmissionCatalogue::HiEmissionCatalogue(std::vector<sourcefitting::RadioSource> &srclist,
-                                         const LOFAR::ParameterSet &parset,
-                                         duchamp::Cube *cube,
-                                         askap::askapparallel::AskapParallel &comms):
-    itsObjects(),
-    itsSpec(),
-    itsCube(cube),
-    itsVersion("casda.sl_hi_emission_object_v0.11")
+        const LOFAR::ParameterSet &parset,
+        duchamp::Cube *cube,
+        askap::askapparallel::AskapParallel &comms):
+    CasdaCatalogue(parset, cube),
+    itsObjects()
 {
+    itsVersion = "casda.sl_hi_emission_object_v0.11";
+    itsFilenameStub = "hiobjects";
+    itsObjectType = "Emission-line object";
+    setup();
     this->defineSpec();
 
     DistributedHIemission distribHI(comms, parset, srclist);
@@ -69,13 +73,6 @@ HiEmissionCatalogue::HiEmissionCatalogue(std::vector<sourcefitting::RadioSource>
     distribHI.parameterise();
     distribHI.gather();
     itsObjects = distribHI.finalList();
-
-    duchamp::Param par = parseParset(parset);
-    std::string filenameBase = par.getOutFile();
-    filenameBase.replace(filenameBase.rfind(".txt"),
-                         std::string::npos, ".hiobjects");
-    itsVotableFilename = filenameBase + ".xml";
-    itsAsciiFilename = filenameBase + ".txt";
 
 }
 
@@ -135,20 +132,20 @@ void HiEmissionCatalogue::defineSpec()
                       "pos.galactic.lat;meta.main", "double", "col_glat_uw", "J2000");
     itsSpec.addColumn("GLAT_UW_ERR", "glat_uw_err", "[arcsec]", 11, casda::precSize,
                       "stat.error;pos.galactic.lat;meta.main", "float", "col_glat_uw_err", "J2000");
-    itsSpec.addColumn("MAJ", "maj_axis", "["+casda::shapeUnit+"]", 6, casda::precSize,
+    itsSpec.addColumn("MAJ", "maj_axis", "[" + casda::shapeUnit + "]", 6, casda::precSize,
                       "askap:src.smajAxis;em.radio", "float", "col_maj_axis", "");
-    itsSpec.addColumn("MIN", "min_axis", "["+casda::shapeUnit+"]", 6, casda::precSize,
+    itsSpec.addColumn("MIN", "min_axis", "[" + casda::shapeUnit + "]", 6, casda::precSize,
                       "askap:src.sminAxis;em.radio", "float", "col_min_axis", "");
     itsSpec.addColumn("PA", "pos_ang", "[deg]", 7, casda::precSize,
                       "askap:src.posAng;em.radio", "float", "col_pos_ang", "");
-    itsSpec.addColumn("MAJFIT", "maj_axis_fit", "["+casda::shapeUnit+"]", 6, casda::precSize,
+    itsSpec.addColumn("MAJFIT", "maj_axis_fit", "[" + casda::shapeUnit + "]", 6, casda::precSize,
                       "askap:src.smajAxis;em.radio;stat.fit", "float", "col_maj_axis_fit", "");
-    itsSpec.addColumn("MAJFIT_ERR", "maj_axis_fit_err", "["+casda::shapeUnit+"]", 6, casda::precSize,
+    itsSpec.addColumn("MAJFIT_ERR", "maj_axis_fit_err", "[" + casda::shapeUnit + "]", 6, casda::precSize,
                       "stat.error;askap:src.smajAxis;em.radio;stat.fit",
                       "float", "col_maj_axis_fit_err", "");
-    itsSpec.addColumn("MINFIT", "min_axis_fit", "["+casda::shapeUnit+"]", 6, casda::precSize,
+    itsSpec.addColumn("MINFIT", "min_axis_fit", "[" + casda::shapeUnit + "]", 6, casda::precSize,
                       "askap:src.sminAxis;em.radio;stat.fit", "float", "col_min_axis_fit", "");
-    itsSpec.addColumn("MINFIT_ERR", "min_axis_fit_err", "["+casda::shapeUnit+"]", 6, casda::precSize,
+    itsSpec.addColumn("MINFIT_ERR", "min_axis_fit_err", "[" + casda::shapeUnit + "]", 6, casda::precSize,
                       "stat.error;askap:src.sminAxis;em.radio;stat.fit",
                       "float", "col_min_axis_fit_err", "");
     itsSpec.addColumn("PAFIT", "pos_ang_fit", "[deg]", 7, casda::precSize,
@@ -456,6 +453,145 @@ void HiEmissionCatalogue::defineSpec()
 
 }
 
+void HiEmissionCatalogue::fixWidths()
+{
+    // -------------------------------------------
+    // DO NOT CHANGE UNLESS COORDINATED WITH CASDA
+    // -------------------------------------------
+
+//    fixColWidth(itsSpec.column("ID"),            255);
+    fixColWidth(itsSpec.column("NAME"),             15);
+    fixColWidth(itsSpec.column("RA"),               11);
+    fixColWidth(itsSpec.column("DEC"),              20);
+    fixColWidth(itsSpec.column("RA_W"),             11);
+    fixColWidth(itsSpec.column("RA_W_ERR"),         11);
+    fixColWidth(itsSpec.column("DEC_W"),            11);
+    fixColWidth(itsSpec.column("DEC_W_ERR"),        11);
+    fixColWidth(itsSpec.column("RA_UW"),            11);
+    fixColWidth(itsSpec.column("RA_UW_ERR"),        11);
+    fixColWidth(itsSpec.column("DEC_UW"),           11);
+    fixColWidth(itsSpec.column("DEC_UW_ERR"),       11);
+    fixColWidth(itsSpec.column("GLON_W"),           11);
+    fixColWidth(itsSpec.column("GLON_W_ERR"),       11);
+    fixColWidth(itsSpec.column("GLAT_W"),           11);
+    fixColWidth(itsSpec.column("GLAT_W_ERR"),       11);
+    fixColWidth(itsSpec.column("GLON_UW"),          11);
+    fixColWidth(itsSpec.column("GLON_UW_ERR"),      11);
+    fixColWidth(itsSpec.column("GLAT_UW"),          11);
+    fixColWidth(itsSpec.column("GLAT_UW_ERR"),      11);
+    fixColWidth(itsSpec.column("MAJ"),              12);
+    fixColWidth(itsSpec.column("MIN"),               6);
+    fixColWidth(itsSpec.column("PA"),                7);
+    fixColWidth(itsSpec.column("MAJFIT"),            6);
+    fixColWidth(itsSpec.column("MAJFIT_ERR"),        6);
+    fixColWidth(itsSpec.column("MINFIT"),            6);
+    fixColWidth(itsSpec.column("MINFIT_ERR"),        6);
+    fixColWidth(itsSpec.column("PAFIT"),             7);
+    fixColWidth(itsSpec.column("PAFIT_ERR"),         7);
+    fixColWidth(itsSpec.column("SIZEX"),             6);
+    fixColWidth(itsSpec.column("SIZEY"),             6);
+    fixColWidth(itsSpec.column("SIZEZ"),             6);
+    fixColWidth(itsSpec.column("NVOX"),              9);
+    fixColWidth(itsSpec.column("ASYMM2D"),           6);
+    fixColWidth(itsSpec.column("ASYMM2D_ERR"),       6);
+    fixColWidth(itsSpec.column("ASYMM3D"),           6);
+    fixColWidth(itsSpec.column("ASYMM3D_ERR"),       6);
+    fixColWidth(itsSpec.column("FREQ_UW"),          11);
+    fixColWidth(itsSpec.column("FREQ_UW_ERR"),      11);
+    fixColWidth(itsSpec.column("FREQ_W"),           11);
+    fixColWidth(itsSpec.column("FREQ_W_ERR"),       11);
+    fixColWidth(itsSpec.column("FREQ_PEAK"),        11);
+    fixColWidth(itsSpec.column("VEL_UW"),           11);
+    fixColWidth(itsSpec.column("VEL_UW_ERR"),       11);
+    fixColWidth(itsSpec.column("VEL_W"),            11);
+    fixColWidth(itsSpec.column("VEL_W_ERR"),        11);
+    fixColWidth(itsSpec.column("VEL_PEAK"),         11);
+    fixColWidth(itsSpec.column("FINT"),             10);
+    fixColWidth(itsSpec.column("FINT_ERR"),         10);
+    fixColWidth(itsSpec.column("FLUXMAX"),          10);
+    fixColWidth(itsSpec.column("FLUXMIN"),          10);
+    fixColWidth(itsSpec.column("FLUXMEAN"),         10);
+    fixColWidth(itsSpec.column("FLUXSTDDEV"),       10);
+    fixColWidth(itsSpec.column("FLUXRMS"),          10);
+    fixColWidth(itsSpec.column("RMS_IMAGECUBE"),    10);
+    fixColWidth(itsSpec.column("W50_FREQ"),         11);
+    fixColWidth(itsSpec.column("W50_FREQ_ERR"),     11);
+    fixColWidth(itsSpec.column("CW50_FREQ"),        11);
+    fixColWidth(itsSpec.column("CW50_FREQ_ERR"),    11);
+    fixColWidth(itsSpec.column("W20_FREQ"),         11);
+    fixColWidth(itsSpec.column("W20_FREQ_ERR"),     11);
+    fixColWidth(itsSpec.column("CW20_FREQ"),        11);
+    fixColWidth(itsSpec.column("CW20_FREQ_ERR"),    11);
+    fixColWidth(itsSpec.column("W50_VEL"),          11);
+    fixColWidth(itsSpec.column("W50_VEL_ERR"),      11);
+    fixColWidth(itsSpec.column("CW50_VEL"),         11);
+    fixColWidth(itsSpec.column("CW50_VEL_ERR"),     11);
+    fixColWidth(itsSpec.column("W20_VEL"),          11);
+    fixColWidth(itsSpec.column("W20_VEL_ERR"),      11);
+    fixColWidth(itsSpec.column("CW20_VEL"),         11);
+    fixColWidth(itsSpec.column("CW20_VEL_ERR"),     11);
+    fixColWidth(itsSpec.column("FREQ_W50_UW"),      11);
+    fixColWidth(itsSpec.column("FREQ_W50_UW_ERR"),  11);
+    fixColWidth(itsSpec.column("FREQ_CW50_UW"),     11);
+    fixColWidth(itsSpec.column("FREQ_CW50_UW_ERR"), 11);
+    fixColWidth(itsSpec.column("FREQ_W20_UW"),      11);
+    fixColWidth(itsSpec.column("FREQ_W20_UW_ERR"),  11);
+    fixColWidth(itsSpec.column("FREQ_CW20_UW"),     11);
+    fixColWidth(itsSpec.column("FREQ_CW20_UW_ERR"), 11);
+    fixColWidth(itsSpec.column("VEL_W50_UW"),       11);
+    fixColWidth(itsSpec.column("VEL_W50_UW_ERR"),   11);
+    fixColWidth(itsSpec.column("VEL_CW50_UW"),      11);
+    fixColWidth(itsSpec.column("VEL_CW50_UW_ERR"),  11);
+    fixColWidth(itsSpec.column("VEL_W20_UW"),       11);
+    fixColWidth(itsSpec.column("VEL_W20_UW_ERR"),   11);
+    fixColWidth(itsSpec.column("VEL_CW20_UW"),      11);
+    fixColWidth(itsSpec.column("VEL_CW20_UW_ERR"),  11);
+    fixColWidth(itsSpec.column("FREQ_W50_W"),       11);
+    fixColWidth(itsSpec.column("FREQ_W50_W_ERR"),   11);
+    fixColWidth(itsSpec.column("FREQ_CW50_W"),      11);
+    fixColWidth(itsSpec.column("FREQ_CW50_W_ERR"),  11);
+    fixColWidth(itsSpec.column("FREQ_W20_W"),       11);
+    fixColWidth(itsSpec.column("FREQ_W20_W_ERR"),   11);
+    fixColWidth(itsSpec.column("FREQ_CW20_W"),      11);
+    fixColWidth(itsSpec.column("FREQ_CW20_W_ERR"),  11);
+    fixColWidth(itsSpec.column("VEL_W50_W"),        11);
+    fixColWidth(itsSpec.column("VEL_W50_W_ERR"),    11);
+    fixColWidth(itsSpec.column("VEL_CW50_W"),       11);
+    fixColWidth(itsSpec.column("VEL_CW50_W_ERR"),   11);
+    fixColWidth(itsSpec.column("VEL_W20_W"),        11);
+    fixColWidth(itsSpec.column("VEL_W20_W_ERR"),    11);
+    fixColWidth(itsSpec.column("VEL_CW20_W"),       11);
+    fixColWidth(itsSpec.column("VEL_CW20_W_ERR"),   11);
+    fixColWidth(itsSpec.column("FINT_W50"),         10);
+    fixColWidth(itsSpec.column("FINT_W50_ERR"),     10);
+    fixColWidth(itsSpec.column("FINT_CW50"),        10);
+    fixColWidth(itsSpec.column("FINT_CW50_ERR"),    10);
+    fixColWidth(itsSpec.column("FINT_W20"),         10);
+    fixColWidth(itsSpec.column("FINT_W20_ERR"),     10);
+    fixColWidth(itsSpec.column("FINT_CW20"),        10);
+    fixColWidth(itsSpec.column("FINT_CW20_ERR"),    10);
+    fixColWidth(itsSpec.column("BF_A"),             10);
+    fixColWidth(itsSpec.column("BF_A_ERR"),         10);
+    fixColWidth(itsSpec.column("BF_W"),             10);
+    fixColWidth(itsSpec.column("BF_W_ERR"),         10);
+    fixColWidth(itsSpec.column("BF_B1"),            10);
+    fixColWidth(itsSpec.column("BF_B1_ERR"),        10);
+    fixColWidth(itsSpec.column("BF_B2"),            10);
+    fixColWidth(itsSpec.column("BF_B2_ERR"),        10);
+    fixColWidth(itsSpec.column("BF_XE"),            10);
+    fixColWidth(itsSpec.column("BF_XE_ERR"),        10);
+    fixColWidth(itsSpec.column("BF_XP"),            10);
+    fixColWidth(itsSpec.column("BF_XP_ERR"),        10);
+    fixColWidth(itsSpec.column("BF_C"),             10);
+    fixColWidth(itsSpec.column("BF_C_ERR"),         10);
+    fixColWidth(itsSpec.column("BF_N"),             10);
+    fixColWidth(itsSpec.column("BF_N_ERR"),         10);
+    fixColWidth(itsSpec.column("FLAG1"),             5);
+    fixColWidth(itsSpec.column("FLAG2"),             5);
+    fixColWidth(itsSpec.column("FLAG3"),             5);
+
+}
+
 void HiEmissionCatalogue::check(bool checkTitle)
 {
     std::vector<CasdaHiEmissionObject>::iterator obj;
@@ -465,49 +601,14 @@ void HiEmissionCatalogue::check(bool checkTitle)
 
 }
 
-void HiEmissionCatalogue::write()
+void HiEmissionCatalogue::writeAsciiEntries(AskapAsciiCatalogueWriter *writer)
 {
-    this->check(false);
-    this->writeVOT();
-    this->check(true);
-    this->writeASCII();
+    writer->writeEntries<CasdaHiEmissionObject>(itsObjects);
 }
 
-void HiEmissionCatalogue::writeVOT()
+void HiEmissionCatalogue::writeVOTableEntries(AskapVOTableCatalogueWriter *writer)
 {
-    AskapVOTableCatalogueWriter vowriter(itsVotableFilename);
-    vowriter.setup(itsCube);
-    ASKAPLOG_DEBUG_STR(logger, "Writing object table to the VOTable " <<
-                       itsVotableFilename);
-    vowriter.setColumnSpec(&itsSpec);
-    vowriter.openCatalogue();
-    vowriter.setResourceName("HI Emission-line object catalogue from Selavy source-finding");
-    vowriter.setTableName("HI Emission-line object catalogue");
-    vowriter.writeHeader();
-    duchamp::VOParam version("table_version", "meta.version", "char", itsVersion, itsVersion.size() + 1, "");
-    vowriter.writeParameter(version);
-    vowriter.writeParameters();
-    vowriter.writeFrequencyParam();
-    vowriter.writeStats();
-    vowriter.writeTableHeader();
-    vowriter.writeEntries<CasdaHiEmissionObject>(itsObjects);
-    vowriter.writeFooter();
-    vowriter.closeCatalogue();
-}
-
-void HiEmissionCatalogue::writeASCII()
-{
-
-    AskapAsciiCatalogueWriter writer(itsAsciiFilename);
-    ASKAPLOG_DEBUG_STR(logger, "Writing Fit results to " << itsAsciiFilename);
-    writer.setup(itsCube);
-    writer.setColumnSpec(&itsSpec);
-    writer.openCatalogue();
-    writer.writeTableHeader();
-    writer.writeEntries<CasdaHiEmissionObject>(itsObjects);
-    writer.writeFooter();
-    writer.closeCatalogue();
-
+    writer->writeEntries<CasdaHiEmissionObject>(itsObjects);
 }
 
 

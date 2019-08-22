@@ -30,7 +30,7 @@
 #define ASKAP_ANALYSIS_CASDA_ABSORPTION_H_
 
 #include <catalogues/Casda.h>
-#include <catalogues/CatalogueEntry.h>
+#include <catalogues/CasdaObject.h>
 #include <catalogues/CasdaComponent.h>
 #include <sourcefitting/RadioSource.h>
 #include <Common/ParameterSet.h>
@@ -50,11 +50,11 @@ namespace analysis {
 /// allows extraction from a RadioSource object and provides methods
 /// to write out the Component to a VOTable or other type of catalogue
 /// file.
-class CasdaAbsorptionObject : public CatalogueEntry {
+class CasdaAbsorptionObject : public CasdaObject {
     public:
         /// Default constructor that does nothing.
         CasdaAbsorptionObject();
-    
+
         /// Constructor that builds the Absorption object from a
         /// RadioSource.
         /// **THE INTERFACE IS STILL TO BE WORKED OUT FULLY**
@@ -62,7 +62,7 @@ class CasdaAbsorptionObject : public CatalogueEntry {
         /// by the parameter fitNumber, from the fit results given by
         /// the fitType parameter. The parset is used to make the
         /// corresponding Island, to get the Island ID, and is passed
-        /// to the CatalogueEntry constructor to get the SB and base
+        /// to the CasdaObject constructor to get the SB and base
         /// ID.
         CasdaAbsorptionObject(CasdaComponent &component,
                               sourcefitting::RadioSource &obj,
@@ -78,14 +78,6 @@ class CasdaAbsorptionObject : public CatalogueEntry {
         // Return the ID string
         const std::string id();
 
-        ///  Print a row of values for the objet into an
-        ///  output table. Each column from the catalogue
-        ///  specification is sent to printTableEntry for output.
-        ///  \param stream Where the output is written
-        ///  \param columns The vector list of Column objects
-        void printTableRow(std::ostream &stream,
-                           duchamp::Catalogues::CatalogueSpecification &columns);
-
         ///  Print a single value (a column) into an output table. The
         ///  column's correct value is extracted according to the
         ///  Catalogues::COLNAME key in the column given.
@@ -100,13 +92,10 @@ class CasdaAbsorptionObject : public CatalogueEntry {
         /// the COLNAME key. If a key is given that was not expected,
         /// an Askap Error is thrown. Column must be non-const as it
         /// could change.
-    void checkCol(duchamp::Catalogues::Column &column, bool checkTitle);
+        void checkCol(duchamp::Catalogues::Column &column, bool checkTitle);
 
-        /// Perform the column check for all columns in
-        /// specification.
-    void checkSpec(duchamp::Catalogues::CatalogueSpecification &spec, bool checkTitle);
 
-    /// @brief Functions allowing CasdaPolarisationEntry objects to be passed
+        /// @brief Functions allowing CasdaPolarisationEntry objects to be passed
         /// over LOFAR Blobs
         /// @name
         /// @{

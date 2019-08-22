@@ -27,7 +27,7 @@
 /// @author Matthew Whiting <Matthew.Whiting@csiro.au>
 ///
 #include <catalogues/CasdaComponent.h>
-#include <catalogues/CatalogueEntry.h>
+#include <catalogues/CasdaObject.h>
 #include <catalogues/CasdaIsland.h>
 #include <catalogues/Casda.h>
 #include <askap_analysis.h>
@@ -54,7 +54,7 @@ namespace askap {
 namespace analysis {
 
 CasdaComponent::CasdaComponent():
-    CatalogueEntry()
+    CasdaObject()
 {
 }
 
@@ -62,7 +62,7 @@ CasdaComponent::CasdaComponent(sourcefitting::RadioSource &obj,
                                const LOFAR::ParameterSet &parset,
                                const unsigned int fitNumber,
                                const std::string fitType):
-    CatalogueEntry(parset),
+    CasdaObject(parset),
     itsFlagSpectralIndexOrigin(0),
     itsFlag4(0),
     itsComment("")
@@ -87,26 +87,26 @@ CasdaComponent::CasdaComponent(sourcefitting::RadioSource &obj,
     id << itsIDbase << casda::getIslandID(obj);
     itsIslandID = id.str();
     id.str("");
-    id << itsIDbase << casda::getComponentID(obj,fitNumber);
+    id << itsIDbase << casda::getComponentID(obj, fitNumber);
     itsComponentID = id.str();
 
     // Add a catch for errors that have not converged properly. Check for position error of >1000 pix
-    if (errors[1]>1000.) {
+    if (errors[1] > 1000.) {
         ASKAPLOG_WARN_STR(logger, "Component " << itsComponentID << " has poorly defined errors on the fit - setting them to zero.");
         itsFlag4 = true;
-        for(size_t i=0;i<errors.size();i++){
+        for (size_t i = 0; i < errors.size(); i++) {
             errors[i] = 0.;
         }
     }
-    
+
     duchamp::FitsHeader newHead_freq = changeSpectralAxis(obj.header(), "FREQ", casda::freqUnit);
 
     double thisRA, thisDec, zworld;
     ASKAPLOG_DEBUG_STR(logger, "About to convert pixels to world:" << gauss.xCenter() << " " << gauss.yCenter() << " " << obj.getZcentre());
-    ASKAPLOG_DEBUG_STR(logger, "Gaussian: " << gauss 
-                       << " fitType="<<fitType 
-                       << " fitNumber="<<fitNumber 
-                       << " obj.numFits(fitType)="<<obj.numFits(fitType));
+    ASKAPLOG_DEBUG_STR(logger, "Gaussian: " << gauss
+                       << " fitType=" << fitType
+                       << " fitNumber=" << fitNumber
+                       << " obj.numFits(fitType)=" << obj.numFits(fitType));
     newHead_freq.pixToWCS(gauss.xCenter(), gauss.yCenter(), obj.getZcentre(),
                           thisRA, thisDec, zworld);
     ASKAPLOG_DEBUG_STR(logger, "Done: " << thisRA << " " << thisDec << " " << zworld);
@@ -165,13 +165,12 @@ CasdaComponent::CasdaComponent(sourcefitting::RadioSource &obj,
 
     itsRMSimage = obj.noiseLevel() * itsPeakFluxscale;
 
-    if (useAlphaBeta()){
+    if (useAlphaBeta()) {
         itsAlpha.value() = obj.alphaValues(fitType)[fitNumber];
         itsBeta.value() = obj.betaValues(fitType)[fitNumber];
         itsAlpha.error() = obj.alphaErrors(fitType)[fitNumber];
         itsBeta.error() = obj.betaErrors(fitType)[fitNumber];
-    }
-    else {
+    } else {
         itsAlpha.value() = sourcefitting::defaultAlpha;
         itsBeta.value() = sourcefitting::defaultBeta;
         itsAlpha.error() = 0.;
@@ -182,8 +181,8 @@ CasdaComponent::CasdaComponent(sourcefitting::RadioSource &obj,
     itsFlagSiblings = obj.numFits(fitType) > 1 ? 1 : 0;
 
     itsFlagSpectralIndexOrigin = parset.getBool("spectralTermsFromTaylor", "true") ? 1 : 0;
-    
-        
+
+
     // These are the additional parameters not used in the CASDA
     // component catalogue v1.7:
     std::stringstream localid;
@@ -202,15 +201,14 @@ CasdaComponent::CasdaComponent(sourcefitting::RadioSource &obj,
 
 bool CasdaComponent::useAlphaBeta()
 {
-    if ( itsParset.isDefined("spectralTerms.threshold") ) {
+    if (itsParset.isDefined("spectralTerms.threshold")) {
         float threshold = itsParset.getFloat("spectralTerms.threshold");
-        return itsFluxPeak.value()/itsPeakFluxscale > threshold;
+        return itsFluxPeak.value() / itsPeakFluxscale > threshold;
+    } else {
+        float thresholdSNR = itsParset.getFloat("spectralTerms.thresholdSNR", 0.0);
+        return itsFluxPeak.value() / itsRMSimage > thresholdSNR;
     }
-    else {
-        float thresholdSNR = itsParset.getFloat("spectralTerms.thresholdSNR",0.0);
-        return itsFluxPeak.value()/itsRMSimage > thresholdSNR;
-    }
-        
+
 }
 
 const float CasdaComponent::ra()
@@ -291,17 +289,6 @@ const double CasdaComponent::beta()
 const double CasdaComponent::betaErr()
 {
     return itsBeta.error();
-}
-
-
-void CasdaComponent::printTableRow(std::ostream &stream,
-                                   duchamp::Catalogues::CatalogueSpecification &columns)
-{
-    stream.setf(std::ios::fixed);
-    for (size_t i = 0; i < columns.size(); i++) {
-        this->printTableEntry(stream, columns.column(i));
-    }
-    stream << "\n";
 }
 
 void CasdaComponent::printTableEntry(std::ostream &stream,
@@ -512,13 +499,6 @@ void CasdaComponent::checkCol(duchamp::Catalogues::Column &column, bool checkTit
                    "Unknown column type " << type);
     }
 
-}
-
-void CasdaComponent::checkSpec(duchamp::Catalogues::CatalogueSpecification &spec, bool checkTitle)
-{
-    for (size_t i = 0; i < spec.size(); i++) {
-        this->checkCol(spec.column(i), checkTitle);
-    }
 }
 
 void CasdaComponent::writeAnnotation(boost::shared_ptr<duchamp::AnnotationWriter> &writer)

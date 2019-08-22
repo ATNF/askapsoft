@@ -27,7 +27,7 @@
 /// @author Matthew Whiting <Matthew.Whiting@csiro.au>
 ///
 #include <catalogues/CasdaAbsorptionObject.h>
-#include <catalogues/CatalogueEntry.h>
+#include <catalogues/CasdaObject.h>
 #include <catalogues/CasdaComponent.h>
 #include <catalogues/Casda.h>
 #include <askap_analysis.h>
@@ -62,14 +62,14 @@ namespace askap {
 namespace analysis {
 
 CasdaAbsorptionObject::CasdaAbsorptionObject():
-    CatalogueEntry()
+    CasdaObject()
 {
 }
 
 CasdaAbsorptionObject::CasdaAbsorptionObject(CasdaComponent &component,
         sourcefitting::RadioSource &obj,
         const LOFAR::ParameterSet &parset):
-    CatalogueEntry(parset),
+    CasdaObject(parset),
     itsFlag2(0),
     itsFlag3(0),
     itsComment("")
@@ -149,16 +149,6 @@ const float CasdaAbsorptionObject::dec()
 const std::string CasdaAbsorptionObject::id()
 {
     return itsObjectID;
-}
-
-void CasdaAbsorptionObject::printTableRow(std::ostream &stream,
-        duchamp::Catalogues::CatalogueSpecification &columns)
-{
-    stream.setf(std::ios::fixed);
-    for (size_t i = 0; i < columns.size(); i++) {
-        this->printTableEntry(stream, columns.column(i));
-    }
-    stream << "\n";
 }
 
 void CasdaAbsorptionObject::printTableEntry(std::ostream &stream,
@@ -244,7 +234,7 @@ void CasdaAbsorptionObject::printTableEntry(std::ostream &stream,
 
 void CasdaAbsorptionObject::checkCol(duchamp::Catalogues::Column &column, bool checkTitle)
 {
-    bool checkPrec=false;
+    bool checkPrec = false;
     std::string type = column.type();
     if (type == "IMAGEID") {
         column.check(itsImageID, checkTitle);
@@ -321,13 +311,6 @@ void CasdaAbsorptionObject::checkCol(duchamp::Catalogues::Column &column, bool c
                    "Unknown column type " << type);
     }
 
-}
-
-void CasdaAbsorptionObject::checkSpec(duchamp::Catalogues::CatalogueSpecification &spec, bool checkTitle)
-{
-    for (size_t i = 0; i < spec.size(); i++) {
-        this->checkCol(spec.column(i), checkTitle);
-    }
 }
 
 LOFAR::BlobOStream& operator<<(LOFAR::BlobOStream &blob,

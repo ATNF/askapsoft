@@ -29,7 +29,7 @@
 #ifndef ASKAP_ANALYSIS_CASDA_ISLAND_H_
 #define ASKAP_ANALYSIS_CASDA_ISLAND_H_
 
-#include <catalogues/CatalogueEntry.h>
+#include <catalogues/CasdaObject.h>
 #include <catalogues/Casda.h>
 #include <sourcefitting/RadioSource.h>
 #include <Common/ParameterSet.h>
@@ -46,7 +46,7 @@ namespace analysis {
 /// the CASDA island catalogue for a single island. It allows
 /// translation from a RadioSource object and provides methods to
 /// write out the Island to a VOTable or other type of catalogue file.
-class CasdaIsland : public CatalogueEntry {
+class CasdaIsland : public CasdaObject {
     public:
         /// Default constructor that does nothing.
         CasdaIsland();
@@ -55,7 +55,7 @@ class CasdaIsland : public CatalogueEntry {
         /// RadioSource. The number of fitted components is used,
         /// otherwise it is essentially the information contained in
         /// the duchamp::Detection object. The parset is passed to the
-        /// base CatalogueEntry object, and used to get the scheduling
+        /// base CasdaObject object, and used to get the scheduling
         /// block ID and image name, for constructing the
         /// islandID. The fitType is used when calculating the
         /// statistics of the fit residuals.
@@ -75,14 +75,6 @@ class CasdaIsland : public CatalogueEntry {
         /// Return the ID string
         const std::string id();
 
-        ///  Print a row of values for the current Island into an
-        ///  output table. Each column from the catalogue
-        ///  specification is sent to printTableEntry for output.
-        ///  \param stream Where the output is written
-        ///  \param columns The vector list of Column objects
-        void printTableRow(std::ostream &stream,
-                           duchamp::Catalogues::CatalogueSpecification &columns);
-
         ///  Print a single value (column) into an output table. The
         ///  column's correct value is extracted according to the
         ///  Catalogues::COLNAME key in the column given.
@@ -98,10 +90,6 @@ class CasdaIsland : public CatalogueEntry {
         /// an Askap Error is thrown. The column must be non-const as
         /// it could change.
         void checkCol(duchamp::Catalogues::Column &column, bool checkTitle);
-
-        /// Perform the column check for all columns in the
-        /// specification.
-        void checkSpec(duchamp::Catalogues::CatalogueSpecification &spec, bool checkTitle);
 
         /// @brief Functions allowing CasdaIsland objects to be passed
         /// over LOFAR Blobs

@@ -29,10 +29,14 @@
 #ifndef ASKAP_ANALYSIS_RM_CAT_H_
 #define ASKAP_ANALYSIS_RM_CAT_H_
 
+#include <catalogues/CasdaCatalogue.h>
 #include <catalogues/CasdaPolarisationEntry.h>
+#include <outputs/AskapVOTableCatalogueWriter.h>
+#include <outputs/AskapAsciiCatalogueWriter.h>
 #include <sourcefitting/RadioSource.h>
 #include <Common/ParameterSet.h>
 #include <duchamp/Outputs/CatalogueSpecification.hh>
+#include <duchamp/Outputs/CatalogueWriter.hh>
 #include <vector>
 
 namespace askap {
@@ -46,7 +50,7 @@ namespace analysis {
 /// detailing how the information should be written to a catalogue. It
 /// provides methods to write the information to VOTable and ASCII
 /// format files.
-class RMCatalogue {
+class RMCatalogue : public CasdaCatalogue {
     public:
         /// Constructor, that calls defineComponents to define the
         /// catalogue from a set of RadioSource object, and defineSpec
@@ -64,9 +68,6 @@ class RMCatalogue {
         /// the catalogue.
         void check(bool checkTitle);
 
-        /// Write the catalogue to the ASCII & VOTable files (acts as
-        /// a front-end to the writeVOT() and writeASCII() functions)
-        void write();
 
     protected:
         /// Define the vector list of Components using the input list
@@ -81,37 +82,13 @@ class RMCatalogue {
         /// catalogue, using the Duchamp interface.
         void defineSpec();
 
-        /// Writes the catalogue to a VOTable that conforms to the
-        /// CASDA requirements. It has the necessary header
-        /// information, the catalogue version number, and a table
-        /// entry for each Component in the catalogue.
-        void writeVOT();
+        void fixWidths();
 
-        /// Writes the catalogue to an ASCII text file that is
-        /// human-readable (with space-separated and aligned
-        /// columns). It has a commented line (ie. starting with '#')
-        /// with the column titles, another with the units, then one
-        /// line for each Component.
-        void writeASCII();
+        void writeAsciiEntries(AskapAsciiCatalogueWriter *writer);
+        void writeVOTableEntries(AskapVOTableCatalogueWriter *writer);
 
         /// The list of catalogued Components.
         std::vector<CasdaPolarisationEntry> itsComponents;
-
-        /// The specification for the individual columns
-        duchamp::Catalogues::CatalogueSpecification itsSpec;
-
-        /// The duchamp::Cube, used to help instantiate the classes to
-        /// write out the ASCII and VOTable files.
-        duchamp::Cube *itsCube;
-
-        /// The filename of the VOTable output file
-        std::string itsVotableFilename;
-
-        /// The filename of the ASCII text output file.
-        std::string itsAsciiFilename;
-
-        /// The version of the catalogue specification, from CASDA.
-        std::string itsVersion;
 
 };
 

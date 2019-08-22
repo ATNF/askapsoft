@@ -27,6 +27,7 @@
 /// @author Matthew Whiting <Matthew.Whiting@csiro.au>
 ///
 #include <catalogues/ComponentCatalogue.h>
+#include <catalogues/CasdaCatalogue.h>
 #include <askap_analysis.h>
 
 #include <askap/AskapLogging.h>
@@ -42,6 +43,7 @@
 
 #include <Common/ParameterSet.h>
 #include <duchamp/Outputs/CatalogueSpecification.hh>
+#include <duchamp/Outputs/CatalogueWriter.hh>
 #include <duchamp/Outputs/KarmaAnnotationWriter.hh>
 #include <duchamp/Outputs/CasaAnnotationWriter.hh>
 #include <duchamp/Outputs/DS9AnnotationWriter.hh>
@@ -56,97 +58,70 @@ namespace analysis {
 ComponentCatalogue::ComponentCatalogue(std::vector<CasdaComponent> &componentList,
                                        const LOFAR::ParameterSet &parset,
                                        duchamp::Cube *cube):
+    CasdaCatalogue(parset, cube),
     itsFitType(casda::componentFitType),
-    itsComponents(componentList),
-    itsSpec(),
-    itsCube(cube),
-    itsKarmaFilename(""),
-    itsCASAFilename(""),
-    itsDS9Filename(""),
-    itsVersion("casda.continuum_component_description_v1.9")
+    itsComponents(componentList)
 {
+    itsVersion = "casda.continuum_component_description_v1.9";
     ASKAPLOG_DEBUG_STR(logger, "Defining component catalogue, version " << itsVersion);
+    itsFilenameStub = "components";
+    itsObjectType = "Component";
 
-    this->setup(parset);
+    setup();
+    this->defineSpec();
 }
 
 ComponentCatalogue::ComponentCatalogue(std::vector<CasdaComponent> &componentList,
                                        const LOFAR::ParameterSet &parset,
                                        duchamp::Cube *cube,
                                        const std::string fitType):
+    CasdaCatalogue(parset, cube),
     itsFitType(fitType),
-    itsComponents(componentList),
-    itsSpec(),
-    itsCube(cube),
-    itsKarmaFilename(""),
-    itsCASAFilename(""),
-    itsDS9Filename(""),
-    itsVersion("casda.continuum_component_description_v1.9")
+    itsComponents(componentList)
 {
+    itsVersion = "casda.continuum_component_description_v1.9";
     ASKAPLOG_DEBUG_STR(logger, "Defining component catalogue, version " << itsVersion);
+    itsFilenameStub = "components";
+    itsObjectType = "Component";
 
-    this->setup(parset);
+    setup();
+    this->defineSpec();
 }
 
 ComponentCatalogue::ComponentCatalogue(std::vector<sourcefitting::RadioSource> &srclist,
                                        const LOFAR::ParameterSet &parset,
                                        duchamp::Cube *cube):
+    CasdaCatalogue(parset, cube),
     itsFitType(casda::componentFitType),
-    itsComponents(),
-    itsSpec(),
-    itsCube(cube),
-    itsKarmaFilename(""),
-    itsCASAFilename(""),
-    itsDS9Filename(""),
-    itsVersion("casda.continuum_component_description_v1.9")
+    itsComponents()
 {
+    itsVersion = "casda.continuum_component_description_v1.9";
     ASKAPLOG_DEBUG_STR(logger, "Defining component catalogue, version " << itsVersion);
-
+    itsFilenameStub = "components";
+    itsObjectType = "Component";
+    setup();
+    this->defineSpec();
     this->defineComponents(srclist, parset);
-    this->setup(parset);
 }
 
 ComponentCatalogue::ComponentCatalogue(std::vector<sourcefitting::RadioSource> &srclist,
                                        const LOFAR::ParameterSet &parset,
                                        duchamp::Cube *cube,
                                        const std::string fitType):
+    CasdaCatalogue(parset, cube),
     itsFitType(fitType),
-    itsComponents(),
-    itsSpec(),
-    itsCube(cube),
-    itsKarmaFilename(""),
-    itsCASAFilename(""),
-    itsDS9Filename(""),
-    itsVersion("casda.continuum_component_description_v1.9")
+    itsComponents()
 {
+    itsVersion = "casda.continuum_component_description_v1.9";
     ASKAPLOG_DEBUG_STR(logger, "Defining component catalogue, version " << itsVersion);
+    itsFilenameStub = "components";
+    itsObjectType = "Component";
 
-    this->defineComponents(srclist, parset);
-    this->setup(parset);
-}
-
-void ComponentCatalogue::setup(const LOFAR::ParameterSet &parset)
-{
-
+    setup();
     this->defineSpec();
-
-    duchamp::Param par = parseParset(parset);
-    std::string filenameBase = par.getOutFile();
-    filenameBase.replace(filenameBase.rfind(".txt"),
-                         std::string::npos, ".components");
-    itsVotableFilename = filenameBase + ".xml";
-    itsAsciiFilename = filenameBase + ".txt";
-    if (parset.getBool("flagKarma", false)) {
-        itsKarmaFilename = filenameBase + ".ann";
-    }
-    if (parset.getBool("flagCasa", false)) {
-        itsCASAFilename = filenameBase + ".crf";
-    }
-    if (parset.getBool("flagDS9", false)) {
-        itsDS9Filename = filenameBase + ".reg";
-    }
-
+    this->defineComponents(srclist, parset);
 }
+
 
 void ComponentCatalogue::defineComponents(std::vector<sourcefitting::RadioSource> &srclist,
         const LOFAR::ParameterSet &parset)
@@ -203,28 +178,28 @@ void ComponentCatalogue::defineSpec()
                       casda::precFlux + 2, casda::precFlux,
                       "stat.error;phot.flux.density;em.radio;stat.fit",
                       "float", "col_flux_int_err", "");
-    itsSpec.addColumn("MAJ", "maj_axis", "["+casda::shapeUnit+"]", casda::precSize+2, casda::precSize,
+    itsSpec.addColumn("MAJ", "maj_axis", "[" + casda::shapeUnit + "]", casda::precSize + 2, casda::precSize,
                       "phys.angSize.smajAxis;em.radio;stat.fit",
                       "float", "col_maj_axis", "");
-    itsSpec.addColumn("MIN", "min_axis", "["+casda::shapeUnit+"]", casda::precSize+2, casda::precSize,
+    itsSpec.addColumn("MIN", "min_axis", "[" + casda::shapeUnit + "]", casda::precSize + 2, casda::precSize,
                       "phys.angSize.sminAxis;em.radio;stat.fit",
                       "float", "col_min_axis", "");
     itsSpec.addColumn("PA", "pos_ang", "[deg]", casda::precSize + 2, casda::precSize,
                       "phys.angSize;pos.posAng;em.radio;stat.fit",
                       "float", "col_pos_ang", "");
-    itsSpec.addColumn("MAJERR", "maj_axis_err", "["+casda::shapeUnit+"]", casda::precSize+2, casda::precSize,
+    itsSpec.addColumn("MAJERR", "maj_axis_err", "[" + casda::shapeUnit + "]", casda::precSize + 2, casda::precSize,
                       "stat.error;phys.angSize.smajAxis;em.radio",
                       "float", "col_maj_axis_err", "");
-    itsSpec.addColumn("MINERR", "min_axis_err", "["+casda::shapeUnit+"]", casda::precSize+2, casda::precSize,
+    itsSpec.addColumn("MINERR", "min_axis_err", "[" + casda::shapeUnit + "]", casda::precSize + 2, casda::precSize,
                       "stat.error;phys.angSize.sminAxis;em.radio",
                       "float", "col_min_axis_err", "");
     itsSpec.addColumn("PAERR", "pos_ang_err", "[deg]", casda::precSize + 2, casda::precSize,
                       "stat.error;phys.angSize;pos.posAng;em.radio",
                       "float", "col_pos_ang_err", "");
-    itsSpec.addColumn("MAJDECONV", "maj_axis_deconv", "["+casda::shapeUnit+"]", casda::precSize+2, casda::precSize,
+    itsSpec.addColumn("MAJDECONV", "maj_axis_deconv", "[" + casda::shapeUnit + "]", casda::precSize + 2, casda::precSize,
                       "phys.angSize.smajAxis;em.radio;askap:meta.deconvolved",
                       "float", "col_maj_axis_deconv", "");
-    itsSpec.addColumn("MINDECONV", "min_axis_deconv", "["+casda::shapeUnit+"]", casda::precSize+2, casda::precSize,
+    itsSpec.addColumn("MINDECONV", "min_axis_deconv", "[" + casda::shapeUnit + "]", casda::precSize + 2, casda::precSize,
                       "phys.angSize.sminAxis;em.radio;askap:meta.deconvolved",
                       "float", "col_min_axis_deconv", "");
     itsSpec.addColumn("PADECONV", "pos_ang_deconv", "[deg]", casda::precSize + 2, casda::precSize,
@@ -266,6 +241,53 @@ void ComponentCatalogue::defineSpec()
 
 }
 
+void ComponentCatalogue::fixWidths()
+{
+    // -------------------------------------------
+    // DO NOT CHANGE UNLESS COORDINATED WITH CASDA
+    // -------------------------------------------
+
+//    fixColWidth(itsSpec.column("ISLAND"),        255);
+//    fixColWidth(itsSpec.column("ID"),        255);
+    fixColWidth(itsSpec.column("NAME"),         26);
+    fixColWidth(itsSpec.column("RA"),           12);
+    fixColWidth(itsSpec.column("DEC"),          13);
+    fixColWidth(itsSpec.column("RAJD"),         12);
+    fixColWidth(itsSpec.column("DECJD"),        13);
+    fixColWidth(itsSpec.column("RAERR"),        11);
+    fixColWidth(itsSpec.column("DECERR"),       11);
+    fixColWidth(itsSpec.column("FREQ"),         11);
+    fixColWidth(itsSpec.column("FPEAK"),        11);
+    fixColWidth(itsSpec.column("FPEAKERR"),     14);
+    fixColWidth(itsSpec.column("FINT"),         10);
+    fixColWidth(itsSpec.column("FINTERR"),      13);
+    fixColWidth(itsSpec.column("MAJ"),           9);
+    fixColWidth(itsSpec.column("MIN"),           9);
+    fixColWidth(itsSpec.column("PA"),            8);
+    fixColWidth(itsSpec.column("MAJERR"),       13);
+    fixColWidth(itsSpec.column("MINERR"),       13);
+    fixColWidth(itsSpec.column("PAERR"),        12);
+    fixColWidth(itsSpec.column("MAJDECONV"),    18);
+    fixColWidth(itsSpec.column("MINDECONV"),    16);
+    fixColWidth(itsSpec.column("PADECONV"),     15);
+    fixColWidth(itsSpec.column("MAJDECONVERR"), 13);
+    fixColWidth(itsSpec.column("MINDECONVERR"), 13);
+    fixColWidth(itsSpec.column("PADECONVERR"),  12);
+    fixColWidth(itsSpec.column("CHISQ"),        17);
+    fixColWidth(itsSpec.column("RMSFIT"),       15);
+    fixColWidth(itsSpec.column("ALPHA"),        15);
+    fixColWidth(itsSpec.column("BETA"),         19);
+    fixColWidth(itsSpec.column("ALPHAERR"),     15);
+    fixColWidth(itsSpec.column("BETAERR"),      19);
+    fixColWidth(itsSpec.column("RMSIMAGE"),     12);
+    fixColWidth(itsSpec.column("FLAG1"),         8);
+    fixColWidth(itsSpec.column("FLAG2"),         8);
+    fixColWidth(itsSpec.column("FLAG3"),         8);
+    fixColWidth(itsSpec.column("FLAG4"),         8);
+    fixColWidth(itsSpec.column("COMMENT"),     100);
+
+}
+
 void ComponentCatalogue::check(bool checkTitle)
 {
     std::vector<CasdaComponent>::iterator comp;
@@ -282,57 +304,14 @@ std::vector<CasdaComponent> &ComponentCatalogue::components()
 }
 
 
-void ComponentCatalogue::write()
+void ComponentCatalogue::writeAsciiEntries(AskapAsciiCatalogueWriter *writer)
 {
-    this->check(false);
-    ASKAPLOG_DEBUG_STR(logger, "Writing to votable " << itsVotableFilename);
-    this->writeVOT();
-    this->check(true);
-    ASKAPLOG_DEBUG_STR(logger, "Writing to ascii file " << itsAsciiFilename);
-    this->writeASCII();
-    this->writeAnnotations();
+    writer->writeEntries<CasdaComponent>(itsComponents);
 }
 
-void ComponentCatalogue::writeVOT()
+void ComponentCatalogue::writeVOTableEntries(AskapVOTableCatalogueWriter *writer)
 {
-    AskapVOTableCatalogueWriter vowriter(itsVotableFilename);
-    vowriter.setup(itsCube);
-    ASKAPLOG_DEBUG_STR(logger, "Writing component table to the VOTable " <<
-                       itsVotableFilename);
-    vowriter.setColumnSpec(&itsSpec);
-    vowriter.openCatalogue();
-    writeVOTinformation(vowriter);
-    vowriter.writeHeader();
-    duchamp::VOParam version("table_version", "meta.version", "char", itsVersion, itsVersion.size() + 1, "");
-    vowriter.writeParameter(version);
-    vowriter.writeParameters();
-    vowriter.writeFrequencyParam();
-    vowriter.writeStats();
-    vowriter.writeTableHeader();
-    vowriter.writeEntries<CasdaComponent>(itsComponents);
-    vowriter.writeFooter();
-    vowriter.closeCatalogue();
-}
-
-void ComponentCatalogue::writeVOTinformation(AskapVOTableCatalogueWriter &vowriter)
-{
-    vowriter.setResourceName("Component catalogue from Selavy source-finding");
-    vowriter.setTableName("Component catalogue");
-}
-
-void ComponentCatalogue::writeASCII()
-{
-
-    AskapAsciiCatalogueWriter writer(itsAsciiFilename);
-    ASKAPLOG_DEBUG_STR(logger, "Writing Fitted components to " << itsAsciiFilename);
-    writer.setup(itsCube);
-    writer.setColumnSpec(&itsSpec);
-    writer.openCatalogue();
-    writer.writeTableHeader();
-    writer.writeEntries<CasdaComponent>(itsComponents);
-    writer.writeFooter();
-    writer.closeCatalogue();
-
+    writer->writeEntries<CasdaComponent>(itsComponents);
 }
 
 void ComponentCatalogue::writeAnnotations()

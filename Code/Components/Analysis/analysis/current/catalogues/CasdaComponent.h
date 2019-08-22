@@ -30,7 +30,7 @@
 #define ASKAP_ANALYSIS_CASDA_COMPONENT_H_
 
 #include <catalogues/Casda.h>
-#include <catalogues/CatalogueEntry.h>
+#include <catalogues/CasdaObject.h>
 #include <sourcefitting/RadioSource.h>
 #include <Common/ParameterSet.h>
 #include <duchamp/Outputs/CatalogueSpecification.hh>
@@ -47,7 +47,7 @@ namespace analysis {
 /// allows extraction from a RadioSource object and provides methods
 /// to write out the Component to a VOTable or other type of catalogue
 /// file.
-class CasdaComponent : public CatalogueEntry {
+class CasdaComponent : public CasdaObject {
     public:
         /// Default constructor that does nothing.
         CasdaComponent();
@@ -57,7 +57,7 @@ class CasdaComponent : public CatalogueEntry {
         /// by the parameter fitNumber, from the fit results given by
         /// the fitType parameter. The parset is used to make the
         /// corresponding Island, to get the Island ID, and is passed
-        /// to the CatalogueEntry constructor to get the SB and base
+        /// to the CasdaObject constructor to get the SB and base
         /// ID.
         CasdaComponent(sourcefitting::RadioSource &obj,
                        const LOFAR::ParameterSet &parset,
@@ -100,21 +100,13 @@ class CasdaComponent : public CatalogueEntry {
         /// Return the spectral curvature error
         const double betaErr();
 
-    /// @brief Determine whether to report the spectral index &
-    /// curvature values in the catalogue.
-    /// @details Base this on either the flux peak or the
-    /// flux_peak/rms_image value, comparing to the parset parameter
-    /// spectralTerms.threshold or spectralTerms.thresholdSNR
-    /// respectively.
-    bool useAlphaBeta();
-    
-        ///  Print a row of values for the Component into an
-        ///  output table. Each column from the catalogue
-        ///  specification is sent to printTableEntry for output.
-        ///  \param stream Where the output is written
-        ///  \param columns The vector list of Column objects
-        void printTableRow(std::ostream &stream,
-                           duchamp::Catalogues::CatalogueSpecification &columns);
+        /// @brief Determine whether to report the spectral index &
+        /// curvature values in the catalogue.
+        /// @details Base this on either the flux peak or the
+        /// flux_peak/rms_image value, comparing to the parset parameter
+        /// spectralTerms.threshold or spectralTerms.thresholdSNR
+        /// respectively.
+        bool useAlphaBeta();
 
         ///  Print a single value (a column) into an output table. The
         ///  column's correct value is extracted according to the
@@ -131,10 +123,6 @@ class CasdaComponent : public CatalogueEntry {
         /// an Askap Error is thrown. Column must be non-const as it
         /// could change.
         void checkCol(duchamp::Catalogues::Column &column, bool checkTitle);
-
-        /// Perform the column check for all colums in
-        /// specification.
-        void checkSpec(duchamp::Catalogues::CatalogueSpecification &spec, bool checkTitle);
 
         /// Write the ellipse showing the component shape to the given
         /// Annotation file. This allows writing to Karma, DS9 or CASA
@@ -222,10 +210,10 @@ class CasdaComponent : public CatalogueEntry {
         /// A comment string, not used as yet.
         std::string itsComment;
 
-    /// Not used in the catalogue, but a scale factor for pixel fluxes
-    double itsPeakFluxscale;
-    /// Not used in the catalogue, but a scale factor for integrated fluxes
-    double itsIntFluxscale;
+        /// Not used in the catalogue, but a scale factor for pixel fluxes
+        double itsPeakFluxscale;
+        /// Not used in the catalogue, but a scale factor for integrated fluxes
+        double itsIntFluxscale;
 
         /// The following are not in the CASDA component catalogue at
         /// v1.7, but are reported in the fit catalogues of Selavy

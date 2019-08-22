@@ -26,9 +26,11 @@
 ///
 /// @author Matthew Whiting <Matthew.Whiting@csiro.au>
 ///
-#ifndef ASKAP_ANALYSIS_CAT_ENTRY_H_
-#define ASKAP_ANALYSIS_CAT_ENTRY_H_
+#ifndef ASKAP_ANALYSIS_CASDA_OBJECT_H_
+#define ASKAP_ANALYSIS_CASDA_OBJECT_H_
 #include <Common/ParameterSet.h>
+#include <duchamp/Outputs/CatalogueSpecification.hh>
+#include <duchamp/Outputs/columns.hh>
 #include <string>
 
 namespace askap {
@@ -40,18 +42,18 @@ namespace analysis {
 /// a base for a full component/island/whatever ID combining the SB_ID
 /// and the image name. The class also provides for methods to get the
 /// RA and Dec of the entry.
-class CatalogueEntry {
+class CasdaObject {
     public:
 
         /// Default constructor that does nothing
-        CatalogueEntry();
+        CasdaObject();
 
         /// Constructor from a parset, getting the SB ID and making a
         /// base ID with it and the image name.
-        CatalogueEntry(const LOFAR::ParameterSet &parset);
+        CasdaObject(const LOFAR::ParameterSet &parset);
 
         /// Default destructor
-        virtual ~CatalogueEntry() {};
+        virtual ~CasdaObject() {};
 
         /// Accessor for the RA (not defined in base class)
         virtual const float ra() = 0;
@@ -59,11 +61,25 @@ class CatalogueEntry {
         /// Accessor for the Declination (not defined in base class)
         virtual const float dec() = 0;
 
-    protected:
-    /// @brief Parset - can add things here
-    LOFAR::ParameterSet            itsParset;
+        virtual void printTableRow(std::ostream &stream, duchamp::Catalogues::CatalogueSpecification &columns);
 
-    /// The Scheduling Block ID
+        virtual void printTableEntry(std::ostream &stream, duchamp::Catalogues::Column &column);
+
+        virtual void checkSpec(duchamp::Catalogues::CatalogueSpecification &spec, bool checkTitle);
+        /// Allow the Column provided to check its width against that
+        /// required by the value for this Component, and increase its
+        /// width if need be. The correct value is chose according to
+        /// the COLNAME key. If a key is given that was not expected,
+        /// an Askap Error is thrown. Column must be non-const as it
+        /// could change.
+        virtual void checkCol(duchamp::Catalogues::Column &column, bool checkTitle);
+
+
+    protected:
+        /// @brief Parset - can add things here
+        LOFAR::ParameterSet            itsParset;
+
+        /// The Scheduling Block ID
         std::string itsSBid;
 
         /// The base ID that ties an entry to a unique observation &

@@ -27,6 +27,7 @@
 /// @author Matthew Whiting <Matthew.Whiting@csiro.au>
 ///
 #include <catalogues/AbsorptionCatalogue.h>
+#include <catalogues/CasdaCatalogue.h>
 #include <askap_analysis.h>
 
 #include <askap/AskapLogging.h>
@@ -43,6 +44,7 @@
 
 #include <Common/ParameterSet.h>
 #include <duchamp/Outputs/CatalogueSpecification.hh>
+#include <duchamp/Outputs/CatalogueWriter.hh>
 #include <vector>
 #include <map>
 
@@ -53,23 +55,18 @@ namespace askap {
 namespace analysis {
 
 AbsorptionCatalogue::AbsorptionCatalogue(std::vector< std::pair<CasdaComponent,
-                                         sourcefitting::RadioSource> > &srclist,
-                                         const LOFAR::ParameterSet &parset,
-                                         duchamp::Cube *cube):
-    itsObjects(),
-    itsSpec(),
-    itsCube(cube),
-    itsVersion("casda.sl_absorption_object_v0.7")
+        sourcefitting::RadioSource> > &srclist,
+        const LOFAR::ParameterSet &parset,
+        duchamp::Cube *cube):
+    CasdaCatalogue(parset, cube),
+    itsObjects()
 {
+    itsVersion = "casda.sl_absorption_object_v0.7";
+    itsFilenameStub = "absorption";
+    itsObjectType = "Absorption object";
+    setup();
     this->defineObjects(srclist, parset);
     this->defineSpec();
-
-    duchamp::Param par = parseParset(parset);
-    std::string filenameBase = par.getOutFile();
-    filenameBase.replace(filenameBase.rfind(".txt"),
-                         std::string::npos, ".absobjects");
-    itsVotableFilename = filenameBase + ".xml";
-    itsAsciiFilename = filenameBase + ".txt";
 
 }
 
@@ -186,6 +183,48 @@ void AbsorptionCatalogue::defineSpec()
 
 }
 
+void AbsorptionCatalogue::fixWidths()
+{
+    // -------------------------------------------
+    // DO NOT CHANGE UNLESS COORDINATED WITH CASDA
+    // -------------------------------------------
+
+//    fixColWidth(itsSpec.column("IMAGEID"),         50);
+    fixColWidth(itsSpec.column("DATEOBS"),           50);
+    fixColWidth(itsSpec.column("COMP_ID"),           22);
+    fixColWidth(itsSpec.column("CONTFLUX"),           9);
+    fixColWidth(itsSpec.column("ID"),                24);
+    fixColWidth(itsSpec.column("NAME"),              15);
+    fixColWidth(itsSpec.column("RA"),                12);
+    fixColWidth(itsSpec.column("DEC"),               13);
+    fixColWidth(itsSpec.column("RAJD"),              11);
+    fixColWidth(itsSpec.column("DECJD"),             11);
+    fixColWidth(itsSpec.column("RAERR"),             11);
+    fixColWidth(itsSpec.column("DECERR"),            11);
+    fixColWidth(itsSpec.column("FREQ_UW"),           11);
+    fixColWidth(itsSpec.column("FREQ_UW_ERR"),       11);
+    fixColWidth(itsSpec.column("FREQ_W"),            11);
+    fixColWidth(itsSpec.column("FREQ_W_ERR"),        11);
+    fixColWidth(itsSpec.column("Z_HI_UW"),           11);
+    fixColWidth(itsSpec.column("Z_HI_UW_ERR"),       11);
+    fixColWidth(itsSpec.column("Z_HI_W"),            11);
+    fixColWidth(itsSpec.column("Z_HI_W_ERR"),        11);
+    fixColWidth(itsSpec.column("Z_HI_PEAK"),         11);
+    fixColWidth(itsSpec.column("Z_HI_PEAK_ERR"),     11);
+    fixColWidth(itsSpec.column("W50"),               11);
+    fixColWidth(itsSpec.column("W50_ERR"),           11);
+    fixColWidth(itsSpec.column("W20"),               11);
+    fixColWidth(itsSpec.column("W20_ERR"),           11);
+    fixColWidth(itsSpec.column("RMS_IMAGECUBE"),     10);
+    fixColWidth(itsSpec.column("OPT_DEPTH_PEAK"),    10);
+    fixColWidth(itsSpec.column("OPT_DEPTH_INT"),     10);
+    fixColWidth(itsSpec.column("OPT_DEPTH_INT_ERR"), 10);
+    fixColWidth(itsSpec.column("FLAG1"),              5);
+    fixColWidth(itsSpec.column("FLAG2"),              5);
+    fixColWidth(itsSpec.column("FLAG3"),              5);
+
+}
+
 void AbsorptionCatalogue::check(bool checkTitle)
 {
     std::vector<CasdaAbsorptionObject>::iterator obj;
@@ -195,49 +234,14 @@ void AbsorptionCatalogue::check(bool checkTitle)
 
 }
 
-void AbsorptionCatalogue::write()
+void AbsorptionCatalogue::writeAsciiEntries(AskapAsciiCatalogueWriter *writer)
 {
-    this->check(false);
-    this->writeVOT();
-    this->check(true);
-    this->writeASCII();
+    writer->writeEntries<CasdaAbsorptionObject>(itsObjects);
 }
 
-void AbsorptionCatalogue::writeVOT()
+void AbsorptionCatalogue::writeVOTableEntries(AskapVOTableCatalogueWriter *writer)
 {
-    AskapVOTableCatalogueWriter vowriter(itsVotableFilename);
-    vowriter.setup(itsCube);
-    ASKAPLOG_DEBUG_STR(logger, "Writing object table to the VOTable " <<
-                       itsVotableFilename);
-    vowriter.setColumnSpec(&itsSpec);
-    vowriter.openCatalogue();
-    vowriter.setResourceName("Absorption object catalogue from Selavy source-finding");
-    vowriter.setTableName("Absorption object catalogue");
-    vowriter.writeHeader();
-    duchamp::VOParam version("table_version", "meta.version", "char", itsVersion, itsVersion.size() + 1, "");
-    vowriter.writeParameter(version);
-    vowriter.writeParameters();
-    vowriter.writeFrequencyParam();
-    vowriter.writeStats();
-    vowriter.writeTableHeader();
-    vowriter.writeEntries<CasdaAbsorptionObject>(itsObjects);
-    vowriter.writeFooter();
-    vowriter.closeCatalogue();
-}
-
-void AbsorptionCatalogue::writeASCII()
-{
-
-    AskapAsciiCatalogueWriter writer(itsAsciiFilename);
-    ASKAPLOG_DEBUG_STR(logger, "Writing Fit results to " << itsAsciiFilename);
-    writer.setup(itsCube);
-    writer.setColumnSpec(&itsSpec);
-    writer.openCatalogue();
-    writer.writeTableHeader();
-    writer.writeEntries<CasdaAbsorptionObject>(itsObjects);
-    writer.writeFooter();
-    writer.closeCatalogue();
-
+    writer->writeEntries<CasdaAbsorptionObject>(itsObjects);
 }
 
 

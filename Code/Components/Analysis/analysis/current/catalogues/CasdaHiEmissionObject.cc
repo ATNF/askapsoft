@@ -27,7 +27,7 @@
 /// @author Matthew Whiting <Matthew.Whiting@csiro.au>
 ///
 #include <catalogues/CasdaHiEmissionObject.h>
-#include <catalogues/CatalogueEntry.h>
+#include <catalogues/CasdaObject.h>
 #include <catalogues/CasdaComponent.h>
 #include <catalogues/Casda.h>
 #include <askap_analysis.h>
@@ -65,85 +65,85 @@ namespace askap {
 namespace analysis {
 
 CasdaHiEmissionObject::CasdaHiEmissionObject():
-    CatalogueEntry()
+    CasdaObject()
 {
 }
 
 CasdaHiEmissionObject::CasdaHiEmissionObject(sourcefitting::RadioSource &obj,
         const LOFAR::ParameterSet &parset):
-    CatalogueEntry(parset),
+    CasdaObject(parset),
     itsName(""),
     itsRAs_w(""),
     itsDECs_w(""),
-    itsRA_w(0.,0.),
-    itsDEC_w(0.,0.),
-    itsRA_uw(0.,0.),
-    itsDEC_uw(0.,0.),
-    itsGlong_w(0.,0.),
-    itsGlat_w(0.,0.),
-    itsGlong_uw(0.,0.),
-    itsGlat_uw(0.,0.),
+    itsRA_w(0., 0.),
+    itsDEC_w(0., 0.),
+    itsRA_uw(0., 0.),
+    itsDEC_uw(0., 0.),
+    itsGlong_w(0., 0.),
+    itsGlat_w(0., 0.),
+    itsGlong_uw(0., 0.),
+    itsGlat_uw(0., 0.),
     itsMajorAxis(0.),
     itsMinorAxis(0.),
     itsPositionAngle(0.),
-    itsMajorAxis_fit(0.,0.),
-    itsMinorAxis_fit(0.,0.),
-    itsPositionAngle_fit(0.,0.),
+    itsMajorAxis_fit(0., 0.),
+    itsMinorAxis_fit(0., 0.),
+    itsPositionAngle_fit(0., 0.),
     itsSizeX(0),
     itsSizeY(0),
     itsSizeZ(0),
     itsNumVoxels(0),
-    itsAsymmetry2d(0.,0.),
-    itsAsymmetry3d(0.,0.),
-    itsFreq_uw(0.,0.),
-    itsFreq_w(0.,0.),
+    itsAsymmetry2d(0., 0.),
+    itsAsymmetry3d(0., 0.),
+    itsFreq_uw(0., 0.),
+    itsFreq_w(0., 0.),
     itsFreq_peak(0.),
-    itsVelHI_uw(0.,0.),
-    itsVelHI_w(0.,0.),
+    itsVelHI_uw(0., 0.),
+    itsVelHI_w(0., 0.),
     itsVelHI_peak(0.),
-    itsIntegFlux(0.,0.),
+    itsIntegFlux(0., 0.),
     itsFluxMax(0.),
     itsFluxMin(0.),
     itsFluxMean(0.),
     itsFluxStddev(0.),
     itsFluxRMS(0.),
     itsRMSimagecube(0.),
-    itsW50_freq(0.,0.),
-    itsW20_freq(0.,0.),
-    itsCW50_freq(0.,0.),
-    itsCW20_freq(0.,0.),
-    itsW50_vel(0.,0.),
-    itsW20_vel(0.,0.),
-    itsCW50_vel(0.,0.),
-    itsCW20_vel(0.,0.),
-    itsFreq_W50clip_uw(0.,0.),
-    itsFreq_W20clip_uw(0.,0.),
-    itsFreq_CW50clip_uw(0.,0.),
-    itsFreq_CW20clip_uw(0.,0.),
-    itsFreq_W50clip_w(0.,0.),
-    itsFreq_W20clip_w(0.,0.),
-    itsFreq_CW50clip_w(0.,0.),
-    itsFreq_CW20clip_w(0.,0.),
-    itsVelHI_W50clip_uw(0.,0.),
-    itsVelHI_W20clip_uw(0.,0.),
-    itsVelHI_CW50clip_uw(0.,0.),
-    itsVelHI_CW20clip_uw(0.,0.),
-    itsVelHI_W50clip_w(0.,0.),
-    itsVelHI_W20clip_w(0.,0.),
-    itsVelHI_CW50clip_w(0.,0.),
-    itsVelHI_CW20clip_w(0.,0.),
-    itsIntegFlux_W50clip(0.,0.),
-    itsIntegFlux_W20clip(0.,0.),
-    itsIntegFlux_CW50clip(0.,0.),
-    itsIntegFlux_CW20clip(0.,0.),
-    itsBFfit_a(0.,0.),
-    itsBFfit_w(0.,0.),
-    itsBFfit_b1(0.,0.),
-    itsBFfit_b2(0.,0.),
-    itsBFfit_xe(0.,0.),
-    itsBFfit_xp(0.,0.),
-    itsBFfit_c(0.,0.),
-    itsBFfit_n(0.,0.),
+    itsW50_freq(0., 0.),
+    itsW20_freq(0., 0.),
+    itsCW50_freq(0., 0.),
+    itsCW20_freq(0., 0.),
+    itsW50_vel(0., 0.),
+    itsW20_vel(0., 0.),
+    itsCW50_vel(0., 0.),
+    itsCW20_vel(0., 0.),
+    itsFreq_W50clip_uw(0., 0.),
+    itsFreq_W20clip_uw(0., 0.),
+    itsFreq_CW50clip_uw(0., 0.),
+    itsFreq_CW20clip_uw(0., 0.),
+    itsFreq_W50clip_w(0., 0.),
+    itsFreq_W20clip_w(0., 0.),
+    itsFreq_CW50clip_w(0., 0.),
+    itsFreq_CW20clip_w(0., 0.),
+    itsVelHI_W50clip_uw(0., 0.),
+    itsVelHI_W20clip_uw(0., 0.),
+    itsVelHI_CW50clip_uw(0., 0.),
+    itsVelHI_CW20clip_uw(0., 0.),
+    itsVelHI_W50clip_w(0., 0.),
+    itsVelHI_W20clip_w(0., 0.),
+    itsVelHI_CW50clip_w(0., 0.),
+    itsVelHI_CW20clip_w(0., 0.),
+    itsIntegFlux_W50clip(0., 0.),
+    itsIntegFlux_W20clip(0., 0.),
+    itsIntegFlux_CW50clip(0., 0.),
+    itsIntegFlux_CW20clip(0., 0.),
+    itsBFfit_a(0., 0.),
+    itsBFfit_w(0., 0.),
+    itsBFfit_b1(0., 0.),
+    itsBFfit_b2(0., 0.),
+    itsBFfit_xe(0., 0.),
+    itsBFfit_xp(0., 0.),
+    itsBFfit_c(0., 0.),
+    itsBFfit_n(0., 0.),
     itsFlagResolved(0),
     itsFlag2(0),
     itsFlag3(0),
@@ -437,16 +437,6 @@ const std::string CasdaHiEmissionObject::id()
     return itsObjectID;
 }
 
-void CasdaHiEmissionObject::printTableRow(std::ostream &stream,
-        duchamp::Catalogues::CatalogueSpecification &columns)
-{
-    stream.setf(std::ios::fixed);
-    for (size_t i = 0; i < columns.size(); i++) {
-        this->printTableEntry(stream, columns.column(i));
-    }
-    stream << "\n";
-}
-
 void CasdaHiEmissionObject::printTableEntry(std::ostream &stream,
         duchamp::Catalogues::Column &column)
 {
@@ -720,7 +710,7 @@ void CasdaHiEmissionObject::printTableEntry(std::ostream &stream,
 
 void CasdaHiEmissionObject::checkCol(duchamp::Catalogues::Column &column, bool checkTitle)
 {
-    bool checkPrec=false;
+    bool checkPrec = false;
     std::string type = column.type();
     if (type == "ID") {
         column.check(itsObjectID, checkTitle);
@@ -989,12 +979,6 @@ void CasdaHiEmissionObject::checkCol(duchamp::Catalogues::Column &column, bool c
 
 }
 
-void CasdaHiEmissionObject::checkSpec(duchamp::Catalogues::CatalogueSpecification &spec, bool checkTitle)
-{
-    for (size_t i = 0; i < spec.size(); i++) {
-        this->checkCol(spec.column(i), checkTitle);
-    }
-}
 
 //**************************************************************//
 

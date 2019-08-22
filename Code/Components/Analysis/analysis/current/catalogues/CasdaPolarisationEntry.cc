@@ -28,7 +28,7 @@
 ///
 #include <catalogues/CasdaPolarisationEntry.h>
 #include <catalogues/CasdaComponent.h>
-#include <catalogues/CatalogueEntry.h>
+#include <catalogues/CasdaObject.h>
 #include <catalogues/CasdaIsland.h>
 #include <catalogues/Casda.h>
 #include <askap_analysis.h>
@@ -55,13 +55,13 @@ namespace askap {
 namespace analysis {
 
 CasdaPolarisationEntry::CasdaPolarisationEntry():
-    CatalogueEntry()
+    CasdaObject()
 {
 }
 
 CasdaPolarisationEntry::CasdaPolarisationEntry(CasdaComponent *comp,
         const LOFAR::ParameterSet &parset):
-    CatalogueEntry(parset)
+    CasdaObject(parset)
 {
 
     itsRA = comp->ra();
@@ -72,11 +72,11 @@ CasdaPolarisationEntry::CasdaPolarisationEntry(CasdaComponent *comp,
     LOFAR::ParameterSet polParset = parset.makeSubset("RMSynthesis.");
     polParset.replace(LOFAR::KVpair("objid", itsComponentID));
     polParset.replace(LOFAR::KVpair("objectname", itsName));
-    if (parset.isDefined("imageHistory")){
+    if (parset.isDefined("imageHistory")) {
         polParset.add("imageHistory", parset.getString("imageHistory"));
     }
-    if(! polParset.isDefined("imagetype")){
-        polParset.add("imagetype","fits");
+    if (! polParset.isDefined("imagetype")) {
+        polParset.add("imagetype", "fits");
     }
 
     PolarisationData poldata(polParset);
@@ -170,17 +170,6 @@ const std::string CasdaPolarisationEntry::id()
 {
     return itsComponentID;
 }
-
-void CasdaPolarisationEntry::printTableRow(std::ostream &stream,
-        duchamp::Catalogues::CatalogueSpecification &columns)
-{
-    stream.setf(std::ios::fixed);
-    for (size_t i = 0; i < columns.size(); i++) {
-        this->printTableEntry(stream, columns.column(i));
-    }
-    stream << "\n";
-}
-
 
 void CasdaPolarisationEntry::printTableEntry(std::ostream &stream,
         duchamp::Catalogues::Column &column)
@@ -280,7 +269,7 @@ void CasdaPolarisationEntry::printTableEntry(std::ostream &stream,
 
 void CasdaPolarisationEntry::checkCol(duchamp::Catalogues::Column &column, bool checkTitle)
 {
-    bool checkPrec=false;
+    bool checkPrec = false;
     std::string type = column.type();
     if (type == "ID") {
         column.check(itsComponentID, checkTitle);
@@ -375,13 +364,6 @@ void CasdaPolarisationEntry::checkCol(duchamp::Catalogues::Column &column, bool 
 
 }
 
-void CasdaPolarisationEntry::checkSpec(duchamp::Catalogues::CatalogueSpecification &spec, bool checkTitle)
-{
-    for (size_t i = 0; i < spec.size(); i++) {
-        this->checkCol(spec.column(i), checkTitle);
-    }
-}
-
 //**************************************************************//
 
 LOFAR::BlobOStream& operator<<(LOFAR::BlobOStream& blob, CasdaPolarisationEntry& src)
@@ -391,7 +373,7 @@ LOFAR::BlobOStream& operator<<(LOFAR::BlobOStream& blob, CasdaPolarisationEntry&
     casda::ValueError v;
     unsigned int u;
 
-    // from CatalogueEntry.h
+    // from CasdaObject.h
     s = src.itsSBid; blob << s;
     s = src.itsIDbase; blob << s;
     // from CasdaPolarisationEntry.h
@@ -444,7 +426,7 @@ LOFAR::BlobIStream& operator>>(LOFAR::BlobIStream& blob, CasdaPolarisationEntry&
     casda::ValueError v;
     unsigned int u;
 
-    // from CatalogueEntry.h
+    // from CasdaObject.h
     blob >> s; src.itsSBid = s;
     blob >> s; src.itsIDbase = s;
     // from CasdaPolarisationEntry.h
