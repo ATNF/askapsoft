@@ -50,6 +50,7 @@
 #include "casacore/measures/Measures/MEpoch.h"
 #include "casacore/ms/MeasurementSets/MeasurementSet.h"
 #include "casacore/ms/MeasurementSets/MSColumns.h"
+#include "dataaccess/FeedSubtableHandler.h"
 
 // Local package includes
 #include "casdaupload/ScanElement.h"
@@ -137,6 +138,9 @@ void MeasurementSetElement::extractData()
     const ROMSDataDescColumns& ddc = msc.dataDescription();
     const ROMSPolarizationColumns& polc = msc.polarization();
     const ROMSSpWindowColumns& spwc = msc.spectralWindow();
+    accessors::FeedSubtableHandler fsh(ms);
+    TableColumn feedcol(ms, "FEED1");
+    int beamId = feedcol.asInt(0);
 
     // Iterate over all rows, creating a ScanElement for each scan
     casa::Int lastScanId = -1;
@@ -153,8 +157,12 @@ void MeasurementSetElement::extractData()
             // Field
             const casa::Int fieldId = msc.fieldId()(row);
             const casa::Vector<MDirection> dirVec = fieldc.phaseDirMeasCol()(fieldId);
-            const MDirection fieldDirection = dirVec(0);
+            MDirection fieldDirection = dirVec(0);
             const std::string fieldName = fieldc.name()(fieldId);
+
+            const casa::Vector<casa::RigidVector<casa::Double, 2> > offsets = fsh.getAllBeamOffsets(startTime,0);
+            fieldDirection.shift(-offsets[beamId](0),offsets[beamId](1),casa::True);
+            const MDirection beamDirection(fieldDirection);
 
             // Polarisations
             const casa::Int dataDescId = msc.dataDescId()(row);
@@ -205,7 +213,7 @@ void MeasurementSetElement::extractData()
             itsScans.push_back(ScanElement(scanNum,
                                            startTime,
                                            endTime,
-                                           fieldDirection,
+                                           beamDirection,
                                            fieldName,
                                            stokesTypesInt,
                                            nChan,
