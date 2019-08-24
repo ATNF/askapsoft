@@ -294,7 +294,7 @@ ${SLURM_CONFIG}
 #SBATCH --ntasks-per-node=1
 #SBATCH --job-name=bpvalidate
 ${exportDirective}
-#SBATCH --output="$slurmOut/slurm-findBandpass-%j.out"
+#SBATCH --output="$slurmOut/slurm-validateBandpass-%j.out"
 
 ${askapsoftModuleCommands}
 
