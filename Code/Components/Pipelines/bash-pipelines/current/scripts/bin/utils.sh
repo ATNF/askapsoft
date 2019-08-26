@@ -395,7 +395,8 @@ function setImageProperties()
         fi
     fi
 
-    polSuffix="Stokes $(echo $pol | tr '[:upper:]' '[:lower:]')"
+    # Put Stokes parameter into upper case
+    polSuffix="Stokes $(echo $pol | tr '[:lower:]' '[:upper:]')"
 
     base="${band}${imageBase}${imSuffix}"
 
