@@ -64,6 +64,8 @@ using std::abs;
 using std::map;
 using std::string;
 
+//#define FORWARD_DIFFERENCE
+
 namespace askap
 {
   namespace scimath
@@ -676,12 +678,13 @@ std::pair<double,double> LinearSolver::solveSubsetOfNormalEquations(Params &para
 
             if (myrank == 0) ASKAPLOG_DEBUG_STR(logger, "nChannelsLocal = " << nChannelsLocal);
 
-            std::vector<int> currIndexGlobal(nParametersTotal);
-            std::vector<int> nextIndexGlobal(nParametersTotal);
+            std::vector<int> leftIndexGlobal(nParametersTotal);
+            std::vector<int> rightIndexGlobal(nParametersTotal);
 
             // NOTE: Assume channels are ordered with the MPI rank order, i.e., the higher the rank the higher the channel number.
             // E.g.: for 40 channels and 4 workers, rank 0 has channels 0-9, rank 1: 10-19, rank 2: 20-29, and rank 3: 30-39.
 
+#ifdef FORWARD_DIFFERENCE
             size_t localChannelNumber = 0;
             for (size_t i = 0; i < nParametersTotal; i += 2) {
 
@@ -693,28 +696,28 @@ std::pair<double,double> LinearSolver::solveSubsetOfNormalEquations(Params &para
                     if (shiftedIndex < nParametersTotal) {
                     // Reached last local channel - shift the 'next' index.
                         // Real part.
-                        currIndexGlobal[i] = i;
-                        nextIndexGlobal[i] = shiftedIndex;
+                        leftIndexGlobal[i] = i;
+                        rightIndexGlobal[i] = shiftedIndex;
                         // Imaginary part.
-                        currIndexGlobal[i + 1] = currIndexGlobal[i] + 1;
-                        nextIndexGlobal[i + 1] = nextIndexGlobal[i] + 1;
+                        leftIndexGlobal[i + 1] = leftIndexGlobal[i] + 1;
+                        rightIndexGlobal[i + 1] = rightIndexGlobal[i] + 1;
                     } else {
                     // Reached last global channel - do not add constraints - it is already coupled with previous one.
                         // Real part.
-                        currIndexGlobal[i] = -1;
-                        nextIndexGlobal[i] = -1;
+                        leftIndexGlobal[i] = -1;
+                        rightIndexGlobal[i] = -1;
                         // Imaginary part.
-                        currIndexGlobal[i + 1] = -1;
-                        nextIndexGlobal[i + 1] = -1;
+                        leftIndexGlobal[i + 1] = -1;
+                        rightIndexGlobal[i + 1] = -1;
                     }
 
                 } else {
                     // Real part.
-                    currIndexGlobal[i] = i;
-                    nextIndexGlobal[i] = i + 2;
+                    leftIndexGlobal[i] = i;
+                    rightIndexGlobal[i] = i + 2;
                     // Imaginary part.
-                    currIndexGlobal[i + 1] = currIndexGlobal[i] + 1;
-                    nextIndexGlobal[i + 1] = nextIndexGlobal[i] + 1;
+                    leftIndexGlobal[i + 1] = leftIndexGlobal[i] + 1;
+                    rightIndexGlobal[i + 1] = rightIndexGlobal[i] + 1;
                 }
 
                 if (lastLocalChannel) {
@@ -724,6 +727,93 @@ std::pair<double,double> LinearSolver::solveSubsetOfNormalEquations(Params &para
                     localChannelNumber++;
                 }
             }
+#else
+            size_t localChannelNumber = 0;
+            for (size_t i = 0; i < nParametersTotal; i += 2) {
+
+                bool firstLocalChannel = (localChannelNumber == 0);
+                bool lastLocalChannel = (localChannelNumber == nChannelsLocal - 1);
+
+                int shiftedLeftIndex = (i - 2) - nextChannelIndexShift;
+                size_t shiftedRightIndex = (i + 2) + nextChannelIndexShift;
+
+                if (firstLocalChannel && lastLocalChannel) {
+                // One local channel.
+                    if ((shiftedLeftIndex >= 0) && (shiftedRightIndex < nParametersTotal)) {
+                        // Real part.
+                        leftIndexGlobal[i] = shiftedLeftIndex;
+                        rightIndexGlobal[i] = shiftedRightIndex;
+                        // Imaginary part.
+                        leftIndexGlobal[i + 1] = leftIndexGlobal[i] + 1;
+                        rightIndexGlobal[i + 1] = rightIndexGlobal[i] + 1;
+
+                    } else {
+                    // First/last global channel - do not add constraints - it is already coupled with next/previous one.
+                        // Real part.
+                        leftIndexGlobal[i] = -1;
+                        rightIndexGlobal[i] = -1;
+                        // Imaginary part.
+                        leftIndexGlobal[i + 1] = -1;
+                        rightIndexGlobal[i + 1] = -1;
+                    }
+
+                } else if (firstLocalChannel) {
+
+                    if (shiftedLeftIndex >= 0) {
+                    // First local channel - shift the 'left' index.
+                        // Real part.
+                        leftIndexGlobal[i] = shiftedLeftIndex;
+                        rightIndexGlobal[i] = i + 2;
+                        // Imaginary part.
+                        leftIndexGlobal[i + 1] = leftIndexGlobal[i] + 1;
+                        rightIndexGlobal[i + 1] = rightIndexGlobal[i] + 1;
+
+                    } else {
+                    // First/last global channel - do not add constraints - it is already coupled with next/previous one.
+                        // Real part.
+                        leftIndexGlobal[i] = -1;
+                        rightIndexGlobal[i] = -1;
+                        // Imaginary part.
+                        leftIndexGlobal[i + 1] = -1;
+                        rightIndexGlobal[i + 1] = -1;
+                    }
+                } else if (lastLocalChannel) {
+
+                    if (shiftedRightIndex < nParametersTotal) {
+                    // Last local channel - shift the 'right' index.
+                        // Real part.
+                        leftIndexGlobal[i] = i - 2;
+                        rightIndexGlobal[i] = shiftedRightIndex;
+                        // Imaginary part.
+                        leftIndexGlobal[i + 1] = leftIndexGlobal[i] + 1;
+                        rightIndexGlobal[i + 1] = rightIndexGlobal[i] + 1;
+                    } else {
+                    // Reached last global channel - do not add constraints - it is already coupled with previous one.
+                        // Real part.
+                        leftIndexGlobal[i] = -1;
+                        rightIndexGlobal[i] = -1;
+                        // Imaginary part.
+                        leftIndexGlobal[i + 1] = -1;
+                        rightIndexGlobal[i + 1] = -1;
+                    }
+
+                } else {
+                    // Real part.
+                    leftIndexGlobal[i] = i - 2;
+                    rightIndexGlobal[i] = i + 2;
+                    // Imaginary part.
+                    leftIndexGlobal[i + 1] = leftIndexGlobal[i] + 1;
+                    rightIndexGlobal[i + 1] = rightIndexGlobal[i] + 1;
+                }
+
+                if (lastLocalChannel) {
+                    // Reset local channel counter.
+                    localChannelNumber = 0;
+                } else {
+                    localChannelNumber++;
+                }
+            }
+#endif
 
             //-----------------------------------------------------------------------------
             // Adding Jacobian of the gradient to the matrix.
@@ -743,8 +833,8 @@ std::pair<double,double> LinearSolver::solveSubsetOfNormalEquations(Params &para
 
                 // Global matrix column indexes.
                 size_t globIndex[2];
-                globIndex[0] = currIndexGlobal[i]; // Current index: negative term in forward difference x[i+1] - x[i].
-                globIndex[1] = nextIndexGlobal[i]; // Next index: positive term in forward difference x[i+1] - x[i].
+                globIndex[0] = leftIndexGlobal[i]; // Current index: negative term in forward difference x[i+1] - x[i].
+                globIndex[1] = rightIndexGlobal[i]; // Next index: positive term in forward difference x[i+1] - x[i].
 
                 for (size_t k = 0; k < 2; k++) {
                     if (globIndex[k] >= 0
@@ -761,10 +851,11 @@ std::pair<double,double> LinearSolver::solveSubsetOfNormalEquations(Params &para
                 // Adding the Right-Hand Side.
                 //----------------------------------------------------
                 double b_RHS_value = 0.;
-                if (currIndexGlobal[i] >= 0 && nextIndexGlobal[i] >= 0) {
-                    b_RHS_value = - smoothingWeight * (x0[nextIndexGlobal[i]] - x0[currIndexGlobal[i]]);
+                if (leftIndexGlobal[i] >= 0 && rightIndexGlobal[i] >= 0) {
+                    b_RHS_value = - smoothingWeight * (x0[rightIndexGlobal[i]] - x0[leftIndexGlobal[i]]);
                 } else {
-                    ASKAPCHECK(currIndexGlobal[i] == -1 && nextIndexGlobal[i] == -1, "Wrong indexes!");
+                    ASKAPCHECK(leftIndexGlobal[i] == -1 && rightIndexGlobal[i] == -1,
+                            "Wrong indexes: " << i << ", " << leftIndexGlobal[i] << ", " << rightIndexGlobal[i]);
                 }
                 size_t b_index = matrix.GetCurrentNumberRows() - 1;
                 b_RHS[b_index] = b_RHS_value;
