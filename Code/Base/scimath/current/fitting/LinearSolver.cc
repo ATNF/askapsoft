@@ -734,8 +734,8 @@ std::pair<double,double> LinearSolver::solveSubsetOfNormalEquations(Params &para
                 bool firstLocalChannel = (localChannelNumber == 0);
                 bool lastLocalChannel = (localChannelNumber == nChannelsLocal - 1);
 
-                int shiftedLeftIndex = (i - 2) - nextChannelIndexShift;
-                size_t shiftedRightIndex = (i + 2) + nextChannelIndexShift;
+                int shiftedLeftIndex = i - nextChannelIndexShift;
+                size_t shiftedRightIndex = i + nextChannelIndexShift;
 
                 if (firstLocalChannel && lastLocalChannel) {
                 // One local channel.
@@ -833,8 +833,8 @@ std::pair<double,double> LinearSolver::solveSubsetOfNormalEquations(Params &para
 
                 // Global matrix column indexes.
                 size_t globIndex[2];
-                globIndex[0] = leftIndexGlobal[i]; // Current index: negative term in forward difference x[i+1] - x[i].
-                globIndex[1] = rightIndexGlobal[i]; // Next index: positive term in forward difference x[i+1] - x[i].
+                globIndex[0] = leftIndexGlobal[i];  // Left index: "minus" term in finite difference (e.g. -x[i] for x' =  x[i+1] - x[i])
+                globIndex[1] = rightIndexGlobal[i]; // Right index: "plus" term in finite difference (e.g. x[i+1] for x' =  x[i+1] - x[i]).
 
                 for (size_t k = 0; k < 2; k++) {
                     if (globIndex[k] >= 0
@@ -855,7 +855,7 @@ std::pair<double,double> LinearSolver::solveSubsetOfNormalEquations(Params &para
                     b_RHS_value = - smoothingWeight * (x0[rightIndexGlobal[i]] - x0[leftIndexGlobal[i]]);
                 } else {
                     ASKAPCHECK(leftIndexGlobal[i] == -1 && rightIndexGlobal[i] == -1,
-                            "Wrong indexes: " << i << ", " << leftIndexGlobal[i] << ", " << rightIndexGlobal[i]);
+                            "Wrong finite difference indexes: " << i << ", " << leftIndexGlobal[i] << ", " << rightIndexGlobal[i]);
                 }
                 size_t b_index = matrix.GetCurrentNumberRows() - 1;
                 b_RHS[b_index] = b_RHS_value;
