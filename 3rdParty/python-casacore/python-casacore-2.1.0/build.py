@@ -9,7 +9,6 @@ builder.has_extension = True
 wcslib = builder.dep.get_install_path("wcslib")
 cfitsio = builder.dep.get_install_path("cfitsio")
 boost   = builder.dep.get_install_path("boost")
-numpy   = builder.dep.get_install_path("numpy")
 casacore = builder.dep.get_install_path("casacore")
 
 builder.add_option("-I%s/include:%s/include:%s/include:%s/include"%(casacore,boost,wcslib,cfitsio))
