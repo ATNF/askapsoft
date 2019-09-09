@@ -137,6 +137,9 @@ module load python"
             askapsoftModuleCommands="${askapsoftModuleCommands}
 module use ${ASKAP_MODULE_DIR}
 module load askapdata
+module load numpy
+module load matplotlib
+module load astropy
 module load askapsoft${ASKAPSOFT_VERSION}"
             module load askapsoft${ASKAPSOFT_VERSION}
         else
@@ -149,6 +152,9 @@ module load askapsoft${ASKAPSOFT_VERSION}"
 module use ${ASKAP_MODULE_DIR}
 module load askapdata
 module unload askapsoft
+module load numpy
+module load matplotlib
+module load astropy
 module load askapsoft${ASKAPSOFT_VERSION}"
                 echo "Will use the askapsoft module askapsoft${ASKAPSOFT_VERSION}"
                 module unload askapsoft
@@ -159,6 +165,9 @@ module load askapsoft${ASKAPSOFT_VERSION}"
 module use ${ASKAP_MODULE_DIR}
 module load askapdata
 module unload askapsoft
+module load numpy
+module load matplotlib
+module load astropy
 module load ${currentASKAPsoftVersion}"
                 echo "Will use the askapsoft module defined by your environment (${currentASKAPsoftVersion})"
             fi
