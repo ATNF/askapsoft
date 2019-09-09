@@ -14,6 +14,9 @@ cfitsio = builder.dep.get_install_path("cfitsio")
 wcslib  = builder.dep.get_install_path("wcslib")
 fftw3   = builder.dep.get_install_path("fftw3")
 boost   = builder.dep.get_install_path("boost")
+numpy   = ""
+if builder.dep.__contains__("numpy"):
+    numpy   = builder.dep.get_install_path("numpy")
 
 # these work
 builder.add_option("-DCFITSIO_ROOT_DIR=%s" % cfitsio)
@@ -30,6 +33,8 @@ builder.nowarnings = True
 # python bindings
 builder.add_option("-DBUILD_PYTHON=ON")
 builder.add_option("-DBoost_INCLUDE_DIR=%s/include"%boost)
+if numpy != "":
+    builder.add_option("-DNUMPY_INCLUDE_DIRS=%s/include"%numpy)
 
 
 # Force use of raw GNU compilers. This is due to bug #5798 soon on the Cray XC30.
