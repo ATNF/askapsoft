@@ -7,7 +7,6 @@ import matplotlib
 matplotlib.use('Agg')
 import pylab as plt
 import math
-import scipy.special
 from askap.analysis.evaluation.readData import *
 import askap.analysis.evaluation.modelcomponents as models
 from askap.analysis.evaluation.sourceSelection import *
@@ -152,7 +151,7 @@ if __name__ == '__main__':
     x=np.arange(1000)*10./1000
     y=np.zeros(x.size)
     for i in range(x.size):
-        y[i] = 0.5 * snrmap.size * scipy.special.erfc(x[i]/math.sqrt(2.))
+        y[i] = 0.5 * snrmap.size * math.erfc(x[i]/math.sqrt(2.))
     plt.plot(x,y,'g:',label='Gaussian noise')
     
     plt.xlim(0.8,30)

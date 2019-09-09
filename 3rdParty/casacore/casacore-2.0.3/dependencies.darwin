@@ -4,5 +4,4 @@ cfitsio=3rdParty/cfitsio/cfitsio-3.35
 wcslib=3rdParty/wcslib/wcslib-4.18
 fftw3=3rdParty/fftw/fftw-3.3.3
 boost=3rdParty/boost/boost-1.56.0
-numpy=3rdParty/numpy/numpy-1.12.0
 
