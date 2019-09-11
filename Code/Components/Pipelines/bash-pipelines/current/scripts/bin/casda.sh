@@ -350,7 +350,6 @@ if [ "\${writeREADYfile}" == "true" ] && [ "\${doTransition}" == "true" ]; then
     loadModule askapcli
     schedblock transition -s PENDINGARCHIVE ${SB_SCIENCE}
     err=\$?
-    unloadModule askapcli
     if [ \${err} -ne 0 ]; then
         echo "\$(date): ERROR - 'schedblock transition' failed for SB ${SB_SCIENCE} with error code \$err" | tee -a ${ERROR_FILE}
     fi
@@ -369,6 +368,7 @@ if [ "\${writeREADYfile}" == "true" ] && [ "\${doTransition}" == "true" ]; then
             fi
         fi
     fi
+    unloadModule askapcli
 
     # Submit job to poll for completion of ingest into the CASDA database
     pollingsbatchfile="$pollingsbatchfile"
