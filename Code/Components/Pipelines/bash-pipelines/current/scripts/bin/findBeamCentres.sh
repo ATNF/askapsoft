@@ -83,12 +83,12 @@ if [ "$DO_SCIENCE_FIELD" == "true" ] && [ "$NEED_BEAM_CENTRES" == "true" ]; then
             fi
             if [ "${getSchedblock}" == "true" ]; then
                 loadModule askapcli
-                schedblock info -v -p "${SB_SCIENCE}" > "$sbinfo"
+                schedblock info -p "${SB_SCIENCE}" > "$sbinfo"
                 err=$?
                 unloadModule askapcli
                 if [ $err -ne 0 ]; then
                     echo "ERROR - the 'schedblock' command failed."
-                    echo "        Full command:   schedblock info -v -p ${SB_SCIENCE}"
+                    echo "        Full command:   schedblock info -p ${SB_SCIENCE}"
                     echo "Exiting pipeline."
                     exit $err
                 fi

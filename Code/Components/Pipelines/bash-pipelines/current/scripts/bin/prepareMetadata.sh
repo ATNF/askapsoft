@@ -242,13 +242,13 @@ EOF
             if [ "${getSchedblock}" == "true" ]; then
                 err=$(
                     loadModule askapcli
-                    schedblock info -v -p "${SB_1934}" > "$sbinfoCal"
+                    schedblock info -p "${SB_1934}" > "$sbinfoCal"
                     echo $?
                     unloadModule askapcli
                 )
                 if [ $err -ne 0 ]; then
                     echo "ERROR - the 'schedblock' command failed."
-                    echo "        Full command:   schedblock info -v -p ${SB_1934}"
+                    echo "        Full command:   schedblock info -p ${SB_1934}"
                     echo "Exiting pipeline."
                     exit $err
                 fi
@@ -483,12 +483,12 @@ $TILE"
         if [ "${getSchedblock}" == "true" ]; then
             echo "Using $sbinfo as location for SB metadata"
             loadModule askapcli
-            schedblock info -v -p "${SB_SCIENCE}" > "$sbinfo"
+            schedblock info -p "${SB_SCIENCE}" > "$sbinfo"
             err=$?
             unloadModule askapcli
             if [ $err -ne 0 ]; then
                 echo "ERROR - the 'schedblock' command failed."
-                echo "        Full command:   schedblock info -v -p ${SB_SCIENCE}"
+                echo "        Full command:   schedblock info -p ${SB_SCIENCE}"
                 echo "Exiting pipeline."
                 exit $err
             fi
@@ -537,12 +537,12 @@ EOF
                 fi
                 # Re-create the sbinfo file, as we've changed the state of the SB
                 loadModule askapcli
-                schedblock info -v -p "${SB_SCIENCE}" > "$sbinfo"
+                schedblock info -p "${SB_SCIENCE}" > "$sbinfo"
                 err=$?
                 unloadModule askapcli
                 if [ $err -ne 0 ]; then
                     echo "ERROR - the 'schedblock' command failed."
-                    echo "        Full command:   schedblock info -v -p ${SB_SCIENCE}"
+                    echo "        Full command:   schedblock info -p ${SB_SCIENCE}"
                     echo "Exiting pipeline."
                     exit $err
                 fi
@@ -572,12 +572,12 @@ EOF
             if [ "${getSchedblock}" == "true" ]; then
                 echo "Using $sbinfoCal as location for bandpass SB metadata"
                 loadModule askapcli
-                schedblock info -v -p ${SB_1934} > $sbinfoCal
+                schedblock info -p ${SB_1934} > $sbinfoCal
                 err=$?
                 unloadModule askapcli
                 if [ $err -ne 0 ]; then
                     echo "ERROR - the 'schedblock' command failed."
-                    echo "        Full command:   schedblock info -v -p ${SB_1934}"
+                    echo "        Full command:   schedblock info -p ${SB_1934}"
                     echo "Exiting pipeline."
                     exit $err
                 fi
