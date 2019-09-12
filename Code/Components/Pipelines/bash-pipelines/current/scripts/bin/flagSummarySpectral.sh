@@ -28,13 +28,17 @@
 #
 
 ID_FLAG_SUMMARY_SPECTRAL=""
-FLAG_SUMMARY_SPECTRAL_CHECK_FILE="${OUTPUT}/Checkfiles/FLAG_SUMMARY_SPECTRAL_DONE_BEAM${BEAM}"
-msToUse="$msSciSLFull"
+FLAG_SUMMARY_SPECTRAL_FILE=$(realpath ${msSciSLFull}).flagSummary
 
 DO_IT=$DO_FLAG_SUMMARY_SPECTRAL
 
+if [ -e "${OUTPUT}/${FLAG_SUMMARY_SPECTRAL_FILE}"]; then
+    if ["${DO_IT}" == "true" ]; then
+	echo "Flag Summary File ${FLAG_SUMMARY_SPECTRAL_FILE} for beam $BEAM spectral ms exists - not redoing"
+        DO_IT=false
+fi
 
-if [ "${DO_IT}" == "true" ] && [ ! -e "$FLAG_SUMMARY_SPECTRAL_CHECK_FILE" ]; then
+if [ "${DO_IT}" == "true" ]; then
         setJob flagSummarySpectral flgSummSpectral
     cat > "$sbatchfile" <<EOF
 #!/bin/bash -l
@@ -62,7 +66,7 @@ log="${logs}/flagSummarySpectral-b${BEAM}_\${SLURM_JOB_ID}.log"
 STARTTIME=\$(date +%FT%T)
 NCORES=1
 NPPN=1
-srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} /usr/bin/time -p -o "\${log}.timing" flagSummary.py -i ${msToUse}
+srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} /usr/bin/time -p -o "\${log}.timing" flagSummary.py -i $msSciSLFull -o ${FLAG_SUMMARY_SPECTRAL_FILE}
 err=\$?
 echo "STARTTIME=\${STARTTIME}" >> "\${log}.timing"
 extractStatsNonStandard "\${log}" \${NCORES} "\${SLURM_JOB_ID}" \${err} "flagSumarySpectral" "txt,csv"
@@ -71,7 +75,6 @@ if [ \$err != 0 ]; then
 else
     # Copy the log from the valiation to the diagnostics directory 
     cp \${log} \${diagnostics}
-    touch "$FLAG_SUMMARY_SPECTRAL_CHECK_FILE"
 fi
 
 
