@@ -36,6 +36,7 @@ if [ -e "${OUTPUT}/${FLAG_SUMMARY_AVERAGE_FILE}"]; then
     if ["${DO_IT}" == "true" ]; then
 	echo "Flag Summary File ${FLAG_SUMMARY_AVERAGE_FILE} for beam $BEAM averaged ms exists - not redoing"
         DO_IT=false
+    fi
 fi
 
 

@@ -36,6 +36,7 @@ if [ -e "${OUTPUT}/${FLAG_SUMMARY_SPECTRAL_FILE}"]; then
     if ["${DO_IT}" == "true" ]; then
 	echo "Flag Summary File ${FLAG_SUMMARY_SPECTRAL_FILE} for beam $BEAM spectral ms exists - not redoing"
         DO_IT=false
+    fi
 fi
 
 if [ "${DO_IT}" == "true" ]; then
