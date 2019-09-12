@@ -296,14 +296,7 @@ EOF
                 fi
             fi
             if [ "$submitIt" == "true" ]; then
-                DEP=""
-                DEP=$(addDep "$DEP" "$DEP_START")
-                DEP=$(addDep "$DEP" "$ID_SPLIT_SCI")
-                DEP=$(addDep "$DEP" "$ID_FLAG_SCI")
-                DEP=$(addDep "$DEP" "$ID_CCALAPPLY_SCI")
-                DEP=$(addDep "$DEP" "$ID_SPLIT_SL_SCI")
-                DEP=$(addDep "$DEP" "$ID_CAL_APPLY_SL_SCI")
-                DEP=$(addDep "$DEP" "$ID_CONT_SUB_SL_SCI")
+                DEP=${SPECTRAL_PREIMAGE_DEPS}
                 DEP=$(addDep "$DEP" "$ID_SPECIMG_SCI")
                 ID_SPEC_IMCONTSUB_SCI=$(sbatch $DEP "$sbatchfile" | awk '{print $4}')
                 DEP_SPECIMCONTSUB=$(addDep "${DEP_SPECIMCONTSUB}" "${ID_SPEC_IMCONTSUB_SCI}")

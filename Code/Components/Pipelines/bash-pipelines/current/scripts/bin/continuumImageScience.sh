@@ -181,16 +181,7 @@ fi
 EOFOUTER
 
     if [ "${SUBMIT_JOBS}" == "true" ]; then
-	DEP=""
-        DEP=$(addDep "$DEP" "$DEP_START")
-        DEP=$(addDep "$DEP" "$ID_SPLIT_SCI_LIST")
-        DEP=$(addDep "$DEP" "$ID_CCALAPPLY_SCI_LIST")
-        DEP=$(addDep "$DEP" "$ID_FLAG_SCI_LIST")
-        DEP=$(addDep "$DEP" "$ID_AVERAGE_SCI_LIST")
-        DEP=$(addDep "$DEP" "$ID_FLAG_SCI_AV_LIST")
-	if [ "${DO_SPLIT_TIMEWISE}" == "true" ]; then 
-            DEP=$(addDep "$DEP" "$ID_MSCONCAT_SCI_AV")
-	fi
+	DEP=${CONT_PREIMAGE_DEPS}
 	ID_CONTIMG_SCI=$(sbatch $DEP "$sbatchfile" | awk '{print $4}')
 	recordJob "${ID_CONTIMG_SCI}" "Make a continuum image for beam $BEAM of the science observation, with flags \"$DEP\""
         FLAG_IMAGING_DEP=$(addDep "$FLAG_IMAGING_DEP" "$ID_CONTIMG_SCI")

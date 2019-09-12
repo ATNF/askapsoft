@@ -193,16 +193,7 @@ EOFOUTER
     # 
 
         if [ "${SUBMIT_JOBS}" == "true" ]; then
-	    DEP=""
-            DEP=$(addDep "$DEP" "$DEP_START")
-            DEP=$(addDep "$DEP" "$ID_SPLIT_SCI_LIST")
-            DEP=$(addDep "$DEP" "$ID_CCALAPPLY_SCI_LIST")
-            DEP=$(addDep "$DEP" "$ID_FLAG_SCI_LIST")
-            DEP=$(addDep "$DEP" "$ID_AVERAGE_SCI_LIST")
-            DEP=$(addDep "$DEP" "$ID_FLAG_SCI_AV_LIST")
-	    if [ "${DO_SPLIT_TIMEWISE}" == "true" ]; then 
-                DEP=$(addDep "$DEP" "$ID_MSCONCAT_SCI_AV")
-	    fi
+	    DEP=${CONT_PREIMAGE_DEPS}
 	    DEP=$(addDep "$DEP" "$ID_CONTIMG_SCI_SC")
 	    DEP=$(addDep "$DEP" "$ID_CAL_APPLY_CONT_SCI")
 	    ID_CONTPOL_IMG_SCI=$(sbatch $DEP "$sbatchfile" | awk '{print $4}')

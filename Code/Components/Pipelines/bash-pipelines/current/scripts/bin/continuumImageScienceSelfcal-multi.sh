@@ -143,16 +143,7 @@ Ccalibrator.refgain                             = ${SELFCAL_REF_GAINS}"
     mkdir -p $caldir
 
     if [ "${SUBMIT_JOBS}" == "true" ]; then
-        DEP=""
-        DEP=$(addDep "$DEP" "$DEP_START")
-        DEP=$(addDep "$DEP" "$ID_SPLIT_SCI")
-        DEP=$(addDep "$DEP" "$ID_CCALAPPLY_SCI")
-        DEP=$(addDep "$DEP" "$ID_FLAG_SCI")
-        DEP=$(addDep "$DEP" "$ID_AVERAGE_SCI")
-        DEP=$(addDep "$DEP" "$ID_FLAG_SCI_AV")
-	if [ "${DO_SPLIT_TIMEWISE}" == "true" ]; then 
-            DEP=$(addDep "$DEP" "$ID_MSCONCAT_SCI_AV")
-	fi
+        DEP=${CONT_PREIMAGE_DEPS}
     fi
 
     for((LOOP=0;LOOP<=SELFCAL_NUM_LOOPS;LOOP++)); do

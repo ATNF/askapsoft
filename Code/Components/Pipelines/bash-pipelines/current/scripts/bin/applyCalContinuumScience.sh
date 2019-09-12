@@ -122,13 +122,7 @@ EOFOUTER
             fi
         fi
         if [ "$submitIt" == "true" ]; then
-            DEP=""
-            DEP=$(addDep "$DEP" "$DEP_START")
-            DEP=$(addDep "$DEP" "$ID_SPLIT_SCI_LIST")
-            DEP=$(addDep "$DEP" "$ID_CCALAPPLY_SCI_LIST")
-            DEP=$(addDep "$DEP" "$ID_FLAG_SCI_LIST")
-            DEP=$(addDep "$DEP" "$ID_AVERAGE_SCI_LIST")
-            DEP=$(addDep "$DEP" "$ID_FLAG_SCI_AV_LIST")
+            DEP=${CONT_PREIMAGE_DEPS}
             DEP=$(addDep "$DEP" "$ID_CONTIMG_SCI_SC")
             ID_CAL_APPLY_CONT_SCI=$(sbatch $DEP "$sbatchfile" | awk '{print $4}')
             recordJob "${ID_CAL_APPLY_CONT_SCI}" "Apply gains calibration to the continuum dataset for imaging beam $BEAM of the science observation, with flags \"$DEP\""

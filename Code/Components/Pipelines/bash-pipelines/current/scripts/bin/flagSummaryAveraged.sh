@@ -82,11 +82,7 @@ fi
 
 EOF
     if [ "${SUBMIT_JOBS}" == "true" ]; then
-        DEP=""
-        DEP=$(addDep "$DEP" "$ID_FLAG_SCI_AV_LIST")
-	if [ "${DO_SPLIT_TIMEWISE}" == "true" ]; then
-		DEP=$(addDep "$DEP" "$ID_MSCONCAT_SCI_AV")
-	fi
+        DEP=${CONT_PREIMAGE_DEPS}
         ID_FLAG_SUMMARY_AVE=$(sbatch ${DEP} "$sbatchfile" | awk '{print $4}')
         recordJob "${ID_FLAG_SUMMARY_AVE}" "Running flagSummary on averaged Science data for beam-${BEAM}, with flags \"$DEP\""
     else
