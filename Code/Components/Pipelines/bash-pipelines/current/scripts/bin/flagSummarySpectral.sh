@@ -32,8 +32,8 @@ FLAG_SUMMARY_SPECTRAL_FILE=$(realpath ${msSciSLFull}).flagSummary
 
 DO_IT=$DO_FLAG_SUMMARY_SPECTRAL
 
-if [ -e "${OUTPUT}/${FLAG_SUMMARY_SPECTRAL_FILE}"]; then
-    if ["${DO_IT}" == "true" ]; then
+if [ -e "${OUTPUT}/${FLAG_SUMMARY_SPECTRAL_FILE}" ]; then
+    if [ "${DO_IT}" == "true" ]; then
 	echo "Flag Summary File ${FLAG_SUMMARY_SPECTRAL_FILE} for beam $BEAM spectral ms exists - not redoing"
         DO_IT=false
     fi
@@ -73,9 +73,9 @@ echo "STARTTIME=\${STARTTIME}" >> "\${log}.timing"
 extractStatsNonStandard "\${log}" \${NCORES} "\${SLURM_JOB_ID}" \${err} "flagSumarySpectral" "txt,csv"
 if [ \$err != 0 ]; then
     exit \$err
-else
-    # Copy the log from the valiation to the diagnostics directory 
-    cp \${log} \${diagnostics}
+#else
+#    # Copy the log from the valiation to the diagnostics directory 
+#    cp \${log} \${diagnostics}
 fi
 
 

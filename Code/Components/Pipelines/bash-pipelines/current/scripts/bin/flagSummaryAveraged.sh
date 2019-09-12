@@ -32,8 +32,8 @@ FLAG_SUMMARY_AVERAGE_FILE=$(realpath ${msSciAvFull}).flagSummary
 
 DO_IT=$DO_FLAG_SUMMARY_AVERAGED
 
-if [ -e "${OUTPUT}/${FLAG_SUMMARY_AVERAGE_FILE}"]; then
-    if ["${DO_IT}" == "true" ]; then
+if [ -e "${OUTPUT}/${FLAG_SUMMARY_AVERAGE_FILE}" ]; then
+    if [ "${DO_IT}" == "true" ]; then
 	echo "Flag Summary File ${FLAG_SUMMARY_AVERAGE_FILE} for beam $BEAM averaged ms exists - not redoing"
         DO_IT=false
     fi
@@ -68,15 +68,15 @@ log="${logs}/flagSummaryAverage-b${BEAM}_\${SLURM_JOB_ID}.log"
 STARTTIME=\$(date +%FT%T)
 NCORES=1
 NPPN=1
-srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} /usr/bin/time -p -o "\${log}.timing" flagSummary.py -i ${msSciAvFull} -o ${FLAG_SUMMARY_AVERAGE_FILE}
+srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} /usr/bin/time -p -o "\${log}.timing" flagSummary.py -i ${msSciAvFull} -o ${FLAG_SUMMARY_AVERAGE_FILE} 
 err=\$?
 echo "STARTTIME=\${STARTTIME}" >> "\${log}.timing"
 extractStatsNonStandard "\${log}" \${NCORES} "\${SLURM_JOB_ID}" \${err} "flagSumaryAve" "txt,csv"
 if [ \$err != 0 ]; then
     exit \$err
-else
-    # Copy the log from the valiation to the diagnostics directory 
-    cp \${log} \${diagnostics}
+#else
+#    # Copy the log from the valiation to the diagnostics directory 
+#    cp \${log} \${diagnostics}
 fi
 
 
