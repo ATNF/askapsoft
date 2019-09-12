@@ -196,7 +196,11 @@ EOF
         # CHAN_RANGE_1934 gives global channel range - pass this to getMatchingMS.py
         chanSelection="-c ${CHAN_RANGE_1934}"
     fi
-    inputMSlist=$("${PIPELINEDIR}/getMatchingMS.py" -d "${sb1934dir}" -b $BEAM $chanSelection)
+    inputMSlist=$(
+        loadModule numpy
+        "${PIPELINEDIR}/getMatchingMS.py" -d "${sb1934dir}" -b $BEAM $chanSelection
+        unloadModule numpy
+               )
     if [ "${inputMSlist}" == "" ]; then
         echo "ERROR - unable to determine number of channels in bandpass datasets in directory ${sb1934dir}"
         echo "      - beam 0 datasets failed to give spectral metadata"
@@ -366,7 +370,11 @@ EOF
         # CHAN_RANGE_SCIENCE gives global channel range - pass this to getMatchingMS.py
         chanSelection="-c ${CHAN_RANGE_SCIENCE}"
     fi
-    inputMSlist=$("${PIPELINEDIR}/getMatchingMS.py" -d "${sbScienceDir}" -b $BEAM $chanSelection)
+    inputMSlist=$(
+        loadModule numpy
+        "${PIPELINEDIR}/getMatchingMS.py" -d "${sbScienceDir}" -b $BEAM $chanSelection
+        unloadModule numpy
+               )
     if [ "${inputMSlist}" == "" ]; then
         echo "ERROR - unable to determine number of channels in science datasets in directory ${sbScienceDir}"
         echo "      - beam 0 datasets failed to give spectral metadata"
