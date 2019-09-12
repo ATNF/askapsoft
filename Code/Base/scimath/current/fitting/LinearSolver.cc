@@ -173,27 +173,32 @@ std::vector<std::string> LinearSolver::getIndependentSubset(std::vector<std::str
 }
 
 bool LinearSolver::compareGainNames(const std::string& gainA, const std::string& gainB) {
-    std::pair<casa::uInt, std::string> paramInfoA = LinearSolver::extractChannelInfo(gainA);
-    std::pair<casa::uInt, std::string> paramInfoB = LinearSolver::extractChannelInfo(gainB);
+    try {
+        std::pair<casa::uInt, std::string> paramInfoA = LinearSolver::extractChannelInfo(gainA);
+        std::pair<casa::uInt, std::string> paramInfoB = LinearSolver::extractChannelInfo(gainB);
 
-    // Parameter name excluding channel number.
-    std::string parNameA = paramInfoA.second;
-    std::string parNameB = paramInfoB.second;
+        // Parameter name excluding channel number.
+        std::string parNameA = paramInfoA.second;
+        std::string parNameB = paramInfoB.second;
 
-    casa::uInt chanA = paramInfoA.first;
-    casa::uInt chanB = paramInfoB.first;
+        casa::uInt chanA = paramInfoA.first;
+        casa::uInt chanB = paramInfoB.first;
 
-    int res = parNameA.compare(parNameB);
+        int res = parNameA.compare(parNameB);
 
-    if (res == 0) {
-    // Same names, sort by channel number.
-        return (chanA <= chanB);
-    } else {
-        if (res < 0) {
-            return true;
+        if (res == 0) {
+        // Same names, sort by channel number.
+            return (chanA <= chanB);
         } else {
-            return false;
+            if (res < 0) {
+                return true;
+            } else {
+                return false;
+            }
         }
+    }
+    catch (AskapError &e) {
+        return (gainA.compare(gainB) < 0);
     }
 }
 
