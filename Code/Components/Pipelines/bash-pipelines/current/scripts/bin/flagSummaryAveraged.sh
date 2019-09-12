@@ -28,7 +28,7 @@
 #
 
 ID_FLAG_SUMMARY_AVE=""
-FLAG_SUMMARY_AVERAGE_FILE="$(realpath ${msSciAvFull}).flagSummary
+FLAG_SUMMARY_AVERAGE_FILE=$(realpath ${msSciAvFull}).flagSummary
 
 DO_IT=$DO_FLAG_SUMMARY_AVERAGED
 
