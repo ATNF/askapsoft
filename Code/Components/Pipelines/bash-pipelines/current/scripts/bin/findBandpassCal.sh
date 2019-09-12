@@ -341,7 +341,141 @@ EOF
 
     echo " "
 
+    #--------------------------------------------------------------------
+    # Plotting of Bandpass solutions using bptool: 
+    # You need to create some directories here for the additional plots/files: 
+    mkdir -p ${slurms}/diagnostics
+    mkdir -p ${slurmOut}/diagnostics
+    mkdir -p ${logs}/diagnostics
+    inmontage_files=""
+    DEP_LIST=""
+    bAnt=0
+    eAnt=$(($NUM_ANT - 1))
+    bBeam=0
+    eBeam=$(($maxbeam - 1))
+    tmpPlotDir="diagnostics/plotBandpass"
+    mkdir -p ${tmpPlotDir}
+    for ib in $(seq -f "%02g" ${bBeam} ${eBeam})
+    do
+	    sbatchfile="$slurms/diagnostics/plotBandpass_beam-${ib}.sbatch"
+	    len2=$(echo $TABLE_BANDPASS |awk 'match ($0,".tab"){print RSTART}')
+            #basename=${TABLE_BANDPASS:$len1-1:$len2-1}
+            basename=${TABLE_BANDPASS:0:$len2-1}
+	    len=$(echo $basename |awk '{print length}')
+	    len1=$(echo $basename |awk 'match ($0,"calparameters"){print RSTART}')
+            basename=${basename:$len1-1:$len}
+	    inmontage_files="${inmontage_files} ${tmpPlotDir}/${basename}_Beam-${ib}_montage.png "
+            cat > "$sbatchfile" <<EOF
+#!/bin/bash -l
+${SLURM_CONFIG}
+#SBATCH --time=00:30:00
+#SBATCH --ntasks=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --job-name=pltBP-bm-${ib}
+${exportDirective}
+#SBATCH --output="$slurmOut/diagnostics/slurm-plotBandpass_beam-${ib}-%j.out"
 
-    
+${askapsoftModuleCommands}
+module load bptool 
+
+BASEDIR=${BASEDIR}
+cd $OUTPUT
+. ${PIPELINEDIR}/utils.sh
+
+# Make a copy of this sbatch file for posterity
+sedstr="s/sbatch/\${SLURM_JOB_ID}\.sbatch/g"
+thisfile="$sbatchfile"
+cp "\$thisfile" "\$(echo "\$thisfile" | sed -e "\$sedstr")"
+
+
+log="${logs}/diagnostics/plotBandpass_beam-${ib}_\${SLURM_JOB_ID}.log"
+script="plot_bandpass.py"
+STARTTIME=\$(date +%FT%T)
+NCORES=1
+NPPN=1
+ms1934Ref=$(echo ${ms1934list} |sed -e 's/,/ /g' |awk '{print $1}')
+addparam="-nofit 1 -pshow 0 -m \${ms1934Ref}"
+srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} /usr/bin/time -p -o "\${log}.timing" "\${script}" -t ${TABLE_BANDPASS} -a1 ${bAnt} -a2 ${eAnt} -b1 ${ib} -b2 ${ib} -pdir ${tmpPlotDir} \${addparam} > "\${log}"
+inplots=""
+for ia in \$(seq -f "%02g" ${bAnt} ${eAnt})
+do
+	inplots="\$inplots ${tmpPlotDir}/${basename}_Beam-${ib}_Ante-\${ia}.png "
+done
+srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} /usr/bin/time -p -o "\${log}.timing" montage \$inplots -geometry +6+6 -frame 5 -shadow ${tmpPlotDir}/${basename}_Beam-${ib}_montage.png
+err=\$?
+echo "STARTTIME=\${STARTTIME}" >> "\${log}.timing"
+extractStatsNonStandard "\${log}" \${NCORES} "\${SLURM_JOB_ID}" \${err} "plotBandpass" "txt,csv"
+if [ \$err != 0 ]; then
+    exit \$err
+else
+    # Copy the log from the valiation to the diagnostics directory 
+    cp \${log} \${diagnostics}
+fi
+
+EOF
+
+        if [ "${SUBMIT_JOBS}" == "true" ]; then
+	    DEP=""
+            DEP=$(addDep "$DEP" "$ID_CBPCAL")
+            ID_PLOT_BANDPASS=$(sbatch ${DEP} "$sbatchfile" | awk '{print $4}')
+            DEP_LIST=$(addDep "$DEP_LIST" "$ID_PLOT_BANDPASS")
+            recordJob "${ID_PLOT_BANDPASS}" "Running plotting of bandpass solutions for beam-${ib}, with flags \"$DEP\""
+        else
+            echo "Would run plotting of bandpass solutions for beam-${ib} with slurm file $sbatchfile"
+        fi
+    done
+    echo " "
+    # Done plotting of Bandpass solutions using bptool for beam-${ib}. 
+    #--------------------------------------------------------------------
+    # Now combine the plots into one pdf using convert (ImageMagic): 
+    sbatchfile="$slurms/diagnostics/combineBandpassPlots_beams-${bBeam}-${eBeam}.sbatch"
+    cat > "$sbatchfile" <<EOF
+#!/bin/bash -l
+${SLURM_CONFIG}
+#SBATCH --time=00:30:00
+#SBATCH --ntasks=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --job-name=combineBPplots
+${exportDirective}
+#SBATCH --output="$slurmOut/diagnostics/slurm-combineBandpassPlots_beams-${bBeam}-${eBeam}-%j.out"
+
+BASEDIR=${BASEDIR}
+cd $OUTPUT
+. ${PIPELINEDIR}/utils.sh
+
+# Make a copy of this sbatch file for posterity
+sedstr="s/sbatch/\${SLURM_JOB_ID}\.sbatch/g"
+thisfile="$sbatchfile"
+cp "\$thisfile" "\$(echo "\$thisfile" | sed -e "\$sedstr")"
+
+
+log="${logs}/diagnostics/combineBandpassPlots_beams-${bBeam}-${eBeam}_\${SLURM_JOB_ID}.log"
+STARTTIME=\$(date +%FT%T)
+NCORES=1
+NPPN=1
+srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} /usr/bin/time -p -o "\${log}.timing" convert $inmontage_files ${basename}.pdf
+err=\$?
+echo "STARTTIME=\${STARTTIME}" >> "\${log}.timing"
+extractStatsNonStandard "\${log}" \${NCORES} "\${SLURM_JOB_ID}" \${err} "plotBandpass" "txt,csv"
+if [ \$err != 0 ]; then
+    exit \$err
+else
+    # Copy the log from the valiation to the diagnostics directory 
+    cp \${log} \${diagnostics}
+fi
+
+EOF
+
+    if [ "${SUBMIT_JOBS}" == "true" ]; then
+        DEP=""
+        DEP=$(addDep "$DEP" "$DEP_LIST")
+        ID_COMBINE_PLOT_BANDPASS=$(sbatch ${DEP} "$sbatchfile" | awk '{print $4}')
+        recordJob "${ID_COMBINE_PLOT_BANDPASS}" "Running convert to combine plots of bandpass solutions for beams-${bBeam}-${eBeam}, with flags \"$DEP\""
+    else
+        echo "Would run convert to combine bandpass solutions for beams-${bBeam}-${eBeam} with slurm file $sbatchfile"
+    fi
+    echo " "
+
+    #--------------------------------------------------------------------
 
 fi

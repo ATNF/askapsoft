@@ -54,6 +54,8 @@ if [ "$PROCESS_DEFAULTS_HAS_RUN" != "true" ]; then
         # turn off all science-field switches
         DO_SPLIT_SCIENCE=false
         DO_FLAG_SCIENCE=false
+        DO_FLAG_SUMMARY_AVERAGED=false
+        DO_FLAG_SUMMARY_SPECTRAL=false
         DO_APPLY_BANDPASS=false
         DO_AVERAGE_CHANNELS=false
         DO_CONT_IMAGING=false

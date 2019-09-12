@@ -171,6 +171,9 @@ for FIELD in ${FIELD_LIST}; do
 	    # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 	    # Redefine FIELDBEAM for imager sbatchfile-naming: timeWin tag not needed.
             FIELDBEAM=$(echo "$FIELD_ID" "$BEAM" | awk '{printf "F%02d_B%s",$1,$2}')
+	    # Find FlagSummary for the continuum dataset: 
+	    . "${PIPELINEDIR}/flagSummaryAveraged.sh"
+
             if [ "${DO_SELFCAL}" == "true" ]; then
                 if [ "${MULTI_JOB_SELFCAL}" == "true" ]; then
                     . "${PIPELINEDIR}/continuumImageScienceSelfcal-multi.sh"
@@ -221,6 +224,8 @@ for FIELD in ${FIELD_LIST}; do
                 . "${PIPELINEDIR}/spectralImageScience.sh"
 
                 . "${PIPELINEDIR}/spectralImContSub.sh"
+	        # Find FlagSummary for the spectral dataset: 
+	        . ${PIPELINEDIR}/flagSummarySpectral.sh
             
                 if [ "${DO_SOURCE_FINDING_BEAMWISE}" == "true" ]; then
                     . "${PIPELINEDIR}/sourcefindingSpectral.sh"
