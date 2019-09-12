@@ -101,7 +101,11 @@ else
 
         if [ "${DO_SCIENCE_FIELD}" == "true" ]; then
 
-            . "${PIPELINEDIR}/scienceCalIm.sh"
+            if [ "${DO_RAPID_SURVEY}" == "true" ]; then
+                . "${PIPELINEDIR}/scienceCalImRapid.sh"
+            else
+                . "${PIPELINEDIR}/scienceCalIm.sh"
+            fi
 
             . "${PIPELINEDIR}/defineArtifactsScript.sh"
 

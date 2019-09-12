@@ -513,6 +513,11 @@ EOF
 
         fi
 
+        if [ $LOOP -gt 0 ]; then
+            # Remove the preimaging text, as we only call this the first time round
+            PREIMAGING_TEXT=""
+        fi
+
         setJob science_continuumImage_L${LOOP} contIm${LOOP}
         cat > "$sbatchfile" <<EOF
 #!/bin/bash -l
@@ -571,6 +576,10 @@ cd $OUTPUT
 sedstr="s/sbatch/\${SLURM_JOB_ID}\.sbatch/g"
 thisfile="$sbatchfile"
 cp "\$thisfile" "\$(echo "\$thisfile" | sed -e "\$sedstr")"
+
+BEAM="${BEAM}"
+FIELD_ID="${FIELD_ID}"
+${PREIMAGING_TEXT}
 
 parset="${parsets}/science_imagingSelfcal_${FIELDBEAM}_\${SLURM_JOB_ID}_LOOP${LOOP}.in"
 

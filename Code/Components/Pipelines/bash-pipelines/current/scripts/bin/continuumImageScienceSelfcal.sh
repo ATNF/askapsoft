@@ -295,6 +295,10 @@ sedstr="s/sbatch/\${SLURM_JOB_ID}\.sbatch/g"
 thisfile="$sbatchfile"
 cp "\$thisfile" "\$(echo "\$thisfile" | sed -e "\$sedstr")"
 
+BEAM="${BEAM}"
+FIELD_ID="${FIELD_ID}"
+${PREIMAGING_TEXT}
+
 selfcalMethod=${SELFCAL_METHOD}
 
 msMetadata="${MS_METADATA}"

@@ -205,6 +205,7 @@ SPLIT_INTERVAL_MINUTES=60
 
 # Calibration & imaging of the 'science' field.
 DO_SCIENCE_FIELD=true
+DO_RAPID_SURVEY=false
 DO_SPLIT_SCIENCE=true
 DO_FLAG_SCIENCE=true
 DO_FLAG_SUMMARY_AVERAGED=false

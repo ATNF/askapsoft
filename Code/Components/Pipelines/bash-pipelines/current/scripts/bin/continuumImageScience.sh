@@ -120,6 +120,10 @@ sedstr="s/sbatch/\${SLURM_JOB_ID}\.sbatch/g"
 thisfile="$sbatchfile"
 cp "\$thisfile" "\$(echo "\$thisfile" | sed -e "\$sedstr")"
 
+BEAM="${BEAM}"
+FIELD_ID="${FIELD_ID}"
+${PREIMAGING_TEXT}
+
 # Parameters that can vary with self-calibration loop number (which is
 #     zero in this case)
 CLEAN_THRESHOLD_MAJORCYCLE_ARRAY=(${CLEAN_THRESHOLD_MAJORCYCLE_ARRAY[@]})
