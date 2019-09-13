@@ -404,12 +404,9 @@ done
 srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} /usr/bin/time -p -o "\${log}.timing" montage \$inplots -geometry +6+6 -frame 5 -shadow ${tmpPlotDir}/${basename}_Beam-${ib}_montage.png
 err=\$?
 echo "STARTTIME=\${STARTTIME}" >> "\${log}.timing"
-extractStatsNonStandard "\${log}" \${NCORES} "\${SLURM_JOB_ID}" \${err} "plotBandpass" "txt,csv"
+extractStatsNonStandard "\${log}" \${NCORES} "\${SLURM_JOB_ID}" \${err} "plotBandpassB${ib}" "txt,csv"
 if [ \$err != 0 ]; then
     exit \$err
-else
-    # Copy the log from the valiation to the diagnostics directory 
-    cp \${log} \${diagnostics}
 fi
 
 EOF
@@ -456,12 +453,11 @@ NPPN=1
 srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} /usr/bin/time -p -o "\${log}.timing" convert $inmontage_files ${basename}.pdf
 err=\$?
 echo "STARTTIME=\${STARTTIME}" >> "\${log}.timing"
-extractStatsNonStandard "\${log}" \${NCORES} "\${SLURM_JOB_ID}" \${err} "plotBandpass" "txt,csv"
+extractStatsNonStandard "\${log}" \${NCORES} "\${SLURM_JOB_ID}" \${err} "plotBandpassCombined" "txt,csv"
 if [ \$err != 0 ]; then
     exit \$err
 else
-    # Copy the log from the valiation to the diagnostics directory 
-    cp \${log} \${diagnostics}
+    cp ${basename}.pdf \${diagnostics}
 fi
 
 EOF

@@ -67,15 +67,15 @@ log="${logs}/flagSummarySpectral-b${BEAM}_\${SLURM_JOB_ID}.log"
 STARTTIME=\$(date +%FT%T)
 NCORES=1
 NPPN=1
-srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} /usr/bin/time -p -o "\${log}.timing" flagSummary.py -i $msSciSLFull -o ${FLAG_SUMMARY_SPECTRAL_FILE}
+srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} /usr/bin/time -p -o "\${log}.timing" flagSummary.py -i $msSciSLFull -o "${FLAG_SUMMARY_SPECTRAL_FILE}"
 err=\$?
 echo "STARTTIME=\${STARTTIME}" >> "\${log}.timing"
 extractStatsNonStandard "\${log}" \${NCORES} "\${SLURM_JOB_ID}" \${err} "flagSumarySpectral" "txt,csv"
 if [ \$err != 0 ]; then
     exit \$err
-#else
-#    # Copy the log from the valiation to the diagnostics directory 
-#    cp \${log} \${diagnostics}
+else
+    # Copy the summary file to the diagnostics directory
+    cp "${FLAG_SUMMARY_SPECTRAL_FILE}" "\${diagnostics}"
 fi
 
 
