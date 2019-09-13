@@ -1,3 +1,43 @@
+0.24.5 (13 September 2019)
+--------------------------
+
+A patch release largely built around fixing issues with data presented to CASDA for release.
+
+ * Ensuring the validation metrics file is correctly named when
+   casdaupload is re-run.
+ * Getting the correct RA/Dec positions for each beam's MS for the
+   casda metadata (rather than the pointing centre of the
+   observation).
+ * Allowing the correct annotation of Jira tickets when uploading to
+   CASDA.
+ * Ensuring the column widths within the VOTable catalogues produced
+   by Selavy are consistent with CASDA expectations.
+
+There are also several pipeline fixes:
+
+ * A new "rapid" mode of the pipeline for wide-area continuum
+   observations of many fields within the one scheduling block. This
+   combines the pre-imaging tasks into the imaging slurm job, to
+   reduce the overall load on the slurm controller.
+ * New bandpass plotting is provided, along with flag summaries for each MS.
+ * The reference frequency was not being set correctly for the
+   CleanModel option of continuum subtraction.
+ * We avoid writing out the schedblock variables to the metadata
+   files, to avoid formatting issues that were causing errors.
+ * The Stokes value had been set to lower-case in some labels on
+   plots, which led to confusion. It is now back to upper case.
+
+And for the askapsoft processing software:
+
+ * The numpy, matplotlib, scipy and astropy 3rdParty modules have been
+   removed - these need to be provided by the external system. This
+   was to avoid segmentation faults occuring in the makeThumbnails
+   jobs for the larger continuum images. This has resulted in changes
+   to the modules loaded by the pipeline scripts as well (so that
+   those python packages are provided by system modules).
+ * The PSF fitting in the imager has been tweaked to avoid rare cases
+   of divergence.
+   
 0.24.4 (6 August 2019)
 ----------------------
 
