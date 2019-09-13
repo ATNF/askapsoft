@@ -252,6 +252,11 @@ the science field processing.
 |                             |         | to ``false`` then all the following switches will be set to |
 |                             |         | ``false``.                                                  |
 +-----------------------------+---------+-------------------------------------------------------------+
+| ``DO_RAPID_SURVEY``         | false   | Whether to use the rapid survey mode of the pipeline -      |
+|                             |         | suitable for continuum observations of many fields within a |
+|                             |         | single scheduling block. See :doc:`pipelineUsage` for       |
+|                             |         | details.                                                    |
++-----------------------------+---------+-------------------------------------------------------------+
 | ``DO_SPLIT_SCIENCE``        | true    | Whether to split out the given beam from the science MS     |
 +-----------------------------+---------+-------------------------------------------------------------+
 | ``DO_FLAG_SCIENCE``         | true    | Whether to flag the (splitted) science MS                   |
@@ -322,26 +327,36 @@ After the calibration, imaging and source-finding, there are several
 tasks that can be done to prepare the data for archiving in CASDA, and
 these tasks are controlled by the following parameters.
 
-+----------------------------+---------+-------------------------------------------------------------+
-| Variable                   | Default | Description                                                 |
-+============================+=========+=============================================================+
-| ``DO_DIAGNOSTICS``         | true    | Whether to run the diagnostic script upon completion of     |
-|                            |         | imaging and source-finding. (This is not the continuum      |
-|                            |         | validation, but rather other diganostic tasks).             |
-+----------------------------+---------+-------------------------------------------------------------+
-| ``DO_VALIDATION_SCIENCE``  | true    | Run specific science validation tasks, such as plotting the |
-|                            |         | cube statistics.                                            |
-+----------------------------+---------+-------------------------------------------------------------+
-| ``DO_CONVERT_TO_FITS``     | true    | Whether to convert remaining CASA images and image cubes to |
-|                            |         | FITS format (some will have been converted by the           |
-|                            |         | source-finding tasks).                                      |
-+----------------------------+---------+-------------------------------------------------------------+
-| ``DO_MAKE_THUMBNAILS``     | true    | Whether to make the PNG thumbnail images that are used      |
-|                            |         | within CASDA to provide previews of the image data products.|
-+----------------------------+---------+-------------------------------------------------------------+
-| ``DO_STAGE_FOR_CASDA``     | false   | Whether to tun the casda upload script to copy the data to  |
-|                            |         | the staging directory for ingest into the archive.          |
-+----------------------------+---------+-------------------------------------------------------------+
++------------------------------+---------+-------------------------------------------------------------+
+| Variable                     | Default | Description                                                 |
++==============================+=========+=============================================================+
+| ``DO_DIAGNOSTICS``           | true    | Whether to run the diagnostic script upon completion of     |
+|                              |         | imaging and source-finding. (This is not the continuum      |
+|                              |         | validation, but rather other diganostic tasks).             |
++------------------------------+---------+-------------------------------------------------------------+
+| ``DO_FLAG_SUMMARY_AVERAGED`` | false   | Whether to produce a summary file showing the fraction of   |
+|                              |         | data flagged as a function of integration and baseline for  |
+|                              |         | each of the continuum-averaged MSs. See :doc:`validation`   |
+|                              |         | for further description.                                    |
++------------------------------+---------+-------------------------------------------------------------+
+| ``DO_FLAG_SUMMARY_SPECTRAL`` | false   | Whether to produce a summary file showing the fraction of   |
+|                              |         | data flagged as a function of integration and baseline for  |
+|                              |         | each of the spectral-line MSs. See :doc:`validation` for    |
+|                              |         | further description.                                        |
++------------------------------+---------+-------------------------------------------------------------+
+|  ``DO_VALIDATION_SCIENCE``   | true    | Run specific science validation tasks, such as plotting the |
+|                              |         | cube statistics.                                            |
++------------------------------+---------+-------------------------------------------------------------+
+| ``DO_CONVERT_TO_FITS``       | true    | Whether to convert remaining CASA images and image cubes to |
+|                              |         | FITS format (some will have been converted by the           |
+|                              |         | source-finding tasks).                                      |
++------------------------------+---------+-------------------------------------------------------------+
+| ``DO_MAKE_THUMBNAILS``       | true    | Whether to make the PNG thumbnail images that are used      |
+|                              |         | within CASDA to provide previews of the image data products.|
++------------------------------+---------+-------------------------------------------------------------+
+| ``DO_STAGE_FOR_CASDA``       | false   | Whether to tun the casda upload script to copy the data to  |
+|                              |         | the staging directory for ingest into the archive.          |
++------------------------------+---------+-------------------------------------------------------------+
 
 
 

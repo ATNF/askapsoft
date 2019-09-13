@@ -344,6 +344,37 @@ The science field is processed for each field name - what follows describes the 
   plots. Details of diagnostic plots can be found on :doc:`validation`. 
 
 
+'Rapid' mode processing
+-----------------------
+
+The "rapid survey" mode of the telescope involves taking many
+relatively short integrations of different fields within a single
+scheduling block, allowing the coverage of wide areas of sky. A
+consequence of this mode is that the MS sizes are quite small, so that
+the pre-imaging tasks (splitting, bandpass calibration, flagging,
+averaging) take very little time. This can lead to large overheads for
+the slurm scheduling system, especially when combined with the large
+numbers of jobs coming from the many fields.
+
+To address this, there is a rapid pipeline mode that combines all
+these pre-imaging steps into a single script (that is written to the
+*tools/* directory when processASKAP.sh is run). This script is called
+from within the imaging job itself, so that each beam only needs to
+run the continuum imaging/self-cal job (as well as the jobs that
+follow - applying calibration, Stokes V imaging, linmos), greatly
+reducing the load on the slurm controller.
+
+This mode is turned on by setting ``DO_RAPID_SURVEY=true``. There are
+some constraints with this:
+
+* Only continuum imaging is done in this mode.
+* There is no merging of spectral chunks of the raw data - it is
+  assumed the raw data is either in a single MS or in one MS per beam.
+
+Otherwise, the processing is exactly the same as for the regular
+pipeline case.
+  
+
 .. Following is the old text about stage-processing. Doesn't work, so leaving out for now.  
 .. Staging the processing As described on :doc:`../platform/comm_archive`, many datasets will not reside on /astro, but only on the commissioning archive. They can be restored by Operations staff if you wish to process (or re-process) them. It is possible to set up your processing to start immediately upon completion of the restoration process, by using the **stage-processing.sh** script in the *askaputils* module. Typical usage is::  stage-processing.sh myconfig.sh <jobID> where <jobID> is the slurm job ID of the restore job and 'myconfig.sh' can be replaced with your configuration file. Run "stage-processing.sh -h" for more information.
 

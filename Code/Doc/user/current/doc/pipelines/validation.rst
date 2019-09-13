@@ -17,8 +17,12 @@ The bandpass validation script provides additional plots to more quickly assess 
    :width: 90%
    :align: center
 
-Together with this plot, the amplitude and phase of all solutions for each antenna are plotted, again to allow identification of outliers or problematic trends. These plots can be found in the *diagnostics* directory.
+A more detailed plot of the bandpass solutions for each antenna/beam combination (plotted separately as amplitude and phase for each polarisation) is also provided in the *diagnostics* directory. This will be named for the bandpass calibration table, but with a *.pdf* extension (for it is a PDF file - each page showing all beams for a single antenna). Here is an example of the style of plots:
 
+.. image:: exampleBandpassPlot.png
+   :width: 90%
+   :align: center
+           
 
 Spectral cube diagnostics
 -------------------------
@@ -58,3 +62,12 @@ All continuum images will (when the ``DO_MAKE_THUMBNAILS=true`` is set) have a P
 .. image:: exampleImageSources.png
    :width: 90%
    :align: center
+
+
+Flagging summaries
+------------------
+
+For both the spectral datasets and the averaged (continuum) datasets, the pipeline will produce text files that summarise the flagging statistics. These will be written to the *diagnostics* directory, and will be named for the measurement set in question, with a *.flagSummary* appended to the filename.
+
+These files will list the percentage of data flagged for each integration & baseline, along with summaries for each integration. A future release will provide a graphical representation of this data as well.
+
