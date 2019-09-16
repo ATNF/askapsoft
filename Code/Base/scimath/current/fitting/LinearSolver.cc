@@ -64,7 +64,7 @@ using std::abs;
 using std::map;
 using std::string;
 
-//#define FORWARD_DIFFERENCE
+#define FORWARD_DIFFERENCE
 
 namespace askap
 {
