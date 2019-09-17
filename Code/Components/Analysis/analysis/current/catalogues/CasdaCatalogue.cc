@@ -120,6 +120,7 @@ void CasdaCatalogue::writeVOT()
                              "char", itsVersion, itsVersion.size() + 1, "");
     vowriter.writeParameter(version);
     vowriter.writeParameters();
+    vowriter.writeFrequencyParam();
     vowriter.writeStats();
     vowriter.writeTableHeader();
     writeVOTableEntries(&vowriter);
