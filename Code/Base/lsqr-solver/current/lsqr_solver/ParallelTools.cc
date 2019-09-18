@@ -15,7 +15,7 @@
 namespace askap { namespace lsqr { namespace ParallelTools {
 
 // Private function.
-static void get_number_elements_on_other_cpus(size_t nelements, IVector& nelements_at_cpu, int nbproc, const MPI_Comm &comm)
+static void get_number_elements_on_other_cpus(size_t nelements, std::vector<int>& nelements_at_cpu, int nbproc, const MPI_Comm &comm)
 {
     if (nelements_at_cpu.size() != size_t(nbproc))
     {
@@ -39,7 +39,7 @@ size_t get_total_number_elements(size_t nelements, int nbproc, const MPI_Comm &c
         return nelements;
     }
 
-    IVector nelements_at_cpu(nbproc);
+    std::vector<int> nelements_at_cpu(nbproc);
     get_number_elements_on_other_cpus(nelements, nelements_at_cpu, nbproc, comm);
 
     size_t nelements_total = 0;
@@ -57,7 +57,7 @@ size_t get_nsmaller(size_t nelements, int myrank, int nbproc, const MPI_Comm &co
         return 0;
     }
 
-    IVector nelements_at_cpu(nbproc);
+    std::vector<int> nelements_at_cpu(nbproc);
     get_number_elements_on_other_cpus(nelements, nelements_at_cpu, nbproc, comm);
 
     size_t nsmaller = 0;
@@ -69,7 +69,7 @@ size_t get_nsmaller(size_t nelements, int myrank, int nbproc, const MPI_Comm &co
 }
 
 // Private function.
-static void get_mpi_partitioning(size_t nelements, IVector& displs, IVector& nelements_at_cpu, int nbproc, const MPI_Comm &comm)
+static void get_mpi_partitioning(size_t nelements, std::vector<int>& displs, std::vector<int>& nelements_at_cpu, int nbproc, const MPI_Comm &comm)
 {
     // Sanity check.
     if (displs.size() != size_t(nbproc) || nelements_at_cpu.size() != size_t(nbproc))
@@ -88,8 +88,8 @@ static void get_mpi_partitioning(size_t nelements, IVector& displs, IVector& nel
 
 static void __get_full_array_in_place(size_t nelements, void *data_array, bool bcast, int myrank, int nbproc, const MPI_Comm &comm, MPI_Datatype mpi_dt)
 {
-    IVector displs(nbproc);
-    IVector nelements_at_cpu(nbproc);
+    std::vector<int> displs(nbproc);
+    std::vector<int> nelements_at_cpu(nbproc);
 
     // Get partitioning for MPI_Gatherv.
     get_mpi_partitioning(nelements, displs, nelements_at_cpu, nbproc, comm);

@@ -7,12 +7,14 @@
 #ifndef SRC_UTILS_MATHUTILS_H_
 #define SRC_UTILS_MATHUTILS_H_
 
-#include <lsqr_solver/GlobalTypedefs.h>
+#include <vector>
 
 /*
  * Contains functions for some math operations.
  */
 namespace askap { namespace lsqr { namespace MathUtils {
+
+typedef std::vector<double> Vector;
 
 /*
  * Calculates l2-norm of a vector.

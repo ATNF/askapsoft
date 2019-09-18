@@ -7,10 +7,11 @@
 #ifndef LSQRSOLVER_H_
 #define LSQRSOLVER_H_
 
-#include <lsqr_solver/GlobalTypedefs.h>
 #include <lsqr_solver/SparseMatrix.h>
 
 namespace askap { namespace lsqr {
+
+typedef std::vector<double> Vector;
 
 /*
  * Least Square (LSQR) solver parallelized by the model parameters.

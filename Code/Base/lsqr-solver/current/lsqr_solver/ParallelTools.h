@@ -16,9 +16,6 @@
 
 namespace askap { namespace lsqr { namespace ParallelTools {
 
-typedef std::vector<int> IVector;
-typedef std::vector<double> Vector;
-
 /*
  * Returns the total number of elements (on all CPUs).
  */
