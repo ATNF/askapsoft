@@ -105,7 +105,7 @@ public:
      * Extends (finalized) matrix for adding more elements.
      * Makes matrix non-finalized.
      */
-    void Extend(size_t extra_nl, size_t extra_nnz);
+    void Extend(size_t extra_nl);
 
     /*
      * Returns the number of nonempty rows.

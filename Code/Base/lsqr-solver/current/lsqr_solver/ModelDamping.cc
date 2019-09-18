@@ -53,7 +53,7 @@ void ModelDamping::Add(double alpha,
 #endif
 
     // Extend matrix and right-hand size for adding damping.
-    matrix.Extend(nelementsTotal, nelements);
+    matrix.Extend(nelementsTotal);
     b.resize(b.size() + nelementsTotal);
 
     // Gather here local parts of the right-hand-side from all CPUs.

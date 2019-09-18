@@ -45,7 +45,6 @@
 #include <gsl/gsl_vector.h>
 #include <gsl/gsl_linalg.h>
 
-#include <lsqr_solver/GlobalTypedefs.h>
 #include <lsqr_solver/SparseMatrix.h>
 #include <lsqr_solver/LSQRSolver.h>
 #include <lsqr_solver/ModelDamping.h>
@@ -299,8 +298,6 @@ std::pair<double,double> LinearSolver::solveSubsetOfNormalEquations(Params &para
     //------------------------------------------------------------------------------
     // Define LSQR solver sparse matrix.
     //------------------------------------------------------------------------------
-    size_t nrows = 0;
-    bool addSmoothnessConstraints = false;
 #ifdef HAVE_MPI
     size_t nParametersTotal = lsqr::ParallelTools::get_total_number_elements(nParameters, nbproc, itsWorkersComm);
     size_t nParametersSmaller = lsqr::ParallelTools::get_nsmaller(nParameters, myrank, nbproc, itsWorkersComm);
@@ -311,16 +308,9 @@ std::pair<double,double> LinearSolver::solveSubsetOfNormalEquations(Params &para
     if (myrank == 0) ASKAPLOG_DEBUG_STR(logger, "nParameters = " << nParameters);
     if (myrank == 0) ASKAPLOG_DEBUG_STR(logger, "nParametersTotal = " << nParametersTotal);
 
+    size_t nrows = 0;
     if (algorithmLSQR) {
         nrows = nParametersTotal;
-        if (parameters().count("smoothing") > 0
-            && parameters().at("smoothing") == "true") {
-            addSmoothnessConstraints = true;
-        }
-
-        if (addSmoothnessConstraints) {
-            nrows += nParametersTotal;
-        }
     }
 
 #ifdef HAVE_MPI
@@ -411,6 +401,7 @@ std::pair<double,double> LinearSolver::solveSubsetOfNormalEquations(Params &para
         }
         ASKAPCHECK(matrix.GetCurrentNumberRows() == nParametersTotal, "Wrong number of matrix rows!");
     }
+    matrix.Finalize(nParameters);
 
     //----------------------------------------------------------------------------------------------------------------------------
     if (algorithmLSQR) {
@@ -591,19 +582,26 @@ std::pair<double,double> LinearSolver::solveSubsetOfNormalEquations(Params &para
 #endif
         }
 
+
+        bool addSmoothnessConstraints = false;
+        if (parameters().count("smoothing") > 0
+            && parameters().at("smoothing") == "true") {
+            addSmoothnessConstraints = true;
+        }
+
         if (addSmoothnessConstraints) {
             ASKAPCHECK(matrixIsParallel, "Smoothing constraints should be used in the parallel matrix mode!");
-
-        //-----------------------------------------------
-        // Adding smoothness constraints.
-        //-----------------------------------------------
+            //-----------------------------------------------
+            // Adding smoothness constraints.
+            //-----------------------------------------------
+            matrix.Extend(nParametersTotal);
             b_RHS.resize(b_RHS.size() + nParametersTotal);
 
             //-----------------------------------------------------------------------------
             // Setting the smoothing weight.
             //-----------------------------------------------------------------------------
             double smoothingWeight = 0.;
-            if (addSmoothnessConstraints) {
+            {
                 double smoothingMinWeight = 0.;
                 if (parameters().count("smoothingMinWeight") > 0) {
                     smoothingMinWeight = std::atof(parameters().at("smoothingMinWeight").c_str());
@@ -856,10 +854,9 @@ std::pair<double,double> LinearSolver::solveSubsetOfNormalEquations(Params &para
             }
 
             if (myrank == 0) ASKAPLOG_INFO_STR(logger, "Smoothness constraints cost = " << cost / (smoothingWeight * smoothingWeight));
-        }
-        // Completed the matrix building.
-        matrix.Finalize(nParameters);
 
+            matrix.Finalize(nParameters);
+        }
         if (myrank == 0) ASKAPLOG_DEBUG_STR(logger, "Matrix nelements = " << matrix.GetNumberElements());
 
         // A simple approximation for the upper bound of the rank of the  A'A matrix.

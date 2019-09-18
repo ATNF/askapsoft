@@ -172,7 +172,7 @@ void SparseMatrix::TransMultVector(const Vector& x, Vector& b) const
     }
 }
 
-void SparseMatrix::Extend(size_t extra_nl, size_t extra_nnz)
+void SparseMatrix::Extend(size_t extra_nl)
 {
     // Sanity check.
     if (!finalized) {

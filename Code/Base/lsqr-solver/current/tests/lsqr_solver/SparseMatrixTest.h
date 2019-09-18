@@ -617,7 +617,7 @@ namespace askap
 
             matrix.Finalize(3);
 
-            matrix.Extend(2, 6);
+            matrix.Extend(2);
 
             matrix.NewRow();
 
@@ -653,7 +653,7 @@ namespace askap
             SparseMatrix matrix(0);
             matrix.Finalize(3);
 
-            matrix.Extend(3, 9);
+            matrix.Extend(3);
 
             matrix.NewRow();
 
