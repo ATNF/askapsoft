@@ -17,8 +17,7 @@ namespace askap
 
       CPPUNIT_TEST(testConstructors);
       CPPUNIT_TEST(testAdd);
-      CPPUNIT_TEST_EXCEPTION(testInvalidAdd, std::runtime_error);
-      CPPUNIT_TEST_EXCEPTION(testInvalidAdd2, std::runtime_error);
+      CPPUNIT_TEST_EXCEPTION(testInvalidAddBeforeFirstRow, std::runtime_error);
       CPPUNIT_TEST(testGetNumberRows);
       CPPUNIT_TEST(testFinalizeZeroColumns);
       CPPUNIT_TEST(testFinalizeNonZeroColumns);
@@ -50,7 +49,7 @@ namespace askap
 
         void testConstructors()
         {
-            SparseMatrix *matrix = new SparseMatrix(1, 1);
+            SparseMatrix *matrix = new SparseMatrix(1);
             CPPUNIT_ASSERT(matrix != NULL);
             delete matrix;
         }
@@ -58,7 +57,7 @@ namespace askap
         // Test of Add.
         void testAdd()
         {
-            SparseMatrix matrix(1, 3);
+            SparseMatrix matrix(1);
 
             matrix.NewRow();
 
@@ -81,31 +80,17 @@ namespace askap
         }
 
         // Test of Add.
-        // Add more elements than reserved number (nnz).
-        void testInvalidAdd()
-        {
-            SparseMatrix matrix(1, 3);
-
-            matrix.NewRow();
-            matrix.Add(1.0, 0);
-            matrix.Add(2.0, 0);
-            matrix.Add(3.0, 0);
-            // Will throw std::runtime_error.
-            matrix.Add(4.0, 0);
-        }
-
-        // Test of Add.
         // Add elements before the first row has been added.
-        void testInvalidAdd2()
+        void testInvalidAddBeforeFirstRow()
         {
-            SparseMatrix matrix(1, 3);
+            SparseMatrix matrix(1);
             matrix.Add(1.0, 0);
         }
 
         // Test of GetCurrentNumberRows, and GetTotalNumberRows.
         void testGetNumberRows()
         {
-            SparseMatrix matrix(3, 9);
+            SparseMatrix matrix(3);
 
             CPPUNIT_ASSERT_EQUAL(size_t(0), matrix.GetCurrentNumberRows());
             CPPUNIT_ASSERT_EQUAL(size_t(3), matrix.GetTotalNumberRows());
@@ -127,7 +112,7 @@ namespace askap
         // Zero number of columns.
         void testFinalizeZeroColumns()
         {
-            SparseMatrix matrix(1, 1);
+            SparseMatrix matrix(1);
             matrix.NewRow();
             CPPUNIT_ASSERT(matrix.Finalize(0));
         }
@@ -136,7 +121,7 @@ namespace askap
         // Non-zero number of columns.
         void testFinalizeNonZeroColumns()
         {
-            SparseMatrix matrix(3, 9);
+            SparseMatrix matrix(3);
 
             matrix.NewRow();
 
@@ -163,7 +148,7 @@ namespace askap
         // Finalize matrix with wrong number of rows.
         void testInvalidFinalize()
         {
-            SparseMatrix matrix(1, 1);
+            SparseMatrix matrix(1);
             // Will throw std::runtime_error.
             matrix.Finalize(0);
         }
@@ -172,7 +157,7 @@ namespace askap
         // Pass wrong number of matrix columns to Finalize.
         void testInvalidFinalize2()
         {
-            SparseMatrix matrix(1, 1);
+            SparseMatrix matrix(1);
             matrix.Add(1.0, 2);
             // Will throw std::runtime_error.
             matrix.Finalize(1);
@@ -180,7 +165,7 @@ namespace askap
 
         void testInvalidNewRow()
         {
-            SparseMatrix matrix(3, 9);
+            SparseMatrix matrix(3);
 
             matrix.NewRow();
 
@@ -207,7 +192,7 @@ namespace askap
         // Matrix with all non-zero elements.
         void testGetValueAllNonZero()
         {
-            SparseMatrix matrix(3, 9);
+            SparseMatrix matrix(3);
 
             matrix.NewRow();
 
@@ -247,7 +232,7 @@ namespace askap
         // so GetValue() should return zero when querying for them.
         void testGetValueZeroDiag()
         {
-            SparseMatrix matrix(3, 9);
+            SparseMatrix matrix(3);
 
             matrix.NewRow();
 
@@ -283,7 +268,7 @@ namespace askap
         // 3x3 matrix with all non-zero elements.
         void testMultVectorAllNonZero()
         {
-            SparseMatrix matrix(3, 9);
+            SparseMatrix matrix(3);
 
             matrix.NewRow();
 
@@ -323,7 +308,7 @@ namespace askap
         // 3x3 matrix with no diagonal elements.
         void testMultVectorZeroDiag()
         {
-            SparseMatrix matrix(3, 9);
+            SparseMatrix matrix(3);
 
             matrix.NewRow();
 
@@ -360,7 +345,7 @@ namespace askap
         // Diagonal 3x3 matrix.
         void testMultVectorDiag()
         {
-            SparseMatrix matrix(3, 9);
+            SparseMatrix matrix(3);
 
             matrix.NewRow();
             matrix.Add(1.0, 0);
@@ -391,7 +376,7 @@ namespace askap
         // 1x3 matrix.
         void testMultVector1x3()
         {
-            SparseMatrix matrix(3, 9);
+            SparseMatrix matrix(3);
 
             matrix.NewRow();
             matrix.Add(1.0, 0);
@@ -420,7 +405,7 @@ namespace askap
         // 3x1 matrix.
         void testMultVector3x1()
         {
-            SparseMatrix matrix(1, 9);
+            SparseMatrix matrix(1);
 
             matrix.NewRow();
             matrix.Add(1.0, 0);
@@ -445,7 +430,7 @@ namespace askap
         // 3x3 matrix with one non-zero element a11.
         void testMultVectorOneNonZero()
         {
-            SparseMatrix matrix(3, 9);
+            SparseMatrix matrix(3);
 
             matrix.NewRow();
             matrix.Add(5.0, 0);
@@ -477,7 +462,7 @@ namespace askap
         // 3x3 matrix with all non-zero elements.
         void testTransMultVectorAllNonZero3x3()
         {
-            SparseMatrix matrix(3, 9);
+            SparseMatrix matrix(3);
 
             matrix.NewRow();
 
@@ -517,7 +502,7 @@ namespace askap
         // 2x3 matrix with all non-zero elements.
         void testTransMultVectorAllNonZero2x3()
         {
-            SparseMatrix matrix(3, 9);
+            SparseMatrix matrix(3);
 
             matrix.NewRow();
 
@@ -553,7 +538,7 @@ namespace askap
         // 3x2 matrix with all non-zero elements.
         void testTransMultVectorAllNonZero3x2()
         {
-            SparseMatrix matrix(2, 9);
+            SparseMatrix matrix(2);
 
             matrix.NewRow();
 
@@ -585,7 +570,7 @@ namespace askap
         // Test of Reset.
         void testReset()
         {
-            SparseMatrix matrix(3, 9);
+            SparseMatrix matrix(3);
 
             matrix.NewRow();
 
@@ -622,7 +607,7 @@ namespace askap
         // Extending a non-empty matrix.
         void testExtendNonEmpty()
         {
-            SparseMatrix matrix(1, 3);
+            SparseMatrix matrix(1);
 
             matrix.NewRow();
 
@@ -665,7 +650,7 @@ namespace askap
         // Extending an empty matrix.
         void testExtendEmpty()
         {
-            SparseMatrix matrix(0, 0);
+            SparseMatrix matrix(0);
             matrix.Finalize(3);
 
             matrix.Extend(3, 9);
@@ -707,7 +692,7 @@ namespace askap
         // No empty rows.
         void testGetNumberNonemptyRowsNoEmpty()
         {
-            SparseMatrix matrix(3, 9);
+            SparseMatrix matrix(3);
 
             matrix.NewRow();
 
@@ -736,7 +721,7 @@ namespace askap
         // All empty rows.
         void testGetNumberNonemptyRowsAllEmpty()
         {
-            SparseMatrix matrix(3, 9);
+            SparseMatrix matrix(3);
 
             matrix.NewRow();
             matrix.NewRow();
@@ -751,7 +736,7 @@ namespace askap
         // Some empty rows.
         void testGetNumberNonemptyRowsSomeEmpty()
         {
-            SparseMatrix matrix(3, 9);
+            SparseMatrix matrix(3);
 
             matrix.NewRow();
             matrix.Add(1.0, 0);
@@ -768,7 +753,7 @@ namespace askap
         // Some empty rows.
         void testGetNumberNonemptyRowsSomeEmpty2()
         {
-            SparseMatrix matrix(3, 9);
+            SparseMatrix matrix(3);
 
             matrix.NewRow();
             matrix.Add(1.0, 0);

@@ -40,9 +40,9 @@ namespace askap
             size_t nelements = 3;
 
 #ifdef HAVE_MPI
-            SparseMatrix matrix(0, 0, MPI_COMM_WORLD);
+            SparseMatrix matrix(0, MPI_COMM_WORLD);
 #else
-            SparseMatrix matrix(0, 0);
+            SparseMatrix matrix(0);
 #endif
 
             Vector b(0);

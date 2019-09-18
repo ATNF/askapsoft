@@ -47,9 +47,9 @@ namespace askap
               nrows = 2;
 
 #ifdef HAVE_MPI
-              matrix = new SparseMatrix(nrows, ncols * nrows, MPI_COMM_WORLD);
+              matrix = new SparseMatrix(nrows, MPI_COMM_WORLD);
 #else
-              matrix = new SparseMatrix(nrows, ncols * nrows);
+              matrix = new SparseMatrix(nrows);
 #endif
               b_RHS = new Vector(nrows, 0.0);
 
@@ -236,9 +236,9 @@ namespace askap
             size_t nelements = nelements_total;
 
 #ifdef HAVE_MPI
-            SparseMatrix matrix(nrows, nelements * nrows, MPI_COMM_WORLD);
+            SparseMatrix matrix(nrows, MPI_COMM_WORLD);
 #else
-            SparseMatrix matrix(nrows, nelements * nrows);
+            SparseMatrix matrix(nrows);
 #endif
 
             Vector b_RHS(nrows, 0.0);
@@ -284,9 +284,9 @@ namespace askap
             size_t nrows = 3;
 
 #ifdef HAVE_MPI
-            SparseMatrix matrix(nrows, ncols * nrows, MPI_COMM_WORLD);
+            SparseMatrix matrix(nrows, MPI_COMM_WORLD);
 #else
-            SparseMatrix matrix(nrows, ncols * nrows);
+            SparseMatrix matrix(nrows);
 #endif
 
             matrix.NewRow();

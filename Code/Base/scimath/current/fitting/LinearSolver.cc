@@ -297,16 +297,9 @@ std::pair<double,double> LinearSolver::solveSubsetOfNormalEquations(Params &para
     }
 
     //------------------------------------------------------------------------------
-    const GenericNormalEquations& gne = dynamic_cast<const GenericNormalEquations&>(normalEquations());
-    size_t nElements = gne.getNumberElements();
-
-    if (myrank == 0) ASKAPLOG_DEBUG_STR(logger, "nParameters = " << nParameters << ", nElements = " << nElements);
-
-    //------------------------------------------------------------------------------
     // Define LSQR solver sparse matrix.
     //------------------------------------------------------------------------------
     size_t nrows = 0;
-    size_t nnz = 0;
     bool addSmoothnessConstraints = false;
 #ifdef HAVE_MPI
     size_t nParametersTotal = lsqr::ParallelTools::get_total_number_elements(nParameters, nbproc, itsWorkersComm);
@@ -315,17 +308,10 @@ std::pair<double,double> LinearSolver::solveSubsetOfNormalEquations(Params &para
     size_t nParametersTotal = nParameters;
     size_t nParametersSmaller = 0;
 #endif
+    if (myrank == 0) ASKAPLOG_DEBUG_STR(logger, "nParameters = " << nParameters);
     if (myrank == 0) ASKAPLOG_DEBUG_STR(logger, "nParametersTotal = " << nParametersTotal);
 
     if (algorithmLSQR) {
-        // Define approximate number of nonzero elements.
-        // Note: nElements may contain elements which are not currently being solved for.
-        if (nElements <= (size_t)(nParameters * nParameters)) {
-            nnz = nElements;
-        } else {
-            nnz = nParameters * nParameters;
-        }
-
         nrows = nParametersTotal;
         if (parameters().count("smoothing") > 0
             && parameters().at("smoothing") == "true") {
@@ -334,14 +320,13 @@ std::pair<double,double> LinearSolver::solveSubsetOfNormalEquations(Params &para
 
         if (addSmoothnessConstraints) {
             nrows += nParametersTotal;
-            nnz += 2 * nParameters;
         }
     }
 
 #ifdef HAVE_MPI
-    lsqr::SparseMatrix matrix(nrows, nnz, mpi_comm);
+    lsqr::SparseMatrix matrix(nrows, mpi_comm);
 #else
-    lsqr::SparseMatrix matrix(nrows, nnz);
+    lsqr::SparseMatrix matrix(nrows);
 #endif
 
     //--------------------------------------------------------------------------------------------
@@ -349,6 +334,8 @@ std::pair<double,double> LinearSolver::solveSubsetOfNormalEquations(Params &para
     //      - to gsl NxN matrix, for the SVD solver;
     //      - to sparse matrix (CSR format), for the LSQR solver.
     //--------------------------------------------------------------------------------------------
+    const GenericNormalEquations& gne = dynamic_cast<const GenericNormalEquations&>(normalEquations());
+
     if (algorithmLSQR && matrixIsParallel) {
         for (size_t i = 0; i < nParametersSmaller; ++i) {
             matrix.NewRow();

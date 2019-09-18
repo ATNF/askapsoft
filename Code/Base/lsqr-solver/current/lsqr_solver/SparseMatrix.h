@@ -25,12 +25,11 @@ public:
     /*
      * Constructor: initializes the sparse matrix.
      * nl - number of matrix lines.
-     * nnz - reserved (predicted maximum) number of non-zero elements.
      * comm - MPI communicator (used when the matrix is split among CPUs).
      */
-    SparseMatrix(size_t nl, size_t nnz);
+    SparseMatrix(size_t nl);
 #ifdef HAVE_MPI
-    SparseMatrix(size_t nl, size_t nnz, const MPI_Comm &comm);
+    SparseMatrix(size_t nl, const MPI_Comm &comm);
 #endif
 
     virtual ~SparseMatrix();
@@ -130,8 +129,6 @@ private:
     // Flag for whether the matrix has been finalized.
     bool finalized;
 
-    // Predicted number of nonzero elements.
-    size_t nnz;
     // Actual number of nonzero elements.
     size_t nel;
     // Total number of rows in the matrix.
