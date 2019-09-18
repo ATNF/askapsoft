@@ -524,7 +524,6 @@ EOF
                 loadModule askapcli
                 schedblock transition -s PROCESSING ${SB_SCIENCE} > "${logs}/transition-to-PROCESSING.log"
                 err=$?
-                unloadModule askapcli
                 if [ $err -ne 0 ]; then
                     echo "$(date): ERROR - 'schedblock transition' failed for SB ${SB_SCIENCE} with error code \$err"
                 fi
@@ -544,7 +543,6 @@ EOF
                     fi
                 fi
                 # Re-create the sbinfo file, as we've changed the state of the SB
-                loadModule askapcli
                 schedblock info -p "${SB_SCIENCE}" > "$sbinfo"
                 err=$?
                 unloadModule askapcli
