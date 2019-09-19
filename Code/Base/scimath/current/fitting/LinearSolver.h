@@ -39,6 +39,8 @@
 #include <fitting/DesignMatrix.h>
 #include <fitting/Params.h>
 
+#include <lsqr_solver/SparseMatrix.h>
+
 #include <boost/config.hpp>
 
 #include <utility>
@@ -140,6 +142,19 @@ namespace askap
          static std::pair<casa::uInt, std::string> extractChannelInfo(const std::string &name);
 
          static bool compareGainNames(const std::string& gainA, const std::string& gainB);
+
+         /// @brief Calculates the smoothing weight for the current major loop iteration.
+         double getSmoothingWeight() const;
+
+         /// @brief Adding smoothness constraints to the system of equations.
+         /// @details Extends the matrix and right-hand side with smoothness constraints,
+         /// which are defined for the least squares minimization framework.
+         static void addSmoothnessConstraints(lsqr::SparseMatrix& matrix, lsqr::Vector& b_RHS,
+                                              const std::vector<std::pair<std::string, int> >& indices,
+                                              const Params& params,
+                                              size_t nParameters,
+                                              size_t nChannels,
+                                              double smoothingWeight);
 
 #ifdef HAVE_MPI
          // MPI communicator of all workers (for LSQR solver).
