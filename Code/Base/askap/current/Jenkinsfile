@@ -63,6 +63,7 @@ make install
 
       }
     }
+  }
   environment {
     WORKSPACE = pwd()
     PREFIX = "${WORKSPACE}/install"
