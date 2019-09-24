@@ -96,25 +96,31 @@ if __name__ == '__main__':
     stats = cs.statsCollection(freq,comm,useCasacoreStats)
     stats.setScaleFactor(scale)
     stats.setUnits(unit)
+
+    if not args.nocalc:
     
-    for i in range(specSize):
+        for i in range(specSize):
 
-        if i % size == rank:
+            if i % size == rank:
 
-            blc[spInd] = i
-            trc[spInd] = i
-            try:
-                stats.calculate(cube,i,blc.tolist(),trc.tolist())
-            except:
-                print('findCubeStats.py: Error for channel %d - setting stats to zero'%i)
+                blc[spInd] = i
+                trc[spInd] = i
+                try:
+                    stats.calculate(cube,i,blc.tolist(),trc.tolist())
+                except:
+                    print('findCubeStats.py: Error for channel %d - setting stats to zero'%i)
 
-    stats.gather(comm)
-            
+        stats.gather(comm)
+
+        
     if rank == 0:
 
-        stats.scale()
-        stats.write(catalogue)
-
+        if args.nocalc:
+            stats.read(catalogue)
+        else:
+            stats.scale()
+            stats.write(catalogue)
+            
         std=stats.getStd()
         madfm=cs.madfmToSigma(stats.getMadfm())
         minval=stats.getMinval()

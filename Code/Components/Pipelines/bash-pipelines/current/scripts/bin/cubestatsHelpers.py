@@ -83,6 +83,12 @@ class stat:
     def assign(self,chan,statsDict,label):
         self.stat[chan] = statsDict[label]
 
+    def set(self,chan,value):
+        self.stat[chan] = value
+
+    def makeFinal(self):
+        self.finalStat = self.stat
+        
     def gather(self,comm):
         comm.Gather(self.stat,self.fullStat)
         if self.rank == 0:
@@ -96,6 +102,7 @@ class stat:
 
 class statsCollection:
     def __init__(self,freq,comm,useCasacoreStats):
+        self.rank = comm.Get_rank()
         self.freq = freq
         self.useCasa = useCasacoreStats
         self.scaleFactor = 1.
@@ -191,6 +198,24 @@ class statsCollection:
             fout.write('%8d %15.6f %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f\n'%(i, self.freq[i], self.mean[i], self.std[i], self.median[i], self.madfm[i], self.onepc[i], self.minval[i], self.maxval[i]))
         fout.close()
             
-#    def read(catalogue):
-#        if self.rank == 0:
-            
+    def read(self,catalogue):
+        if self.rank == 0:
+            fin = open(catalogue,'r')
+            for line in fin:
+                if line[0]!='#':
+                    chan = int(line.split()[0])
+                    #self.freq.set(chan,float(line.split()[1]))
+                    self.mean.set(chan,float(line.split()[2]))
+                    self.std.set(chan,float(line.split()[3]))
+                    self.median.set(chan,float(line.split()[4]))
+                    self.madfm.set(chan,float(line.split()[5]))
+                    self.onepc.set(chan,float(line.split()[6]))
+                    self.minval.set(chan,float(line.split()[7]))
+                    self.maxval.set(chan,float(line.split()[8]))
+            self.mean.makeFinal()
+            self.std.makeFinal()
+            self.median.makeFinal()
+            self.madfm.makeFinal()
+            self.onepc.makeFinal()
+            self.minval.makeFinal()
+            self.maxval.makeFinal()
