@@ -197,9 +197,10 @@ EOF
         chanSelection="-c ${CHAN_RANGE_1934}"
     fi
     inputMSlist=$(
-        loadModule numpy
-        "${PIPELINEDIR}/getMatchingMS.py" -d "${sb1934dir}" -b $BEAM $chanSelection
-        unloadModule numpy
+        module unload askapsoft
+        module load numpy
+        module load askapsoft${ASKAPSOFT_VERSION}
+        "${PIPELINEDIR}/getMatchingMS.py" -d "${sb1934dir}" -b $BEAM $
                )
     if [ "${inputMSlist}" == "" ]; then
         echo "ERROR - unable to determine number of channels in bandpass datasets in directory ${sb1934dir}"
@@ -371,9 +372,10 @@ EOF
         chanSelection="-c ${CHAN_RANGE_SCIENCE}"
     fi
     inputMSlist=$(
-        loadModule numpy
+        module unload askapsoft
+        module load numpy
+        module load askapsoft${ASKAPSOFT_VERSION}
         "${PIPELINEDIR}/getMatchingMS.py" -d "${sbScienceDir}" -b $BEAM $chanSelection
-        unloadModule numpy
                )
     if [ "${inputMSlist}" == "" ]; then
         echo "ERROR - unable to determine number of channels in science datasets in directory ${sbScienceDir}"
