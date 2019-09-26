@@ -137,6 +137,9 @@ The following parameters are available for the Basisfunction and BasisfunctionMF
 |                   |              |              |approximately the ratio of pixels in the patch to pixels|
 |                   |              |              |in the image.                                           |
 +-------------------+--------------+--------------+--------------------------------------------------------+
+|detectdivergence   |bool          |false         |Check if the deconvolution is diverging - stop the major|
+|                   |              |              |cycles if the residuals increase by a factor 2          |
++-------------------+--------------+--------------+--------------------------------------------------------+
 |orthogonal         |bool          |false         |Use orthogonal spatial basisfunctions - this does not   |
 |                   |              |              |appear to be as useful as expected - avoid in normal use|
 +-------------------+--------------+--------------+--------------------------------------------------------+
