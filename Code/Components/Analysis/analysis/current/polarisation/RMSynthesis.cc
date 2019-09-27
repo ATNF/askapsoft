@@ -56,18 +56,14 @@ static const std::string defaultWeight = "variance";
 
 RMSynthesis::RMSynthesis(const LOFAR::ParameterSet &parset):
     itsWeightType(parset.getString("weightType", defaultWeight)),
-    itsNormalisation(0.),
-    itsLambdaSquaredVariance(0.),
     itsNumPhiChan(parset.getUint("numPhiChan", 40)),
     itsDeltaPhi(parset.getFloat("deltaPhi", 30.)),
     itsPhiZero(parset.getFloat("phiZero", 0.)),
     itsPhi(0),
     itsFaradayDF(0),
-    itsFDFnoise(0.),
     itsImodel(parset),
     itsPhiForRMSF(0),
-    itsRMSF(0),
-    itsRefLambdaSquared(0.)
+    itsRMSF(0)
 
 {
 
@@ -152,21 +148,18 @@ void RMSynthesis::calculate(const casa::Vector<float> &lsq,
     ASKAPLOG_DEBUG_STR(logger, "Noise = " << noise);
     ASKAPLOG_DEBUG_STR(logger, "Weights = " << itsWeights);
 
-    if (noise.size()>0){
-        itsFDFnoise = casa::mean(noise) / sqrt(noise.size());
-    }
+    itsFDFnoise = casa::mean(noise) / sqrt(noise.size());
 
-    if (casa::sum(itsWeights)>0.){
-        // K = \sum(w_i)^-1
-       itsNormalisation = 1. / casa::sum(itsWeights);
-       // \lambda^2_0 = K * \sum(w_i*\lambda^2_i)
-       itsRefLambdaSquared = itsNormalisation * casa::sum(itsWeights * itsLamSq);
-       // variance in the itsLamSq distribution
-       itsLambdaSquaredVariance = (casa::sum(itsLamSq * itsLamSq) - pow(casa::sum(itsLamSq), 2) / itsLamSq.size()) /
-           float(itsLamSq.size() - 1);
-   }
+    // K = \sum(w_i)^-1
+    itsNormalisation = 1. / casa::sum(itsWeights);
     ASKAPLOG_DEBUG_STR(logger, "FDF normalisation = " << itsNormalisation);
 
+    // \lambda^2_0 = K * \sum(w_i*\lambda^2_i)
+    itsRefLambdaSquared = itsNormalisation * casa::sum(itsWeights * itsLamSq);
+
+    // variance in the itsLamSq distribution
+    itsLambdaSquaredVariance = (casa::sum(itsLamSq * itsLamSq) - pow(casa::sum(itsLamSq), 2) / itsLamSq.size()) /
+                               float(itsLamSq.size() - 1);
 
     // Compute FDF
     for (size_t j = 0; j < itsNumPhiChan; j++) {
