@@ -104,7 +104,10 @@ void RMData::calculate(RMSynthesis *rmsynth)
     casa::minMax<float>(minFDF, maxFDF, locMin, locMax, fdf_p);
     ASKAPLOG_DEBUG_STR(logger, "minFDF=" << minFDF << ", maxFDF=" << maxFDF);
 
-    itsSNR = maxFDF / noise;
+    itsSNR = 0.;
+    if (noise > 0.){
+        itsSNR = maxFDF / noise;
+    }
     itsFlagDetection = (itsSNR > itsDetectionThreshold);
 
     if (itsFlagDetection) {

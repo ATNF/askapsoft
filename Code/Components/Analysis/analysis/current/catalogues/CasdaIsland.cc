@@ -117,8 +117,6 @@ CasdaIsland::CasdaIsland(sourcefitting::RadioSource &obj,
 
     itsFluxInt.value() = obj.getIntegFlux();
     itsFluxInt.error() = obj.getIntegFluxError();  // this won't work as we don't know the stats
-    double intFluxscale = getIntFluxConversionScale(newHead_freq, casda::intFluxUnitContinuum);
-    itsFluxInt.value() *= intFluxscale;
 
     // scale factor for the angular size
     casa::Unit headerShapeUnits(obj.header().getShapeUnits());

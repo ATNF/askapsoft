@@ -97,17 +97,17 @@ void DistributedFitter::parameterise()
                 itsReferenceParset.replace("subsection", subsection);
 
                 // define a duchamp Cube using the filename from the itsReferenceParams
-                DuchampParallel tempDP(*itsComms, itsReferenceParset);
-
+                boost::scoped_ptr<DuchampParallel> tempDP(new DuchampParallel(*itsComms,itsReferenceParset));
+                
                 // set this to false to stop anything trying to access
                 // the recon array
-                tempDP.cube().setReconFlag(false);
+                tempDP->cube().setReconFlag(false);
 
                 // open the image
-                tempDP.readData();
+                tempDP->readData();
 
                 // set the offsets to those from the local subsection
-                itsInputList[i].setOffsets(tempDP.cube().pars());
+                itsInputList[i].setOffsets(tempDP->cube().pars());
                 // remove those offsets, so we are in
                 // local-pixel-coordinates (as if we just did the
                 // searching)
@@ -115,25 +115,25 @@ void DistributedFitter::parameterise()
                 itsInputList[i].setFlagText("");
 
                 // store the current object to the cube
-                tempDP.cube().addObject(itsInputList[i]);
+                tempDP->cube().addObject(itsInputList[i]);
 
                 // parameterise
-                tempDP.cube().calcObjectWCSparams();
+                tempDP->cube().calcObjectWCSparams();
 
-                sourcefitting::RadioSource src(tempDP.cube().getObject(0));
+                sourcefitting::RadioSource src(tempDP->cube().getObject(0));
 
-                src.setFitParams(tempDP.fitParams());
-                src.defineBox(tempDP.cube().pars().section(),
-                              tempDP.cube().header().getWCS()->spec);
-                src.setDetectionThreshold(tempDP.cube(),
-                                          tempDP.getFlagVariableThreshold());
+                src.setFitParams(tempDP->fitParams());
+                src.defineBox(tempDP->cube().pars().section(),
+                              tempDP->cube().header().getWCS()->spec);
+                src.setDetectionThreshold(tempDP->cube(),
+                                          tempDP->getFlagVariableThreshold());
 
-                src.prepareForFit(tempDP.cube(), true);
+                src.prepareForFit(tempDP->cube(), true);
                 src.setAtEdge(false);
 
-                 if (tempDP.fitParams().doFit()) {
+                 if (tempDP->fitParams().doFit()) {
 
-                     tempDP.fitSource(src);
+                     tempDP->fitSource(src);
 
                 }
 
@@ -147,6 +147,9 @@ void DistributedFitter::parameterise()
 
                 // get the parameterised object and store to itsOutputList
                 itsOutputList.push_back(src);
+
+                tempDP.reset();
+                
             }
 
             ASKAPASSERT(itsOutputList.size() == itsInputList.size());
