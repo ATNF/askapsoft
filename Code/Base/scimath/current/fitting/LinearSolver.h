@@ -105,7 +105,7 @@ namespace askap
         /// @param[in] names names for parameters to solve for
         /// @return pair of minimum and maximum eigenvalues
         std::pair<double,double> solveSubsetOfNormalEquations(Params &params, Quality& quality,
-                   const std::vector<std::string> &__names) const;
+                   const std::vector<std::string> &names) const;
 
         /// @brief solve for a subset of parameters using the LSQR solver.
         std::pair<double,double> solveSubsetOfNormalEquationsLSQR(Params &params, Quality& quality,
