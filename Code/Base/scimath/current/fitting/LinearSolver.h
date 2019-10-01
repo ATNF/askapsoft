@@ -107,6 +107,10 @@ namespace askap
         std::pair<double,double> solveSubsetOfNormalEquations(Params &params, Quality& quality,
                    const std::vector<std::string> &__names) const;
 
+        /// @brief solve for a subset of parameters using the LSQR solver.
+        std::pair<double,double> solveSubsetOfNormalEquationsLSQR(Params &params, Quality& quality,
+                   const std::vector<std::string> &__names) const;
+
         /// @brief extract an independent subset of parameters
         /// @details This method analyses the normal equations and forms a subset of 
         /// parameters which can be solved for independently. Although the SVD is more than
@@ -152,19 +156,28 @@ namespace askap
 #endif
     };
 
+    /// @brief Returns a current solution vector of doubles.
+    /// @param[in] indices List of gain name/index pairs (note two parameters per gain - real & imaginary part).
+    /// @param[in] params Normal equation parameters.
+    /// @param[in] solution A container where the solution will be returned.
+    void getCurrentSolutionVector(const std::vector<std::pair<std::string, int> >& indices,
+                                  const Params& params,
+                                  std::vector<double>& solution);
+
     /// @brief Adding smoothness constraints to the system of equations.
     /// @details Extends the matrix and right-hand side with smoothness constraints,
     /// which are defined for the least squares minimization framework.
     /// @param[in] matrix The matrix where constraints will be added.
     /// @param[in] b_RHS The right-hand side where constraints will be added.
     /// @param[in] indices List of gain name/index pairs (note two parameters per gain - real & imaginary part).
-    /// @param[in] nParameters Local number of parameters at the current worker.
-    /// @param[in] nChannels THe total number of channels.
+    /// @param[in] x0 The current global solution (at all workers).
+    /// @param[in] nParameters Local number of parameters (at the current worker).
+    /// @param[in] nChannels The total number of channels.
     /// @param[in] smoothingWeight The smoothing weight.
     /// @param[in] gradientType The type of gradient approximation (0 - forward difference, 1- central difference).
     void addSmoothnessConstraints(lsqr::SparseMatrix& matrix, lsqr::Vector& b_RHS,
                                   const std::vector<std::pair<std::string, int> >& indices,
-                                  const Params& params,
+                                  const std::vector<double>& x0,
                                   size_t nParameters,
                                   size_t nChannels,
                                   double smoothingWeight,
