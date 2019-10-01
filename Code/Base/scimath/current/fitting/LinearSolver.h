@@ -146,21 +146,29 @@ namespace askap
          /// @brief Calculates the smoothing weight for the current major loop iteration.
          double getSmoothingWeight() const;
 
-         /// @brief Adding smoothness constraints to the system of equations.
-         /// @details Extends the matrix and right-hand side with smoothness constraints,
-         /// which are defined for the least squares minimization framework.
-         static void addSmoothnessConstraints(lsqr::SparseMatrix& matrix, lsqr::Vector& b_RHS,
-                                              const std::vector<std::pair<std::string, int> >& indices,
-                                              const Params& params,
-                                              size_t nParameters,
-                                              size_t nChannels,
-                                              double smoothingWeight);
-
 #ifdef HAVE_MPI
          // MPI communicator of all workers (for LSQR solver).
          MPI_Comm itsWorkersComm;
 #endif
     };
+
+    /// @brief Adding smoothness constraints to the system of equations.
+    /// @details Extends the matrix and right-hand side with smoothness constraints,
+    /// which are defined for the least squares minimization framework.
+    /// @param[in] matrix The matrix where constraints will be added.
+    /// @param[in] b_RHS The right-hand side where constraints will be added.
+    /// @param[in] indices List of gain name/index pairs (note two parameters per gain - real & imaginary part).
+    /// @param[in] nParameters Local number of parameters at the current worker.
+    /// @param[in] nChannels THe total number of channels.
+    /// @param[in] smoothingWeight The smoothing weight.
+    /// @param[in] gradientType The type of gradient approximation (0 - forward difference, 1- central difference).
+    void addSmoothnessConstraints(lsqr::SparseMatrix& matrix, lsqr::Vector& b_RHS,
+                                  const std::vector<std::pair<std::string, int> >& indices,
+                                  const Params& params,
+                                  size_t nParameters,
+                                  size_t nChannels,
+                                  double smoothingWeight,
+                                  int gradientType = 0);
 
   }
 }
