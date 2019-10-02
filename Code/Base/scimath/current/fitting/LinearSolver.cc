@@ -256,6 +256,30 @@ bool LinearSolver::compareGainNames(const std::string& gainA, const std::string&
     }
 }
 
+int LinearSolver::calculateGainNameIndices(const std::vector<std::string> &names,
+                                           const Params &params,
+                                           std::vector<std::pair<string, int> > &indices) const
+{
+    ASKAPCHECK(indices.size() == names.size(), "Wrong vector size in calculateGainNameIndices!");
+
+    int nParameters = 0;
+    std::vector<std::pair<string, int> >::iterator it = indices.begin();
+    for (vector<string>::const_iterator cit = names.begin();
+            cit != names.end(); ++cit, ++it) {
+        ASKAPDEBUGASSERT(it != indices.end());
+        it->second = nParameters;
+        it->first = *cit;
+        ASKAPLOG_DEBUG_STR(logger, "Processing " << *cit << " " << nParameters);
+
+        const casa::uInt newParameters = normalEquations().dataVector(*cit).nelements();
+        nParameters += newParameters;
+        ASKAPDEBUGASSERT((params.isFree(*cit) ? params.value(*cit).nelements() : newParameters) == newParameters);
+    }
+    ASKAPLOG_DEBUG_STR(logger, "Done");
+
+    return nParameters;
+}
+
 /// @brief solve for a subset of parameters
 /// @details This method is used in solveNormalEquations
 /// @param[in] params parameters to be updated
@@ -275,26 +299,9 @@ std::pair<double,double> LinearSolver::solveSubsetOfNormalEquations(Params &para
 
     // Solving A^T Q^-1 V = (A^T Q^-1 A) P
 
-    int nParameters = 0;
-
     std::vector<std::pair<string, int> > indices(names.size());
-    {
-      std::vector<std::pair<string, int> >::iterator it = indices.begin();
-      for (vector<string>::const_iterator cit=names.begin(); cit!=names.end(); ++cit,++it)
-      {
-        ASKAPDEBUGASSERT(it != indices.end());
-        it->second = nParameters;
-        it->first = *cit;
-        ASKAPLOG_DEBUG_STR(logger, "Processing "<<*cit<<" "<<nParameters);
-        const casa::uInt newParameters = normalEquations().dataVector(*cit).nelements();
-        nParameters += newParameters;
-        ASKAPDEBUGASSERT((params.isFree(*cit) ? params.value(*cit).nelements() : newParameters) == newParameters);
-      }
-    }
-    ASKAPLOG_DEBUG_STR(logger, "Done");
-    ASKAPCHECK(nParameters>0, "No free parameters in a subset of normal equations");
-
-    ASKAPDEBUGASSERT(indices.size() > 0);
+    int nParameters = calculateGainNameIndices(names, params, indices);
+    ASKAPCHECK(nParameters > 0, "No free parameters in a subset of normal equations!");
 
     // Convert the normal equations to gsl format.
     gsl_matrix * A = gsl_matrix_alloc(nParameters, nParameters);
@@ -455,30 +462,9 @@ std::pair<double,double> LinearSolver::solveSubsetOfNormalEquationsLSQR(Params &
 
     // Solving A^T Q^-1 V = (A^T Q^-1 A) P
 
-    int nParameters = 0;
-
     std::vector<std::pair<string, int> > indices(names.size());
-    std::map<string, size_t> indicesMap;
-
-    {
-        std::vector<std::pair<string, int> >::iterator it = indices.begin();
-        for (vector<string>::const_iterator cit=names.begin(); cit!=names.end(); ++cit,++it) {
-            ASKAPDEBUGASSERT(it != indices.end());
-            it->second = nParameters;
-            it->first = *cit;
-
-            indicesMap[it->first] = (size_t)(it->second);
-
-            ASKAPLOG_DEBUG_STR(logger, "Processing " << *cit << " " << nParameters);
-            const casa::uInt newParameters = normalEquations().dataVector(*cit).nelements();
-            nParameters += newParameters;
-            ASKAPDEBUGASSERT((params.isFree(*cit) ? params.value(*cit).nelements() : newParameters) == newParameters);
-        }
-    }
-    ASKAPLOG_DEBUG_STR(logger, "Done");
-    ASKAPCHECK(nParameters > 0, "No free parameters in a subset of normal equations");
-
-    ASKAPDEBUGASSERT(indices.size() > 0);
+    int nParameters = calculateGainNameIndices(names, params, indices);
+    ASKAPCHECK(nParameters > 0, "No free parameters in a subset of normal equations!");
 
     //------------------------------------------------------------------------------
     // Define MPI partitioning.
@@ -535,6 +521,12 @@ std::pair<double,double> LinearSolver::solveSubsetOfNormalEquationsLSQR(Params &
     // Copy matrix elements from normal matrix (map of map of matrixes) to the solver sparse matrix (in CSR format).
     //----------------------------------------------------------------------------------------------------------------
     const GenericNormalEquations& gne = dynamic_cast<const GenericNormalEquations&>(normalEquations());
+
+    std::map<string, size_t> indicesMap;
+    for (std::vector<std::pair<string, int> >::const_iterator it = indices.begin();
+         it != indices.end(); ++it) {
+        indicesMap[it->first] = (size_t)(it->second);
+    }
 
     if (matrixIsParallel) {
         // Adding starting matrix empty rows, i.e., the rows in a big block-diagonal matrix above the current block.

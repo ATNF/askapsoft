@@ -147,6 +147,14 @@ namespace askap
 
          static bool compareGainNames(const std::string& gainA, const std::string& gainB);
 
+         /// @brief Calculates the list of gain name/index pairs.
+         /// @param[in] names Names of gain parameters to solve for.
+         /// @param[in] params Equation parameters.
+         /// @param[out] indices Calculated indices.
+         int calculateGainNameIndices(const std::vector<std::string> &names,
+                                      const Params &params,
+                                      std::vector<std::pair<string, int> > &indices) const;
+
          /// @brief Calculates the smoothing weight for the current major loop iteration.
          double getSmoothingWeight() const;
 
