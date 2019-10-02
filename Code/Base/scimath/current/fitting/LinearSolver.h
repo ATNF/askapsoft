@@ -152,10 +152,19 @@ namespace askap
 
          /// @brief Populate the right-hand side vector b (in the system of equations Ax = b).
          /// @param[in] indices List of gain name/index pairs.
-         /// @param[in] B The data holder.
+         /// @param[in] B Data holder.
          /// @param[in] assignment Assignment function.
          template <typename DataHolder, typename AssignmentFunc>
          size_t populate_B(const std::vector<std::pair<string, int> > &indices, DataHolder &B, AssignmentFunc assignment) const;
+
+         /// @brief Update the solution.
+         /// @param[in] indices List of gain name/index pairs.
+         /// @param[in] params Solution accessor.
+         /// @param[in] delta_X Solution perturbation (obtained at the current major iteration).
+         /// @param[in] retrieval Retrieval function.
+         template <typename DataHolder, typename RetrievalFunc>
+         void update_solution(const std::vector<std::pair<string, int> > &indices, Params& params,
+                              const DataHolder &delta_X, RetrievalFunc retrieval) const;
 
 #ifdef HAVE_MPI
          // MPI communicator of all workers (for LSQR solver).
