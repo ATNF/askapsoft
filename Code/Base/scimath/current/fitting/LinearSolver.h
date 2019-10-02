@@ -150,6 +150,13 @@ namespace askap
          /// @brief Calculates the smoothing weight for the current major loop iteration.
          double getSmoothingWeight() const;
 
+         /// @brief Populate the right-hand side vector b (in the system of equations Ax = b).
+         /// @param[in] indices List of gain name/index pairs.
+         /// @param[in] B The data holder.
+         /// @param[in] assignment Assignment function.
+         template <typename DataHolder, typename AssignmentFunc>
+         size_t populate_B(const std::vector<std::pair<string, int> > &indices, DataHolder &B, AssignmentFunc assignment) const;
+
 #ifdef HAVE_MPI
          // MPI communicator of all workers (for LSQR solver).
          MPI_Comm itsWorkersComm;
@@ -169,7 +176,7 @@ namespace askap
     /// which are defined for the least squares minimization framework.
     /// @param[in] matrix The matrix where constraints will be added.
     /// @param[in] b_RHS The right-hand side where constraints will be added.
-    /// @param[in] indices List of gain name/index pairs (note two parameters per gain - real & imaginary part).
+    /// @param[in] indices List of gain name/index pairs (note two parameters in x0 per gain: real & imaginary parts).
     /// @param[in] x0 The current global solution (at all workers).
     /// @param[in] nParameters Local number of parameters (at the current worker).
     /// @param[in] nChannels The total number of channels.

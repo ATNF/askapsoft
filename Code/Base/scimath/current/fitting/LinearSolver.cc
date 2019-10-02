@@ -168,6 +168,35 @@ std::vector<std::string> LinearSolver::getIndependentSubset(std::vector<std::str
     return resultNames;
 }
 
+template <typename DataHolder, typename AssignmentFunc>
+size_t LinearSolver::populate_B(const std::vector<std::pair<string, int> > &indices, DataHolder &B, AssignmentFunc assignment) const
+{
+    size_t counter = 0;
+    for (std::vector<std::pair<string, int> >::const_iterator it = indices.begin();
+            it != indices.end(); ++it) {
+        const casa::Vector<double> &dv = normalEquations().dataVector(it->first);
+        for (size_t row = 0; row < dv.nelements(); ++row) {
+             const double elem = dv(row);
+             ASKAPCHECK(!std::isnan(elem), "Data vector seems to have NaN for row = " << row << ", this shouldn't happen!");
+             assignment(B, row + it->second, elem);
+             counter++;
+        }
+    }
+    return counter;
+}
+
+static
+void assign_to_lsqr_vector(lsqr::Vector &B, std::size_t index, double elem)
+{
+    B[index] = elem;
+}
+
+static
+void assign_to_gsl_vector(gsl_vector *B, std::size_t index, double elem)
+{
+    gsl_vector_set(B, index, elem);
+}
+
 bool LinearSolver::compareGainNames(const std::string& gainA, const std::string& gainB) {
     try {
         std::pair<casa::uInt, std::string> paramInfoA = LinearSolver::extractChannelInfo(gainA);
@@ -238,7 +267,7 @@ std::pair<double,double> LinearSolver::solveSubsetOfNormalEquations(Params &para
 
     ASKAPDEBUGASSERT(indices.size() > 0);
 
-    // Convert the normal equations to gsl format
+    // Convert the normal equations to gsl format.
     gsl_matrix * A = gsl_matrix_alloc (nParameters, nParameters);
     gsl_vector * B = gsl_vector_alloc (nParameters);
     gsl_vector * X = gsl_vector_alloc (nParameters);
@@ -246,8 +275,8 @@ std::pair<double,double> LinearSolver::solveSubsetOfNormalEquations(Params &para
     for (std::vector<std::pair<string, int> >::const_iterator indit2=indices.begin();indit2!=indices.end(); ++indit2)  {
         for (std::vector<std::pair<string, int> >::const_iterator indit1=indices.begin();indit1!=indices.end(); ++indit1)  {
 
-             // Axes are dof, dof for each parameter
-             // Take a deep breath for const-safe indexing into the double layered map
+             // Axes are dof, dof for each parameter.
+             // Take a deep breath for const-safe indexing into the double layered map.
              const casa::Matrix<double>& nm = normalEquations().normalMatrix(indit1->first, indit2->first);
 
              if (&nm == &emptyMatrix) {
@@ -265,14 +294,8 @@ std::pair<double,double> LinearSolver::solveSubsetOfNormalEquations(Params &para
          }
     }
 
-    for (std::vector<std::pair<string, int> >::const_iterator indit1=indices.begin();indit1!=indices.end(); ++indit1) {
-        const casa::Vector<double> &dv = normalEquations().dataVector(indit1->first);
-        for (size_t row=0; row<dv.nelements(); ++row) {
-             const double elem = dv(row);
-             ASKAPCHECK(!std::isnan(elem), "Data vector seems to have NaN for row = "<<row<<", this shouldn't happen!");
-             gsl_vector_set(B, row+(indit1->second), elem);
-        }
-    }
+    // Populate the right-hand side vector B.
+    populate_B(indices, B, assign_to_gsl_vector);
 
     if (algorithm() == "SVD") {
         ASKAPLOG_INFO_STR(logger, "Solving normal equations using the SVD solver");
@@ -290,9 +313,9 @@ std::pair<double,double> LinearSolver::solveSubsetOfNormalEquations(Params &para
         // ASKAPCHECK(status == 0, "gsl_linalg_SV_decomp failed, status = "<<status);
         gsl_set_error_handler(oldhandler);
 
-        // a hack for now. For some reason, for some matrices gsl_linalg_SV_decomp may return NaN as singular value, perhaps some
+        // A hack for now. For some reason, for some matrices gsl_linalg_SV_decomp may return NaN as singular value, perhaps some
         // numerical precision issue inside SVD. Although it needs to be investigated further  (see ASKAPSDP-2270), for now trying
-        // to replace those singular values with zeros to exclude them from processing. Note, singular vectors may also contain NaNs
+        // to replace those singular values with zeros to exclude them from processing. Note, singular vectors may also contain NaNs.
         for (int i=0; i<nParameters; ++i) {
           if (std::isnan(gsl_vector_get(S,i))) {
               gsl_vector_set(S,i,0.);
@@ -301,12 +324,11 @@ std::pair<double,double> LinearSolver::solveSubsetOfNormalEquations(Params &para
                ASKAPCHECK(!std::isnan(gsl_matrix_get(V,i,k)), "NaN in V: i="<<i<<" k="<<k);
           }
         }
-
-         // end of the hack
+        // end of the hack
 
          //SVDecomp (A, V, S);
 
-         // code to put a limit on the condition number of the system
+         // Code to put a limit on the condition number of the system.
          const double singularValueLimit = nParameters>1 ?
                      gsl_vector_get(S,0)/itsMaxCondNumber : -1.;
          for (int i=1; i<nParameters; ++i) {
@@ -321,7 +343,7 @@ std::pair<double,double> LinearSolver::solveSubsetOfNormalEquations(Params &para
          const int solveStatus = gsl_linalg_SV_solve (A, V, S, B, X);
          ASKAPCHECK(solveStatus == 0, "gsl_linalg_SV_solve failed");
 
-// Now find the statistics for the decomposition
+         // Now find the statistics for the decomposition.
          int rank=0;
          double smin = 1e50;
          double smax = 0.0;
@@ -357,8 +379,8 @@ std::pair<double,double> LinearSolver::solveSubsetOfNormalEquations(Params &para
              }
          }
 
-// Update the parameters for the calculated changes. Exploit reference
-// semantics of casa::Array.
+         // Update the parameters for the calculated changes. Exploit reference
+         // semantics of casa::Array.
          std::vector<std::pair<string, int> >::const_iterator indit;
          for (indit=indices.begin();indit!=indices.end();++indit) {
               casa::IPosition vecShape(1, params.value(indit->first).nelements());
@@ -575,16 +597,8 @@ std::pair<double,double> LinearSolver::solveSubsetOfNormalEquationsLSQR(Params &
     //----------------------------------------------------
     lsqr::Vector b_RHS(nParametersTotal, 0.);
 
-    size_t nDataAdded = 0;
-    for (std::vector<std::pair<string, int> >::const_iterator indit1=indices.begin();indit1!=indices.end(); ++indit1) {
-        const casa::Vector<double> &dv = normalEquations().dataVector(indit1->first);
-        for (size_t row = 0; row < dv.nelements(); ++row) {
-             const double elem = dv(row);
-             ASKAPCHECK(!std::isnan(elem), "Data vector seems to have NaN for row = " << row << ", this shouldn't happen!");
-             b_RHS[row+(indit1->second)] = elem;
-             nDataAdded++;
-        }
-    }
+    // Populate the right-hand side vector B.
+    size_t nDataAdded = populate_B(indices, b_RHS, assign_to_lsqr_vector);
     ASKAPCHECK(nDataAdded == (size_t)(nParameters), "Wrong number of data added on rank " << myrank);
 
     if (matrixIsParallel) {
